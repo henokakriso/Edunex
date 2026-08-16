@@ -1,0 +1,488 @@
+BULI EYES
+
+AI-Powered Security Surveillance and Recognition System
+
+
+
+
+CONFIDENTIALITY STATEMENT
+
+
+
+This document contains proprietary and confidential information intended solely for the recipient
+organization. Unauthorized distribution, reproduction, or disclosure is strictly prohibited and may
+result in legal action.
+
+
+
+
+Proposal Version 1.0
+Date 28 May 2026
+
+
+
+Prepared by
+Name: Henok Arega
+Phone: +251-912-172-646
+Website: henokakriso.com
+
+
+
+
+Executive Summary
+
+Modern security environments face an escalating volume of threats that traditional surveillance
+systems and manual monitoring can no longer contain. The demand for instantaneous
+situational awareness, reduced human error, and automated response has never been higher.
+Buli Eyes is an AI-powered surveillance and intelligent monitoring platform engineered to meet
+these demands. It transforms conventional CCTV infrastructure into a proactive, real-time
+security intelligence network capable of facial recognition, weapon detection, license plate
+recognition, and comprehensive personnel management—all without reliance on cloud
+connectivity.
+By deploying deep learning models locally on Linux-based servers, Buli Eyes delivers sub-second
+threat identification, automates attendance and guard patrol verification, and centralises
+monitoring across multiple camera feeds. The result is a dramatic improvement in operational
+efficiency, a reduction in security personnel fatigue, and a hardened security posture suitable for
+defence, government, critical infrastructure, and smart city applications.
+
+
+
+
+Problem Statement
+
+Security operations in large-scale facilities, transportation hubs, and critical installations are
+undermined by several persistent weaknesses:
+
+
+ Challenge                      Impact
+ Unauthorized access            Intruders bypass checkpoints due to weak identity verification.
+ Manual monitoring              Operators cannot sustain attention across dozens of camera
+ limitations                    feeds for extended periods.
+ Delayed incident response      Events escalate before human operators detect and react.
+ Attendance fraud               Buddy punching, tailgating, and proxy attendance compromise
+                                workforce accountability.
+ Checkpoint inefficiency        Manual vehicle and identity checks create bottlenecks and
+                                security gaps.
+ Vehicle verification           License plates are missed, misread, or deliberately obscured,
+ challenges                     hindering forensic investigation.
+ Absence of centralised         Disparate systems generate isolated alerts with no unified
+ intelligence                   correlation, leaving blind spots.
+
+
+These shortcomings highlight the urgent need for an intelligent, automated system that analyses
+video in real time, generates accurate alerts, and provides a unified operational view.
+
+
+
+
+Project Objectives
+
+Buli Eyes is designed to achieve the following key security and operational objectives:
+   Facial recognition – Identify authorised personnel and persons of interest under varying
+   angles and lighting.
+   Weapon detection – Recognise firearms, knives, and blunt weapons in real-time video
+   streams.
+   License plate recognition – Automatically capture and log vehicle plates at entry/exit points.
+   Attendance management – Touchless, fraud-proof clock-in/out using face matching.
+   Guard authorization verification – Validate that only assigned guards are present at
+   designated posts.
+   Patrol timestamp logging – Record guard patrol checkpoints via facial or QR-based scanning.
+   AI threat alerts – Trigger instant notifications for watchlist matches, weapons, and abnormal
+   behaviour.
+   Centralised monitoring – Aggregate all camera feeds, events, and logs into a single
+   dashboard.
+   Intelligent surveillance automation – Reduce dependency on human supervision while
+   increasing detection accuracy.
+
+
+
+
+System Overview
+
+Buli Eyes is a modular, locally deployed AI surveillance platform that connects to existing IP
+cameras or new installations. Video streams are continuously ingested by a dedicated Linux
+server running a C-based processing engine integrated with OpenCV and the YOLO real-time
+object detection framework. The AI engine simultaneously performs face detection, weapon
+classification, and license plate recognition. All results are indexed and stored in a MySQL
+database and surfaced through a web-based dashboard built with HTML, CSS, and PHP.
+
+
+
+Key architectural principles include:
+
+
+   Real-time monitoring with minimal latency (< 500 ms per frame analysis).
+   Centralised dashboard for live viewing, event search, and reporting.
+   Offline/local deployment to eliminate cloud dependency and reduce attack surface.
+   Alert mechanisms including on-screen alerts, email, SMS, and API-based integration.
+   Multi-camera management supporting simultaneous processing of 20+ channels on a single
+   server.
+
+
+
+
+Core Features
+1. Facial Recognition
+
+High-accuracy face detection and matching against enrolled databases. The system handles
+pose variations, partial occlusion, and differing illumination, maintaining an identification rate
+above 99% under controlled conditions.
+
+
+
+2. Real-Time Face Identification
+
+Live streams are matched against employee, VIP, and watchlist databases. Alerts are generated
+immediately for unknown individuals in restricted zones or persons flagged as security risks.
+
+
+
+3. Weapon Detection
+
+Using the YOLO object detection model trained on extensive weapon datasets, the system
+identifies handguns, rifles, knives, and blunt objects. Detection triggers instant lockdown
+protocols and notification to on-duty operators.
+
+
+
+4. Vehicle Plate Recognition
+
+Optical character recognition extracts license plate numbers from video frames. Plates are
+logged with timestamps, camera location, and vehicle thumbnails, enabling automated barrier
+control and forensic search.
+
+
+
+5. Attendance Tracking
+
+Employees clock in and out through facial recognition without physical contact. The system
+prevents proxy attendance by requiring liveness detection and matching live facial features
+against the stored profile.
+
+
+
+6. Employee Verification
+
+Integration with HR databases ensures that only currently authorised personnel are granted
+access. Revoked or expired credentials trigger immediate denial and alert.
+7. Guard Assignment Validation
+
+Security personnel are verified at post checkpoints using facial recognition. If a guard is absent
+or an unauthorised individual attempts to log in, supervisors are notified in real time.
+
+
+
+8. Patrol Checkpoint Timestamp System
+
+Designated patrol checkpoints are equipped with NFC tags or QR codes. Guards scan using a
+mobile device, and the system verifies identity via facial recognition, logging exact timestamps
+and geolocation.
+
+
+
+9. Watchlist Alerts
+
+A dynamic watchlist module allows importing of person-of-interest records. Whenever a match
+occurs on any camera, immediate alerts are sent with location and time.
+
+
+
+10. Suspicious Activity Detection
+
+AI analyses motion patterns, loitering, crowd density anomalies, and object left behind. Operators
+receive early warning before situations escalate.
+
+
+
+11. Audit Logs
+
+Every system interaction—alerts, access attempts, configuration changes—is recorded in an
+immutable, timestamped audit trail for compliance and investigation.
+
+
+
+12. Multi-Camera Tracking
+
+The system correlates detections across overlapping camera views to track individuals or
+vehicles throughout a facility, providing continuous movement history.
+
+
+
+13. Role-Based Access Management
+Granular user roles ensure that operators, supervisors, and auditors see only the data and
+controls relevant to their responsibilities.
+
+
+
+14. Offline Secure Deployment
+
+All components operate within the local network. No internet connection is required, ensuring
+functionality during network outages and protection against remote cyber threats.
+
+
+
+
+Technical Architecture
+
+Buli Eyes is built on a layered architecture that separates video processing, AI inference, data
+management, and presentation logic.
+
+
+Layer            Technology Stack       Description
+Frontend         HTML, CSS,             Responsive dashboard for live monitoring, event search,
+                 JavaScript (PHP        and system administration.
+                 templating)
+Backend          PHP                    RESTful API endpoints, user authentication, database
+Logic                                   interaction, and alert dispatch.
+AI Processing C language, OpenCV, High-performance video stream decoding, frame
+Engine        YOLO                preprocessing, neural network inference, and post-
+                                  processing. C ensures minimal overhead and efficient
+                                  memory management.
+Database         MySQL                  Stores user profiles, watchlists, attendance logs, event
+                                        records, vehicle plates, and audit trails.
+Server OS        Linux (Ubuntu          Provides a stable, secure, and resource-efficient
+                 Server / CentOS)       environment for all services.
+Networking       Gigabit Ethernet,      Dedicated video network isolates camera traffic from
+                 VLAN segmentation      corporate LAN, preserving bandwidth and security.
+
+
+The AI pipeline operates as follows:
+
+
+1. Capture – IP camera streams ingested via RTSP.
+2. Preprocessing – Frame resizing, noise reduction, and format conversion using OpenCV
+   functions called from C.
+3. Inference – YOLO model loaded in memory performs object detection; separate face
+   recognition models run on detected face regions.
+4. Postprocessing – Non-max suppression, tracking ID assignment, and event generation.
+5. Storage – Results pushed to MySQL through a lightweight PHP API.
+6. Alerting – PHP scripts evaluate rules and trigger notifications.
+
+
+Deployment infrastructure consists of one or more Linux servers, a Power-over-Ethernet switch,
+and compatible IP cameras. No proprietary hardware is required.
+
+
+
+
+Security Architecture
+
+The system incorporates a defence-in-depth strategy to protect data, model integrity, and
+operational continuity.
+
+
+   Encrypted Storage – All sensitive data at rest (biometric templates, watchlists, audit logs) is
+   encrypted using AES-256.
+   Access Control – Role-based permissions enforced at the application and database levels;
+   multi-factor authentication supported.
+   Authentication – Strong password policies, session management, and optional integration
+   with LDAP/Active Directory.
+   Local Server Security – Linux server hardened with minimal packages, firewall rules
+   (iptables), SELinux/AppArmor enabled, and disabled unused services.
+   Audit Logging – Immutable logs record all authentication attempts, configuration changes,
+   and data access, stored locally and optionally mirrored to a syslog server.
+   Intrusion Prevention – Fail2ban monitors login attempts; network intrusion detection
+   systems (e.g., Snort) can be layered in high-security environments.
+   Secure Communication – TLS 1.3 for web console access; camera streams isolated on a
+   separate VLAN with no default gateway.
+
+
+Biometric templates are stored as irreversible mathematical vectors, not original images,
+ensuring privacy compliance.
+
+
+
+
+Implementation Phases
+Deployment is structured in four phases to manage risk, validate performance, and progressively
+expand capability.
+
+
+
+Phase 1 – Core Identity & Attendance
+
+   Facial recognition enrolment and verification
+   Touchless attendance management
+   Basic user profile and role setup
+   Centralised dashboard with live view
+
+
+Phase 2 – Threat Object & Vehicle Intelligence
+
+   Weapon detection model deployment
+   License plate recognition integration
+   Guard authorization verification at posts
+   Watchlist import and matching
+
+
+Phase 3 – Patrol Automation & Multi-Camera Synergy
+
+   Patrol checkpoint timestamp system
+   Multi-camera tracking and correlation
+   Automated threat alert escalation rules
+   API integration with existing access control systems
+
+
+Phase 4 – Advanced Analytics & Expansion
+
+   Behavioural anomaly detection
+   Crowd density and flow analysis
+   Predictive monitoring dashboards
+   Integration with smart city IoT platforms
+
+
+Each phase includes user acceptance testing, parallel run with existing systems, and operator
+training.
+Deployment Scenarios
+
+Buli Eyes is designed for versatile deployment across diverse operational environments.
+
+
+Scenario                   Application
+Office Buildings           Employee access, attendance, and floor-level security monitoring.
+Industrial Compounds       Perimeter surveillance, vehicle gate management, and restricted
+                           zone intrusion alerts.
+Checkpoints                Rapid identity and vehicle verification for military and border
+                           control.
+Smart Cities               Integration with city-wide camera networks for public safety,
+                           missing person search, and traffic incident detection.
+Transportation             Passenger flow analysis, unattended baggage detection, and
+Terminals                  platform security.
+Warehouses                 Workforce attendance, forklift operator verification, and theft
+                           prevention.
+University & Corporate     Access control, dormitory security, and incident response
+Campuses                   coordination.
+Secure Facilities          High-assurance identity verification, weapon screening, and audit-
+                           grade logging.
+
+
+Each scenario adapts the camera count, processing server specifications, and feature activation
+to match operational requirements.
+
+
+
+
+Business Benefits
+
+Benefit                  Description
+Operational Efficiency Automates monitoring, attendance, and verification tasks, allowing
+                       redeployment of security personnel to higher-value activities.
+Improved Security        Real-time detection of weapons, unauthorised persons, and suspicious
+Posture                  behaviour reduces risk exposure.
+Reduced Manual           AI shoulders the burden of constant video analysis, eliminating fatigue-
+Monitoring               related misses.
+Faster Incident          Instant alerts with visual evidence enable security teams to act within
+Response                 seconds.
+Accountability &         Immutable audit logs and accurate timestamp records meet regulatory
+Compliance               and legal standards.
+Digital                  Converts passive CCTV into an active intelligence asset, aligning with
+Transformation           broader smart facility strategies.
+Scalable                 Start with a few cameras and scale to hundreds with additional servers
+Infrastructure           —no forklift upgrade required.
+
+
+
+
+Challenges and Risk Mitigation
+
+Challenge             Mitigation Strategy
+False positives       Multi-frame consensus logic, configurable alert thresholds, and operator
+                      feedback loops to refine models.
+Poor lighting         Infrared and low-light cameras, adaptive histogram equalisation in
+conditions            preprocessing, and thermal camera integration option.
+Network               Edge processing minimises bandwidth; dedicated VLANs and local
+limitations           recording prevent stream loss.
+AI accuracy drift     Scheduled model retraining using localised data, performance monitoring
+                      dashboards, and phase-wise tuning.
+Cybersecurity         Air-gapped capable design, regular security patches, hardened Linux OS,
+threats               and intrusion detection systems.
+System                Redundant power supplies, hot-swappable storage, and 24/7 remote
+maintenance           monitoring contracts available.
+User acceptance       Comprehensive operator training, intuitive dashboard design, and phased
+                      transition with parallel operation.
+
+
+
+
+Future Expansion
+
+Buli Eyes is architected to evolve with emerging technologies and operational requirements:
+
+
+   Drone integration – Receive live aerial feeds and apply AI detection for large-area
+   surveillance.
+   Thermal imaging – Detect body heat signatures in complete darkness or through smoke/fog.
+   Advanced analytics – Emotion recognition, crowd sentiment analysis, and trajectory
+   prediction.
+   Behavioural intelligence – Machine learning models that learn normal patterns and flag
+   deviations autonomously.
+   Smart city integration – API gateways to connect with traffic management, emergency
+   response, and city dashboard systems.
+   Predictive monitoring – Forecast potential security incidents based on historical data and
+   real-time indicators, enabling pre-emptive action.
+
+
+
+
+Timeline
+
+Stage                     Duration   Milestone
+Prototype                 3          Core AI engine (C + YOLO + OpenCV), basic PHP
+Development               months     dashboard, MySQL schema.
+Pilot Testing             2          Deploy at one site with facial recognition and attendance;
+                          months     gather operator feedback.
+Phase 1 Rollout           1 month    Refine and release Phase 1 features.
+Phase 2 Development       3          Weapon detection and license plate modules, guard
+& Test                    months     validation; pilot at checkpoint.
+Phase 2 Rollout           1 month    Production deployment.
+Phase 3 Development       2          Patrol system, multi-camera tracking, alert automation.
+& Test                    months
+Phase 3 Rollout           1 month    Production deployment.
+Phase 4 and Scaling       Ongoing    Analytics, behavioural monitoring, additional camera
+                                     integration as needed.
+
+
+Total time to full feature set: approximately 12 months, with security benefits realised from day
+one of pilot.
+
+
+
+
+Budget Overview
+
+Costs vary by number of cameras, server specifications, and deployment complexity. The
+following table outlines principal categories for a mid-scale deployment (50 cameras, one
+primary server).
+
+
+Category                       Description                                     Estimated
+                                                                               Proportion
+IP Cameras                     2MP–8MP, IR, outdoor-rated, PoE                 20%
+GPU Servers                    Linux servers with NVIDIA GPUs for AI           25%
+                               inference
+Networking Equipment           PoE switches, cables, VLAN configuration        10%
+Software Development           Core AI engine customisation, dashboard,        30%
+                               integration
+Deployment & Training          On-site installation, configuration, and        10%
+                               operator training
+Maintenance & Support          Updates, technical support, model retuning      5%
+(annual)
+
+
+A detailed line-item budget will be provided upon receipt of site-specific requirements and
+camera count.
+
+
+
+
+Conclusion
+
+The modern threat landscape demands a surveillance infrastructure that moves beyond passive
+recording. Buli Eyes delivers an intelligent, AI-driven security system that automates detection,
+verification, and alerting, while operating independently of cloud services to ensure resilience and
+data sovereignty. By unifying facial recognition, weapon detection, vehicle identification, and
+workforce management into a single, locally deployed platform, organisations gain immediate
+situational awareness, measurable operational efficiency, and a scalable foundation for future
+security innovations. Buli Eyes is not merely an upgrade to existing CCTV—it is the core of a
+proactive, intelligent defence posture for the facilities, cities, and nations that adopt it.
+

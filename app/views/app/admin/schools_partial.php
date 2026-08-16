@@ -1,0 +1,128 @@
+<?php /* Admin schools view — dynamic region (AJAX-swappable) */
+$typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'college' => icon('university'), 'training' => icon('wrench'), 'other' => icon('building')];
+$mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(array_filter(array_merge(
+    ['q' => $q, 'type' => $type, 'status' => $status], [$k => $v]
+), fn($x) => $x !== '')));
+?>
+<div class="page-head flex-between" style="flex-wrap:wrap;gap:12px">
+  <div>
+    <h1><?= icon('school') ?> Schools</h1>
+    <p class="sub"><?= number_format($total) ?> school<?= $total === 1 ? '' : 's' ?><?= $pages > 1 ? ' · page ' . $page . ' of ' . $pages : '' ?></p>
+  </div>
+  <button class="btn btn-primary" data-open-modal="new-school-modal">+ New school</button>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid" style="margin-bottom:18px">
+  <a class="stat-box clickable ajax-nav" href="<?= e($mk('')) ?>"><span class="tiny faint">Total schools</span><b class="h2"><?= number_format($stats['total']) ?></b><span class="tiny faint"><?= number_format($stats['students']) ?> students platform-wide</span></a>
+  <a class="stat-box clickable ajax-nav" href="<?= e($mk('status', 'active')) ?>"><span class="tiny faint">Active</span><b class="h2" style="color:var(--success)"><?= number_format($stats['active']) ?></b><span class="tiny faint">running schools</span></a>
+  <a class="stat-box clickable ajax-nav" href="<?= e($mk('status', 'suspended')) ?>"><span class="tiny faint">Suspended</span><b class="h2" style="color:var(--danger)"><?= number_format($stats['suspended']) ?></b><span class="tiny faint">paused schools</span></a>
+  <a class="stat-box clickable ajax-nav" href="<?= e($mk('type', 'university')) ?>"><span class="tiny faint">Universities</span><b class="h2" style="color:var(--accent-3)"><?= number_format((int)($typeCounts['university'] ?? 0)) ?></b><span class="tiny faint"><?= number_format((int)($typeCounts['school'] ?? 0)) ?> schools, <?= number_format((int)($typeCounts['college'] ?? 0)) ?> colleges</span></a>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom:18px">
+  <form method="get" class="ajax-nav flex gap-10" style="flex-wrap:wrap;align-items:end">
+    <input type="hidden" name="r" value="admin/schools">
+    <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, code or city" style="min-width:220px"></div>
+    <div class="flex-col"><label class="small faint">Status</label>
+      <select class="input" name="status" onchange="this.form.submit()">
+        <option value="">All statuses</option>
+        <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Active</option>
+        <option value="suspended" <?= $status === 'suspended' ? 'selected' : '' ?>>Suspended</option>
+      </select>
+    </div>
+    <button class="btn"><?= icon('search') ?> Search</button>
+    <?php if ($q !== '' || $type !== '' || $status !== ''): ?><a class="ajax-nav btn btn-ghost" href="<?= e(url('admin/schools')) ?>">✕ Reset</a><?php endif; ?>
+  </form>
+  <div class="chips" style="margin-top:14px">
+    <a class="ajax-nav chip <?= $type === '' && $status === '' ? 'on' : '' ?>" href="<?= e($mk('type')) ?>">All · <?= number_format($stats['total']) ?></a>
+    <?php foreach (['school', 'university', 'college', 'training'] as $t): ?>
+      <a class="ajax-nav chip <?= $type === $t ? 'on' : '' ?>" href="<?= e($mk('type', $t)) ?>"><?= ($typeIco[$t] ?? icon('building')) ?> <?= ucfirst($t) ?> · <?= (int)($typeCounts[$t] ?? 0) ?></a>
+    <?php endforeach; ?>
+  </div>
+</div>
+
+<!-- Schools table -->
+<div class="card">
+  <div class="table-wrap">
+    <table class="table schools-table" id="schools-table">
+      <thead>
+        <tr>
+          <th class="th-sort <?= $sort === 'name' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'name') . ($sort === 'name' && $dir === 'asc' ? '&dir=desc' : '')) ?>">School<?= $sort === 'name' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
+          <th class="th-sort <?= $sort === 'type' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'type') . ($sort === 'type' && $dir === 'asc' ? '&dir=desc' : '')) ?>">Type<?= $sort === 'type' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
+          <th>City</th>
+          <th>People</th>
+          <th>Content</th>
+          <th class="th-sort <?= $sort === 'users' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'users') . ($sort === 'users' && $dir === 'desc' ? '&dir=asc' : '')) ?>">Users<?= $sort === 'users' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
+          <th>Status</th>
+          <th class="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($schools as $s):
+          $row = [
+              'id' => (int)$s['id'], 'name' => $s['name'], 'code' => $s['code'], 'type' => $s['type'],
+              'city' => $s['city'] ?? '', 'phone' => $s['phone'] ?? '', 'email' => $s['email'] ?? '',
+              'status' => $s['status'], 'created' => date('M j, Y', strtotime($s['created_at'])),
+              'total_users' => (int)$s['total_users'], 'students' => (int)$s['students'], 'teachers' => (int)$s['teachers'],
+              'directors' => (int)$s['directors'], 'parents' => (int)$s['parents'],
+              'courses' => (int)$s['courses'], 'departments' => (int)$s['departments'], 'classes' => (int)$s['classes'],
+          ];
+        ?>
+          <tr class="list-row school-row" data-drawer-url="<?= e(url('admin/school&id=' . $s['id'] . '&partial=1')) ?>">
+            <td>
+              <div class="flex gap-10" style="align-items:center">
+                <div class="avatar school-avatar"><?= $typeIco[$s['type']] ?? icon('school') ?></div>
+                <div class="min-0">
+                  <b class="small"><?= e($s['name']) ?></b>
+                  <p class="tiny faint ellipsis" style="max-width:220px"><?= e($s['code']) ?> · <?= e($s['address'] ?? '') ?></p>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-accent"><?= e(ucfirst($s['type'])) ?></span></td>
+            <td class="small"><?= e($s['city'] ?: '—') ?></td>
+            <td class="small nowrap">
+              <span title="Students"><?= icon('users-card') ?> <?= (int)$s['students'] ?></span> ·
+              <span title="Teachers"><?= icon('user') ?>‍<?= icon('school') ?> <?= (int)$s['teachers'] ?></span> ·
+              <span title="Directors"><?= icon('graduation') ?> <?= (int)$s['directors'] ?></span>
+            </td>
+            <td class="small nowrap">
+              <span title="Courses"><?= icon('books') ?> <?= (int)$s['courses'] ?></span> ·
+              <span title="Departments"><?= icon('university') ?> <?= (int)$s['departments'] ?></span> ·
+              <span title="Classes"><?= icon('user') ?>‍<?= icon('school') ?> <?= (int)$s['classes'] ?></span>
+            </td>
+            <td class="small mono"><?= number_format((int)$s['total_users']) ?></td>
+            <td><span class="badge <?= $s['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($s['status']) ?></span></td>
+            <td class="actions">
+              <div class="row-act">
+                <a class="icon-btn" title="View profile" href="<?= e(url('admin/school&id=' . $s['id'])) ?>"><?= icon('eye') ?></a>
+                <?php if ($s['status'] === 'active'): ?>
+                  <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="update_school" value="<?= (int)$s['id'] ?>"><input type="hidden" name="name" value="<?= e($s['name']) ?>"><input type="hidden" name="type" value="<?= e($s['type']) ?>"><input type="hidden" name="education_level" value="<?= e($s['education_level'] ?: 'secondary') ?>"><input type="hidden" name="status" value="suspended"><button class="icon-btn warn" title="Suspend" data-confirm="Suspend <?= e($s['name']) ?>?"><?= icon('pause') ?></button></form>
+                <?php else: ?>
+                  <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="update_school" value="<?= (int)$s['id'] ?>"><input type="hidden" name="name" value="<?= e($s['name']) ?>"><input type="hidden" name="type" value="<?= e($s['type']) ?>"><input type="hidden" name="education_level" value="<?= e($s['education_level'] ?: 'secondary') ?>"><input type="hidden" name="status" value="active"><button class="icon-btn success" title="Activate" data-confirm="Activate <?= e($s['name']) ?>?"><?= icon('check') ?></button></form>
+                <?php endif; ?>
+                <form method="post" class="inline" data-confirm="Delete <?= e($s['name']) ?>? This cascades to its users and courses.">
+                  <?= csrf_field() ?><input type="hidden" name="delete_school" value="<?= (int)$s['id'] ?>"><button class="icon-btn danger" title="Delete school"><?= icon('trash') ?></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php if (!$schools): ?>
+    <div class="empty" style="padding:34px"><span class="empty-ico"><?= icon('school') ?></span><b>No schools found</b><p class="tiny faint">Try a different search, type or status filter.</p></div>
+  <?php endif; ?>
+
+  <?php if ($pages > 1): ?>
+    <div class="pager">
+      <?php if ($page > 1): ?><a class="ajax-nav pager-btn" href="<?= e($pager(1)) ?>">«</a><a class="ajax-nav pager-btn" href="<?= e($pager($page - 1)) ?>">‹</a><?php endif; ?>
+      <?php for ($p = max(1, $page - 2); $p <= min($pages, $page + 2); $p++): ?>
+        <a class="ajax-nav pager-btn <?= $p === $page ? 'on' : '' ?>" href="<?= e($pager($p)) ?>"><?= $p ?></a>
+      <?php endfor; ?>
+      <?php if ($page < $pages): ?><a class="ajax-nav pager-btn" href="<?= e($pager($page + 1)) ?>">›</a><a class="ajax-nav pager-btn" href="<?= e($pager($pages)) ?>">»</a><?php endif; ?>
+    </div>
+  <?php endif; ?>
+</div>

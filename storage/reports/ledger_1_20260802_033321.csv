@@ -1,0 +1,3 @@
+id,event_type,entity_type,entity_id,actor,payload,prev_hash,record_hash,created_at
+1,ledger.genesis,school,1,,"{""genesis"":1,""school"":""Addis Ababa International School"",""created"":""2026-08-01T14:39:20+03:00""}",0000000000000000000000000000000000000000000000000000000000000000,316a4f815d7a8cc4b1a3d240424329c4f8c2879da8b43dd6411b21a11efb2839,"2026-08-01 14:39:20"
+2,certificate.issued,certificate,1,"Henok Arega","{""cert_code"":""CERT-8C34CCEF"",""course_id"":1,""course"":""Mathematics 101""}",316a4f815d7a8cc4b1a3d240424329c4f8c2879da8b43dd6411b21a11efb2839,7b06bde8e4602b01668bcf9992d5f5a0b13f6fd0d415c22463c690ec49c97d80,"2026-08-01 14:39:20"

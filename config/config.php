@@ -1,0 +1,67 @@
+<?php
+/**
+ * EDUNEX - AI-Powered Ethiopian Learning Platform
+ * Application Configuration
+ */
+
+define('APP_NAME', 'Edunex');
+define('APP_TAGLINE', 'AI-Powered Ethiopian Learning Platform');
+define('APP_VERSION', '1.0.0');
+define('APP_ENV', getenv('APP_ENV') ?: 'production'); // production | development
+define('APP_URL', getenv('APP_URL') ?: (($_SERVER['HTTP_HOST'] ?? '') !== '' ? 'http://' . $_SERVER['HTTP_HOST'] : 'http://localhost:8080')); // base URL (no trailing slash)
+
+// Paths
+define('BASE_PATH', dirname(__DIR__));
+define('PUBLIC_PATH', BASE_PATH . '/public');
+define('STORAGE_PATH', BASE_PATH . '/storage');
+define('APP_PATH', BASE_PATH . '/app');
+define('INC_PATH', BASE_PATH . '/includes');
+define('FLASH_CARDS_PATH', BASE_PATH . '/Flash Cards');
+
+// Database (override via env, e.g. DB_PORT=3307 when using the test rig)
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'edunex');
+define('DB_USER', getenv('DB_USER') ?: 'edunex');
+define('DB_PASS', getenv('DB_PASS') ?: 'edunex_db_pass_2026');
+define('DB_CHARSET', 'utf8mb4');
+
+// Session & Security
+define('SESSION_NAME', 'edunex_sess');
+define('SESSION_LIFETIME', 7200);            // 2 hours
+define('REMEMBER_ME_DAYS', 30);
+define('PASSWORD_MIN_LEN', 8);
+define('MAX_LOGIN_ATTEMPTS', 5);
+define('LOGIN_LOCK_MINUTES', 15);
+define('OTP_EXPIRY_MINUTES', 10);
+define('CSRF_SECRET', 'edunex_csrf_secret_change_me');
+define('ENCRYPTION_KEY', 'edunex_enc_key_change_me_32bytes!!');
+define('API_SECRET', 'edunex_api_secret_change_me_2026'); // HMAC for desktop app API tokens
+define('HENA_SECRET', 'edunex_hena_key_change_me_2026');  // HMAC/encryption key for USB .hena keys (Auth::hena*)
+
+// AI Tutor
+define('AI_ENGINE', 'local'); // local rule-based engine
+define('AI_CHAT_LIMIT', 50);  // max messages stored per conversation
+
+// Uploads
+define('MAX_UPLOAD_MB', 50);
+define('ALLOWED_EXT', 'jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,7z,c,cpp,h,py,java,js,ts,html,css,php,sql,mp3,wav,mp4,webm,ogg,csv,json,md');
+
+// Email (mail() based; set to 'log' to write emails to storage/mail.log)
+define('MAIL_MODE', 'log');
+define('MAIL_FROM', 'no-reply@edunex.local');
+
+// Default theme
+define('DEFAULT_THEME', 'dark'); // dark | light
+
+date_default_timezone_set('Africa/Addis_Ababa');
+mb_internal_encoding('UTF-8');
+
+// Error reporting
+if (APP_ENV === 'development') {
+    ini_set('display_errors', '1');
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', '0');
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+}
