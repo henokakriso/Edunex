@@ -1,124 +1,166 @@
 # Edunex — AI-Powered Ethiopian Learning Platform
 
-Full-stack LMS (PHP 8 + MySQL, dark UI) for admin, director, teacher, student,
-parent and guest roles, with a C desktop client (ncurses + libcurl) that syncs
-through the JSON API.
+## Overview
 
-## Quick start (development)
+Edunex is a full-stack **Learning Management System (LMS)** built for Ethiopian
+schools: a PHP 8 + MySQL web application with a dark, role-based UI and a C
+desktop client (ncurses + libcurl) that syncs through the same JSON API. It
+covers the full school lifecycle — administration, teaching, exams, attendance,
+messaging, transfers, gamification and an AI tutoring layer — with an
+integrity ledger that makes grading and certificates tamper-evident.
 
-1. Install the database and seed accounts:
+## Problem
 
-   ```bash
-   php database/install.php --demo --root-pass=<YOUR_MYSQL_ROOT_PASSWORD>
-   # non-default server: add --host=127.0.0.1 --port=3306
-   ```
+Ethiopian schools juggle paper registers, spreadsheets and disconnected
+tools. Teachers cannot easily generate courses and exams, students move
+between schools with no portable record, attendance is hard to audit, and AI
+assistance requires cloud APIs that offline or low-bandwidth campuses cannot
+reach.
 
-2. Serve the app (dev server):
+## Solution
 
-   ```bash
-   php -S 127.0.0.1:8080 index.php
-   ```
+Edunex puts the whole school on one platform with clear role separation
+(super admin, director, teacher, student, parent, guest):
 
-3. Open http://localhost:8080 — seeded logins use password `Passw0rd!`
-   (`admin@edunex.local`, `director@edunex.local`, `teacher@edunex.local`,
-   `student@edunex.local`, `parent@edunex.local`; student ID
-   `AAIS-2026-000001` also works).
+- **Offline-first AI** — a local Ollama tutor (`edunex-tutor`,
+  qwen2.5 3B) with an optional vision model; a provider abstraction (`local` /
+  `openai`) means the AI layer works with no API key at all.
+- **PDF-book course generator** — teachers upload a book and get a course plus
+  an exam through the configured AI provider.
+- **Portable student records** — school-to-school transfers move the complete
+  profile (XP, badges, goals, certificates, grades, attendance) via referral
+  codes.
+- **Tamper-evident integrity ledger** — grading, attendance and certificate
+  events are SHA-256 hash-chained and visible at Admin → Integrity Ledger.
+- **C desktop client** — ncurses terminal client for low-resource
+  environments, syncing via the JSON API with HMAC bearer auth.
 
-## AI models (Ollama)
+## Features
 
-The AI features need two Ollama models, registered as `edunex-tutor` (qwen2.5
-3B, required) and `edunex-vision` (deepseek-vl2-tiny, optional). They are
-multi-GB, so they are **not** committed to this repository — download them
-with:
+- Courses, lessons, exams & grading, assignments
+- Attendance: teacher marking, QR codes, student code check-in,
+  attendance-mobile endpoints
+- AI tutor, AI flashcards, AI quiz, PDF-book course generator
+- Gamification: XP, levels, challenges, leaderboard
+- Messaging, announcements, notifications, calendar
+- Library and forum
+- Certificates issued on course completion
+- School-to-school transfers with referral codes
+- Excel (`.xlsx`/`.csv`) bulk user import
+- Reports (CSV) and backups
+- Admin: schools, departments, subjects, groups, users, roles, system logs
+- Integrity ledger (SHA-256 hash-chained grading/attendance/certificates)
+- JSON API + C desktop client (ncurses)
 
-```bash
-./download-models.sh
+## Architecture
+
+```
+                 E D U N E X
+                      │
+      ┌───────────────┼─────────────────┐
+      ▼               ▼                 ▼
+  PHP 8 + MySQL   C desktop client   Ollama (AI)
+  (web + API)     (ncurses, libcurl)  tutor/vision
+                      │
+                  HMAC bearer + JSON API
 ```
 
-The script installs Ollama if missing, downloads the models, registers them
-under the names Edunex expects, and prints the final `ollama list`.
-
-## Configuration
-
-`config/config.php` — DB credentials and security keys are read from environment
-variables when set (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`), else
-they fall back to the defaults. After installing, change `CSRF_SECRET`,
-`ENCRYPTION_KEY` and `API_SECRET` to strong random values.
-
-The AI layer (`models/`) uses a provider abstraction: `local` (offline,
-rule-based, works with no API key) or `openai` (any OpenAI-compatible endpoint).
-Configure it in Settings → AI & Learning (`ai_provider`, `ai_api_url`,
-`ai_api_key`, `ai_model`). The PDF-book pipeline (`teacher/book`) extracts text
-with `pdftotext` (falls back to `mutool`/`gs`) and generates a course + exam
-through the configured provider.
-
-Example running against a test MySQL on port 3307:
-
-```bash
-DB_PORT=3307 php -S 127.0.0.1:8080 index.php
+```
+├── app/            PHP application (modules, controllers, models)
+├── config/         Configuration
+├── database/       Installer (php database/install.php)
+├── deploy/         Apache vhost template
+├── desktop/        C desktop client (ncurses + libcurl)
+├── docs/           Documentation
+├── models/         AI provider abstraction (local / openai)
+├── public/         Web root
+├── storage/        Storage
+└── tests/          e2e.sh (125 checks) + audit.sh (route crawler)
 ```
 
-## Test suite
+## Technology
 
-`tests/e2e.sh` runs 125 checks (public pages, all role dashboards, forms, API
-auth, JSON endpoints) against a running server and reports PASS/FAIL counts.
-`tests/audit.sh` crawls every nav-reachable route per role and fails on
-404/403/500 or placeholder pages.
+| Layer | Technology |
+|---|---|
+| Backend | PHP 8, MySQL |
+| Frontend | HTML, CSS, Pure JavaScript (dark UI) |
+| Desktop | C (ncurses, libcurl, json-c) |
+| AI | Ollama — `edunex-tutor` (qwen2.5 3B, required), `edunex-vision` (deepseek-vl2-tiny, optional) |
+
+## Installation
+
+Requirements: PHP 8, MySQL, and (for AI) Ollama.
 
 ```bash
-bash tests/e2e.sh
-bash tests/audit.sh
+# 1. Install the database and seed accounts
+php database/install.php --demo --root-pass=<YOUR_MYSQL_ROOT_PASSWORD>
+# non-default server: add --host=127.0.0.1 --port=3306
+
+# 2. Serve the app (dev server)
+php -S 127.0.0.1:8080 index.php
+
+# 3. (Optional) AI models — multi-GB, not committed to the repo
+./download-models.sh     # installs Ollama if missing, pulls + registers models
 ```
 
-## C desktop client
+## Usage
 
-```bash
-cd desktop && make          # builds ./edunex-cli (ncurses + curl + json-c)
-make install                # installs to /usr/local/bin
-```
+Open http://localhost:8080 — seeded logins use password `Passw0rd!`:
+`admin@edunex.local`, `director@edunex.local`, `teacher@edunex.local`,
+`student@edunex.local`, `parent@edunex.local` (student ID `AAIS-2026-000001`
+also works).
 
-The client signs in via `api/login`, polls `api/notifications/poll`, and calls
-`api/ai/chat` for the offline AI tutor. All API calls use the HMAC bearer token
-issued at login.
-
-## JSON API
-
-Base: `index.php?r=api/<endpoint>`. Authenticate with
-`Authorization: Bearer <token>` obtained from `api/login`
-(`{"identifier": "...", "password": "..."}`).
-
-Endpoints: login, notifications/poll, messages/send, ai/chat, attendance
-(teacher mark + student code check-in), attendance-mobile, reactions, upload,
-notify, settings, users, courses, calendar, library, gamification, transfers,
-reports, backups, activity, search.
-
-## Production (Apache)
-
-1. Point a vhost at `public/` (see `deploy/edunex-vhost.conf`) with
-   `AllowOverride All` — `public/.htaccess` rewrites all requests to `index.php`.
-2. Ensure `storage/` and its subdirectories are writable by the web server.
-3. Set `APP_ENV` to `production` in `config/config.php`.
-
-## Modules
-
-Courses/lessons, exams & grading, assignments, attendance (incl. QR + student
-code), grades, AI tutor/assistant/flashcards/quiz + PDF-book course generator,
-forum, library, certificates (issued on course completion), transfers
-(school-to-school referral codes; the full student record — profile, XP,
-badges, goals, certificates, grades, attendance — is copied to the new school),
-gamification (XP/levels/challenges/leaderboard), messaging, announcements,
-notifications, calendar, reports (CSV), backups, admin (schools, departments,
-subjects, groups, users, roles, system logs), integrity ledger (a SHA-256
-hash-chained, tamper-evident log of grading, attendance and certificate events,
-visible at Admin → Integrity Ledger).
-
-## Account model
-
-- Students self-register; a homeroom teacher verifies them (pending for up to
+- **Students** self-register; a homeroom teacher verifies them (pending up to
   24h).
-- The Super Admin creates Directors (one per school).
-- Directors create teachers and approve/reject school transfers.
-- Teachers create parents and link them to students, bulk-import users from
-  Excel (`.xlsx`/`.csv`), and verify new student accounts.
-- Students can be marked inactive — inactive students keep course/exam access
-  (re-exam ready) but lose attendance/grades/schedule/leaderboard menus.
+- **Super Admin** creates Directors (one per school); **Directors** create
+  teachers and approve transfers; **Teachers** create parents, bulk-import
+  from Excel, verify students.
+- **AI** is configured at Settings → AI & Learning (`ai_provider`,
+  `ai_api_url`, `ai_api_key`, `ai_model`); the PDF-book pipeline uses
+  `pdftotext` (falls back to `mutool`/`gs`).
+- **Desktop client**: `cd desktop && make` → `./edunex-cli`; it logs in via
+  `api/login`, polls `api/notifications/poll` and talks to the offline AI
+  tutor.
+
+**JSON API** — base `index.php?r=api/<endpoint>`, authenticate with
+`Authorization: Bearer <token>` from `api/login`. Endpoints: login, polls,
+messages, ai/chat, attendance, reactions, uploads, settings, users, courses,
+calendar, library, gamification, transfers, reports, backups, activity,
+search.
+
+**Tests:**
+
+```bash
+bash tests/e2e.sh      # 125 checks against a running server
+bash tests/audit.sh    # crawls every nav route per role, fails on 404/403/500
+```
+
+## Security
+
+- **HMAC bearer tokens** — all API calls (web and desktop client) are
+  authenticated with tokens issued at login.
+- **CSRF protection** — `CSRF_SECRET` guards state-changing requests; change
+  it plus `ENCRYPTION_KEY` and `API_SECRET` after install.
+- **Integrity ledger** — grading, attendance and certificate events are
+  SHA-256 hash-chained and tamper-evident.
+- **Role separation** — admin/director/teacher/student/parent/guest each see
+  only their permitted surfaces.
+- **Account lifecycle** — pending student verification, inactive students
+  keep exam access but lose grading/attendance menus.
+
+## Screenshots
+
+Screenshots will be added here as the interface is finalized (dark dashboard,
+teacher course builder, AI tutor chat, integrity ledger).
+
+## Roadmap
+
+- Browser-driven E2E smoke tests for newer modules (AI, transfers, chat)
+- Expanded AI: automated paper-to-exam pipelines and voice responses
+- Mobile attendance app
+- Arabic/Amharic localization pass
+- Production hardening: rate limiting on AI endpoints, audit export
+
+## License
+
+MIT — see [LICENSE](LICENSE).
