@@ -163,4 +163,6 @@ teacher course builder, AI tutor chat, integrity ledger).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache License, Version 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Copyright 2026 henokakriso. "Edunex" and "ARWE" are trademarks of the ARWE project; trademark use is governed by Section 6 of the Apache License, Version 2.0.
