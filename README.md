@@ -1,5 +1,7 @@
 # Edunex — AI-Powered Ethiopian Learning Platform
 
+**Core vision:** Create a unified intelligent education ecosystem for Ethiopia. *Part of [Project ARWE](https://github.com/henokakriso).*
+
 ## Overview
 
 Edunex is a full-stack **Learning Management System (LMS)** built for Ethiopian
