@@ -4,6 +4,7 @@
  * Opened from the notifications list. Back returns to notifications.
  * Forward lets the reader send a suggestion/comment to the announcement creator (a DM).
  */
+require_once __DIR__ . '/communication.php';
 
 class Ctl_announcement {
     public function run(): void {

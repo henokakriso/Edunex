@@ -42,7 +42,7 @@
 #include <openssl/sha.h>
 
 #define HOST_DEFAULT "http://127.0.0.1:11434"
-#define KEEP_ALIVE "30m"
+#define KEEP_ALIVE "24h"
 #define CACHE_TTL_S (24 * 3600)
 #define STATE_FILE "router_state.json"
 
@@ -360,28 +360,28 @@ static const char *pick_model(json_object *req, json_object *state,
     }
     if (nc == 0) { cand[0] = "edunex-tutor"; nc = 1; }
 
-    /* identity questions -> biggest instruct model (follows identity best) */
+    /* identity questions -> 3b model (follows identity best) */
     if (want_id) {
         for (int i = 0; i < nc; i++)
             if (strstr(cand[i], "3b")) return cand[i];
     }
 
-    /* math -> deepseek-r1 (reasoning), then phi3 */
+    /* math -> llama3.2:1b (best quality+speed), then gemma2:2b, then qwen2.5:3b */
     if (want_math) {
         for (int i = 0; i < nc; i++)
-            if (strstr(cand[i], "deepseek-r1")) return cand[i];
+            if (strstr(cand[i], "llama3.2:1b")) return cand[i];
         for (int i = 0; i < nc; i++)
-            if (strstr(cand[i], "phi3")) return cand[i];
+            if (strstr(cand[i], "gemma2")) return cand[i];
     }
-    /* code -> phi3 (compact + technical), then deepseek-r1 */
+    /* code -> llama3.2:1b, then gemma2:2b */
     if (want_code) {
         for (int i = 0; i < nc; i++)
-            if (strstr(cand[i], "phi3")) return cand[i];
+            if (strstr(cand[i], "llama3.2:1b")) return cand[i];
         for (int i = 0; i < nc; i++)
-            if (strstr(cand[i], "deepseek-r1")) return cand[i];
+            if (strstr(cand[i], "gemma2")) return cand[i];
     }
-    /* general chat: accuracy first — biggest instruct model, smallest as emergency */
-    const char *tier[] = {"3b", "2b", "1b", "0.5b"};
+    /* general chat: quality+speed balance — llama3.2:1b (best instruct), then gemma2:2b */
+    const char *tier[] = {"llama3.2:1b", "gemma2:2b", "1b", "2b"};
     for (size_t t = 0; t < sizeof tier / sizeof *tier; t++)
         for (int i = 0; i < nc; i++)
             if (strstr(cand[i], tier[t])) return cand[i];
@@ -415,7 +415,7 @@ static int cmd_chat(void) {
     if (json_object_object_get_ex(req, "models", &o)) models_csv = json_object_get_string(o);
     if (json_object_object_get_ex(req, "system", &o)) system = json_object_get_string(o);
 
-    int max_tokens = 180;
+    int max_tokens = 150;
     double temperature = 0.5;
     if (json_object_object_get_ex(req, "max_tokens", &o)) max_tokens = json_object_get_int(o);
     if (json_object_object_get_ex(req, "temperature", &o)) temperature = json_object_get_double(o);

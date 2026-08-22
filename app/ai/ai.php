@@ -1,8 +1,60 @@
 <?php
 /**
  * AI suite: tutor chat, assistant, history, flashcards (Leitner), AI quiz
- * All rule-based via AiTutor (no external API).
  */
+
+/** Load education AI rules from config/ai_rules.json */
+function ai_rules(): array {
+    static $rules = null;
+    if ($rules !== null) return $rules;
+    $path = BASE_PATH . '/config/ai_rules.json';
+    $raw = @file_get_contents($path);
+    $rules = $raw ? (json_decode($raw, true) ?: []) : [];
+    return $rules;
+}
+
+/** Build the system prompt from education rules */
+function ai_system_prompt(): string {
+    $r = ai_rules();
+    $id = $r['identity'] ?? [];
+    $resp = $r['response_rules'] ?? [];
+    $edu = $r['education_rules'] ?? [];
+    $ped = $edu['pedagogy'] ?? [];
+    $prohib = $r['prohibited'] ?? [];
+
+    $maxW = $resp['max_words'] ?? 120;
+    $neverAs = implode(', ', $id['never_identify_as'] ?? []);
+    $fullName = $id['full_name'] ?? 'Edunex-tutor';
+    $identityAnswer = $id['response_when_asked'] ?? 'I am Edunex-tutor.';
+    $prohibTopics = implode(', ', $prohib['topics'] ?? []);
+    $prohibBehaviors = implode(', ', $prohib['behaviors'] ?? []);
+    $prohibPatterns = implode(', ', $prohib['output_patterns'] ?? []);
+
+    return "You are {$fullName}, an AI tutor for the Edunex Ethiopian learning platform.\n\n"
+        . "IDENTITY RULES:\n"
+        . "- Your name is Edunex-tutor. Always refer to yourself as Edunex-tutor.\n"
+        . "- Never say you are {$neverAs} or any other AI model.\n"
+        . "- When asked who you are, say: \"{$identityAnswer}\"\n\n"
+        . "RESPONSE RULES:\n"
+        . "- Answer ONLY the exact question asked. Do not add unrelated information.\n"
+        . "- Be concise: 1-3 sentences for simple questions, at most {$maxW} words for explanations.\n"
+        . "- Use the same language the student writes in (Amharic or English).\n"
+        . "- Include one short example when explaining a concept.\n"
+        . "- If you are not sure, say: 'I'm not sure about that. Please ask your teacher for help.'\n"
+        . "- Never make up facts. If you don't know, say so honestly.\n\n"
+        . "EDUCATION RULES:\n"
+        . "- Guide students to understand — don't just give answers (Socratic method).\n"
+        . "- Break complex topics into smaller steps.\n"
+        . "- Be encouraging and acknowledge the student's effort.\n"
+        . "- For math: always show steps clearly.\n"
+        . "- For code: show one short working example.\n"
+        . "- For science: use examples relevant to Ethiopia when possible.\n\n"
+        . "PROHIBITED:\n"
+        . "- Never discuss: {$prohibTopics}\n"
+        . "- Never do: {$prohibBehaviors}\n"
+        . "- Never output: {$prohibPatterns}\n\n"
+        . "This is a chat conversation. Earlier messages are context only — focus on answering the LATEST question.";
+}
 
 function ai_save_chat(array $u, int $chatId, string $userMsg, string $aiReply): void {
     $n = (int)Database::scalar("SELECT COUNT(*) FROM ai_messages WHERE chat_id = ?", [$chatId], 0);
@@ -56,7 +108,7 @@ class Ctl_tutor {
             if ($msg !== '') {
                 $courseId = (int)($_POST['course_id'] ?? 0);
                 $reply = Model::chat(
-                    'You are Edunex AI, a friendly Ethiopian school tutor. Keep answers clear and encouraging.',
+                    ai_system_prompt(),
                     $msg, ['user' => $u]);
                 ai_save_chat($u, (int)$chatId, $msg, $reply);
                 log_activity('ai_chat', 'Tutor: ' . mb_substr($msg, 0, 60), $uid);
@@ -87,7 +139,7 @@ class Ctl_assistant {
             $q = trim($_POST['question'] ?? '');
             if ($q !== '') {
                 $answer = Model::chat(
-                    'You are Edunex AI, a helpful study assistant. Answer questions from Ethiopian students concisely and accurately.',
+                    ai_system_prompt(),
                     $q, ['user' => $u]);
                 $chatId = Database::insert('ai_chats', ['user_id' => $uid, 'title' => 'Assistant Q&A']);
                 if ($chatId) ai_save_chat($u, (int)$chatId, $q, $answer);
@@ -290,11 +342,13 @@ class Ctl_tutor_stream {
         } else {
             $chatId = (int)$chat['id'];
         }
+        // keep model warm so switching is instant
+        if (AiRouter::available() && (string)setting('ai_router') !== 'off') AiRouter::warmAsync();
         // The stream runs for many seconds — release the session lock now so other
         // requests from the same user (chat delete, page loads, polls) are NOT blocked.
         session_write_close();
         $courseId = (int)($_POST['course_id'] ?? 0);
-        $identity = "I am Edunex, the AI tutor of the Edunex learning platform. I help students and teachers with lessons, homework, and questions — in Amharic or English. How can I help you today?";
+        $identity = ai_rules()['identity']['response_when_asked'] ?? 'I am Edunex-tutor, your AI tutor on the Edunex learning platform.';
         // pure identity questions are answered directly — instant and always correct
         if (preg_match('/^\s*(so|hey|hi|ok|um|well|please)?\s*(who|what) (are|is) you\b|your name\b|who (made|created|built|developed) (you|it|this)\b|(who|what) (developed|built|created|made) (this|the) (system|platform|app|site|software|website)\b|what is this (system|platform|app|site)\b|introduce yourself/i', $msg)) {
             $chatId = (int)$chat['id'];
@@ -303,29 +357,29 @@ class Ctl_tutor_stream {
             header('X-Accel-Buffering: no');
             header('X-Stream-Id: ' . $chatId);
             if (ob_get_level()) ob_end_flush();
-            echo "data: " . json_encode(['delta' => $identity], JSON_UNESCAPED_UNICODE) . "\n\n";
+            echo "data: " . json_encode(['delta' => $identity, 'model' => 'Edunex-tutor'], JSON_UNESCAPED_UNICODE) . "\n\n";
             echo "data: " . json_encode(['done' => true, 'chat' => $chatId]) . "\n\n";
             flush();
             log_activity('ai_chat', 'Tutor: ' . mb_substr($msg, 0, 60), $uid);
             ai_save_chat($u, $chatId, $msg, $identity);
             exit;
         }
-        $system = 'You are Edunex, the AI tutor of the Edunex school platform. Your name is Edunex. When asked "who are you", your name, or what you are, answer: "I am Edunex, the AI tutor of the Edunex learning platform." Never say you are Qwen, DeepSeek, Ollama, or any other AI model. Always answer in English. Be concise: answer in at most 120 words unless asked for detail. Use plain language and one short example when helpful. This is a chat: the FINAL user message below is the only question to answer. Earlier messages are context only — never repeat, recap, or re-answer them.';
+        $system = ai_system_prompt();
         $prompt = $msg;
         if ($courseId) {
             $c = Database::one("SELECT title, description FROM courses WHERE id = ?", [$courseId]);
-            if ($c) $prompt = "Context: student is learning \"{$c['title']}\".\n\n" . $msg;
+            if ($c) $prompt = "Subject: {$c['title']}\nQuestion: " . $msg;
         }
-        $history = Database::all("SELECT role, content FROM ai_messages WHERE chat_id = ? ORDER BY id ASC LIMIT 8", [$chatId]);
+        $history = Database::all("SELECT role, content FROM ai_messages WHERE chat_id = ? ORDER BY id ASC LIMIT 6", [$chatId]);
         $messages = [];
         $messages[] = ['role' => 'system', 'content' => $system];
         $prev = 'system';
         foreach ($history as $h) {
-            if ($h['role'] === 'user' && $prev === 'user') continue; // orphaned question (no answer) — skip
+            if ($h['role'] === 'user' && $prev === 'user') continue;
             $messages[] = ['role' => $h['role'], 'content' => $h['content']];
             $prev = $h['role'];
         }
-        $messages[] = ['role' => 'user', 'content' => "ANSWER THIS LATEST QUESTION:\n" . $prompt];
+        $messages[] = ['role' => 'user', 'content' => $prompt];
 
         // subject -> routing tier (the C router picks the actual model)
         $tags = 'general';
@@ -346,12 +400,21 @@ class Ctl_tutor_stream {
         // Fast path: native C router (adaptive model switching + answer cache)
         if (AiRouter::available() && (string)setting('ai_router') !== 'off') {
             $full = '';
-            $routed = AiRouter::stream($messages, $tags, 220, 0.5, function (string $delta) use (&$full, $chatId): void {
+            $maxWords = 100; // hard word limit since models ignore num_predict
+            $routed = AiRouter::stream($messages, $tags, 150, 0.5, function (string $delta) use (&$full, $chatId, $maxWords): void {
                 $full .= $delta;
+                // hard truncation: stop streaming after ~100 words
+                if (str_word_count($full) >= $maxWords) {
+                    echo "data: " . json_encode(['delta' => $delta], JSON_UNESCAPED_UNICODE) . "\n\n";
+                    echo "data: " . json_encode(['done' => true, 'chat' => $chatId, 'truncated' => true]) . "\n\n";
+                    flush();
+                    return;
+                }
                 echo "data: " . json_encode(['delta' => $delta], JSON_UNESCAPED_UNICODE) . "\n\n";
                 flush();
             }, 170, function (string $model) use ($chatId): void {
-                echo "data: " . json_encode(['model' => $model, 'chat' => $chatId]) . "\n\n";
+                // Always show "Edunex-tutor" regardless of backend model
+                echo "data: " . json_encode(['model' => 'Edunex-tutor', 'chat' => $chatId]) . "\n\n";
                 flush();
             });
             if ($routed !== null) {
@@ -376,6 +439,36 @@ class Ctl_tutor_stream {
             }
         }
 
+        // Cloud API streaming: if provider is 'openai' and key is set
+        if ((string)setting('ai_provider') === 'openai' && setting('ai_api_key')) {
+            $provider = new OpenAIProvider();
+            $full = '';
+            echo "data: " . json_encode(['model' => 'Edunex-tutor', 'chat' => $chatId]) . "\n\n";
+            flush();
+            try {
+                $full = $provider->streamChat($system, $msg, function (string $delta) use (&$full, $chatId): void {
+                    $full .= $delta;
+                    if (str_word_count($full) >= 120) return; // hard truncation
+                    echo "data: " . json_encode(['delta' => $delta], JSON_UNESCAPED_UNICODE) . "\n\n";
+                    flush();
+                });
+            } catch (Throwable $e) {
+                if ($full === '') {
+                    $reply = AiTutor::respond($msg, $u);
+                    echo "data: " . json_encode(['delta' => $reply], JSON_UNESCAPED_UNICODE) . "\n\n";
+                    $full = $reply;
+                }
+            }
+            echo "data: " . json_encode(['done' => true, 'chat' => $chatId]) . "\n\n";
+            flush();
+            if ($full !== '') {
+                $full = ai_scrub_identity($full, $identity);
+                log_activity('ai_chat', 'Tutor (cloud): ' . mb_substr($msg, 0, 60), $uid);
+                ai_save_chat($u, $chatId, $msg, $full);
+            }
+            exit;
+        }
+
         if (!OllamaProvider::isUp()) {
             // offline fallback: single chunk
             $reply = AiTutor::respond($msg, $u);
@@ -387,14 +480,15 @@ class Ctl_tutor_stream {
         }
 
         $full = '';
+        $model = setting('ai_model') ?: 'llama3.2:1b';
         $json = json_encode([
-            'model' => setting('ai_model') ?: 'edunex-tutor',
+            'model' => $model,
             'messages' => $messages,
             'stream' => true,
             'temperature' => 0.5,
-            'num_predict' => 180,
-            'options' => ['temperature' => 0.5, 'num_predict' => 180, 'num_ctx' => 2048, 'num_threads' => 6, 'num_batch' => 512],
-            'keep_alive' => '30m',
+            'num_predict' => 150,
+            'options' => ['temperature' => 0.5, 'num_predict' => 150, 'num_ctx' => 2048, 'num_threads' => 8, 'num_batch' => 512],
+            'keep_alive' => '24h',
         ]);
         $host = rtrim(setting('ai_api_url') ?: 'http://127.0.0.1:11434', '/');
         $ch = curl_init($host . '/api/chat');
@@ -409,6 +503,7 @@ class Ctl_tutor_stream {
             CURLOPT_WRITEFUNCTION => function ($ch2, $chunk) use (&$full, $chatId): int {
                 // Stop button / closed tab → abort the Ollama stream immediately
                 if (connection_aborted()) return 0;
+                $maxWords = 100;
                 $len = strlen($chunk);
                 // Ollama NDJSON: one JSON object per line
                 foreach (explode("\n", $chunk) as $line) {
@@ -419,6 +514,12 @@ class Ctl_tutor_stream {
                     $delta = (string)($obj['message']['content'] ?? '');
                     if ($delta !== '') {
                         $full .= $delta;
+                        if (str_word_count($full) >= $maxWords) {
+                            echo "data: " . json_encode(['delta' => $delta], JSON_UNESCAPED_UNICODE) . "\n\n";
+                            echo "data: " . json_encode(['done' => true, 'chat' => $chatId], JSON_UNESCAPED_UNICODE) . "\n\n";
+                            flush();
+                            return 0; // abort Ollama stream
+                        }
                         echo "data: " . json_encode(['delta' => $delta], JSON_UNESCAPED_UNICODE) . "\n\n";
                         flush();
                     }

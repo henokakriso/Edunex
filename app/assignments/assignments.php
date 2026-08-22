@@ -85,11 +85,14 @@ class Ctl_teacher_assignment {
             if (($sid = (int)($_POST['grade_sub'] ?? 0))) {
                 $score = max(0, (float)($_POST['score'] ?? 0));
                 $fb = trim((string)($_POST['feedback'] ?? ''));
+                $oldScore = (float)Database::scalar("SELECT COALESCE(score,0) FROM assignment_submissions WHERE id = ?", [$sid], 0);
                 Database::update('assignment_submissions', [
                     'score' => $score, 'feedback' => $fb, 'status' => 'graded', 'graded_by' => $uid, 'graded_at' => date('Y-m-d H:i:s'),
                 ], 'id = ?', [$sid]);
                 $st = Database::one("SELECT student_id FROM assignment_submissions WHERE id = ?", [$sid]);
                 if ($st) {
+                    grade_audit_log((int)$st['student_id'], (int)$assign['course_id'], 'assignment', $id,
+                        (string)$oldScore, (string)$score, 'Teacher grading', (int)$uid);
                     notify((int)$st['student_id'], 'assignment', 'Assignment graded: ' . $assign['title'], 'Score: ' . $score . '/' . $assign['max_score'] . '. ' . $fb, 'assignments/view&id=' . $id);
                     award_xp((int)$st['student_id'], 15, 'Assignment graded');
                 }

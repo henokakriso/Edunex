@@ -42,7 +42,7 @@ $trashIcon = json_encode(icon('trash'));
         <p class="tutor-meta">
           <span class="msg-count"><span id="msg-count"><?= $msgCount ?></span> message(s)</span>
           <span class="sep">·</span>
-          <span class="model-chip"><span class="dot" id="model-dot"></span><span id="model-badge">auto-routed</span></span>
+          <span class="model-chip"><span class="dot" id="model-dot"></span><span id="model-badge">Edunex-tutor</span></span>
         </p>
       </div>
       <div class="flex gap-6" style="flex-shrink:0">
@@ -224,7 +224,7 @@ function showEmptyChat() {
   const title = document.querySelector('.tutor-title');
   if (title) title.innerHTML = ICO.robot + ' New chat';
   const badge = document.getElementById('model-badge');
-  if (badge) badge.textContent = 'auto-routed';
+  if (badge) badge.textContent = 'Edunex-tutor';
   const dot = document.getElementById('model-dot');
   if (dot) dot.classList.remove('pulse');
   const count = document.getElementById('msg-count');
@@ -401,7 +401,7 @@ document.getElementById('tutor-form').addEventListener('submit', async (e) => {
             aiBubble.textContent = full;
             log.scrollTop = log.scrollHeight;
           }
-          if (evt.model && !full) { if (badge) badge.textContent = evt.model; }
+          if (evt.model && !full) { if (badge) badge.textContent = 'Edunex-tutor'; }
           if (evt.chat && evt.chat !== TUTOR_CHAT) {
             newChatId = TUTOR_CHAT = evt.chat;                  // auto-created chat: name it right away
             history.replaceState(null, '', '<?= url('ai/tutor&chat=') ?>' + evt.chat);

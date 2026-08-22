@@ -471,14 +471,23 @@ class Ctl_registrar {
     private function announcements(array $u, int $sid): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            Database::insert('announcements', [
+            $title = trim((string)($_POST['title'] ?? ''));
+            $content = trim((string)($_POST['content'] ?? ''));
+            $audience = in_array($_POST['audience'] ?? 'all', ['all', 'students', 'teachers', 'parents'], true) ? $_POST['audience'] : 'all';
+            $aid = Database::insert('announcements', [
                 'school_id' => $sid, 'author_id' => (int)$u['id'],
-                'title' => trim((string)($_POST['title'] ?? '')),
-                'content' => trim((string)($_POST['content'] ?? '')),
-                'audience' => in_array($_POST['audience'] ?? 'all', ['all', 'students', 'teachers', 'parents'], true) ? $_POST['audience'] : 'all',
+                'title' => $title, 'content' => $content, 'audience' => $audience,
             ]);
+            $roleMap = ['all' => null, 'students' => 'student', 'teachers' => 'teacher', 'parents' => 'parent'];
+            $role = $roleMap[$audience] ?? null;
+            $targets = $role
+                ? Database::all("SELECT id FROM users WHERE role = ? AND school_id = ?", [$role, $sid])
+                : Database::all("SELECT id FROM users WHERE role != 'guest' AND school_id = ?", [$sid]);
+            foreach ($targets as $t) {
+                notify((int)$t['id'], 'announcement', $title, mb_strimwidth($content, 0, 120, '…'), 'communication/announcement&id=' . $aid);
+            }
             log_activity('announcement.create', 'Registrar announced to school #' . $sid, (int)$u['id']);
-            flash('success', 'Announcement published.');
+            flash('success', 'Announcement published to ' . count($targets) . ' users.');
             redirect('registrar/announcements');
         }
         $rows = Database::all(

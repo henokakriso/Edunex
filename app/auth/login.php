@@ -19,6 +19,7 @@ class Ctl_login {
                         redirect('auth/2fa');
                     } elseif ($ok) {
                         log_activity('login', 'Signed in');
+                        if (AiRouter::available()) AiRouter::warmAsync();
                         redirect(dashboard_path());
                     } else {
                         rate_limit($key, MAX_LOGIN_ATTEMPTS, 900);

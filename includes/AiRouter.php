@@ -110,8 +110,31 @@ class AiRouter
     private static function enabledModels(): array
     {
         $models = setting('ai_models') ? json_decode((string)setting('ai_models'), true) : null;
-        if (!is_array($models) || !$models) $models = [(string)(setting('ai_model') ?: 'edunex-tutor')];
-        return array_values(array_filter(array_map('trim', (array)$models), 'strlen'));
+        if (is_array($models) && $models) {
+            return array_values(array_filter(array_map('trim', (array)$models), 'strlen'));
+        }
+        // Auto-discover all models from Ollama so the C router can pick the fastest one
+        $ch = curl_init('http://127.0.0.1:11434/api/tags');
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2]);
+        $r = curl_exec($ch);
+        curl_close($ch);
+        if ($r !== false) {
+            $d = json_decode((string)$r, true);
+            if (isset($d['models']) && is_array($d['models'])) {
+                $found = [];
+                foreach ($d['models'] as $m) {
+                    $name = $m['name'] ?? $m['model'] ?? '';
+                    if ($name !== '') $found[] = preg_replace('/:latest$/', '', $name);
+                }
+                if ($found) {
+                    // Only keep the best models — avoid keeping too many loaded
+                    $keep = ['edunex-tutor', 'llama3.2:1b', 'phi3:mini', 'gemma2:2b', 'qwen2.5:3b', 'qwen2.5:0.5b'];
+                    $filtered = array_values(array_filter($found, fn($n) => in_array($n, $keep)));
+                    return $filtered ?: array_slice($found, 0, 5);
+                }
+            }
+        }
+        return [(string)(setting('ai_model') ?: 'edunex-tutor')];
     }
 
     private static function run(array $argv, ?array $payload, callable $onEvent, int $timeout): bool

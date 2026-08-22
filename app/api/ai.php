@@ -4,6 +4,7 @@
  */
 header('Content-Type: application/json');
 require_once __DIR__ . '/_auth.php';
+require_once __DIR__ . '/../ai/ai.php';
 
 $u = api_user();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') api_out(['ok' => false, 'error' => 'method'], 405);
@@ -12,5 +13,5 @@ $message = trim((string)($in['message'] ?? ''));
 $courseId = (int)($in['course_id'] ?? 0);
 if ($message === '') api_out(['ok' => false, 'error' => 'empty'], 400);
 
-$tutor = Model::chat('You are Edunex AI, a friendly Ethiopian school tutor.', $message, ['user' => $u]);
+$tutor = Model::chat(ai_system_prompt(), $message, ['user' => $u]);
 api_out(['ok' => true, 'reply' => $tutor]);

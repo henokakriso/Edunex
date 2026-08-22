@@ -93,6 +93,7 @@ $__nav = [
     ['library', 'Library', 'library', icon('university')],
     ['ai', 'AI Tutor', 'ai/tutor', icon('robot')],
     ['OPERATIONS'],
+    ['announcements', 'Announcements', 'communication/announcements', icon('megaphone')],
     ['transfers', 'Transfers', 'director/transfers', icon('refresh')],
     ['reports', 'Reports', 'director/reports', icon('trend-up')],
     ['analytics', 'Analytics', 'director/analytics', icon('chart-bar')],
@@ -167,6 +168,14 @@ if (($__u['role'] ?? '') === 'student') {
 if (($__u['role'] ?? '') === 'teacher' && Database::scalar("SELECT COUNT(*) FROM student_groups WHERE homeroom_teacher_id = ?", [$__u['id']], 0) > 0) {
     $__i = array_search('attendance', array_column($__nav['teacher'], 2), true);
     array_splice($__nav['teacher'], ($__i === false ? 7 : $__i + 1), 0, [['homeroom', 'Homeroom', 'teacher/homeroom', icon('school')]]);
+}
+
+/* Director: only show faculties for university/college schools */
+if (($__u['role'] ?? '') === 'director') {
+    $__schoolType = Database::scalar("SELECT type FROM schools WHERE id = ?", [$__u['school_id'] ?? 0], 'school');
+    if (!in_array($__schoolType, ['university', 'college'], true)) {
+        $__nav['director'] = array_values(array_filter($__nav['director'], fn($i) => count($i) === 1 || $i[2] !== 'director/faculties'));
+    }
 }
 
 $__icons = [
@@ -337,6 +346,13 @@ $__icons = [
     window.EDUNEX_FLASHES = <?= json_encode(flash_drain()) ?>;
   </script>
   <script src="<?= url('public/js/app.js?v=12') ?>"></script>
+  <script>
+    (function() {
+      var src = new XMLHttpRequest();
+      src.open('GET', '<?= url('index.php?r=api/ai/warm') ?>', true);
+      src.send();
+    })();
+  </script>
   <?php if (isset($__scripts)): foreach ($__scripts as $s): ?>
     <script src="<?= url('public/js/' . $s) ?>"></script>
   <?php endforeach; endif; ?>

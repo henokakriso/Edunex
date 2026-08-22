@@ -273,13 +273,23 @@ class Ctl_regional {
             csrf_verify();
             $schoolId = (int)($_POST['school_id'] ?? 0);
             RegionalScope::requireSchool($uid, $schoolId);
-            Database::insert('announcements', [
+            $title = trim((string)$_POST['title']);
+            $content = trim((string)$_POST['content']);
+            $audience = in_array($_POST['audience'] ?? 'all', ['all', 'students', 'teachers', 'parents'], true) ? $_POST['audience'] : 'all';
+            $aid = Database::insert('announcements', [
                 'school_id' => $schoolId, 'author_id' => $uid,
-                'title' => trim((string)$_POST['title']), 'content' => trim((string)$_POST['content']),
-                'audience' => in_array($_POST['audience'] ?? 'all', ['all', 'students', 'teachers', 'parents'], true) ? $_POST['audience'] : 'all',
+                'title' => $title, 'content' => $content, 'audience' => $audience,
             ]);
+            $roleMap = ['all' => null, 'students' => 'student', 'teachers' => 'teacher', 'parents' => 'parent'];
+            $role = $roleMap[$audience] ?? null;
+            $targets = $role
+                ? Database::all("SELECT id FROM users WHERE role = ? AND school_id = ?", [$role, $schoolId])
+                : Database::all("SELECT id FROM users WHERE role != 'guest' AND school_id = ?", [$schoolId]);
+            foreach ($targets as $t) {
+                notify((int)$t['id'], 'announcement', $title, mb_strimwidth($content, 0, 120, '…'), 'communication/announcement&id=' . $aid);
+            }
             log_activity('announcement.create', 'Regional admin announced to school #' . $schoolId, $uid);
-            flash('success', 'Announcement published.');
+            flash('success', 'Announcement published to ' . count($targets) . ' users.');
             redirect('regional/announcements');
         }
         $rows = Database::all(

@@ -22,25 +22,54 @@ CREATE TABLE settings (
 
 CREATE TABLE schools (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id INT UNSIGNED DEFAULT NULL,
   name VARCHAR(150) NOT NULL,
   code VARCHAR(20) NOT NULL UNIQUE,
   type ENUM('school','university','college','training','other') DEFAULT 'school',
+  education_level VARCHAR(40) DEFAULT 'secondary',
   address VARCHAR(255) DEFAULT '',
   city VARCHAR(100) DEFAULT '',
   phone VARCHAR(30) DEFAULT '',
   email VARCHAR(120) DEFAULT '',
   logo VARCHAR(255) DEFAULT '',
   status ENUM('active','suspended') DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE school_modules (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  school_id INT UNSIGNED NOT NULL,
+  module_key VARCHAR(60) NOT NULL,
+  enabled TINYINT(1) DEFAULT 1,
+  installed_at DATETIME DEFAULT NULL,
+  UNIQUE KEY uq_school_mod (school_id, module_key),
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE faculties (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  school_id INT UNSIGNED NOT NULL,
+  name VARCHAR(150) NOT NULL,
+  code VARCHAR(30) DEFAULT NULL,
+  dean_id INT UNSIGNED DEFAULT NULL,
+  vice_dean_id INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_fac_school (school_id),
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  FOREIGN KEY (dean_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (vice_dean_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE departments (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   school_id INT UNSIGNED NOT NULL,
+  faculty_id INT UNSIGNED DEFAULT NULL,
   name VARCHAR(120) NOT NULL,
   head VARCHAR(120) DEFAULT '',
   status ENUM('active','archived') DEFAULT 'active',
-  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE academic_years (
@@ -135,9 +164,10 @@ CREATE TABLE users (
   xp INT DEFAULT 0, level INT DEFAULT 1, streak INT DEFAULT 0, streak_last DATE,
   last_login DATETIME,
   status ENUM('active','pending','suspended','banned') DEFAULT 'pending',
+  session_version INT DEFAULT 0,
   privacy JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (school_id) REFERENCES schools(id),
+  FOREIGN KEY (school_id) REFERENCES users(id),
   FOREIGN KEY (group_id) REFERENCES student_groups(id) ON DELETE SET NULL,
   FOREIGN KEY (parent_id) REFERENCES users(id) ON DELETE SET NULL,
   INDEX idx_users_school_role (school_id, role),
@@ -392,6 +422,28 @@ CREATE TABLE exam_answers (
   FOREIGN KEY (question_id) REFERENCES exam_questions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE grade_audit (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  school_id INT UNSIGNED NOT NULL,
+  assessment_type ENUM('exam','assignment','manual') NOT NULL DEFAULT 'exam',
+  assessment_id INT UNSIGNED NOT NULL,
+  old_score VARCHAR(50) DEFAULT NULL,
+  new_score VARCHAR(50) DEFAULT NULL,
+  action ENUM('create','update','delete','override') NOT NULL DEFAULT 'update',
+  reason VARCHAR(500) DEFAULT '',
+  actor_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_grade_audit_student (student_id),
+  INDEX idx_grade_audit_course (course_id),
+  INDEX idx_grade_audit_assessment (assessment_type, assessment_id),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- ------------------------------------------------------------
 -- 6. ATTENDANCE
 -- ------------------------------------------------------------
@@ -478,6 +530,7 @@ CREATE TABLE conversations (
   school_id INT UNSIGNED NOT NULL,
   is_group TINYINT(1) DEFAULT 0,
   title VARCHAR(160) DEFAULT '',
+  conv_key VARCHAR(128) DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -496,6 +549,7 @@ CREATE TABLE messages (
   conversation_id INT UNSIGNED NOT NULL,
   sender_id INT UNSIGNED NOT NULL,
   body TEXT NOT NULL,
+  hmac VARCHAR(128) DEFAULT '',
   attachment VARCHAR(255) DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,

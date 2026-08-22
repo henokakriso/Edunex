@@ -282,8 +282,7 @@ function education_leave(int $studentId, int $schoolId, string $type = 'transfer
 /** Default module set for a school, by education level. */
 function default_modules_for(string $level): array {
     $common = ['core', 'auth', 'user-management', 'security', 'backup', 'api', 'analytics', 'messaging', 'notifications',
-               'teacher-portal', 'parent-portal', 'student-portal', 'academic', 'attendance', 'library', 'ai-tutor', 'gamification',
-               'hr', 'payroll', 'recruitment', 'projects', 'documents', 'helpdesk', 'assets', 'fleet'];
+               'teacher-portal', 'parent-portal', 'student-portal', 'academic', 'attendance', 'library', 'ai-tutor', 'gamification'];
     return match ($level) {
         'kg' => array_values(array_diff([...$common, 'kindergarten'], ['academic', 'student-portal', 'ai-tutor', 'gamification', 'attendance'])),
         'primary' => [...$common, 'primary', 'examination'],
@@ -477,4 +476,171 @@ function paginate(array &$page, int &$total, int &$perPage): void {
     $offset = ($pageNo - 1) * $perPage;
     $page = $pageNo;
     $total = max(0, $total);
+}
+
+/* ================= ETHIOPIAN CALENDAR (Ge'ez) ================= */
+
+/** Ethiopian month names */
+function ethiopian_months(): array {
+    return [
+        1 => 'Meskerem', 2 => 'Tikimt', 3 => 'Hidar', 4 => 'Tahsas',
+        5 => 'Tir', 6 => 'Yekatit', 7 => 'Megabit', 8 => 'Miyazya',
+        9 => 'Genna', 10 => 'Tebet', 11 => 'Yekur', 12 => 'Negus',
+        13 => 'Pagume',
+    ];
+}
+
+/** Short Ethiopian month names */
+function ethiopian_months_short(): array {
+    return [
+        1 => 'Mes', 2 => 'Tik', 3 => 'Hid', 4 => 'Tah',
+        5 => 'Tir', 6 => 'Yek', 7 => 'Meg', 8 => 'Miy',
+        9 => 'Gen', 10 => 'Teb', 11 => 'Yek', 12 => 'Neg',
+        13 => 'Pag',
+    ];
+}
+
+/** Is an Ethiopian year a leap year? (every 4 years, with exception every 100 but not every 400 — same rule as Gregorian offset) */
+function ethiopian_leap_year(int $year): bool {
+    return $year % 4 === 0;
+}
+
+/** Days in an Ethiopian month */
+function ethiopian_month_days(int $month, int $year): int {
+    if ($month >= 1 && $month <= 12) return 30;
+    if ($month === 13) return ethiopian_leap_year($year) ? 6 : 5;
+    return 0;
+}
+
+/**
+ * Convert Gregorian date to Ethiopian date.
+ * Returns [year, month, day].
+ *
+ * The Ethiopian calendar is approximately 7-8 years behind the Gregorian.
+ * Ethiopian New Year (Meskerem 1) falls on September 11 (or September 12 in Gregorian leap years).
+ */
+function gregorian_to_ethiopian(int $year, int $month, int $day): array {
+    $jd = (int)floor(365.25 * ($year + 4800 + (int)(($month - 14) / 12)))
+        + (int)floor(30.6001 * ($month - 2 - 12 * (int)(($month - 14) / 12)))
+        + $day - 32075;
+    $r = ($jd - 1723857) % 1461;
+    $n = (int)floor($r / 365) - (int)floor($r / 1461);
+    $ju = $jd - ($n * 365 + (int)floor($n / 4));
+    $n2 = (int)floor($ju / 366);
+    $n3 = $ju - $n2 * 366 + 365;
+    $year2 = $n + $n2 + 38;
+    if ((int)floor(($year2 + 3) / 4) < $n3) $year2++;
+    $daysInYear = ethiopian_leap_year($year2) ? 366 : 365;
+    $dayOfYear = $n3 - (int)floor(($year2 + 3) / 4);
+    $month = (int)floor(($dayOfYear - 1) / 30) + 1;
+    $day = $dayOfYear - ($month - 1) * 30;
+    if ($month > 13) $month = 13;
+    if ($day > ethiopian_month_days($month, $year2)) $day = ethiopian_month_days($month, $year2);
+    return [$year2, $month, $day];
+}
+
+/**
+ * Convert Ethiopian date to Gregorian date.
+ * Returns [year, month, day].
+ */
+function ethiopian_to_gregorian(int $year, int $month, int $day): array {
+    $year += 7;
+    $jd = 1723856 + 365 * $year + (int)floor($year / 4) + 30 * ($month - 1) + $day - 1;
+    $l = $jd - 1924420 + 1364;
+    $n = (int)floor(($l - 1) / 1461);
+    $l2 = $l - 1461 * $n;
+    $l3 = (int)floor(($l2 - 1) / 365) - (int)floor($l2 / 1461);
+    $i = $l2 - 365 * $l3 + 30;
+    $j = (int)floor($i / 30);
+    $i2 = $i - $j * 30;
+    $j2 = (int)floor(($j + 1) / 11);
+    $j3 = $j - $j2 * 11 + 2;
+    $year2 = 4 * $n + $l3 + $j2 - 4716;
+    $month = $j3 - $j2 * 2 + 3;
+    $day = $i2 + 1;
+    if ($month > 12) { $month -= 12; $year2++; }
+    $daysInMonth = [31, ($year2 % 4 === 0 ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if ($day > ($daysInMonth[$month - 1] ?? 31)) $day = $daysInMonth[$month - 1] ?? 31;
+    return [$year2, $month, $day];
+}
+
+/** Format a Gregorian date as Ethiopian: "Meskerem 1, 2016" */
+function ethiopian_date(string $gregorianDate): string {
+    $dt = new DateTime($gregorianDate);
+    [$y, $m, $d] = gregorian_to_ethiopian((int)$dt->format('Y'), (int)$dt->format('m'), (int)$dt->format('d'));
+    $months = ethiopian_months();
+    return ($months[$m] ?? '???') . ' ' . $d . ', ' . $y;
+}
+
+/** Format a Gregorian date as short Ethiopian: "Mes 1, 2016" */
+function ethiopian_date_short(string $gregorianDate): string {
+    $dt = new DateTime($gregorianDate);
+    [$y, $m, $d] = gregorian_to_ethiopian((int)$dt->format('Y'), (int)$dt->format('m'), (int)$dt->format('d'));
+    $months = ethiopian_months_short();
+    return ($months[$m] ?? '???') . ' ' . $d . ', ' . $y;
+}
+
+/** Current Ethiopian date as array [year, month, day] */
+function ethiopian_now(): array {
+    return gregorian_to_ethiopian((int)date('Y'), (int)date('m'), (int)date('d'));
+}
+
+/** Current Ethiopian year */
+function ethiopian_year(): int {
+    [$y] = ethiopian_now();
+    return $y;
+}
+
+/** Academic year label in Ethiopian calendar (e.g. "2017 E.C.") */
+function academic_year_ethiopian(): string {
+    return ethiopian_year() . ' E.C.';
+}
+
+/* ================= GRADE AUDIT TRAIL ================= */
+
+/**
+ * Record a grade change in the audit trail.
+ * Call this whenever a grade is created, updated, or deleted.
+ */
+function grade_audit_log(
+    int $studentId,
+    int $courseId,
+    string $assessmentType,
+    int $assessmentId,
+    ?string $oldScore,
+    ?string $newScore,
+    string $reason,
+    int $actorId,
+    string $action = 'update'
+): void {
+    $schoolId = (int)Database::scalar(
+        "SELECT c.school_id FROM courses c WHERE c.id = ?", [$courseId], 0
+    );
+    Database::insert('grade_audit', [
+        'student_id'     => $studentId,
+        'course_id'      => $courseId,
+        'school_id'      => $schoolId,
+        'assessment_type' => $assessmentType,
+        'assessment_id'  => $assessmentId,
+        'old_score'      => $oldScore,
+        'new_score'      => $newScore,
+        'action'         => $action,
+        'reason'         => $reason,
+        'actor_id'       => $actorId,
+    ]);
+    log_activity('grade_change', "$action $assessmentType #$assessmentId: $oldScore -> $newScore ($reason)", $actorId);
+}
+
+/** Fetch audit trail for a student's grades */
+function grade_audit_for_student(int $studentId, int $limit = 50): array {
+    return Database::all(
+        "SELECT ga.*, CONCAT(u.first_name, ' ', u.last_name) AS actor_name,
+                c.title AS course_title
+         FROM grade_audit ga
+         JOIN users u ON u.id = ga.actor_id
+         JOIN courses c ON c.id = ga.course_id
+         WHERE ga.student_id = ?
+         ORDER BY ga.created_at DESC LIMIT ?",
+        [$studentId, $limit]
+    );
 }

@@ -39,14 +39,15 @@ class OllamaProvider implements AiProvider {
 
     public static function isUp(): bool { return self::isOllamaUp(); }
 
-    private function call(array $messages, float $temperature = 0.7, int $maxTokens = 1200, bool $json = false): string {
+    private function call(array $messages, float $temperature = 0.7, int $maxTokens = 150, bool $json = false): string {
         $body = json_encode([
             'model' => $this->model,
             'messages' => $messages,
             'stream' => false,
             'temperature' => $temperature,
             'num_predict' => $maxTokens,
-            'options' => ['temperature' => $temperature, 'num_predict' => $maxTokens],
+            'keep_alive' => '24h',
+            'options' => ['temperature' => $temperature, 'num_predict' => $maxTokens, 'num_ctx' => 2048, 'num_threads' => 8],
         ]);
         $ch = curl_init($this->host . '/api/chat');
         curl_setopt_array($ch, [
@@ -54,7 +55,7 @@ class OllamaProvider implements AiProvider {
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $body,
             CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_TIMEOUT => 90,
+            CURLOPT_TIMEOUT => 60,
         ]);
         $resp = curl_exec($ch);
         $err = curl_error($ch);
@@ -70,6 +71,19 @@ class OllamaProvider implements AiProvider {
         if (!self::isOllamaUp()) {
             return AiTutor::respond($message, $opts['user'] ?? ['id' => 0, 'school_id' => null]);
         }
+
+        /* Try the C ai_router first: streaming + on-disk cache + model warm-up */
+        if (AiRouter::available()) {
+            $msgs = array_merge([['role' => 'system', 'content' => $system]], $this->buildHistory($message, $opts));
+            $tags = $opts['tags'] ?? 'general';
+            $maxTok = $opts['max_tokens'] ?? 150;
+            $result = AiRouter::chat($msgs, $tags, $maxTok, 0.5, 30);
+            if ($result !== null && $result['text'] !== '') {
+                return $result['text'];
+            }
+        }
+
+        /* Fallback: direct Ollama HTTP (no cache, no streaming) */
         try {
             return $this->call([
                 ['role' => 'system', 'content' => $system],
@@ -81,6 +95,17 @@ class OllamaProvider implements AiProvider {
         }
     }
 
+    /** Build message history from opts if provided, otherwise single user message */
+    private function buildHistory(string $message, array $opts): array {
+        $history = $opts['history'] ?? [];
+        $msgs = [];
+        foreach ($history as $h) {
+            $msgs[] = ['role' => $h['role'] ?? 'user', 'content' => $h['content'] ?? ''];
+        }
+        $msgs[] = ['role' => 'user', 'content' => $message];
+        return $msgs;
+    }
+
     /** Ask the model for JSON questions, fall back to LocalProvider heuristics */
     public function generateQuestions(string $text, int $count, string $topic): array {
         if (self::isOllamaUp()) {
@@ -90,7 +115,7 @@ class OllamaProvider implements AiProvider {
                     ['role' => 'system', 'content' => 'You are a teacher creating multiple-choice questions. '
                         . 'Return ONLY a JSON array, no markdown, each item: {"question": "...", "options": ["a","b","c","d"], "answer": "exact correct option", "explanation": "..."}'],
                     ['role' => 'user', 'content' => "Topic: $topic\nCreate $count MCQs from this text:\n$sample"],
-                ], 0.4, 2000);
+                ], 0.4, 800);
                 $out = trim($out);
                 $out = preg_replace('/^```(json)?/i', '', $out);
                 $out = preg_replace('/```$/', '', $out);
@@ -124,6 +149,15 @@ class OllamaProvider implements AiProvider {
     public function summarize(string $text, int $maxWords = 40): string {
         if (self::isOllamaUp()) {
             try {
+                /* Try C ai_router first */
+                if (AiRouter::available()) {
+                    $msgs = [
+                        ['role' => 'system', 'content' => 'Summarize the following lesson text in at most ' . $maxWords . ' words. Plain text only.'],
+                        ['role' => 'user', 'content' => mb_substr(strip_tags($text), 0, 12000)],
+                    ];
+                    $result = AiRouter::chat($msgs, 'general', 200, 0.3, 15);
+                    if ($result !== null && $result['text'] !== '') return $result['text'];
+                }
                 return $this->call([
                     ['role' => 'system', 'content' => 'Summarize the following lesson text in at most ' . $maxWords . ' words. Plain text only.'],
                     ['role' => 'user', 'content' => mb_substr(strip_tags($text), 0, 12000)],

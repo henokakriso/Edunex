@@ -407,6 +407,7 @@ class Ctl_grade {
             if ($aid = (int)($_POST['grade_attempt'] ?? 0)) {
                 $answers = Database::all("SELECT * FROM exam_answers WHERE attempt_id = ?", [$aid]);
                 $total = 0;
+                $oldScore = (float)Database::scalar("SELECT COALESCE(score,0) FROM exam_attempts WHERE id = ?", [$aid], 0);
                 foreach ($answers as $ans) {
                     $pts = (float)($_POST['pts_' . $ans['question_id']] ?? $ans['points_earned']);
                     $fb = trim((string)($_POST['fb_' . $ans['question_id']] ?? ''));
@@ -423,6 +424,8 @@ class Ctl_grade {
                         'exam_attempt', $aid,
                         ['exam_id' => $examId, 'exam' => $exam['title'], 'student_id' => (int)$stud['student_id'],
                          'score' => $total, 'graded_by' => $u['first_name'] . ' ' . $u['last_name']]);
+                    grade_audit_log((int)$stud['student_id'], (int)$exam['course_id'], 'exam', $examId,
+                        (string)$oldScore, (string)$total, 'Manual grading', (int)$u['id']);
                     notify((int)$stud['student_id'], 'exam', 'Exam graded: ' . $exam['title'], 'Your teacher graded your exam. Score: ' . $total . ' points.', 'exams/result&a=' . $aid);
                     award_xp((int)$stud['student_id'], 20, 'Exam graded');
                 }
@@ -496,6 +499,7 @@ class Ctl_grade {
 
     private function autoGradeAttempt(int $attemptId, array $teacher): void {
         $answers = Database::all("SELECT * FROM exam_answers WHERE attempt_id = ?", [$attemptId]);
+        $oldScore = (float)Database::scalar("SELECT COALESCE(score,0) FROM exam_attempts WHERE id = ?", [$attemptId], 0);
         foreach ($answers as $a) {
             if ($a['is_correct'] !== null) continue;
             $q = Database::one("SELECT * FROM exam_questions WHERE id = ?", [$a['question_id']]);
@@ -521,6 +525,11 @@ class Ctl_grade {
             Ledger::append((int)$teacher['school_id'], (int)$teacher['id'], 'grade.autograd',
                 'exam_attempt', $attemptId,
                 ['exam_id' => (int)$att['exam_id'], 'student_id' => (int)$att['student_id'], 'score' => $total]);
+            $exam = Database::one("SELECT course_id FROM exams WHERE id = ?", [(int)$att['exam_id']]);
+            if ($exam) {
+                grade_audit_log((int)$att['student_id'], (int)$exam['course_id'], 'exam', (int)$att['exam_id'],
+                    (string)$oldScore, (string)$total, 'Auto-grading', (int)$teacher['id']);
+            }
         }
     }
 }

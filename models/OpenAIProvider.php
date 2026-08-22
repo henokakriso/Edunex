@@ -2,6 +2,7 @@
 /**
  * OpenAI-compatible HTTP provider (works with OpenAI, DeepSeek, Ollama, LM Studio…).
  * Config via settings: ai_provider = openai, ai_api_url, ai_api_key, ai_model.
+ * Education rules from config/ai_rules.json are always injected as the system prompt.
  * Falls back to the local engine when the API is unreachable.
  */
 
@@ -18,12 +19,12 @@ class OpenAIProvider implements AiProvider {
     }
 
     public function name(): string {
-        return 'OpenAI-compatible: ' . $this->model;
+        return 'Cloud API (OpenAI-compatible): ' . $this->model;
     }
 
-    private function call(array $messages, float $temperature = 0.7, int $maxTokens = 1200): string {
+    private function call(array $messages, float $temperature = 0.5, int $maxTokens = 300): string {
         if ($this->key === '') {
-            throw new RuntimeException('OpenAI provider selected but ai_api_key is not set.');
+            throw new RuntimeException('Cloud API selected but ai_api_key is not set. Go to Settings > AI to configure.');
         }
         $body = json_encode([
             'model' => $this->model,
@@ -45,19 +46,37 @@ class OpenAIProvider implements AiProvider {
         $resp = curl_exec($ch);
         $err = curl_error($ch);
         curl_close($ch);
-        if ($resp === false) throw new RuntimeException('OpenAI request failed: ' . $err);
+        if ($resp === false) throw new RuntimeException('Cloud API request failed: ' . $err);
         $json = json_decode($resp, true);
-        return trim($json['choices'][0]['message']['content'] ?? '');
+        if (!isset($json['choices'][0]['message']['content'])) {
+            throw new RuntimeException('Cloud API returned unexpected response');
+        }
+        $text = trim($json['choices'][0]['message']['content']);
+        // Apply education rules post-processing
+        $rules = ai_rules();
+        $maxW = $rules['response_rules']['max_words'] ?? 120;
+        $words = str_word_count($text);
+        if ($words > $maxW) {
+            $text = mb_substr($text, 0, strrpos(wordwrap($text, $maxW), ' ')) . '…';
+        }
+        return $text;
     }
 
     public function chat(string $system, string $message, array $opts = []): string {
+        // Always prepend the education rules system prompt
+        $eduPrompt = function_exists('ai_system_prompt') ? ai_system_prompt() : $system;
+        $combined = $eduPrompt . "\n\nStudent question:\n" . $message;
         try {
             return $this->call([
-                ['role' => 'system', 'content' => $system],
+                ['role' => 'system', 'content' => $eduPrompt],
                 ['role' => 'user', 'content' => $message],
             ]);
         } catch (Throwable $e) {
-            return 'Warning: ' . $e->getMessage() . " — using local engine:\n\n" . AiTutor::respond($message, $opts['user'] ?? ['id' => 0]);
+            error_log('[OpenAIProvider] chat failed: ' . $e->getMessage());
+            // Fall back to local engine
+            $provider = new OllamaProvider();
+            if ($provider->isUp()) return $provider->chat($system, $message, $opts);
+            return AiTutor::respond($message, $opts['user'] ?? ['id' => 0, 'school_id' => null]);
         }
     }
 
@@ -94,7 +113,7 @@ class OpenAIProvider implements AiProvider {
             }
             if ($qs) return $qs;
         } catch (Throwable $e) {
-            // fall through to local
+            error_log('[OpenAIProvider] generateQuestions failed: ' . $e->getMessage());
         }
         return (new LocalProvider())->generateQuestions($text, $count, $topic);
     }
@@ -108,5 +127,55 @@ class OpenAIProvider implements AiProvider {
         } catch (Throwable $e) {
             return (new LocalProvider())->summarize($text, $maxWords);
         }
+    }
+
+    /** Stream chat completions — returns deltas via callback. Returns full text. */
+    public function streamChat(string $system, string $message, callable $onDelta, int $maxTokens = 300): string {
+        $eduPrompt = function_exists('ai_system_prompt') ? ai_system_prompt() : $system;
+        if ($this->key === '') {
+            throw new RuntimeException('Cloud API selected but ai_api_key is not set.');
+        }
+        $body = json_encode([
+            'model' => $this->model,
+            'messages' => [
+                ['role' => 'system', 'content' => $eduPrompt],
+                ['role' => 'user', 'content' => $message],
+            ],
+            'temperature' => 0.5,
+            'max_tokens' => $maxTokens,
+            'stream' => true,
+        ]);
+        $full = '';
+        $ch = curl_init($this->url . '/chat/completions');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->key,
+            ],
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_NOSIGNAL => true,
+            CURLOPT_WRITEFUNCTION => function ($ch2, $chunk) use (&$full, $onDelta): int {
+                foreach (explode("\n", $chunk) as $line) {
+                    $line = trim($line);
+                    if (!str_starts_with($line, 'data: ')) continue;
+                    $data = substr($line, 6);
+                    if ($data === '[DONE]') break;
+                    $obj = json_decode($data, true);
+                    if (!is_array($obj)) continue;
+                    $delta = $obj['choices'][0]['delta']['content'] ?? '';
+                    if ($delta !== '') {
+                        $full .= $delta;
+                        $onDelta($delta);
+                    }
+                }
+                return strlen($chunk);
+            },
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+        return $full;
     }
 }

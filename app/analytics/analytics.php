@@ -29,13 +29,98 @@ class Ctl_student {
              FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE ce.user_id = ?", [$uid, $uid]);
         $attendance = Database::all("SELECT status, COUNT(*) AS n FROM attendance WHERE student_id = ? GROUP BY status", [$uid]);
         $exams = Database::all(
-            "SELECT e.title, c.title AS course_title, t.score, t.total_points, t.status FROM exam_attempts t
+            "SELECT e.title, c.title AS course_title, t.score, t.total_points, t.status, t.submitted_at FROM exam_attempts t
              JOIN exams e ON e.id = t.exam_id JOIN courses c ON c.id = e.course_id
              WHERE t.student_id = ? AND t.status = 'graded' ORDER BY t.submitted_at DESC LIMIT 12", [$uid]);
         $student = Database::one("SELECT * FROM users WHERE id = ?", [$uid]);
+
+        /* === Performance trend data === */
+
+        // Subject performance: average exam score per subject
+        $subjectPerf = Database::all(
+            "SELECT s.name AS subject, ROUND(AVG(t.score / NULLIF(t.total_points, 0) * 100), 1) AS avg_pct,
+                    COUNT(t.id) AS exam_count
+             FROM exam_attempts t
+             JOIN exams e ON e.id = t.exam_id
+             JOIN courses c ON c.id = e.course_id
+             JOIN subjects s ON s.id = c.subject_id
+             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0
+             GROUP BY s.id ORDER BY avg_pct DESC", [$uid]);
+
+        // Assignment completion rate
+        $totalAssign = (int)Database::scalar(
+            "SELECT COUNT(DISTINCT a.id) FROM assignments a
+             JOIN courses c ON c.id = a.course_id
+             JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
+             WHERE a.course_id IN (SELECT course_id FROM course_enrollments WHERE user_id = ?)", [$uid, $uid], 0);
+        $submittedAssign = (int)Database::scalar(
+            "SELECT COUNT(DISTINCT sub.assignment_id) FROM assignment_submissions sub
+             WHERE sub.student_id = ?", [$uid], 0);
+        $assignCompletion = $totalAssign > 0 ? round($submittedAssign / $totalAssign * 100, 1) : 0;
+
+        // Exam score trend: scores over time for the performance chart
+        $examTrend = Database::all(
+            "SELECT DATE(t.submitted_at) AS dt, ROUND(t.score / NULLIF(t.total_points, 0) * 100, 1) AS pct
+             FROM exam_attempts t
+             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0
+             ORDER BY t.submitted_at ASC", [$uid]);
+        $trendLabels = array_column($examTrend, 'dt');
+        $trendValues = array_map('floatval', array_column($examTrend, 'pct'));
+
+        // Moving average (3-point) for measured trend
+        $trendMA = [];
+        $n = count($trendValues);
+        for ($i = 0; $i < $n; $i++) {
+            $w = array_slice($trendValues, max(0, $i - 2), 3);
+            $trendMA[] = $w ? round(array_sum($w) / count($w), 1) : 0;
+        }
+
+        // Simple linear regression prediction (next 3 exams)
+        $prediction = null;
+        if ($n >= 3) {
+            $xVals = range(1, $n);
+            $yVals = $trendValues;
+            $sumX = array_sum($xVals);
+            $sumY = array_sum($yVals);
+            $sumXY = 0; $sumX2 = 0;
+            for ($i = 0; $i < $n; $i++) {
+                $sumXY += $xVals[$i] * $yVals[$i];
+                $sumX2 += $xVals[$i] * $xVals[$i];
+            }
+            $denom = ($n * $sumX2 - $sumX * $sumX);
+            if ($denom != 0) {
+                $slope = ($n * $sumXY - $sumX * $sumY) / $denom;
+                $intercept = ($sumY - $slope * $sumX) / $n;
+                $prediction = [
+                    'next3' => [
+                        round(max(0, min(100, $intercept + $slope * ($n + 1))), 1),
+                        round(max(0, min(100, $intercept + $slope * ($n + 2))), 1),
+                        round(max(0, min(100, $intercept + $slope * ($n + 3))), 1),
+                    ],
+                    'slope' => round($slope, 2),
+                    'trend' => $slope > 0.5 ? 'improving' : ($slope < -0.5 ? 'declining' : 'stable'),
+                ];
+            }
+        }
+
+        // Overall GPA estimate
+        $overallAvg = $exams
+            ? round(array_sum(array_map(fn($e) => $e['total_points'] > 0 ? ($e['score'] / $e['total_points'] * 100) : 0, $exams)) / count($exams), 1)
+            : 0;
+
+        $attTotal = array_sum(array_column($attendance, 'n'));
+        $attPresent = 0;
+        foreach ($attendance as $a) { if ($a['status'] === 'present') $attPresent = (int)$a['n']; }
+        $attRate = $attTotal > 0 ? round($attPresent / $attTotal * 100, 1) : 0;
+
         Router::render('app/analytics/student', [
             'title' => 'Student Analytics', 'series' => $series, 'perCourse' => $perCourse,
             'attendance' => $attendance, 'exams' => $exams, 'student' => $student, 'u_role' => $u['role'],
+            'subjectPerf' => $subjectPerf,
+            'assignCompletion' => $assignCompletion, 'totalAssign' => $totalAssign, 'submittedAssign' => $submittedAssign,
+            'trendLabels' => $trendLabels, 'trendValues' => $trendValues, 'trendMA' => $trendMA,
+            'prediction' => $prediction,
+            'overallAvg' => $overallAvg, 'attRate' => $attRate,
         ]);
     }
 }

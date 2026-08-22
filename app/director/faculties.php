@@ -8,6 +8,11 @@ class Ctl_faculties {
     public function run(): void {
         $u = require_role('director');
         $sid = (int)$u['school_id'];
+        $schoolType = (string)Database::scalar("SELECT type FROM schools WHERE id = ?", [$sid], 'school');
+        if (!in_array($schoolType, ['university', 'college'], true)) {
+            flash('info', 'Faculties are only available for universities and colleges.');
+            redirect('director/dashboard');
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();

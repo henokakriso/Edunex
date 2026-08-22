@@ -70,15 +70,7 @@ Router::page('director/transfers', 'director/transfers.php', 'director');
 Router::page('director/faculties', 'director/faculties.php', 'director');
 Router::page('director/reports', 'director/reports.php', 'director');
 Router::page('director/analytics', 'director/analytics.php', 'director');
-Router::page('erp/dashboard', 'erp/dashboard.php', ['director', 'sysadmin']);
-Router::page('erp/hr', 'erp/hr.php', ['director', 'sysadmin']);
-Router::page('erp/payroll', 'erp/payroll.php', ['director', 'sysadmin']);
-Router::page('erp/recruitment', 'erp/recruitment.php', ['director', 'sysadmin']);
-Router::page('erp/projects', 'erp/projects.php', ['director', 'sysadmin']);
-Router::page('erp/documents', 'erp/documents.php', ['director', 'sysadmin']);
-Router::page('erp/helpdesk', 'erp/helpdesk.php', ['director', 'sysadmin']);
-Router::page('erp/assets', 'erp/assets.php', ['director', 'sysadmin']);
-Router::page('erp/fleet', 'erp/fleet.php', ['director', 'sysadmin']);
+
 Router::page('teacher/reports', 'teacher/reports.php', 'teacher');
 Router::page('teacher/analytics', 'teacher/analytics.php', 'teacher');
 Router::page('teacher/library', 'teacher/library.php', 'teacher');
@@ -214,8 +206,8 @@ Router::page('gamification/leaderboard', 'gamification/leaderboard.php', ['stude
 
 Router::page('search', 'search/index.php', '*');
 
-Router::page('files', 'files/index.php', ['admin', 'director', 'teacher', 'parent']);
-Router::page('files/view', 'files/view.php', ['admin', 'director', 'teacher', 'parent']);
+Router::page('files', 'files/index.php', 'admin');
+Router::page('files/view', 'files/view.php', 'admin');
 
 Router::page('reports/index', 'reports/index.php', ['admin', 'teacher']);
 Router::page('reports/export', 'reports/export.php', ['admin', 'teacher', 'director']);
@@ -245,6 +237,7 @@ Router::page('api/exams/autosave', 'api/exams.php', '*');
 Router::page('api/exams/flag', 'api/exams.php', '*');
 Router::page('api/messages/send', 'api/messages.php', '*');
 Router::page('api/ai/chat', 'api/ai.php', '*');
+Router::page('api/ai/warm', 'api/ai_warm.php', '*');
 Router::page('api/attendance', 'api/attendance.php', '*');
 Router::page('api/reactions', 'api/reactions.php', '*');
 Router::page('api/upload', 'api/upload.php', '*');
