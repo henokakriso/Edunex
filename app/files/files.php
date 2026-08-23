@@ -67,9 +67,12 @@ class Ctl_index {
                 $res = upload_file($file, 'files', $safeExts);
                 if ($res['error']) { flash('danger', $res['error']); }
                 else {
+                    // Sanitize filename to prevent XSS
+                    $safeName = preg_replace('/[^\w\-\.]/', '_', $file['name']);
+                    $safeName = preg_replace('/_{2,}/', '_', $safeName);
                     Database::insert('files', [
                         'school_id' => my_school_id(), 'user_id' => $uid,
-                        'name' => $file['name'], 'original_name' => $file['name'],
+                        'name' => $safeName, 'original_name' => $safeName,
                         'path' => $res['path'], 'mime' => $file['type'] ?? '', 'size' => $res['size'],
                         'version' => 1, 'parent_id' => $parent ?: null,
                     ]);

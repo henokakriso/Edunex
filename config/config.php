@@ -94,7 +94,13 @@ mb_internal_encoding('UTF-8');
 if (APP_ENV === 'development') {
     ini_set('display_errors', '1');
     error_reporting(E_ALL);
-} else {
+} elseif (APP_ENV === 'production') {
     ini_set('display_errors', '0');
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+    ini_set('log_errors', '1');
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE & ~E_STRICT);
+} else {
+    // Unknown APP_ENV - default to production safety
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE & ~E_STRICT);
 }

@@ -970,7 +970,8 @@ INSERT INTO subjects (school_id, department_id, name, code) VALUES
   (2, 3, 'Data Structures', 'CS201'), (2, 4, 'Circuit Theory', 'EE201'),
   (3, 5, 'General Science', 'GSC101');
 
--- passwords: all demo accounts use: Passw0rd! (hashed below)
+-- WARNING: Demo passwords are for development only. Change them before production use.
+-- The installer can generate unique passwords with --admin-pass flag.
 -- explicit ids: id 1 is the super admin from the base seed
 INSERT INTO users (id, school_id, role, first_name, last_name, email, phone, student_id, password_hash, group_id, department_id, verified, verified_by, verified_at, xp, level, streak, language, theme, status, last_login) VALUES
   (2, 1, 'admin', 'Sara', 'Tesfaye',   'admin@edunex.local',  '+251911000001', NULL, '$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u', NULL, 1, 1, NULL, NOW(), 5000, 8, 12, 'en', 'dark', 'active', NOW()),

@@ -153,7 +153,7 @@ function make_otp(int $len = 6): string {
 
 /** Rate limiter: true if currently blocked (does not record) */
 function rate_limit_blocked(string $key, int $max, int $windowSec): bool {
-    $file = STORAGE_PATH . '/rate/' . md5($key) . '.json';
+    $file = STORAGE_PATH . '/rate/' . hash_hmac('sha256', $key, 'edunex_rate') . '.json';
     if (!is_file($file)) return false;
     $data = json_decode(file_get_contents($file), true) ?: [];
     if (($data['blocked_until'] ?? 0) > time()) return true;
@@ -163,7 +163,7 @@ function rate_limit_blocked(string $key, int $max, int $windowSec): bool {
 
 /** Rate limiter: record one attempt and return false if over limit */
 function rate_limit(string $key, int $max, int $windowSec, ?int &$remaining = null): bool {
-    $file = STORAGE_PATH . '/rate/' . md5($key) . '.json';
+    $file = STORAGE_PATH . '/rate/' . hash_hmac('sha256', $key, 'edunex_rate') . '.json';
     $data = ['t' => [], 'blocked_until' => 0];
     if (is_file($file)) $data = json_decode(file_get_contents($file), true) ?: $data;
     if ($data['blocked_until'] > time()) {
@@ -191,20 +191,44 @@ function upload_file(array $file, string $dir, array $allowedExt = null): array 
             : ($file['error'] === UPLOAD_ERR_PARTIAL ? 'Upload was interrupted' : 'No file uploaded');
         return $fail($why);
     }
+    // Programmatic size validation
     if ($file['size'] > MAX_UPLOAD_MB * 1024 * 1024) {
         return $fail('File exceeds ' . MAX_UPLOAD_MB . 'MB limit');
+    }
+    if ($file['size'] === 0) {
+        return $fail('Empty file not allowed');
     }
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowed = $allowedExt ?? explode(',', ALLOWED_EXT);
     if (!in_array($ext, $allowed, true)) {
         return $fail('File type .' . $ext . ' is not allowed');
     }
-    // verify real image
+    // Verify real image via getimagesize
     if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
         if (@getimagesize($file['tmp_name']) === false) return $fail('Invalid image file');
     }
+    // MIME type validation via finfo
+    $finfo = new \finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($file['tmp_name']);
+    $validMimes = [
+        'jpg'=>'image/jpeg','jpeg'=>'image/jpeg','png'=>'image/png','gif'=>'image/gif','webp'=>'image/webp',
+        'pdf'=>'application/pdf','doc'=>'application/msword',
+        'docx'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls'=>'application/vnd.ms-excel',
+        'xlsx'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'ppt'=>'application/vnd.ms-powerpoint',
+        'pptx'=>'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'txt'=>'text/plain','csv'=>'text/csv','md'=>'text/markdown',
+        'zip'=>'application/zip','rar'=>'application/x-rar-compressed','7z'=>'application/x-7z-compressed',
+        'mp3'=>'audio/mpeg','wav'=>'audio/wav','ogg'=>'audio/ogg',
+        'mp4'=>'video/mp4','webm'=>'video/webm',
+        'json'=>'application/json',
+    ];
+    if (isset($validMimes[$ext]) && $mimeType !== $validMimes[$ext]) {
+        return $fail('File content does not match extension');
+    }
     $targetDir = STORAGE_PATH . '/' . $dir;
-    if (!is_dir($targetDir)) @mkdir($targetDir, 0775, true);
+    if (!is_dir($targetDir)) @mkdir($targetDir, 0750, true);
     $name = date('Ymd_His') . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
     if (!move_uploaded_file($file['tmp_name'], $targetDir . '/' . $name)) {
         return $fail('Failed to save file');

@@ -1064,6 +1064,8 @@ class Ctl_override {
             if (isset($_POST['reset_password'])) {
                 $newPass = trim((string)($_POST['password'] ?? '')) ?: random_password();
                 Database::update('users', ['password_hash' => password_hash($newPass, PASSWORD_DEFAULT)], 'id = ?', [(int)$target['id']]);
+                Auth::bumpSessionVersion((int)$target['id']);
+                Database::delete('sessions', 'user_id = ?', [(int)$target['id']]);
                 log_activity('override.password', 'Emergency password reset for ' . $target['email'], (int)$u['id']);
                 flash('success', 'Password reset. New password: ' . $newPass);
             }

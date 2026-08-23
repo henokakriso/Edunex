@@ -91,13 +91,15 @@ class Auth {
         if ($remember) {
             $token = bin2hex(random_bytes(32));
             $selector = bin2hex(random_bytes(12));
+            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
             Database::insert('sessions', [
                 'user_id' => $u['id'], 'selector' => $selector,
                 'token_hash' => hash('sha256', $token),
                 'expires_at' => date('Y-m-d H:i:s', time() + REMEMBER_ME_DAYS * 86400),
                 'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
             ]);
-            setcookie('remember', $selector . ':' . $token, time() + REMEMBER_ME_DAYS * 86400, '/', '', false, true);
+            setcookie('remember', $selector . ':' . $token, time() + REMEMBER_ME_DAYS * 86400, '/', '', $isSecure, true);
         }
         log_activity('login', 'Signed in as ' . $u['role'], $u['id']);
     }
@@ -168,6 +170,17 @@ class Auth {
         [$selector, $token] = array_pad(explode(':', $_COOKIE['remember'], 2), 2, '');
         $row = Database::one("SELECT s.*, u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.selector = ? AND s.expires_at > NOW() AND u.status = 'active'", [$selector]);
         if ($row && hash_equals($row['token_hash'], hash('sha256', $token))) {
+            // Verify IP and User-Agent match (if stored)
+            $currentIp = $_SERVER['REMOTE_ADDR'] ?? '';
+            $currentUa = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            if (!empty($row['ip']) && $row['ip'] !== $currentIp) {
+                setcookie('remember', '', time() - 3600, '/');
+                return;
+            }
+            if (!empty($row['user_agent']) && $row['user_agent'] !== $currentUa) {
+                setcookie('remember', '', time() - 3600, '/');
+                return;
+            }
             self::login($row, true);
         } else {
             setcookie('remember', '', time() - 3600, '/');
@@ -198,11 +211,24 @@ class Auth {
         session_destroy();
     }
 
+    /** Invalidate all sessions for a user (call on password change) */
+    public static function invalidateSessions(int $userId): void {
+        Database::update('users', ['session_version' => new \PDOStatement('session_version + 1')], 'id = ?', [$userId]);
+        Database::delete('sessions', 'user_id = ?', [$userId]);
+    }
+
+    /** Increment session version (forces re-login) */
+    public static function bumpSessionVersion(int $userId): void {
+        Database::run("UPDATE users SET session_version = session_version + 1 WHERE id = ?", [$userId]);
+    }
+
     /** Password policy check */
     public static function password_ok(string $p): array {
         if (mb_strlen($p) < PASSWORD_MIN_LEN) return [false, 'Password must be at least ' . PASSWORD_MIN_LEN . ' characters.'];
         if (!preg_match('/[A-Z]/', $p)) return [false, 'Password needs at least one uppercase letter.'];
+        if (!preg_match('/[a-z]/', $p)) return [false, 'Password needs at least one lowercase letter.'];
         if (!preg_match('/[0-9]/', $p)) return [false, 'Password needs at least one number.'];
+        if (!preg_match('/[^A-Za-z0-9]/', $p)) return [false, 'Password needs at least one special character (!@#$%^&* etc).'];
         return [true, ''];
     }
 

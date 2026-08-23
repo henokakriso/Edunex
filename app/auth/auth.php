@@ -47,6 +47,7 @@ class Ctl_reset {
             else {
                 Database::update('users', ['password_hash' => password_hash($p1, PASSWORD_DEFAULT)], 'id = ?', [$row['user_id']]);
                 Database::update('password_resets', ['used' => 1], 'id = ?', [$row['id']]);
+                Auth::bumpSessionVersion($row['user_id']);
                 Database::delete('sessions', 'user_id = ?', [$row['user_id']]); // revoke all sessions
                 log_activity('password_reset', 'Password reset completed', $row['user_id']);
                 flash('success', 'Password updated. Please sign in.');

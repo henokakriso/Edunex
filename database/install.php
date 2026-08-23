@@ -36,7 +36,8 @@ try {
         echo "    Run: php database/install.php --root-pass=YOUR_ROOT_PASSWORD\n\n";
         exit(1);
     }
-    echo "[!] Cannot connect as root: " . $e->getMessage() . "\n";
+    echo "[!] Cannot connect as root: Check your credentials and MySQL server status.\n";
+    if (APP_ENV === 'development') echo "    Debug: " . $e->getMessage() . "\n";
     exit(1);
 }
 
@@ -85,7 +86,8 @@ if (!$demo) {
         $pdo->exec($baseSql);
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
     } catch (PDOException $e) {
-        echo "[!] Schema import failed: " . $e->getMessage() . "\n";
+        echo "[!] Schema import failed: Check SQL syntax and MySQL version.\n";
+        if (APP_ENV === 'development') echo "    Debug: " . $e->getMessage() . "\n";
         exit(1);
     }
 } else {
@@ -98,7 +100,8 @@ if (!$demo) {
         $pdo->exec($baseSql . ($demoSql ? $demoSql : ''));
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
     } catch (PDOException $e) {
-        echo "[!] Schema import failed: " . $e->getMessage() . "\n";
+        echo "[!] Schema import failed: Check SQL syntax and MySQL version.\n";
+        if (APP_ENV === 'development') echo "    Debug: " . $e->getMessage() . "\n";
         exit(1);
     }
 }
@@ -115,7 +118,7 @@ $stmt->execute([$hash]);
 // 3) Storage dirs
 foreach (['uploads', 'assignments', 'profile_photos', 'certificates', 'backups', 'rate'] as $d) {
     $p = STORAGE_PATH . '/' . $d;
-    if (!is_dir($p)) mkdir($p, 0775, true);
+    if (!is_dir($p)) mkdir($p, 0750, true);
 }
 
 echo "[*] Seeding done.\n";

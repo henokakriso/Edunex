@@ -41,7 +41,8 @@ class Ctl_password {
             if (!$ok) { flash('danger', $err); redirect('settings/password'); }
             if ($_POST['new'] !== ($_POST['confirm'] ?? '')) { flash('danger', 'New passwords do not match.'); redirect('settings/password'); }
             Database::update('users', ['password_hash' => password_hash($_POST['new'], PASSWORD_DEFAULT)], 'id = ?', [$uid]);
-            Database::delete('sessions', 'user_id = ? AND token_hash IS NOT NULL', [$uid]);
+            Auth::bumpSessionVersion($uid);
+            Database::delete('sessions', 'user_id = ?', [$uid]);
             log_activity('password_change', 'Password changed', $uid);
             flash('success', 'Password changed. Remember-me tokens revoked.');
             redirect('settings/password');
