@@ -25,16 +25,17 @@ $busy = !empty($_GET['creating']);
 
 <?php if ($backups): ?>
 <div class="card">
-  <table class="table">
-    <thead><tr><th style="width:36px">#</th><th style="padding-left:14px">File</th><th>Size</th><th>Created</th><th style="width:140px;text-align:center">Actions</th></tr></thead>
+  <div class="table-wrap">
+  <table class="table" style="table-layout:auto">
+    <thead><tr><th style="width:36px">#</th><th style="padding-left:20px;min-width:200px">File</th><th style="min-width:80px">Size</th><th style="min-width:140px">Created</th><th style="width:120px;text-align:center">Actions</th></tr></thead>
     <tbody>
       <?php foreach ($backups as $i => $b): ?>
         <tr>
-          <td class="small faint"><?= $i + 1 ?></td>
-          <td class="mono small" style="padding-left:14px"><?= e($b['file']) ?></td>
-          <td class="small"><?= e(round($b['size'] / 1024, 1)) ?> KB</td>
-          <td class="small faint"><?= e(date('M j, Y H:i', $b['time'])) ?></td>
-          <td>
+          <td class="small faint" style="padding:10px 8px 10px 12px"><?= $i + 1 ?></td>
+          <td class="mono small" style="padding:10px 20px 10px 12px"><?= e($b['file']) ?></td>
+          <td class="small" style="padding:10px 16px"><?= e(round($b['size'] / 1024, 1)) ?> KB</td>
+          <td class="small faint" style="padding:10px 16px"><?= e(date('M j, Y H:i', $b['time'])) ?></td>
+          <td style="padding:10px 12px">
             <div class="flex gap-8" style="white-space:nowrap;justify-content:center">
               <form method="post" class="inline">
                 <?= csrf_field() ?>
@@ -61,6 +62,7 @@ $busy = !empty($_GET['creating']);
       <?php endforeach; ?>
     </tbody>
   </table>
+  </div>
 </div>
 <?php else: ?>
   <div class="card">
