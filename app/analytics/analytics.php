@@ -246,8 +246,8 @@ class Ctl_teacher {
             // Teacher: ONLY courses in the subjects assigned by the director
             $courses = SubjectAuth::courses($uid);
             $ids = array_map('intval', array_column($courses, 'id'));
-            $idList = $ids ? implode(',', $ids) : '0';
-            $courseWhere = $ids ? "c.id IN ($idList)" : '1 = 0';
+            $placeholders = array_fill(0, count($ids), '?');
+            $courseWhere = $ids ? "c.id IN (" . implode(',', $placeholders) . ")" : '1 = 0';
             if ($ids) {
                 $stats = Database::all(
                     "SELECT c.id,
@@ -255,7 +255,7 @@ class Ctl_teacher {
                             (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons,
                             (SELECT COUNT(*) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE e.course_id = c.id AND t.status = 'graded') AS graded,
                             (SELECT ROUND(AVG(ce2.progress)) FROM course_enrollments ce2 WHERE ce2.course_id = c.id) AS avg_progress
-                     FROM courses c WHERE $courseWhere");
+                     FROM courses c WHERE $courseWhere", $ids);
                 $stats = array_column($stats, null, 'id');
                 foreach ($courses as &$c) {
                     $s = $stats[(int)$c['id']] ?? [];
@@ -271,17 +271,18 @@ class Ctl_teacher {
             $series = [];
             for ($i = 29; $i >= 0; $i--) {
                 $d = date('Y-m-d', strtotime("-$i days"));
-                $series[] = ['date' => $d, 'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE $idList AND DATE(ce.enrolled_at) = ?", [$d], 0)];
+                $args = array_merge($ids, [$d]);
+                $series[] = ['date' => $d, 'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.id IN (" . implode(',', $placeholders) . ") AND DATE(ce.enrolled_at) = ?", $args, 0)];
             }
             $topStudents = Database::all(
                 "SELECT us.id, CONCAT(us.first_name, ' ', us.last_name) AS name, us.student_id, us.xp,
-                        (SELECT COUNT(*) FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id WHERE lp.user_id = us.id AND lp.completed = 1 AND l.course_id IN ($idList)) AS lessons_done,
-                        (SELECT ROUND(AVG(t.score / t.total_points * 100)) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE t.student_id = us.id AND t.status = 'graded' AND t.total_points > 0 AND e.course_id IN ($idList)) AS exam_avg
+                        (SELECT COUNT(*) FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id WHERE lp.user_id = us.id AND lp.completed = 1 AND l.course_id IN (" . implode(',', $placeholders) . ")) AS lessons_done,
+                        (SELECT ROUND(AVG(t.score / t.total_points * 100)) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE t.student_id = us.id AND t.status = 'graded' AND t.total_points > 0 AND e.course_id IN (" . implode(',', $placeholders) . ")) AS exam_avg
                  FROM users us WHERE us.role = 'student' AND us.school_id = ? AND (
-                     EXISTS (SELECT 1 FROM lesson_progress lp2 JOIN lessons l2 ON l2.id = lp2.lesson_id WHERE lp2.user_id = us.id AND lp2.completed = 1 AND l2.course_id IN ($idList))
-                     OR EXISTS (SELECT 1 FROM exam_attempts t3 JOIN exams e3 ON e3.id = t3.exam_id WHERE t3.student_id = us.id AND t3.status = 'graded' AND e3.course_id IN ($idList))
+                     EXISTS (SELECT 1 FROM lesson_progress lp2 JOIN lessons l2 ON l2.id = lp2.lesson_id WHERE lp2.user_id = us.id AND lp2.completed = 1 AND l2.course_id IN (" . implode(',', $placeholders) . "))
+                     OR EXISTS (SELECT 1 FROM exam_attempts t3 JOIN exams e3 ON e3.id = t3.exam_id WHERE t3.student_id = us.id AND t3.status = 'graded' AND e3.course_id IN (" . implode(',', $placeholders) . "))
                  )
-                 ORDER BY lessons_done DESC, exam_avg DESC LIMIT 10", [$u['school_id']]);
+                 ORDER BY lessons_done DESC, exam_avg DESC LIMIT 10", array_merge($ids, [$u['school_id']], $ids, $ids));
         }
         $analysis = self::analyze($courses, $series);
         Router::render('app/analytics/teacher', [
