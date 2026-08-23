@@ -50,11 +50,21 @@ if ($rootOk) {
     $pdo->exec("GRANT ALL PRIVILEGES ON edunex.* TO 'edunex'@'127.0.0.1'");
     $pdo->exec("FLUSH PRIVILEGES");
 
-    // Write .env file with generated credentials
+    // Generate cryptographic secrets
+    $csrfSecret = bin2hex(random_bytes(32));
+    $encryptionKey = bin2hex(random_bytes(32));
+    $apiSecret = bin2hex(random_bytes(32));
+    $henaSecret = bin2hex(random_bytes(32));
+
+    // Write .env file with generated credentials and secrets
     $envFile = __DIR__ . '/../.env';
     $envContent = "DB_HOST=$dbHost\nDB_PORT=$dbPort\nDB_NAME=edunex\nDB_USER=edunex\nDB_PASS=$dbPass\n";
+    $envContent .= "CSRF_SECRET=$csrfSecret\n";
+    $envContent .= "ENCRYPTION_KEY=$encryptionKey\n";
+    $envContent .= "API_SECRET=$apiSecret\n";
+    $envContent .= "HENA_SECRET=$henaSecret\n";
     file_put_contents($envFile, $envContent);
-    echo "[*] Credentials written to .env\n";
+    echo "[*] Credentials and secrets written to .env\n";
 }
 
 // 2) Import schema
