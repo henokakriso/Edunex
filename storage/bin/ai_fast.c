@@ -279,7 +279,7 @@ static char **split_chunks(const char *text, int n, int *out_n) {
         for (int k = start; k < end; k++) len += strlen(chunks[k]) + 1;
         char *buf = malloc(len);
         buf[0] = 0;
-        for (int k = start; k < end; k++) { strcat(buf, chunks[k]); strcat(buf, "\n"); }
+        for (int k = start; k < end; k++) { snprintf(buf + strlen(buf), len - strlen(buf), "%s", chunks[k]); snprintf(buf + strlen(buf), len - strlen(buf), "\n"); }
         out[g] = buf;
         groups++;
     }
@@ -297,6 +297,7 @@ static char *read_file(const char *path) {
     fseek(f, 0, SEEK_SET);
     if (sz <= 0 || sz > 60000) { fclose(f); return NULL; }
     char *buf = malloc(sz + 1);
+    if (!buf) { fclose(f); return NULL; }
     if (fread(buf, 1, sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
     buf[sz] = 0;
     fclose(f);

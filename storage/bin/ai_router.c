@@ -198,7 +198,7 @@ static char *ollama_chat(const char *model, json_object *messages,
 static void sha256_hex(const char *input, char out[65]) {
     unsigned char h[32];
     SHA256((const unsigned char *)input, strlen(input), h);
-    for (int i = 0; i < 32; i++) sprintf(out + i * 2, "%02x", h[i]);
+    for (int i = 0; i < 32; i++) snprintf(out + i * 2, 3, "%02x", h[i]);
 }
 
 static char *cache_path(const char *hex) {
@@ -224,6 +224,7 @@ static char *cache_lookup(const char *hex, char *model_out, size_t model_sz) {
     long sz = ftell(f) - hdr_len;
     fseek(f, hdr_len, SEEK_SET);
     char *content = malloc(sz + 1);
+    if (!content) { fclose(f); return NULL; }
     size_t got = fread(content, 1, sz, f);
     content[got] = 0;
     fclose(f);
@@ -292,6 +293,7 @@ static json_object *state_load(void) {
     fseek(f, 0, SEEK_END); long sz = ftell(f); fseek(f, 0, SEEK_SET);
     if (sz <= 0 || sz > 1 << 20) { fclose(f); return NULL; }
     char *buf = malloc(sz + 1);
+    if (!buf) { fclose(f); return NULL; }
     size_t got = fread(buf, 1, sz, f);
     buf[got] = 0;
     fclose(f);

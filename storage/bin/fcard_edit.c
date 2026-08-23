@@ -111,8 +111,8 @@ int main(int argc, char **argv) {
                     continue;
                 }
             }
-            if (line[0]) strcat(line, " ");
-            strcat(line, tok);
+            if (line[0]) snprintf(line + strlen(line), sizeof(line) - strlen(line), " ");
+            snprintf(line + strlen(line), sizeof(line) - strlen(line), "%s", tok);
             tok = strtok(NULL, " ");
         }
         if (line[0]) { if (nlines == cap) lines = realloc(lines, sizeof(char *) * (cap + 1)); lines[nlines++] = strdup(line); }
@@ -198,8 +198,16 @@ static unsigned char *load_png(const char *path, int *w, int *h, int *has_alpha)
     if (*has_alpha) png_set_strip_16(png); else png_set_strip_16(png);
     png_read_update_info(png, info);
     png_bytep *rows = malloc(sizeof(png_bytep) * hh);
+    if (!rows) { png_destroy_read_struct(&png, &info, NULL); fclose(f); return NULL; }
     unsigned char *rgb = calloc((size_t)ww * hh * 3, 1);
-    for (int y = 0; y < hh; y++) rows[y] = malloc(png_get_rowbytes(png, info));
+    if (!rgb) { free(rows); png_destroy_read_struct(&png, &info, NULL); fclose(f); return NULL; }
+    for (int y = 0; y < hh; y++) {
+        rows[y] = malloc(png_get_rowbytes(png, info));
+        if (!rows[y]) {
+            for (int j = 0; j < y; j++) free(rows[j]);
+            free(rows); free(rgb); png_destroy_read_struct(&png, &info, NULL); fclose(f); return NULL;
+        }
+    }
     png_read_image(png, rows);
     int channels = png_get_channels(png, info);
     for (int y = 0; y < hh; y++) {
@@ -287,6 +295,7 @@ static size_t read_file(const char *path, char **out) {
     long n = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buf = malloc(n + 1);
+    if (!buf) { fclose(f); return (size_t)-1; }
     if (n > 0 && fread(buf, 1, n, f) != (size_t)n) { fclose(f); free(buf); return (size_t)-1; }
     buf[n] = '\0';
     fclose(f);

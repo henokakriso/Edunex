@@ -60,6 +60,7 @@ static char *hmac_hex(const unsigned char *key, int klen, const unsigned char *m
     if (!HMAC(EVP_sha256(), key, klen, msg, mlen, md, &mdlen)) return NULL;
     char *hex = malloc(65);
     if (!hex) return NULL;
+    if (!hex) return NULL;
     dump_hex(md, (int)mdlen, hex);
     return hex;
 }
