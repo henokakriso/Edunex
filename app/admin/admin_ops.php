@@ -118,7 +118,7 @@ class Ctl_permissions {
 /* =============== ADMIN: logs =============== */
 class Ctl_logs {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('sysadmin', 'admin');
         $action = trim($_GET['action'] ?? '');
         $q = trim($_GET['q'] ?? '');
         $days = (int)($_GET['days'] ?? 0);
@@ -317,7 +317,7 @@ class Ctl_reports {
 /* =============== ADMIN: backups =============== */
 class Ctl_backups {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('sysadmin', 'admin');
         $backups = [];
         $dir = STORAGE_PATH . '/backups';
         if (is_dir($dir)) {
