@@ -41,13 +41,20 @@ try {
 }
 
 if ($rootOk) {
+    $dbPass = bin2hex(random_bytes(16));
     echo "[*] Creating database 'edunex' and user 'edunex'...\n";
     $pdo->exec("CREATE DATABASE IF NOT EXISTS edunex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    $pdo->exec("CREATE USER IF NOT EXISTS 'edunex'@'localhost' IDENTIFIED BY 'edunex_db_pass_2026'");
-    $pdo->exec("CREATE USER IF NOT EXISTS 'edunex'@'127.0.0.1' IDENTIFIED BY 'edunex_db_pass_2026'");
+    $pdo->exec("CREATE USER IF NOT EXISTS 'edunex'@'localhost' IDENTIFIED BY '" . addslashes($dbPass) . "'");
+    $pdo->exec("CREATE USER IF NOT EXISTS 'edunex'@'127.0.0.1' IDENTIFIED BY '" . addslashes($dbPass) . "'");
     $pdo->exec("GRANT ALL PRIVILEGES ON edunex.* TO 'edunex'@'localhost'");
     $pdo->exec("GRANT ALL PRIVILEGES ON edunex.* TO 'edunex'@'127.0.0.1'");
     $pdo->exec("FLUSH PRIVILEGES");
+
+    // Write .env file with generated credentials
+    $envFile = __DIR__ . '/../.env';
+    $envContent = "DB_HOST=$dbHost\nDB_PORT=$dbPort\nDB_NAME=edunex\nDB_USER=edunex\nDB_PASS=$dbPass\n";
+    file_put_contents($envFile, $envContent);
+    echo "[*] Credentials written to .env\n";
 }
 
 // 2) Import schema
@@ -60,7 +67,9 @@ $baseSql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
 if (!$demo) {
     // clean production install: schema + base seed only
     echo "[*] Importing schema + base seed (no demo data)...\n";
-    $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;dbname=edunex;charset=utf8mb4", $rootOk ? 'root' : DB_USER, $rootOk ? ($rootPass ?? '') : DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $connPass = $rootOk ? ($rootPass ?? '') : (getenv('DB_PASS') ?: '');
+    $connUser = $rootOk ? 'root' : (getenv('DB_USER') ?: 'edunex');
+    $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;dbname=edunex;charset=utf8mb4", $connUser, $connPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     try {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         $pdo->exec($baseSql);
@@ -71,7 +80,9 @@ if (!$demo) {
     }
 } else {
     echo "[*] Importing schema + demo data...\n";
-    $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;dbname=edunex;charset=utf8mb4", $rootOk ? 'root' : DB_USER, $rootOk ? ($rootPass ?? '') : DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $connPass = $rootOk ? ($rootPass ?? '') : (getenv('DB_PASS') ?: '');
+    $connUser = $rootOk ? 'root' : (getenv('DB_USER') ?: 'edunex');
+    $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;dbname=edunex;charset=utf8mb4", $connUser, $connPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     try {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         $pdo->exec($baseSql . ($demoSql ? $demoSql : ''));

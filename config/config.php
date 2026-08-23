@@ -4,6 +4,23 @@
  * Application Configuration
  */
 
+// Load .env file if it exists (does not override existing env vars)
+$envFile = dirname(__DIR__) . '/.env';
+if (file_exists($envFile)) {
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') continue;
+        if (strpos($line, '=') === false) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (!array_key_exists($key, $_ENV)) {
+            $_ENV[$key] = $value;
+            putenv("$key=$value");
+        }
+    }
+}
+
 define('APP_NAME', 'Edunex');
 define('APP_TAGLINE', 'AI-Powered Ethiopian Learning Platform');
 define('APP_VERSION', '1.0.0');
@@ -23,7 +40,7 @@ define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');
 define('DB_NAME', getenv('DB_NAME') ?: 'edunex');
 define('DB_USER', getenv('DB_USER') ?: 'edunex');
-define('DB_PASS', getenv('DB_PASS') ?: 'edunex_db_pass_2026');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
 // Session & Security
