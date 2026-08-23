@@ -26,23 +26,23 @@ $busy = !empty($_GET['creating']);
 <?php if ($backups): ?>
 <div class="card">
   <table class="table">
-    <thead><tr><th style="width:40px">#</th><th>File</th><th>Size</th><th>Created</th><th style="width:200px">Actions</th></tr></thead>
+    <thead><tr><th style="width:36px">#</th><th style="padding-left:14px">File</th><th>Size</th><th>Created</th><th style="width:140px;text-align:center">Actions</th></tr></thead>
     <tbody>
       <?php foreach ($backups as $i => $b): ?>
         <tr>
           <td class="small faint"><?= $i + 1 ?></td>
-          <td class="mono small"><?= e($b['file']) ?></td>
+          <td class="mono small" style="padding-left:14px"><?= e($b['file']) ?></td>
           <td class="small"><?= e(round($b['size'] / 1024, 1)) ?> KB</td>
           <td class="small faint"><?= e(date('M j, Y H:i', $b['time'])) ?></td>
           <td>
-            <div class="flex gap-6" style="white-space:nowrap">
+            <div class="flex gap-8" style="white-space:nowrap;justify-content:center">
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="download_backup" value="1">
                 <input type="hidden" name="file" value="<?= e($b['file']) ?>">
-                <button class="btn btn-sm btn-primary" title="Download"><?= icon('download') ?> Download</button>
+                <button class="btn btn-sm btn-primary" title="Download"><?= icon('download') ?></button>
               </form>
-              <button class="btn btn-sm" onclick="document.getElementById('rename-<?= $i ?>').style.display='flex'" title="Rename">✏️ Rename</button>
+              <button class="btn btn-sm" onclick="document.getElementById('rename-<?= $i ?>').style.display='flex'" title="Rename"><?= icon('tag') ?></button>
               <form method="post" class="inline" data-confirm="Delete this backup permanently?">
                 <?= csrf_field() ?>
                 <input type="hidden" name="delete_backup" value="<?= e($b['file']) ?>">
