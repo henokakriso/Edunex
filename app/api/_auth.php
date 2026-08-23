@@ -5,6 +5,12 @@
  * then require this file.
  */
 
+// API security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+
 function api_out(array $data, int $code = 200): never {
     http_response_code($code);
     echo json_encode($data);

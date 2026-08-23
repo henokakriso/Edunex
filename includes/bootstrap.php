@@ -5,6 +5,30 @@
 
 require_once __DIR__ . '/../config/config.php';
 
+// Security headers
+$isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+if ($isSecure) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+// CSP — allow inline styles/scripts for existing UI, block external
+$csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+];
+header('Content-Security-Policy: ' . implode('; ', $csp));
+
 // --- core classes ---
 require_once INC_PATH . '/functions.php';
 require_once INC_PATH . '/icons.php';
