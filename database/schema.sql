@@ -138,7 +138,7 @@ CREATE TABLE student_groups (
 CREATE TABLE users (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   school_id INT UNSIGNED DEFAULT NULL,            -- NULL = platform-level (super admin)
-  role ENUM('admin','director','teacher','student','parent','guest') NOT NULL DEFAULT 'student',
+  role ENUM('admin','sysadmin','director','teacher','student','parent','guest') NOT NULL DEFAULT 'student',
   first_name VARCHAR(80) NOT NULL,
   last_name VARCHAR(80) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
@@ -215,7 +215,7 @@ CREATE TABLE login_history (
 ) ENGINE=InnoDB;
 
 CREATE TABLE role_permissions (
-  role ENUM('admin','director','teacher','student','parent','guest') NOT NULL,
+  role ENUM('admin','sysadmin','director','teacher','student','parent','guest') NOT NULL,
   permission VARCHAR(60) NOT NULL,
   PRIMARY KEY (role, permission)
 ) ENGINE=InnoDB;
