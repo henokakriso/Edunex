@@ -332,15 +332,46 @@ class Ctl_backups {
                 if (!is_dir($dir)) @mkdir($dir, 0775, true);
                 $file = $dir . '/edunex_' . date('Ymd_His') . '.sql';
                 $db = DB_NAME;
-                $cmd = sprintf('mysqldump --no-defaults -h %s -u %s -p%s %s 2>/dev/null > %s',
+                $cmd = sprintf('mysqldump --no-defaults -h %s -u %s -p%s %s > %s 2>&1',
                     DB_HOST, DB_USER, DB_PASS, escapeshellarg($db), escapeshellarg($file));
                 exec($cmd, $out, $code);
                 if ($code === 0 && is_file($file) && filesize($file) > 0) {
-                    flash('success', 'Backup created: ' . basename($file));
+                    flash('success', 'Backup created: ' . basename($file) . ' (' . round(filesize($file)/1024, 1) . ' KB)');
                 } else {
                     @unlink($file);
-                    flash('danger', 'Backup failed. Check mysqldump is installed and DB credentials are correct.');
+                    $err = implode("\n", $out);
+                    flash('danger', 'Backup failed (exit ' . $code . '): ' . ($err ?: 'Check mysqldump is installed and DB credentials are correct.'));
                 }
+                redirect('admin/backups');
+            }
+            if (isset($_POST['rename_backup'])) {
+                $old = basename($_POST['old_name'] ?? '');
+                $new = trim($_POST['new_name'] ?? '');
+                if ($old && $new && preg_match('/^[\w\-]+\.sql$/', $new)) {
+                    $oldPath = $dir . '/' . $old;
+                    $newPath = $dir . '/' . $new;
+                    if (is_file($oldPath) && !is_file($newPath)) {
+                        rename($oldPath, $newPath);
+                        flash('success', 'Renamed to ' . $new);
+                    } else {
+                        flash('danger', 'Cannot rename: source missing or target exists.');
+                    }
+                } else {
+                    flash('danger', 'Invalid backup name. Use only letters, numbers, hyphens and .sql extension.');
+                }
+                redirect('admin/backups');
+            }
+            if (isset($_POST['download_backup'])) {
+                $name = basename($_POST['file'] ?? '');
+                $path = $dir . '/' . $name;
+                if (is_file($path)) {
+                    header('Content-Type: application/octet-stream');
+                    header('Content-Disposition: attachment; filename="' . $name . '"');
+                    header('Content-Length: ' . filesize($path));
+                    readfile($path);
+                    exit;
+                }
+                flash('danger', 'Backup file not found.');
                 redirect('admin/backups');
             }
             if (($del = $_POST['delete_backup'] ?? '')) {
