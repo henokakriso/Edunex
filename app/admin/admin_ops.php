@@ -295,12 +295,17 @@ class Ctl_reports {
     }
 
     private function buildReport(string $type, int $schoolId): array {
-        $where = $schoolId ? "WHERE school_id = $schoolId" : '';
+        $args = [];
+        $where = '';
+        if ($schoolId > 0) {
+            $where = 'WHERE school_id = ?';
+            $args[] = $schoolId;
+        }
         return match ($type) {
-            'student' => Database::all("SELECT id, first_name, last_name, email, student_id, status FROM users WHERE role = 'student' $where ORDER BY last_name"),
-            'teacher' => Database::all("SELECT id, first_name, last_name, email, status FROM users WHERE role = 'teacher' $where ORDER BY last_name"),
-            'course' => Database::all("SELECT c.id, c.title, c.code, c.status, c.level, (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students FROM courses c $where ORDER BY c.title"),
-            'attendance' => Database::all("SELECT at.date, at.status, us.student_id, CONCAT(us.first_name, ' ', us.last_name) AS student, c.title AS course FROM attendance at JOIN users us ON us.id = at.student_id JOIN courses c ON c.id = at.course_id $where ORDER BY at.date DESC LIMIT 2000"),
+            'student' => Database::all("SELECT id, first_name, last_name, email, student_id, status FROM users WHERE role = 'student' $where ORDER BY last_name", $args),
+            'teacher' => Database::all("SELECT id, first_name, last_name, email, status FROM users WHERE role = 'teacher' $where ORDER BY last_name", $args),
+            'course' => Database::all("SELECT c.id, c.title, c.code, c.status, c.level, (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students FROM courses c $where ORDER BY c.title", $args),
+            'attendance' => Database::all("SELECT at.date, at.status, us.student_id, CONCAT(us.first_name, ' ', us.last_name) AS student, c.title AS course FROM attendance at JOIN users us ON us.id = at.student_id JOIN courses c ON c.id = at.course_id $where ORDER BY at.date DESC LIMIT 2000", $args),
             default => Database::all("SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 500"),
         };
     }

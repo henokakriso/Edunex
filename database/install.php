@@ -108,7 +108,9 @@ $adminEmail = 'superadmin@edunex.local';
 if (!$adminPass) {
     $adminPass = random_password(14);
 }
-$pdo->exec("UPDATE users SET password_hash = '" . password_hash($adminPass, PASSWORD_DEFAULT) . "' WHERE email = 'superadmin@edunex.local'");
+$hash = password_hash($adminPass, PASSWORD_DEFAULT);
+$stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE email = 'superadmin@edunex.local'");
+$stmt->execute([$hash]);
 
 // 3) Storage dirs
 foreach (['uploads', 'assignments', 'profile_photos', 'certificates', 'backups', 'rate'] as $d) {
