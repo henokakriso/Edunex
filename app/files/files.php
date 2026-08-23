@@ -63,7 +63,8 @@ class Ctl_index {
             if (isset($_POST['upload']) && !empty($_FILES['file'])) {
                 require_perm('files.upload');
                 $file = $_FILES['file'];
-                $res = upload_file($file, 'files', null);
+                $safeExts = ['jpg','jpeg','png','gif','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','md','zip','rar','7z','mp3','wav','mp4','webm','ogg'];
+                $res = upload_file($file, 'files', $safeExts);
                 if ($res['error']) { flash('danger', $res['error']); }
                 else {
                     Database::insert('files', [
@@ -82,7 +83,8 @@ class Ctl_index {
             if (($fid = (int)($_POST['new_version'] ?? 0))) {
                 $f = Database::one("SELECT * FROM files WHERE id = ? AND user_id = ? AND deleted_at IS NULL", [$fid, $uid]);
                 if ($f && !$f['is_folder'] && !empty($_FILES['file'])) {
-                    $res = upload_file($_FILES['file'], 'files', null);
+                    $safeExts = ['jpg','jpeg','png','gif','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','md','zip','rar','7z','mp3','wav','mp4','webm','ogg'];
+                    $res = upload_file($_FILES['file'], 'files', $safeExts);
                     if (!$res['error']) {
                         $nv = (int)$f['version'] + 1;
                         Database::insert('file_versions', ['file_id' => $fid, 'version' => $nv, 'path' => $res['path'], 'size' => $res['size'], 'created_by' => $uid]);

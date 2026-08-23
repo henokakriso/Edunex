@@ -78,7 +78,7 @@ define('AI_CHAT_LIMIT', 50);  // max messages stored per conversation
 
 // Uploads
 define('MAX_UPLOAD_MB', 50);
-define('ALLOWED_EXT', 'jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,7z,c,cpp,h,py,java,js,ts,html,css,php,sql,mp3,wav,mp4,webm,ogg,csv,json,md');
+define('ALLOWED_EXT', 'jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,7z,mp3,wav,mp4,webm,ogg,csv,json,md');
 
 // Email (mail() based; set to 'log' to write emails to storage/mail.log)
 define('MAIL_MODE', 'log');
