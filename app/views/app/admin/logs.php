@@ -75,12 +75,12 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
         <?php foreach ($logs as $i => $l): ?>
           <tr style="text-align:center">
             <td class="small faint" style="padding:10px 8px 10px 12px"><?= $i + 1 ?></td>
-            <td class="small faint" style="padding:10px 16px"><?= e(date('M j, H:i:s', strtotime($l['created_at']))) ?></td>
-            <td style="padding:10px 16px">
+            <td class="small faint" style="padding:10px 20px 10px 12px"><?= e(date('M j, H:i:s', strtotime($l['created_at']))) ?></td>
+            <td style="padding:10px 20px 10px 12px">
               <div class="small bold"><?= e($l['user_name'] ?? '—') ?></div>
               <div class="small faint" style="font-size:11px"><?= e($l['email'] ?? '') ?></div>
             </td>
-            <td class="small" style="padding:10px 16px"><?= e($l['school_name'] ?? '—') ?></td>
+            <td class="small" style="padding:10px 20px 10px 12px"><?= e($l['school_name'] ?? '—') ?></td>
             <td style="padding:10px 16px"><span class="badge badge-muted"><?= e($l['action']) ?></span></td>
             <td class="small" style="padding:10px 16px"><?= e($l['detail']) ?></td>
           </tr>
