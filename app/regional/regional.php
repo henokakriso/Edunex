@@ -329,7 +329,7 @@ class Ctl_regional {
             if (isset($_POST['download_backup'])) {
                 $name = basename($_POST['file'] ?? '');
                 $path = $dir . '/' . $name;
-                if (is_file($path)) {
+                if (preg_match('/^edunex_.*\.sql$/', $name) && is_file($path)) {
                     header('Content-Type: application/octet-stream');
                     header('Content-Disposition: attachment; filename="' . $name . '"');
                     header('Content-Length: ' . filesize($path));
@@ -342,7 +342,7 @@ class Ctl_regional {
             if (isset($_POST['rename_backup'])) {
                 $old = basename($_POST['old_name'] ?? '');
                 $new = trim($_POST['new_name'] ?? '');
-                if ($old && $new && preg_match('/^[\w\-]+\.sql$/', $new)) {
+                if ($old && $new && preg_match('/^edunex_.*\.sql$/', $old) && preg_match('/^[\w\-]+\.sql$/', $new)) {
                     $oldPath = $dir . '/' . $old;
                     $newPath = $dir . '/' . $new;
                     if (is_file($oldPath) && !is_file($newPath)) {
@@ -353,8 +353,13 @@ class Ctl_regional {
                 redirect('regional/backups');
             }
             if (($del = $_POST['delete_backup'] ?? '')) {
-                @unlink($dir . '/' . basename($del));
-                flash('success', 'Backup deleted.');
+                $delFile = basename($del);
+                if (preg_match('/^edunex_.*\.sql$/', $delFile) && is_file($dir . '/' . $delFile)) {
+                    @unlink($dir . '/' . $delFile);
+                    flash('success', 'Backup deleted.');
+                } else {
+                    flash('danger', 'Invalid backup file.');
+                }
                 redirect('regional/backups');
             }
         }
