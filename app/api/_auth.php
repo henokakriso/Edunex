@@ -22,13 +22,6 @@ function api_user(): array {
     if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
         $u = me();
         if (!$u) api_out(['ok' => false, 'error' => 'auth_required'], 401);
-        // Verify CSRF for session-based requests (POST/PUT/DELETE)
-        if (in_array($_SERVER['REQUEST_METHOD'] ?? '', ['POST', 'PUT', 'DELETE', 'PATCH'])) {
-            $csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['_csrf'] ?? '';
-            if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
-                api_out(['ok' => false, 'error' => 'csrf_invalid'], 403);
-            }
-        }
         return $u;
     }
     $token = trim((string)$_SERVER['HTTP_AUTHORIZATION']);
