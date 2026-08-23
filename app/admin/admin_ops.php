@@ -123,7 +123,11 @@ class Ctl_logs {
         $q = trim($_GET['q'] ?? '');
         $days = (int)($_GET['days'] ?? 0);
         $export = $_GET['export'] ?? '';
-        $sql = "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name FROM activity_logs l LEFT JOIN users us ON us.id = l.user_id WHERE 1=1";
+        $sql = "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name, us.email, sc.name AS school_name
+                 FROM activity_logs l
+                 LEFT JOIN users us ON us.id = l.user_id
+                 LEFT JOIN schools sc ON sc.id = us.school_id
+                 WHERE 1=1";
         $args = [];
         if ($action) { $sql .= " AND l.action = ?"; $args[] = $action; }
         if ($q !== '') { $sql .= " AND (l.detail LIKE ? OR l.user_agent LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; }
@@ -145,12 +149,12 @@ class Ctl_logs {
                 header('Content-Disposition: attachment; filename="edunex_logs_' . date('Ymd_His') . '.md"');
                 echo "# Edunex Activity Logs\n\n";
                 echo "**Generated:** $stamp\n**Filters:** $filterStr\n**Records:** " . count($logs) . "\n\n";
-                echo "| # | Time | User | Action | Detail |\n";
-                echo "|---|------|------|--------|--------|\n";
+                echo "| # | Time | User | School | Action | Detail |\n";
+                echo "|---|------|------|--------|--------|--------|\n";
                 $rn = 0;
                 foreach ($logs as $l) {
                     $rn++;
-                    echo "| $rn | " . e(date('M j, H:i:s', strtotime($l['created_at']))) . " | " . e($l['user_name'] ?? '—') . " | " . e($l['action']) . " | " . e($l['detail']) . " |\n";
+                    echo "| $rn | " . e(date('M j, H:i:s', strtotime($l['created_at']))) . " | " . e($l['user_name'] ?? '—') . " | " . e($l['school_name'] ?? '—') . " | " . e($l['action']) . " | " . e($l['detail']) . " |\n";
                 }
                 echo "\n---\n**Henok Akriso** · henokakriso.com\n\nAll system is opensourced under [ARWE-PL License](https://github.com/henokakriso/Edunex)\n";
                 exit;
@@ -186,13 +190,14 @@ class Ctl_logs {
             echo '</div></div>';
             echo '<div class="report"><div class="report-header"><h2>' . e($title) . '</h2>';
             echo '<p class="meta">Generated: ' . e($stamp) . ' · Filters: ' . e($filterStr) . ' · ' . count($logs) . ' records</p></div>';
-            echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
+            echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>School</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
             $rn = 0;
             foreach ($logs as $l) {
                 $rn++;
                 echo '<tr><td class="row-num">' . $rn . '</td>';
                 echo '<td>' . e(date('M j, H:i:s', strtotime($l['created_at']))) . '</td>';
-                echo '<td>' . e($l['user_name'] ?? '—') . '</td>';
+                echo '<td><b>' . e($l['user_name'] ?? '—') . '</b><br><small style="color:#888">' . e($l['email'] ?? '') . '</small></td>';
+                echo '<td>' . e($l['school_name'] ?? '—') . '</td>';
                 echo '<td><span class="badge">' . e($l['action']) . '</span></td>';
                 echo '<td>' . e($l['detail']) . '</td></tr>';
             }
