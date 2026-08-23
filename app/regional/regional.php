@@ -307,12 +307,65 @@ class Ctl_regional {
             }
         }
         usort($backups, fn($a, $b) => $b['time'] <=> $a['time']);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            csrf_verify();
+            if (isset($_POST['create_backup'])) {
+                if (!is_dir($dir)) @mkdir($dir, 0775, true);
+                $file = $dir . '/edunex_' . date('Ymd_His') . '.sql';
+                $db = DB_NAME;
+                $cmd = sprintf('mysqldump --no-defaults -h %s -u %s -p%s %s > %s 2>&1',
+                    DB_HOST, DB_USER, DB_PASS, escapeshellarg($db), escapeshellarg($file));
+                exec($cmd, $out, $code);
+                if ($code === 0 && is_file($file) && filesize($file) > 0) {
+                    flash('success', 'Backup created: ' . basename($file));
+                } else {
+                    @unlink($file);
+                    $err = implode("\n", $out);
+                    flash('danger', 'Backup failed (exit ' . $code . '): ' . ($err ?: 'Check mysqldump.'));
+                }
+                redirect('regional/backups');
+            }
+            if (isset($_POST['download_backup'])) {
+                $name = basename($_POST['file'] ?? '');
+                $path = $dir . '/' . $name;
+                if (is_file($path)) {
+                    header('Content-Type: application/octet-stream');
+                    header('Content-Disposition: attachment; filename="' . $name . '"');
+                    header('Content-Length: ' . filesize($path));
+                    readfile($path);
+                    exit;
+                }
+                flash('danger', 'File not found.');
+                redirect('regional/backups');
+            }
+            if (isset($_POST['rename_backup'])) {
+                $old = basename($_POST['old_name'] ?? '');
+                $new = trim($_POST['new_name'] ?? '');
+                if ($old && $new && preg_match('/^[\w\-]+\.sql$/', $new)) {
+                    $oldPath = $dir . '/' . $old;
+                    $newPath = $dir . '/' . $new;
+                    if (is_file($oldPath) && !is_file($newPath)) {
+                        rename($oldPath, $newPath);
+                        flash('success', 'Renamed to ' . $new);
+                    } else { flash('danger', 'Cannot rename.'); }
+                } else { flash('danger', 'Invalid name.'); }
+                redirect('regional/backups');
+            }
+            if (($del = $_POST['delete_backup'] ?? '')) {
+                @unlink($dir . '/' . basename($del));
+                flash('success', 'Backup deleted.');
+                redirect('regional/backups');
+            }
+        }
+
         Router::render('app/regional/backups', ['title' => 'Backups', 'backups' => $backups]);
     }
 
     private function audit(array $u): void {
         $uid = (int)$u['id'];
         $idList = RegionalScope::idList($uid);
+        $export = $_GET['export'] ?? '';
         $rows = Database::all(
             "SELECT al.*, u.first_name, u.last_name, u.email, sc.name AS school_name
              FROM activity_logs al
@@ -320,6 +373,73 @@ class Ctl_regional {
              LEFT JOIN schools sc ON sc.id = u.school_id
              WHERE u.school_id IN ($idList)
              ORDER BY al.created_at DESC LIMIT 100", []);
+
+        if ($export === 'md') {
+            header('Content-Type: text/markdown');
+            header('Content-Disposition: attachment; filename="edunex_audit_' . date('Ymd_His') . '.md"');
+            echo "# Edunex Audit Log — Regional Admin\n\n";
+            echo "**Generated:** " . date('F j, Y \a\t g:i A') . " · " . count($rows) . " records\n\n";
+            echo "| # | User | School | Action | Detail | When |\n";
+            echo "|---|------|--------|--------|--------|------|\n";
+            $rn = 0;
+            foreach ($rows as $a) {
+                $rn++;
+                $name = e(($a['first_name'] ?? '') . ' ' . ($a['last_name'] ?? ''));
+                echo "| $rn | $name | " . e($a['school_name'] ?? '—') . " | " . e($a['action']) . " | " . e($a['detail']) . " | " . e(time_ago($a['created_at'])) . " |\n";
+            }
+            echo "\n---\n**Henok Akriso** · henokakriso.com\n\nAll system is opensourced under [ARWE-PL License](https://github.com/henokakriso/Edunex)\n";
+            exit;
+        }
+
+        if ($export === 'pdf') {
+            $stamp = date('F j, Y \a\t g:i A');
+            $title = 'Edunex Audit Log — Regional Admin';
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' . e($title) . '</title>';
+            echo '<style>';
+            echo '*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f5;color:#222}';
+            echo '.viewer-bar{position:sticky;top:0;z-index:100;background:#1a1a2e;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}';
+            echo '.viewer-bar h1{font-size:15px;font-weight:600}.viewer-bar .btns{display:flex;gap:10px}';
+            echo '.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}';
+            echo '.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}';
+            echo '.report{max-width:1100px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
+            echo '.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee}';
+            echo '.report-header h2{font-size:20px;margin-bottom:4px}.report-header .meta{color:#666;font-size:12px}';
+            echo '.table-wrap{overflow-x:auto}';
+            echo 'table{width:100%;border-collapse:collapse;min-width:700px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #eee;font-size:12px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}';
+            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:0;z-index:2}';
+            echo '.row-num{color:#999;width:36px;text-align:center;max-width:36px}';
+            echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#e8e8e8}';
+            echo '.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}';
+            echo '.footer a{color:#4361ee;text-decoration:none}';
+            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0}body{background:#fff}.table-wrap{overflow:visible}table{min-width:0}th,td{white-space:normal;word-break:break-word}}';
+            echo '</style></head><body>';
+            echo '<div class="viewer-bar"><h1>' . e($title) . '</h1>';
+            echo '<div class="btns"><button class="btn-secondary" onclick="history.back()">← Back</button>';
+            echo '<a href="javascript:window.print()">🖨 Print</a>';
+            echo '<a href="javascript:downloadPDF()">⬇ Download PDF</a>';
+            echo '<a href="' . e(url('regional/audit&export=md')) . '">📄 Markdown</a></div></div>';
+            echo '<div class="report"><div class="report-header"><h2>' . e($title) . '</h2>';
+            echo '<p class="meta">Generated: ' . e($stamp) . ' · ' . count($rows) . ' records</p></div>';
+            echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th><th>User</th><th>School</th><th>Action</th><th>Detail</th><th>When</th></tr></thead><tbody>';
+            $rn = 0;
+            foreach ($rows as $a) {
+                $rn++;
+                $name = e(($a['first_name'] ?? '') . ' ' . ($a['last_name'] ?? ''));
+                echo '<tr><td class="row-num">' . $rn . '</td>';
+                echo '<td>' . $name . '<br><span class="tiny faint">' . e($a['email'] ?? '') . '</span></td>';
+                echo '<td>' . e($a['school_name'] ?? '—') . '</td>';
+                echo '<td><span class="badge">' . e($a['action']) . '</span></td>';
+                echo '<td>' . e($a['detail']) . '</td>';
+                echo '<td>' . e(time_ago($a['created_at'])) . '</td></tr>';
+            }
+            echo '</tbody></table></div>';
+            echo '<div class="footer"><p><b>Henok Akriso</b> · henokakriso.com</p>';
+            echo '<p>All system is opensourced under <a href="https://github.com/henokakriso/Edunex" target="_blank">ARWE-PL License</a></p></div></div>';
+            echo '<script>function downloadPDF(){var opt={margin:[10,10],filename:"edunex_audit_' . date('Ymd_His') . '.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"}};if(typeof html2pdf!=="undefined"){html2pdf().set(opt).from(document.querySelector(".report")).save();}else{var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=function(){html2pdf().set(opt).from(document.querySelector(".report")).save();};document.head.appendChild(s);}}</script>';
+            echo '</body></html>';
+            exit;
+        }
+
         Router::render('app/regional/audit', ['title' => 'Audit Log', 'rows' => $rows]);
     }
 }
