@@ -63,9 +63,9 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
 <div class="card">
   <div class="table-wrap">
     <table class="table" style="table-layout:auto">
-      <thead><tr>
+      <thead><tr style="text-align:center">
         <th style="width:36px">#</th>
-        <th style="min-width:140px">When</th>
+        <th style="min-width:140px;padding-left:16px">When</th>
         <th style="min-width:160px;padding-left:16px">User</th>
         <th style="min-width:180px;padding-left:16px">School</th>
         <th style="min-width:100px">Action</th>
@@ -73,7 +73,7 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
       </tr></thead>
       <tbody>
         <?php foreach ($logs as $i => $l): ?>
-          <tr style="text-align:center;border-bottom:1px solid #eee">
+          <tr style="text-align:center;border-bottom:1px solid #eee;transition:background .15s" onmouseover="this.style.background='var(--accent-bg,#e8f0fe)'" onmouseout="this.style.background='transparent'">
             <td class="small faint" style="padding:10px 8px 10px 12px"><?= $i + 1 ?></td>
             <td class="small faint" style="padding:10px 20px 10px 12px"><?= e(date('M j, H:i:s', strtotime($l['created_at']))) ?></td>
             <td style="padding:10px 20px 10px 12px">
