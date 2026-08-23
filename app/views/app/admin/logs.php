@@ -73,7 +73,7 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
       </tr></thead>
       <tbody>
         <?php foreach ($logs as $i => $l): ?>
-          <tr>
+          <tr style="text-align:center">
             <td class="small faint" style="padding:10px 8px 10px 12px"><?= $i + 1 ?></td>
             <td class="small faint" style="padding:10px 16px"><?= e(date('M j, H:i:s', strtotime($l['created_at']))) ?></td>
             <td style="padding:10px 16px">
