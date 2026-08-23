@@ -152,6 +152,23 @@ Router::page('dept_head/courses', 'dean/departments_head.php', 'dept_head');
 Router::page('dept_head/theses', 'dean/departments_head.php', 'dept_head');
 Router::page('dept_head/analytics', 'dean/departments_head.php', 'dept_head');
 
+/* ---- University Module ---- */
+Router::page('university/programs', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head']);
+Router::page('university/program', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head']);
+Router::page('university/semesters', 'university/university.php', ['registrar']);
+Router::page('university/registration', 'university/university.php', ['registrar', 'student']);
+Router::page('university/my-schedule', 'university/university.php', ['student']);
+Router::page('university/clearance', 'university/university.php', ['student']);
+Router::page('university/clearance/manage', 'university/university.php', ['registrar', 'dean', 'dept_head', 'bursar', 'librarian', 'student_affairs']);
+Router::page('university/transcript', 'university/university.php', ['student']);
+Router::page('university/transcript/manage', 'university/university.php', ['registrar']);
+Router::page('university/fees', 'university/university.php', ['student']);
+Router::page('university/fees/manage', 'university/university.php', ['bursar', 'registrar']);
+Router::page('university/theses', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head', 'student']);
+Router::page('university/thesis', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head', 'student']);
+Router::page('university/timetable', 'university/university.php', ['registrar', 'dean', 'student']);
+Router::page('university/id-cards', 'university/university.php', ['registrar', 'student_affairs']);
+
 /* ---- Parent ---- */
 Router::page('parent/dashboard', 'parent/dashboard.php', 'parent');
 Router::page('parent/children', 'parent/children.php', 'parent');

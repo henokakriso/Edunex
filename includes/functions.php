@@ -672,3 +672,526 @@ function grade_audit_for_student(int $studentId, int $limit = 50): array {
         [$studentId, $limit]
     );
 }
+
+/* ================= UNIVERSITY SYSTEM ================= */
+
+/** Grade to grade-point mapping */
+function grade_to_points(string $grade): float {
+    $map = [
+        'A+' => 4.0, 'A' => 4.0, 'A-' => 3.7,
+        'B+' => 3.3, 'B' => 3.0, 'B-' => 2.7,
+        'C+' => 2.3, 'C' => 2.0, 'C-' => 1.7,
+        'D+' => 1.3, 'D' => 1.0,
+        'F' => 0.0,
+    ];
+    return $map[strtoupper($grade)] ?? 0.0;
+}
+
+/** Compute SGPA for a student in a given semester */
+function compute_sgpa(int $studentId, int $semesterId): array {
+    $rows = Database::all(
+        "SELECT ar.credit_hours, ar.grade_points
+         FROM academic_records ar
+         WHERE ar.student_id = ? AND ar.semester_id = ?",
+        [$studentId, $semesterId]
+    );
+    $totalQp = 0.0;
+    $totalCr = 0;
+    foreach ($rows as $r) {
+        $totalQp += (float)$r['credit_hours'] * (float)$r['grade_points'];
+        $totalCr += (int)$r['credit_hours'];
+    }
+    return [
+        'sgpa'          => $totalCr > 0 ? round($totalQp / $totalCr, 2) : 0.0,
+        'quality_points' => $totalQp,
+        'credit_hours'  => $totalCr,
+    ];
+}
+
+/** Compute CGPA for a student (all semesters) */
+function compute_cgpa(int $studentId): array {
+    $rows = Database::all(
+        "SELECT ar.credit_hours, ar.grade_points
+         FROM academic_records ar
+         WHERE ar.student_id = ?",
+        [$studentId]
+    );
+    $totalQp = 0.0;
+    $totalCr = 0;
+    foreach ($rows as $r) {
+        $totalQp += (float)$r['credit_hours'] * (float)$r['grade_points'];
+        $totalCr += (int)$r['credit_hours'];
+    }
+    return [
+        'cgpa'          => $totalCr > 0 ? round($totalQp / $totalCr, 2) : 0.0,
+        'quality_points' => $totalQp,
+        'credit_hours'  => $totalCr,
+    ];
+}
+
+/** Determine academic standing from CGPA */
+function academic_standing(float $cgpa): string {
+    if ($cgpa >= 3.5) return 'deans_list';
+    if ($cgpa >= 2.0) return 'good';
+    if ($cgpa >= 1.5) return 'probation';
+    return 'suspension';
+}
+
+/** Human-readable standing label */
+function standing_label(string $standing): string {
+    return match ($standing) {
+        'deans_list' => "Dean's List",
+        'good'       => 'Good Standing',
+        'probation'  => 'Academic Probation',
+        'suspension' => 'Academic Suspension',
+        default      => ucfirst($standing),
+    };
+}
+
+/** Check if student has passed a course (grade >= C or >= given min) */
+function has_passed_course(int $studentId, int $courseId, string $minGrade = 'D'): bool {
+    $min = grade_to_points($minGrade);
+    $row = Database::one(
+        "SELECT ar.grade_points FROM academic_records ar
+         JOIN course_offerings co ON co.id = ar.course_offering_id
+         WHERE ar.student_id = ? AND co.course_id = ? AND ar.grade_points >= ?
+         ORDER BY ar.grade_points DESC LIMIT 1",
+        [$studentId, $courseId, $min]
+    );
+    return $row !== null;
+}
+
+/** Check if student meets all prerequisites for a course */
+function meets_prerequisites(int $studentId, int $courseId): array {
+    $prereqs = Database::all(
+        "SELECT p.required_course_id, p.min_grade, c.title, c.code
+         FROM prerequisites p
+         JOIN courses c ON c.id = p.required_course_id
+         WHERE p.course_id = ?",
+        [$courseId]
+    );
+    $missing = [];
+    foreach ($prereqs as $p) {
+        if (!has_passed_course($studentId, $p['required_course_id'], $p['min_grade'])) {
+            $missing[] = $p;
+        }
+    }
+    return ['met' => empty($missing), 'missing' => $missing];
+}
+
+/** Check schedule conflicts for a student against a course offering */
+function schedule_conflicts(int $studentId, int $courseOfferingId): array {
+    $new = Database::one("SELECT schedule_json FROM course_offerings WHERE id = ?", [$courseOfferingId]);
+    if (!$new || empty($new['schedule_json'])) return [];
+    $newSched = json_decode($new['schedule_json'], true) ?: [];
+
+    $existing = Database::all(
+        "SELECT co.id, co.schedule_json, co.course_id, c.title
+         FROM registrations r
+         JOIN course_offerings co ON co.id = r.course_offering_id
+         JOIN courses c ON c.id = co.course_id
+         WHERE r.student_id = ? AND r.status = 'registered' AND co.id != ?",
+        [$studentId, $courseOfferingId]
+    );
+    $conflicts = [];
+    foreach ($existing as $ex) {
+        if (empty($ex['schedule_json'])) continue;
+        $oldSched = json_decode($ex['schedule_json'], true) ?: [];
+        foreach ($newSched as $day => $newTimes) {
+            if (!isset($oldSched[$day])) continue;
+            $nt = $newSched[$day];
+            $ot = $oldSched[$day];
+            // simple overlap: same day AND overlapping time range
+            if ($nt['start'] < $ot['end'] && $nt['end'] > $ot['start']) {
+                $conflicts[] = ['offering_id' => $ex['id'], 'course' => $ex['title'], 'day' => $day];
+            }
+        }
+    }
+    return $conflicts;
+}
+
+/** Get current/max credit hours for a student */
+function student_credit_load(int $studentId, int $semesterId): array {
+    $row = Database::one(
+        "SELECT COALESCE(SUM(c.credits), 0) AS enrolled
+         FROM registrations r
+         JOIN course_offerings co ON co.id = r.course_offering_id
+         JOIN courses c ON c.id = co.course_id
+         WHERE r.student_id = ? AND r.status = 'registered' AND co.semester_id = ?",
+        [$studentId, $semesterId]
+    );
+    $enrolled = (int)($row['enrolled'] ?? 0);
+    $max = (int)Database::scalar(
+        "SELECT COALESCE(s.value, '18') FROM settings s WHERE s.key = 'max_credit_hours'",
+        [], 18
+    );
+    return ['enrolled' => $enrolled, 'max' => $max, 'remaining' => max(0, $max - $enrolled)];
+}
+
+/** Register a student for a course (with all validations) */
+function register_course(int $studentId, int $courseOfferingId): array {
+    $offering = Database::one("SELECT * FROM course_offerings WHERE id = ?", [$courseOfferingId]);
+    if (!$offering) return ['ok' => false, 'error' => 'Course offering not found.'];
+    if ($offering['status'] !== 'open') return ['ok' => false, 'error' => 'Course is not open for registration.'];
+    if ($offering['current_students'] >= $offering['max_students']) return ['ok' => false, 'error' => 'Course is full.'];
+
+    // Already registered?
+    $exists = Database::one(
+        "SELECT id FROM registrations WHERE student_id = ? AND course_offering_id = ? AND status = 'registered'",
+        [$studentId, $courseOfferingId]
+    );
+    if ($exists) return ['ok' => false, 'error' => 'Already registered for this course.'];
+
+    // Prerequisites
+    $pre = meets_prerequisites($studentId, $offering['course_id']);
+    if (!$pre['met']) {
+        $names = array_map(fn($p) => $p['code'] . ' ' . $p['title'], $pre['missing']);
+        return ['ok' => false, 'error' => 'Missing prerequisites: ' . implode(', ', $names)];
+    }
+
+    // Schedule conflict
+    $conflicts = schedule_conflicts($studentId, $courseOfferingId);
+    if (!empty($conflicts)) {
+        return ['ok' => false, 'error' => 'Schedule conflict with: ' . $conflicts[0]['course']];
+    }
+
+    // Credit limit
+    $load = student_credit_load($studentId, $offering['semester_id']);
+    $cr = Database::one("SELECT credits FROM courses WHERE id = ?", [$offering['course_id']]);
+    $crHours = (int)($cr['credits'] ?? 3);
+    if ($load['enrolled'] + $crHours > $load['max']) {
+        return ['ok' => false, 'error' => "Credit limit reached ({$load['max']}). Currently enrolled: {$load['enrolled']} cr."];
+    }
+
+    // Register
+    Database::insert('registrations', [
+        'student_id'         => $studentId,
+        'course_offering_id' => $courseOfferingId,
+        'status'             => 'registered',
+    ]);
+    Database::run("UPDATE course_offerings SET current_students = current_students + 1 WHERE id = ?", [$courseOfferingId]);
+    return ['ok' => true];
+}
+
+/** Drop a student from a course */
+function drop_course(int $studentId, int $courseOfferingId): array {
+    $reg = Database::one(
+        "SELECT id FROM registrations WHERE student_id = ? AND course_offering_id = ? AND status = 'registered'",
+        [$studentId, $courseOfferingId]
+    );
+    if (!$reg) return ['ok' => false, 'error' => 'Registration not found.'];
+    Database::update('registrations', ['status' => 'dropped', 'dropped_at' => date('Y-m-d H:i:s')], 'id = ?', [$reg['id']]);
+    Database::run("UPDATE course_offerings SET current_students = GREATEST(current_students - 1, 0) WHERE id = ?", [$courseOfferingId]);
+    return ['ok' => true];
+}
+
+/** Create a clearance request with tracking code */
+function create_clearance_request(int $studentId, string $type = 'graduation'): array {
+    $school = Database::one(
+        "SELECT s.code FROM users u JOIN schools s ON s.id = u.school_id WHERE u.id = ?",
+        [$studentId]
+    );
+    $prefix = $school ? strtoupper(mb_substr($school['code'], 0, 4)) : 'UNIV';
+    $seq = (int)Database::scalar(
+        "SELECT COUNT(*) + 1 FROM clearance_requests WHERE YEAR(requested_at) = YEAR(NOW())",
+        [], 1
+    );
+    $year = date('Y');
+    $trackingCode = sprintf('CLR-%s-%s-%05d', $year, $prefix, $seq);
+
+    Database::insert('clearance_requests', [
+        'student_id'    => $studentId,
+        'type'          => $type,
+        'status'        => 'pending',
+        'tracking_code' => $trackingCode,
+    ]);
+
+    $requestId = (int)Database::scalar("SELECT LAST_INSERT_ID()", [], 0);
+
+    // Create clearance items for each department
+    $departments = ['library', 'finance', 'dormitory', 'lab', 'academic', 'disciplinary', 'department'];
+    foreach ($departments as $dept) {
+        Database::insert('clearance_items', [
+            'request_id'  => $requestId,
+            'department'  => $dept,
+            'status'      => 'pending',
+        ]);
+    }
+
+    return ['ok' => true, 'request_id' => $requestId, 'tracking_code' => $trackingCode];
+}
+
+/** Check or update a clearance item */
+function check_clearance_item(int $itemId, int $checkerId, string $status, string $notes = ''): array {
+    $item = Database::one("SELECT * FROM clearance_items WHERE id = ?", [$itemId]);
+    if (!$item) return ['ok' => false, 'error' => 'Item not found.'];
+    $sig = hash_hmac('sha256', "$itemId-$checkerId-$status-" . date('Y-m-d H:i:s'), 'edunex_clearance');
+    Database::update('clearance_items', [
+        'checker_id'     => $checkerId,
+        'status'         => $status,
+        'notes'          => $notes,
+        'checked_at'     => date('Y-m-d H:i:s'),
+        'signature_hash' => $sig,
+    ], 'id = ?', [$itemId]);
+
+    // Update parent request status
+    $requestId = $item['request_id'];
+    $all = Database::all("SELECT status FROM clearance_items WHERE request_id = ?", [$requestId]);
+    $allPassed = true;
+    $anyFailed = false;
+    foreach ($all as $ai) {
+        if ($ai['status'] !== 'passed' && $ai['id'] != $itemId) { $allPassed = false; }
+        if ($ai['status'] === 'failed') $anyFailed = true;
+    }
+    // Also consider the current update
+    if ($status === 'failed') $anyFailed = true;
+    if ($status !== 'passed') $allPassed = false;
+
+    $reqStatus = 'in_progress';
+    if ($anyFailed) $reqStatus = 'rejected';
+    elseif ($allPassed && $status === 'passed') $reqStatus = 'cleared';
+
+    Database::update('clearance_requests', [
+        'status'       => $reqStatus,
+        'completed_at' => $reqStatus === 'cleared' ? date('Y-m-d H:i:s') : null,
+    ], 'id = ?', [$requestId]);
+
+    return ['ok' => true, 'request_status' => $reqStatus];
+}
+
+/** Generate a clearance verification hash */
+function clearance_verify_url(string $trackingCode): string {
+    return url('verify/clearance?code=' . urlencode($trackingCode));
+}
+
+/** Generate a transcript hash */
+function transcript_hash(int $requestId): string {
+    $rows = Database::all(
+        "SELECT ar.grade, ar.credit_hours, ar.grade_points, c.title, c.code, sem.name AS semester_name
+         FROM academic_records ar
+         JOIN course_offerings co ON co.id = ar.course_offering_id
+         JOIN courses c ON c.id = co.course_id
+         JOIN semesters sem ON sem.id = ar.semester_id
+         WHERE ar.student_id = (SELECT student_id FROM transcript_requests WHERE id = ?)
+         ORDER BY sem.start_date, c.code",
+        [$requestId]
+    );
+    return hash('sha256', json_encode($rows));
+}
+
+/** Create a transcript request */
+function create_transcript_request(int $studentId, string $type = 'unofficial'): array {
+    Database::insert('transcript_requests', [
+        'student_id' => $studentId,
+        'type'       => $type,
+        'status'     => 'pending',
+    ]);
+    $id = (int)Database::scalar("SELECT LAST_INSERT_ID()", [], 0);
+    return ['ok' => true, 'request_id' => $id];
+}
+
+/** Create invoice for a student for a given semester */
+function create_student_invoice(int $studentId, int $semesterId): array {
+    $schoolId = (int)Database::scalar(
+        "SELECT u.school_id FROM users u WHERE u.id = ?", [$studentId], 0
+    );
+    $fees = Database::all(
+        "SELECT * FROM fee_structures WHERE school_id = ? AND (semester_id = ? OR semester_id IS NULL) AND status = 'active'",
+        [$schoolId, $semesterId]
+    );
+    if (empty($fees)) return ['ok' => false, 'error' => 'No fee structures defined.'];
+
+    // Check existing invoice
+    $existing = Database::one(
+        "SELECT id FROM invoices WHERE student_id = ? AND semester_id = ?",
+        [$studentId, $semesterId]
+    );
+    if ($existing) return ['ok' => false, 'error' => 'Invoice already exists.', 'invoice_id' => $existing['id']];
+
+    $total = 0.0;
+    $items = [];
+    foreach ($fees as $f) {
+        $amt = (float)$f['amount'];
+        if ($f['fee_type'] === 'per_credit') {
+            $cr = Database::one(
+                "SELECT COALESCE(SUM(c.credits), 0) AS total
+                 FROM registrations r
+                 JOIN course_offerings co ON co.id = r.course_offering_id
+                 JOIN courses c ON c.id = co.course_id
+                 WHERE r.student_id = ? AND co.semester_id = ? AND r.status = 'registered'",
+                [$studentId, $semesterId]
+            );
+            $amt *= (float)($cr['total'] ?? 0);
+        }
+        if ($amt <= 0) continue;
+        $total += $amt;
+        $items[] = ['fee_structure_id' => $f['id'], 'description' => $f['name'], 'amount' => $amt];
+    }
+
+    Database::insert('invoices', [
+        'student_id'    => $studentId,
+        'semester_id'   => $semesterId,
+        'total_amount'  => $total,
+        'paid_amount'   => 0,
+        'status'        => 'pending',
+        'due_date'      => date('Y-m-d', strtotime('+30 days')),
+    ]);
+    $invId = (int)Database::scalar("SELECT LAST_INSERT_ID()", [], 0);
+
+    foreach ($items as $it) {
+        Database::insert('invoice_items', [
+            'invoice_id'       => $invId,
+            'fee_structure_id' => $it['fee_structure_id'],
+            'description'      => $it['description'],
+            'amount'           => $it['amount'],
+        ]);
+    }
+
+    return ['ok' => true, 'invoice_id' => $invId, 'total' => $total];
+}
+
+/** Record a payment against an invoice */
+function record_payment(int $invoiceId, float $amount, string $method, string $ref = '', string $notes = '', ?int $recordedBy = null): array {
+    $inv = Database::one("SELECT * FROM invoices WHERE id = ?", [$invoiceId]);
+    if (!$inv) return ['ok' => false, 'error' => 'Invoice not found.'];
+    if ($amount <= 0) return ['ok' => false, 'error' => 'Invalid amount.'];
+
+    Database::insert('payments', [
+        'invoice_id'      => $invoiceId,
+        'student_id'      => $inv['student_id'],
+        'amount'          => $amount,
+        'payment_method'  => $method,
+        'reference_number'=> $ref,
+        'notes'           => $notes,
+        'recorded_by'     => $recordedBy,
+    ]);
+
+    $newPaid = (float)$inv['paid_amount'] + $amount;
+    $status = 'partial';
+    if ($newPaid >= (float)$inv['total_amount']) $status = 'paid';
+    elseif (strtotime($inv['due_date'] ?? '') < time() && $newPaid < (float)$inv['total_amount']) $status = 'overdue';
+
+    Database::update('invoices', [
+        'paid_amount' => $newPaid,
+        'status'      => $status,
+    ], 'id = ?', [$invoiceId]);
+
+    return ['ok' => true, 'status' => $status, 'balance' => (float)$inv['total_amount'] - $newPaid];
+}
+
+/** Create a thesis record */
+function create_thesis(int $studentId, int $programId, string $title, string $abstract = ''): array {
+    Database::insert('theses', [
+        'student_id' => $studentId,
+        'program_id' => $programId,
+        'title'      => $title,
+        'abstract'   => $abstract,
+        'status'     => 'proposal',
+    ]);
+    $id = (int)Database::scalar("SELECT LAST_INSERT_ID()", [], 0);
+    // Create default chapters
+    $chapters = ['Introduction', 'Literature Review', 'Methodology', 'Results', 'Conclusion'];
+    foreach ($chapters as $i => $ch) {
+        Database::insert('thesis_chapters', [
+            'thesis_id'      => $id,
+            'chapter_number' => $i + 1,
+            'title'          => $ch,
+            'status'         => 'draft',
+        ]);
+    }
+    return ['ok' => true, 'thesis_id' => $id];
+}
+
+/** Assign thesis advisor */
+function assign_thesis_advisor(int $thesisId, int $advisorId): array {
+    Database::update('theses', ['advisor_id' => $advisorId], 'id = ?', [$thesisId]);
+    Database::insert('thesis_committee', [
+        'thesis_id' => $thesisId,
+        'member_id' => $advisorId,
+        'role'      => 'advisor',
+    ]);
+    return ['ok' => true];
+}
+
+/** Submit thesis chapter for review */
+function submit_thesis_chapter(int $chapterId, int $studentId): array {
+    $ch = Database::one(
+        "SELECT tc.*, t.student_id FROM thesis_chapters tc JOIN theses t ON t.id = tc.thesis_id WHERE tc.id = ?",
+        [$chapterId]
+    );
+    if (!$ch) return ['ok' => false, 'error' => 'Chapter not found.'];
+    if ((int)$ch['student_id'] !== $studentId) return ['ok' => false, 'error' => 'Not your thesis.'];
+    Database::update('thesis_chapters', [
+        'status'      => 'submitted',
+        'submitted_at' => date('Y-m-d H:i:s'),
+    ], 'id = ?', [$chapterId]);
+    return ['ok' => true];
+}
+
+/** Schedule thesis defense */
+function schedule_defense(int $thesisId, string $date): array {
+    Database::update('theses', [
+        'defense_date' => $date,
+        'status'       => 'defense',
+    ], 'id = ?', [$thesisId]);
+    return ['ok' => true];
+}
+
+/** Record thesis defense result */
+function thesis_defense_result(int $thesisId, string $result, string $notes = ''): array {
+    Database::update('theses', [
+        'defense_result' => $result,
+        'defense_notes'  => $notes,
+        'status'         => $result === 'pass' ? 'completed' : ($result === 'revise' ? 'revision' : 'in_progress'),
+    ], 'id = ?', [$thesisId]);
+    return ['ok' => true];
+}
+
+/** Check schedule availability for a room */
+function room_available(int $roomId, string $day, string $startTime, string $endTime, ?int $excludeOfferingId = null): bool {
+    $where = "s.room_id = ? AND s.day = ?";
+    $args = [$roomId, $day];
+    if ($excludeOfferingId) {
+        $where .= " AND s.course_offering_id != ?";
+        $args[] = $excludeOfferingId;
+    }
+    $rows = Database::all(
+        "SELECT s.start_time, s.end_time FROM schedules s WHERE $where",
+        $args
+    );
+    foreach ($rows as $r) {
+        if ($startTime < $r['end_time'] && $endTime > $r['start_time']) return false;
+    }
+    return true;
+}
+
+/** Generate student ID card data */
+function generate_student_card(int $studentId): array {
+    $u = Database::one(
+        "SELECT u.*, s.name AS school_name, s.code AS school_code
+         FROM users u JOIN schools s ON s.id = u.school_id WHERE u.id = ?",
+        [$studentId]
+    );
+    if (!$u) return ['ok' => false, 'error' => 'Student not found.'];
+
+    $existing = Database::one(
+        "SELECT * FROM student_cards WHERE student_id = ? AND status = 'active'",
+        [$studentId]
+    );
+    if ($existing) return ['ok' => true, 'card' => $existing];
+
+    $seq = (int)Database::scalar("SELECT COUNT(*) + 1 FROM student_cards", [], 1);
+    $cardNumber = sprintf('%s-%s-%05d', strtoupper(mb_substr($u['school_code'] ?? 'EDX', 0, 3)), date('Y'), $seq);
+    $qrData = url('verify/card?id=' . $cardNumber);
+
+    Database::insert('student_cards', [
+        'student_id'    => $studentId,
+        'card_number'   => $cardNumber,
+        'barcode_data'  => $u['student_id'] ?? $cardNumber,
+        'qr_data'       => $qrData,
+        'expires_at'    => date('Y-m-d', strtotime('+4 years')),
+    ]);
+
+    $card = Database::one("SELECT * FROM student_cards WHERE student_id = ? AND status = 'active'", [$studentId]);
+    return ['ok' => true, 'card' => $card];
+}

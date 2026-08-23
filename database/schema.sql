@@ -1171,4 +1171,279 @@ CREATE TABLE student_notes (
   FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
+-- ============================================================
+-- 14. UNIVERSITY / HIGHER EDUCATION
+-- ------------------------------------------------------------
+
+CREATE TABLE programs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  school_id INT UNSIGNED NOT NULL,
+  faculty_id INT UNSIGNED DEFAULT NULL,
+  department_id INT UNSIGNED DEFAULT NULL,
+  name VARCHAR(200) NOT NULL,
+  code VARCHAR(20) NOT NULL,
+  degree_type ENUM('bachelor','master','phd','diploma','certificate') DEFAULT 'bachelor',
+  total_credits INT UNSIGNED DEFAULT 120,
+  duration_years INT UNSIGNED DEFAULT 4,
+  status ENUM('active','inactive','archived') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_prog_code (school_id, code),
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE SET NULL,
+  FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE student_programs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  program_id INT UNSIGNED NOT NULL,
+  enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expected_graduation DATE DEFAULT NULL,
+  actual_graduation DATE DEFAULT NULL,
+  status ENUM('active','graduated','transferred','withdrawn','suspended') DEFAULT 'active',
+  UNIQUE KEY uq_stu_prog (student_id, program_id),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE course_offerings (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  course_id INT UNSIGNED NOT NULL,
+  semester_id INT UNSIGNED NOT NULL,
+  lecturer_id INT UNSIGNED DEFAULT NULL,
+  max_students INT UNSIGNED DEFAULT 40,
+  current_students INT UNSIGNED DEFAULT 0,
+  room VARCHAR(60) DEFAULT '',
+  schedule_json JSON DEFAULT NULL,
+  status ENUM('open','full','closed','cancelled') DEFAULT 'open',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE,
+  FOREIGN KEY (lecturer_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE registrations (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  course_offering_id INT UNSIGNED NOT NULL,
+  status ENUM('registered','dropped','completed') DEFAULT 'registered',
+  grade VARCHAR(2) DEFAULT NULL,
+  grade_points DECIMAL(3,2) DEFAULT NULL,
+  registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  dropped_at TIMESTAMP NULL,
+  UNIQUE KEY uq_reg (student_id, course_offering_id),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_offering_id) REFERENCES course_offerings(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE prerequisites (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  course_id INT UNSIGNED NOT NULL,
+  required_course_id INT UNSIGNED NOT NULL,
+  min_grade VARCHAR(2) DEFAULT 'D',
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  FOREIGN KEY (required_course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE academic_records (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  course_offering_id INT UNSIGNED NOT NULL,
+  semester_id INT UNSIGNED NOT NULL,
+  credit_hours INT UNSIGNED NOT NULL DEFAULT 3,
+  grade VARCHAR(2) NOT NULL,
+  grade_points DECIMAL(3,2) NOT NULL,
+  quality_points DECIMAL(7,2) GENERATED ALWAYS AS (credit_hours * grade_points) STORED,
+  recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_acad_rec (student_id, course_offering_id),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_offering_id) REFERENCES course_offerings(id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE rooms (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  school_id INT UNSIGNED NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  building VARCHAR(100) DEFAULT '',
+  capacity INT UNSIGNED DEFAULT 40,
+  room_type ENUM('lecture_hall','lab','tutorial_room','seminar','office') DEFAULT 'lecture_hall',
+  equipment JSON DEFAULT NULL,
+  status ENUM('available','maintenance','unavailable') DEFAULT 'available',
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE schedules (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  course_offering_id INT UNSIGNED NOT NULL,
+  day ENUM('monday','tuesday','wednesday','thursday','friday','saturday') NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  room_id INT UNSIGNED DEFAULT NULL,
+  schedule_type ENUM('lecture','lab','tutorial') DEFAULT 'lecture',
+  FOREIGN KEY (course_offering_id) REFERENCES course_offerings(id) ON DELETE CASCADE,
+  FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE fee_structures (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  school_id INT UNSIGNED NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  fee_type ENUM('per_credit','fixed','per_course') NOT NULL DEFAULT 'fixed',
+  applies_to VARCHAR(80) DEFAULT 'all',
+  semester_id INT UNSIGNED DEFAULT NULL,
+  status ENUM('active','inactive') DEFAULT 'active',
+  FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE invoices (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  semester_id INT UNSIGNED NOT NULL,
+  total_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  paid_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  status ENUM('pending','partial','paid','overdue') DEFAULT 'pending',
+  due_date DATE DEFAULT NULL,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE invoice_items (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  invoice_id INT UNSIGNED NOT NULL,
+  fee_structure_id INT UNSIGNED DEFAULT NULL,
+  description VARCHAR(200) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY (fee_structure_id) REFERENCES fee_structures(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE payments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  invoice_id INT UNSIGNED NOT NULL,
+  student_id INT UNSIGNED NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  payment_method ENUM('cash','bank_transfer','mobile','online') DEFAULT 'cash',
+  reference_number VARCHAR(100) DEFAULT '',
+  notes TEXT,
+  paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  recorded_by INT UNSIGNED DEFAULT NULL,
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (recorded_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE clearance_requests (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  type ENUM('graduation','transfer','withdrawal') NOT NULL DEFAULT 'graduation',
+  status ENUM('pending','in_progress','cleared','rejected') DEFAULT 'pending',
+  tracking_code VARCHAR(30) NOT NULL,
+  notes TEXT,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  completed_at TIMESTAMP NULL,
+  UNIQUE KEY uq_clr_code (tracking_code),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE clearance_items (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  request_id INT UNSIGNED NOT NULL,
+  department VARCHAR(50) NOT NULL,
+  checker_id INT UNSIGNED DEFAULT NULL,
+  status ENUM('pending','passed','failed','not_applicable') DEFAULT 'pending',
+  notes TEXT,
+  checked_at TIMESTAMP NULL,
+  signature_hash VARCHAR(64) DEFAULT '',
+  FOREIGN KEY (request_id) REFERENCES clearance_requests(id) ON DELETE CASCADE,
+  FOREIGN KEY (checker_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE transcript_requests (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  type ENUM('official','unofficial') NOT NULL DEFAULT 'unofficial',
+  status ENUM('pending','processing','ready','delivered') DEFAULT 'pending',
+  file_path VARCHAR(255) DEFAULT '',
+  hash VARCHAR(64) DEFAULT '',
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  processed_at TIMESTAMP NULL,
+  processed_by INT UNSIGNED DEFAULT NULL,
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE theses (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  program_id INT UNSIGNED NOT NULL,
+  title VARCHAR(500) NOT NULL DEFAULT '',
+  abstract TEXT,
+  advisor_id INT UNSIGNED DEFAULT NULL,
+  status ENUM('proposal','in_progress','defense','revision','completed','archived') DEFAULT 'proposal',
+  topic_approved_at TIMESTAMP NULL,
+  defense_date DATE DEFAULT NULL,
+  defense_result ENUM('pass','fail','revise') DEFAULT NULL,
+  defense_notes TEXT,
+  final_submitted_at TIMESTAMP NULL,
+  archived_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+  FOREIGN KEY (advisor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE thesis_chapters (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  thesis_id INT UNSIGNED NOT NULL,
+  chapter_number INT UNSIGNED NOT NULL,
+  title VARCHAR(200) NOT NULL DEFAULT '',
+  file_path VARCHAR(255) DEFAULT '',
+  status ENUM('draft','submitted','reviewed','approved') DEFAULT 'draft',
+  submitted_at TIMESTAMP NULL,
+  feedback TEXT,
+  feedback_at TIMESTAMP NULL,
+  advisor_id INT UNSIGNED DEFAULT NULL,
+  FOREIGN KEY (thesis_id) REFERENCES theses(id) ON DELETE CASCADE,
+  FOREIGN KEY (advisor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE thesis_committee (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  thesis_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  role ENUM('advisor','co_advisor','examiner') NOT NULL DEFAULT 'examiner',
+  approved_at TIMESTAMP NULL,
+  FOREIGN KEY (thesis_id) REFERENCES theses(id) ON DELETE CASCADE,
+  FOREIGN KEY (member_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE student_cards (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id INT UNSIGNED NOT NULL,
+  card_number VARCHAR(20) NOT NULL,
+  barcode_data VARCHAR(60) DEFAULT '',
+  qr_data VARCHAR(200) DEFAULT '',
+  issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATE DEFAULT NULL,
+  status ENUM('active','expired','revoked') DEFAULT 'active',
+  photo_path VARCHAR(255) DEFAULT '',
+  UNIQUE KEY uq_card_num (card_number),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE academic_events (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  semester_id INT UNSIGNED NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  event_date DATE NOT NULL,
+  event_type ENUM('holiday','ceremony','deadline','exam','registration') NOT NULL DEFAULT 'deadline',
+  description TEXT,
+  FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 SET FOREIGN_KEY_CHECKS = 1;
