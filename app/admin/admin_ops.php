@@ -342,9 +342,14 @@ class Ctl_backups {
                 if (!is_dir($dir)) @mkdir($dir, 0775, true);
                 $file = $dir . '/edunex_' . date('Ymd_His') . '.sql';
                 $db = DB_NAME;
-                $cmd = sprintf('mysqldump --no-defaults -h %s -u %s -p%s %s > %s 2>&1',
-                    DB_HOST, DB_USER, DB_PASS, escapeshellarg($db), escapeshellarg($file));
+                // Use temp config file to avoid password in process list
+                $mycnf = tempnam(sys_get_temp_dir(), 'mycnf');
+                file_put_contents($mycnf, "[client]\nhost=" . DB_HOST . "\nuser=" . DB_USER . "\npassword=" . DB_PASS . "\n");
+                chmod($mycnf, 0600);
+                $cmd = sprintf('mysqldump --no-defaults --defaults-extra-file=%s %s > %s 2>&1',
+                    escapeshellarg($mycnf), escapeshellarg($db), escapeshellarg($file));
                 exec($cmd, $out, $code);
+                @unlink($mycnf);
                 if ($code === 0 && is_file($file) && filesize($file) > 0) {
                     flash('success', 'Backup created: ' . basename($file) . ' (' . round(filesize($file)/1024, 1) . ' KB)');
                 } else {
