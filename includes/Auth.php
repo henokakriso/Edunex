@@ -10,11 +10,13 @@ class Auth {
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         session_name(SESSION_NAME);
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
         session_set_cookie_params([
             'lifetime' => 0,
             'path' => '/',
             'httponly' => true,
             'samesite' => 'Lax',
+            'secure' => $isSecure,
         ]);
         session_start();
         if (empty($_SESSION['created'])) {
