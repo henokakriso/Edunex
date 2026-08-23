@@ -83,10 +83,16 @@ class Ctl_book {
 
     private static function extractText(string $pdfPath): string {
         $out = '';
-        foreach (['pdftotext -layout', 'mutool draw -F txt', 'gs -sDEVICE=txtwrite'] as $cmd) {
-            $parts = explode(' ', $cmd);
-            if (self::hasBin($parts[0])) {
-                $out = shell_exec(escapeshellcmd($parts[0]) . ' ' . implode(' ', array_map('escapeshellarg', array_slice($parts, 1))) . ' ' . escapeshellarg($pdfPath) . ' - 2>/dev/null');
+        $cmds = [
+            ['bin' => 'pdftotext', 'args' => ['-layout']],
+            ['bin' => 'mutool', 'args' => ['draw', '-F', 'txt']],
+            ['bin' => 'gs', 'args' => ['-sDEVICE=txtwrite']],
+        ];
+        foreach ($cmds as $cmd) {
+            if (self::hasBin($cmd['bin'])) {
+                $parts = array_merge([$cmd['bin']], $cmd['args'], [$pdfPath, '-']);
+                $escaped = array_map('escapeshellarg', $parts);
+                $out = shell_exec(implode(' ', $escaped) . ' 2>/dev/null');
                 if (is_string($out) && trim($out) !== '') break;
             }
         }
