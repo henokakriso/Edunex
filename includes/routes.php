@@ -277,3 +277,5 @@ Router::page('api/activity', 'api/activity.php', '*');
 
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');
+Router::page('verify/clearance', 'verify/verify.php', 'guest');
+Router::page('verify/transcript', 'verify/verify.php', 'guest');

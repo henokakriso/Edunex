@@ -113,7 +113,9 @@ function require_role(string ...$roles): array {
 function dashboard_path(): string {
     return match (me()['role'] ?? '') {
         'sysadmin' => 'admin/dashboard', 'admin' => 'regional/dashboard', 'director' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
-        'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'vice_dean/dashboard', 'dept_head' => 'dept_head/dashboard',
+        'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'dean/dashboard', 'dept_head' => 'dean/dashboard',
+        'lecturer' => 'teacher/dashboard', 'bursar' => 'university/fees/manage', 'student_affairs' => 'university/clearance/manage',
+        'librarian' => 'library',
         'parent' => 'parent/dashboard', 'student' => 'student/dashboard',
         default => 'landing'
     };
@@ -260,8 +262,10 @@ function role_label(string $r): string {
     return match ($r) {
         'admin' => 'Administrator', 'teacher' => 'Teacher', 'registrar' => 'Registrar', 'dean' => 'Dean',
         'vice_dean' => 'Vice Dean', 'dept_head' => 'Department Head',
+        'lecturer' => 'Lecturer', 'bursar' => 'Bursar',
+        'student_affairs' => 'Student Affairs', 'librarian' => 'Librarian',
         'student' => 'Student', 'parent' => 'Parent', 'guest' => 'Guest',
-        default => ucfirst($r)
+        default => ucfirst(str_replace('_', ' ', $r))
     };
 }
 

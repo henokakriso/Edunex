@@ -138,7 +138,7 @@ CREATE TABLE student_groups (
 CREATE TABLE users (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   school_id INT UNSIGNED DEFAULT NULL,            -- NULL = platform-level (super admin)
-  role ENUM('admin','sysadmin','director','teacher','student','parent','guest') NOT NULL DEFAULT 'student',
+  role ENUM('admin','sysadmin','director','teacher','student','parent','guest','registrar','dean','vice_dean','dept_head','lecturer','bursar','student_affairs','librarian') NOT NULL DEFAULT 'student',
   first_name VARCHAR(80) NOT NULL,
   last_name VARCHAR(80) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
@@ -920,10 +920,40 @@ INSERT INTO role_permissions VALUES
   ('student','goals.view'), ('student','files.view'), ('student','files.upload'),
   ('student','calendar.view'), ('student','ai.tutor'), ('student','ai.assistant'),
   ('student','ai.flashcards'), ('student','transfers.view'), ('student','transfers.apply'),
+  ('student','registration.view'), ('student','registration.register'), ('student','registration.drop'),
+  ('student','clearance.view'), ('student','clearance.request'), ('student','transcript.view'),
+  ('student','transcript.request'), ('student','fees.view'), ('student','thesis.view'),
+  ('student','thesis.create'), ('student','thesis.submit'),
   ('parent','children.view'), ('parent','reports.view'), ('parent','grades.view'),
   ('parent','attendance.view'), ('parent','messages.view'), ('parent','messages.send'),
   ('parent','courses.view'), ('parent','assignments.view'), ('parent','calendar.view'),
-  ('guest','courses.view');
+  ('guest','courses.view'),
+  -- University roles
+  ('registrar','dashboard'), ('registrar','programs.manage'), ('registrar','semesters.manage'),
+  ('registrar','enrollments.manage'), ('registrar','transcripts.manage'), ('registrar','transcripts.generate'),
+  ('registrar','clearance.manage'), ('registrar','grades.view'), ('registrar','grades.manage'),
+  ('registrar','admissions.manage'), ('registrar','announcements.manage'), ('registrar','audit.view'),
+  ('registrar','id_cards.manage'), ('registrar','timetable.view'), ('registrar','timetable.manage'),
+  ('dean','dashboard'), ('dean','programs.view'), ('dean','programs.manage'),
+  ('dean','departments.view'), ('dean','departments.manage'), ('dean','courses.approve'),
+  ('dean','teachers.view'), ('dean','theses.manage'), ('dean','theses.view'),
+  ('dean','clearance.manage'), ('dean','analytics.view'), ('dean','announcements.manage'),
+  ('vice_dean','dashboard'), ('vice_dean','programs.view'), ('vice_dean','courses.approve'),
+  ('vice_dean','theses.view'), ('vice_dean','analytics.view'),
+  ('dept_head','dashboard'), ('dept_head','courses.view'), ('dept_head','courses.manage'),
+  ('dept_head','theses.view'), ('dept_head','theses.manage'), ('dept_head','analytics.view'),
+  ('dept_head','clearance.manage'),
+  ('lecturer','dashboard'), ('lecturer','courses.view'), ('lecturer','courses.manage'),
+  ('lecturer','exams.create'), ('lecturer','exams.grade'), ('lecturer','assignments.create'),
+  ('lecturer','assignments.grade'), ('lecturer','attendance.record'), ('lecturer','attendance.view'),
+  ('lecturer','grades.view'), ('lecturer','grades.manage'), ('lecturer','analytics.view'),
+  ('bursar','dashboard'), ('bursar','fees.manage'), ('bursar','fees.view'),
+  ('bursar','invoices.manage'), ('bursar','payments.record'), ('bursar','clearance.manage'),
+  ('bursar','reports.view'),
+  ('student_affairs','dashboard'), ('student_affairs','clearance.manage'),
+  ('student_affairs','id_cards.manage'), ('student_affairs','students.view'),
+  ('librarian','dashboard'), ('librarian','library.manage'), ('librarian','library.view'),
+  ('librarian','library.upload'), ('librarian','clearance.manage');
 
 -- Badges (system content)
 INSERT INTO badges (name, icon, description, xp_required, category) VALUES
