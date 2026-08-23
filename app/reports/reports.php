@@ -118,17 +118,20 @@ class Ctl_export {
             echo '.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}';
             echo '.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}';
             echo '.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}';
-            echo '.report{max-width:1000px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
+            echo '.report{max-width:1100px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
             echo '.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee}';
             echo '.report-header h2{font-size:20px;margin-bottom:4px}';
             echo '.report-header .meta{color:#666;font-size:12px}';
-            echo 'table{width:100%;border-collapse:collapse}th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #eee;font-size:13px}';
-            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:52px}';
+            echo '.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}';
+            echo 'table{width:100%;border-collapse:collapse;table-layout:auto;min-width:700px}';
+            echo 'th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #eee;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}';
+            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:0;z-index:2;white-space:nowrap}';
             echo 'tr:hover{background:#f8f9fa}';
-            echo '.row-num{color:#999;width:40px;text-align:center}';
+            echo '.row-num{color:#999;width:36px;text-align:center;max-width:36px}';
+            echo '.col-name{min-width:120px}.col-email{min-width:180px}.col-phone{min-width:110px}.col-id{min-width:100px}';
             echo '.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}';
             echo '.footer a{color:#4361ee;text-decoration:none}';
-            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}}';
+            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}.table-wrap{overflow:visible}table{min-width:0}th,td{white-space:normal;word-break:break-word}}';
             echo '</style></head><body>';
             echo '<div class="viewer-bar">';
             echo '<h1>' . e($title) . '</h1>';
@@ -143,13 +146,20 @@ class Ctl_export {
             echo '<p class="meta">Generated: ' . e($stamp) . ' · ' . count($rows) . ' records · Henok Akriso</p>';
             echo '</div>';
             if ($rows) {
-                echo '<div style="overflow-x:auto"><table><thead><tr><th class="row-num">#</th>';
-                foreach (array_keys($rows[0]) as $k) echo '<th>' . e(ucwords(str_replace('_', ' ', $k))) . '</th>';
+                $colMap = ['first_name'=>'col-name','last_name'=>'col-name','name'=>'col-name','email'=>'col-email','phone'=>'col-phone','student_id'=>'col-id','school_name'=>'col-name','school'=>'col-name','course'=>'col-name','course_title'=>'col-name'];
+                echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th>';
+                foreach (array_keys($rows[0]) as $k) {
+                    $cls = $colMap[$k] ?? '';
+                    echo '<th' . ($cls ? ' class="' . $cls . '"' : '') . '>' . e(ucwords(str_replace('_', ' ', $k))) . '</th>';
+                }
                 echo '</tr></thead><tbody>';
                 foreach ($rows as $r) {
                     $rowNum++;
                     echo '<tr><td class="row-num">' . $rowNum . '</td>';
-                    foreach (array_values($r) as $v) echo '<td>' . e(is_array($v) ? implode(', ', $v) : $v) . '</td>';
+                    foreach ($r as $k => $v) {
+                        $cls = $colMap[$k] ?? '';
+                        echo '<td' . ($cls ? ' class="' . $cls . '"' : '') . '>' . e(is_array($v) ? implode(', ', $v) : $v) . '</td>';
+                    }
                     echo '</tr>';
                 }
                 echo '</tbody></table></div>';

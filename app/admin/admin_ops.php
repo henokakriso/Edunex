@@ -165,15 +165,18 @@ class Ctl_logs {
             echo '.viewer-bar h1{font-size:15px;font-weight:600}.viewer-bar .btns{display:flex;gap:10px}';
             echo '.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}';
             echo '.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}';
-            echo '.report{max-width:1000px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
+            echo '.report{max-width:1100px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
             echo '.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee}';
             echo '.report-header h2{font-size:20px;margin-bottom:4px}.report-header .meta{color:#666;font-size:12px}';
-            echo 'table{width:100%;border-collapse:collapse}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee;font-size:12px}';
-            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:52px}.row-num{color:#999;width:36px;text-align:center}';
+            echo '.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}';
+            echo 'table{width:100%;border-collapse:collapse;table-layout:auto;min-width:600px}';
+            echo 'th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #eee;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}';
+            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:0;z-index:2;white-space:nowrap}';
+            echo '.row-num{color:#999;width:36px;text-align:center;max-width:36px}';
             echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#e8e8e8}';
             echo '.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}';
             echo '.footer a{color:#4361ee;text-decoration:none}';
-            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}}';
+            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}.table-wrap{overflow:visible}table{min-width:0}th,td{white-space:normal;word-break:break-word}}';
             echo '</style></head><body>';
             echo '<div class="viewer-bar"><h1>' . e($title) . '</h1>';
             echo '<div class="btns"><button class="btn-secondary" onclick="history.back()">← Back</button>';
@@ -183,7 +186,7 @@ class Ctl_logs {
             echo '</div></div>';
             echo '<div class="report"><div class="report-header"><h2>' . e($title) . '</h2>';
             echo '<p class="meta">Generated: ' . e($stamp) . ' · Filters: ' . e($filterStr) . ' · ' . count($logs) . ' records</p></div>';
-            echo '<div style="overflow-x:auto"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
+            echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
             $rn = 0;
             foreach ($logs as $l) {
                 $rn++;
