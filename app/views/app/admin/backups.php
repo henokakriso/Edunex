@@ -35,7 +35,7 @@ $busy = !empty($_GET['creating']);
           <td class="small"><?= e(round($b['size'] / 1024, 1)) ?> KB</td>
           <td class="small faint"><?= e(date('M j, Y H:i', $b['time'])) ?></td>
           <td>
-            <div class="flex gap-6" style="flex-wrap:wrap">
+            <div class="flex gap-6" style="white-space:nowrap">
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="download_backup" value="1">
