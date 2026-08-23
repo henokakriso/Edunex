@@ -11,6 +11,7 @@
       <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="bookmark">
         <button class="btn btn-sm <?= $bookmarked ? 'btn-soft' : '' ?>"><?= $bookmarked ? icon('bookmark') . ' Bookmarked' : icon('bookmark') . ' Bookmark' ?></button>
       </form>
+      <a class="btn btn-sm" href="<?= url('notes&course=' . $course['id']) ?>"><?= icon('note') ?> Notes</a>
     <?php endif; ?>
   </div>
 </div>

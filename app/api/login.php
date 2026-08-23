@@ -8,12 +8,19 @@ require_once __DIR__ . '/_auth.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') api_out(['ok' => false, 'error' => 'method'], 405);
 $in = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $identifier = trim((string)($in['identifier'] ?? ''));
+
+// Rate limit login attempts
+$loginKey = 'api:login:' . ($_SERVER['REMOTE_ADDR'] ?? '');
+if (rate_limit_blocked($loginKey, 10, 900)) {
+    api_out(['ok' => false, 'error' => 'Too many failed attempts. Please wait 5 minutes.'], 429);
+}
 $password = (string)($in['password'] ?? '');
 
 if ($identifier === '' || $password === '') api_out(['ok' => false, 'error' => 'missing_fields'], 400);
 
 $u = Database::one("SELECT * FROM users WHERE (email = ? OR phone = ? OR student_id = ?) LIMIT 1", [$identifier, $identifier, $identifier]);
 if (!$u || !password_verify($password, $u['password_hash'] ?? '')) {
+    rate_limit($loginKey, 10, 900); // record failed attempt
     if ($u) Database::insert('login_history', ['user_id' => $u['id'], 'status' => 'failed', 'ip' => $_SERVER['REMOTE_ADDR'] ?? '', 'user_agent' => 'desktop-api']);
     api_out(['ok' => false, 'error' => 'invalid_credentials'], 401);
 }

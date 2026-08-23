@@ -1153,4 +1153,21 @@ INSERT INTO messages (conversation_id, sender_id, body) VALUES
 INSERT INTO goals (user_id, title, target, current, unit, due_date) VALUES
   (4, 'Finish Mathematics 101', 100, 50, 'lessons', DATE_ADD(CURDATE(), INTERVAL 30 DAY));
 
+CREATE TABLE student_notes (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED DEFAULT NULL,
+  course_id INT UNSIGNED DEFAULT NULL,
+  title VARCHAR(180) NOT NULL DEFAULT '',
+  body LONGTEXT,
+  pinned TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_user (user_id),
+  INDEX idx_course (course_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
 SET FOREIGN_KEY_CHECKS = 1;

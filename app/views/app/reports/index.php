@@ -36,6 +36,18 @@
       <span class="exp-ic"><?= icon('note') ?></span>
       <span><b>Exams CSV</b><p class="tiny faint">Exams and their questions</p></span>
     </a>
+    <a class="exp-tile" href="<?= e(url('reports/export&type=courses&format=pdf')) ?>">
+      <span class="exp-ic" style="background:var(--danger-soft)"><?= icon('file') ?></span>
+      <span><b>Courses PDF</b><p class="tiny faint">Print-ready course report</p></span>
+    </a>
+    <a class="exp-tile" href="<?= e(url('reports/export&type=users&format=pdf')) ?>">
+      <span class="exp-ic" style="background:var(--danger-soft)"><?= icon('file') ?></span>
+      <span><b>Users PDF</b><p class="tiny faint">Print-ready user report</p></span>
+    </a>
+    <a class="exp-tile" href="<?= e(url('reports/export&type=exams&format=pdf')) ?>">
+      <span class="exp-ic" style="background:var(--danger-soft)"><?= icon('file') ?></span>
+      <span><b>Exams PDF</b><p class="tiny faint">Print-ready exam report</p></span>
+    </a>
   </div>
 </div>
 

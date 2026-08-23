@@ -122,6 +122,7 @@ class Ctl_logs {
         $action = trim($_GET['action'] ?? '');
         $q = trim($_GET['q'] ?? '');
         $days = (int)($_GET['days'] ?? 0);
+        $export = $_GET['export'] ?? '';
         $sql = "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name FROM activity_logs l LEFT JOIN users us ON us.id = l.user_id WHERE 1=1";
         $args = [];
         if ($action) { $sql .= " AND l.action = ?"; $args[] = $action; }
@@ -130,6 +131,76 @@ class Ctl_logs {
         $sql .= " ORDER BY l.created_at DESC LIMIT 500";
         $logs = Database::all($sql, $args);
         $actions = Database::all("SELECT action, COUNT(*) AS n FROM activity_logs GROUP BY action ORDER BY n DESC LIMIT 25");
+
+        if ($export === 'pdf' || $export === 'md') {
+            $stamp = date('F j, Y \a\t g:i A');
+            $filters = [];
+            if ($action) $filters[] = "Action: $action";
+            if ($q) $filters[] = "Search: \"$q\"";
+            if ($days) $filters[] = "Last $days days";
+            $filterStr = $filters ? implode(' · ', $filters) : 'No filters';
+
+            if ($export === 'md') {
+                header('Content-Type: text/markdown');
+                header('Content-Disposition: attachment; filename="edunex_logs_' . date('Ymd_His') . '.md"');
+                echo "# Edunex Activity Logs\n\n";
+                echo "**Generated:** $stamp\n**Filters:** $filterStr\n**Records:** " . count($logs) . "\n\n";
+                echo "| # | Time | User | Action | Detail |\n";
+                echo "|---|------|------|--------|--------|\n";
+                $rn = 0;
+                foreach ($logs as $l) {
+                    $rn++;
+                    echo "| $rn | " . e(date('M j, H:i:s', strtotime($l['created_at']))) . " | " . e($l['user_name'] ?? '—') . " | " . e($l['action']) . " | " . e($l['detail']) . " |\n";
+                }
+                echo "\n---\n**Henok Akriso** · henokakriso.com\n\nAll system is opensourced under [ARWE-PL License](https://github.com/henokakriso/Edunex)\n";
+                exit;
+            }
+
+            // PDF viewer
+            $title = 'Edunex Activity Logs';
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' . e($title) . '</title>';
+            echo '<style>';
+            echo '*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f5;color:#222}';
+            echo '.viewer-bar{position:sticky;top:0;z-index:100;background:#1a1a2e;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}';
+            echo '.viewer-bar h1{font-size:15px;font-weight:600}.viewer-bar .btns{display:flex;gap:10px}';
+            echo '.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}';
+            echo '.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}';
+            echo '.report{max-width:1000px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
+            echo '.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee}';
+            echo '.report-header h2{font-size:20px;margin-bottom:4px}.report-header .meta{color:#666;font-size:12px}';
+            echo 'table{width:100%;border-collapse:collapse}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee;font-size:12px}';
+            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:52px}.row-num{color:#999;width:36px;text-align:center}';
+            echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#e8e8e8}';
+            echo '.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}';
+            echo '.footer a{color:#4361ee;text-decoration:none}';
+            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}}';
+            echo '</style></head><body>';
+            echo '<div class="viewer-bar"><h1>' . e($title) . '</h1>';
+            echo '<div class="btns"><button class="btn-secondary" onclick="history.back()">← Back</button>';
+            echo '<a href="javascript:window.print()">🖨 Print</a>';
+            echo '<a href="javascript:downloadPDF()">⬇ Download PDF</a>';
+            echo '<a href="' . e(url('admin/logs&' . http_build_query(array_filter(['action'=>$action,'q'=>$q,'days'=>$days,'export'=>'md'])))) . '">📄 Markdown</a>';
+            echo '</div></div>';
+            echo '<div class="report"><div class="report-header"><h2>' . e($title) . '</h2>';
+            echo '<p class="meta">Generated: ' . e($stamp) . ' · Filters: ' . e($filterStr) . ' · ' . count($logs) . ' records</p></div>';
+            echo '<div style="overflow-x:auto"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
+            $rn = 0;
+            foreach ($logs as $l) {
+                $rn++;
+                echo '<tr><td class="row-num">' . $rn . '</td>';
+                echo '<td>' . e(date('M j, H:i:s', strtotime($l['created_at']))) . '</td>';
+                echo '<td>' . e($l['user_name'] ?? '—') . '</td>';
+                echo '<td><span class="badge">' . e($l['action']) . '</span></td>';
+                echo '<td>' . e($l['detail']) . '</td></tr>';
+            }
+            echo '</tbody></table></div>';
+            echo '<div class="footer"><p><b>Henok Akriso</b> · henokakriso.com</p>';
+            echo '<p>All system is opensourced under <a href="https://github.com/henokakriso/Edunex" target="_blank">ARWE-PL License</a></p></div></div>';
+            echo '<script>function downloadPDF(){var opt={margin:[10,10],filename:"edunex_logs_' . date('Ymd_His') . '.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"}};if(typeof html2pdf!=="undefined"){html2pdf().set(opt).from(document.querySelector(".report")).save();}else{var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=function(){html2pdf().set(opt).from(document.querySelector(".report")).save();};document.head.appendChild(s);}}</script>';
+            echo '</body></html>';
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['rotate'])) {
@@ -259,7 +330,7 @@ class Ctl_backups {
                 $file = $dir . '/edunex_' . date('Ymd_His') . '.sql';
                 $db = DB_NAME;
                 $cmd = sprintf('mysqldump --no-defaults -h %s -u %s -p%s %s 2>/dev/null > %s',
-                    DB_HOST, DB_USER, escapeshellarg(DB_PASS), escapeshellarg($db), escapeshellarg($file));
+                    DB_HOST, DB_USER, DB_PASS, escapeshellarg($db), escapeshellarg($file));
                 exec($cmd, $out, $code);
                 if ($code === 0 && is_file($file) && filesize($file) > 0) {
                     flash('success', 'Backup created: ' . basename($file));

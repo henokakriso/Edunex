@@ -21,6 +21,7 @@ $gradeText = match (strtoupper((string)($cert['grade'] ?: 'A'))) {
     <p class="muted small" style="text-align:center">This is to certify that</p>
     <h2 class="cert-name"><?= e($cert['first_name'] . ' ' . $cert['last_name']) ?></h2>
     <p class="muted small" style="text-align:center">(<?= e($cert['student_id']) ?>)</p>
+    <p class="muted tiny" style="text-align:center;margin-top:2px">Roll Number: <?= e($cert['student_id']) ?></p>
     <p class="muted small" style="text-align:center;margin-top:16px">has successfully completed the course</p>
     <h3 class="cert-course"><?= e($cert['course_title']) ?></h3>
     <p class="small faint" style="text-align:center">Course code: <?= e($cert['course_code']) ?></p>
@@ -35,6 +36,10 @@ $gradeText = match (strtoupper((string)($cert['grade'] ?: 'A'))) {
         <p class="small" style="margin:0"><?= e(date('F j, Y', strtotime($cert['issued_at']))) ?></p>
         <p class="tiny faint mono" style="margin:0"><?= e($cert['cert_code']) ?></p>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #d8ccb4">
+      <p class="tiny faint" style="margin:0"><b>Henok Akriso</b> · henokakriso.com</p>
+      <p class="tiny faint" style="margin:2px 0 0">All system is opensourced under ARWE-PL License</p>
     </div>
   </div>
 </div>

@@ -204,6 +204,8 @@ Router::page('gamification', 'gamification/index.php', ['student', 'admin']);
 Router::page('gamification/badges', 'gamification/badges.php', ['student', 'admin']);
 Router::page('gamification/leaderboard', 'gamification/leaderboard.php', ['student', 'admin']);
 
+Router::page('notes', 'notes/notes.php', ['student', 'teacher', 'parent']);
+Router::page('games', 'games/games.php', ['student', 'teacher']);
 Router::page('search', 'search/index.php', '*');
 
 Router::page('files', 'files/index.php', 'admin');

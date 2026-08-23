@@ -54,3 +54,16 @@ function base64url_decode(string $s): string|false {
     $t = strtr($s, '-_', '+/');
     return base64_decode($t . str_repeat('=', (4 - strlen($t) % 4) % 4));
 }
+
+/**
+ * Rate limit an API endpoint. Call after api_user().
+ * $max = max requests per $windowSec seconds. Default: 60 req/min.
+ */
+function api_rate_limit(array $user, string $endpoint = 'default', int $max = 60, int $windowSec = 60): void {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $key = "api:{$endpoint}:{$ip}:{$user['id']}";
+    if (rate_limit_blocked($key, $max, $windowSec)) {
+        api_out(['ok' => false, 'error' => 'rate_limited', 'retry_after' => $windowSec], 429);
+    }
+    rate_limit($key, $max, $windowSec);
+}

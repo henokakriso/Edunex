@@ -124,7 +124,9 @@ $__nav = [
     ['schedule', 'Schedule', 'student/schedule', icon('calendar')],
     ['ai', 'AI Tutor', 'ai/tutor', icon('robot')],
     ['flashcards', 'Flashcards', 'ai/flashcards', icon('game')],
+    ['games', 'Games', 'games', icon('game')],
     ['library', 'Library', 'library', icon('university')],
+    ['notes', 'My Notes', 'notes', icon('note')],
     ['leaderboard', 'Leaderboard', 'student/leaderboard', icon('trophy')],
     ['certificates', 'Certificates', 'certificates', icon('medal')],
     ['theses', 'My Theses', 'student/theses', icon('book')],
@@ -181,13 +183,14 @@ if (($__u['role'] ?? '') === 'director') {
 $__icons = [
   'dashboard' => icon('home'), 'courses' => icon('graduation'), 'exams' => icon('note'), 'assignments' => icon('file'),
   'attendance' => icon('doc'), 'grades' => icon('check-circle'), 'schedule' => icon('calendar'), 'ai' => icon('robot'),
-  'flashcards' => icon('game'), 'library' => icon('university'), 'leaderboard' => icon('trophy'), 'certificates' => icon('medal'),
+  'flashcards' => icon('game'), 'games' => icon('game'), 'library' => icon('university'), 'leaderboard' => icon('trophy'), 'certificates' => icon('medal'),
   'transfers' => icon('refresh'), 'children' => icon('user') . '‍' . icon('user') . '‍' . icon('user'), 'reports' => icon('trend-up'), 'analytics' => icon('chart-bar'),
   'users' => icon('users'), 'schools' => icon('school'), 'departments' => icon('folder'), 'subjects' => icon('books'),
   'groups' => icon('tag'), 'years' => icon('calendar'), 'announcements' => icon('megaphone'), 'logs' => icon('note'),
   'backups' => icon('save'), 'roles' => icon('lock'), 'settings' => icon('gear'), 'grade' => icon('check-circle'),
   'students' => icon('users'), 'forum' => icon('chat'), 'notifications' => icon('bell'), 'calendar' => icon('calendar'),
   'messages' => icon('chat'), 'files' => icon('folder'), 'search' => icon('search'), 'gamification' => icon('trophy'),
+  'notes' => icon('note'),
 ];
 ?>
 <!DOCTYPE html>
@@ -242,7 +245,7 @@ $__icons = [
         <span class="ico"><?= icon('game') ?></span>Gamification
       </a>
       <?php endif; ?>
-      <?php if (in_array(($__u['role'] ?? ''), ['sysadmin', 'director'], true)): ?>
+      <?php if (($__u['role'] ?? '') === 'sysadmin'): ?>
       <a class="nav-item <?= str_starts_with($__route, 'files') ? 'active' : '' ?>" href="<?= url('index.php?r=files') ?>">
         <span class="ico"><?= icon('folder') ?></span>Files
       </a>

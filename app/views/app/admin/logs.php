@@ -5,6 +5,10 @@
     <h1><?= icon('note') ?> Activity Logs</h1>
     <p class="sub"><?= count($logs) ?> recorded actions</p>
   </div>
+  <div class="flex gap-8">
+    <a class="btn btn-sm" href="<?= e(url('admin/logs&' . http_build_query(array_filter(['action'=>$action,'q'=>$q,'days'=>$days,'export'=>'pdf']))) ) ?>"><?= icon('file') ?> Export PDF</a>
+    <a class="btn btn-sm" href="<?= e(url('admin/logs&' . http_build_query(array_filter(['action'=>$action,'q'=>$q,'days'=>$days,'export'=>'md']))) ) ?>"><?= icon('file') ?> Export Markdown</a>
+  </div>
 </div>
 
 <div class="card" style="margin-bottom:18px">

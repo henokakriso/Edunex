@@ -24,6 +24,7 @@ $ok = $result !== null;
           <b><?= e($result['course_title']) ?></b> at <b><?= e($result['school_name']) ?></b>,
           issued <?= e(date('F j, Y', strtotime($result['issued_at']))) ?>.
         </p>
+        <p class="tiny faint" style="margin:4px 0 0">Roll Number: <?= e($result['student_id']) ?></p>
         <p class="tiny faint mono" style="margin:8px 0 0">Code: <?= e($result['cert_code']) ?> · Hash: <?= e(mb_strimwidth((string)$result['qr_hash'], 0, 16, '…')) ?></p>
       </div>
     <?php else: ?>
