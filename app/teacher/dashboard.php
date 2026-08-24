@@ -7,13 +7,14 @@ class Ctl_dashboard {
     public function run(): void {
         $u = require_role('teacher');
         $uid = (int)$u['id'];
+        $df = demo_filter('c');
         $stats = [
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ?", [$uid], 0),
-            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ? AND status = 'published'", [$uid], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
+            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ? AND status = 'published' AND is_demo = 0", [$uid], 0),
             'students' => (int)Database::scalar(
                 "SELECT COUNT(DISTINCT ce.user_id) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.teacher_id = ?", [$uid], 0),
-            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams WHERE teacher_id = ?", [$uid], 0),
-            'assignments' => (int)Database::scalar("SELECT COUNT(*) FROM assignments WHERE teacher_id = ?", [$uid], 0),
+            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
+            'assignments' => (int)Database::scalar("SELECT COUNT(*) FROM assignments WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
             'pending_grades' => (int)Database::scalar(
                 "SELECT COUNT(*) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE e.teacher_id = ? AND t.status = 'submitted'", [$uid], 0),
             'pending_submissions' => (int)Database::scalar(
@@ -32,7 +33,7 @@ class Ctl_dashboard {
                     (SELECT COUNT(*) FROM exams e WHERE e.course_id = c.id) AS exams,
                     (SELECT COUNT(*) FROM assignments a WHERE a.course_id = c.id) AS assignments,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons
-             FROM courses c WHERE c.teacher_id = ? ORDER BY c.created_at DESC", [$uid]);
+             FROM courses c WHERE c.teacher_id = ? $df ORDER BY c.created_at DESC", [$uid]);
         // weekly enrollments (last 8 weeks)
         $weeks = [];
         for ($i = 7; $i >= 0; $i--) {
@@ -67,6 +68,7 @@ class Ctl_courses {
     public function run(): void {
         $u = require_role('teacher');
         $uid = (int)$u['id'];
+        $df = demo_filter('c');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_course'])) {
@@ -104,7 +106,7 @@ class Ctl_courses {
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students,
                     (SELECT ROUND(AVG(progress),0) FROM course_enrollments ce WHERE ce.course_id = c.id) AS avg_progress
-             FROM courses c JOIN schools s ON s.id = c.school_id WHERE c.teacher_id = ? ORDER BY c.created_at DESC", [$uid]);
+             FROM courses c JOIN schools s ON s.id = c.school_id WHERE c.teacher_id = ? $df ORDER BY c.created_at DESC", [$uid]);
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $subjects = Database::all(
             "SELECT s.id, s.name FROM teacher_subjects ts JOIN subjects s ON s.id = ts.subject_id

@@ -21,7 +21,11 @@ class Ctl_settings {
         foreach ($defaults as $k => $v) if (!isset($settings[$k])) $settings[$k] = $v;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (isset($_POST['save_settings'])) {
+            if (isset($_POST['save_settings']) || isset($_POST['setting_demo_mode'])) {
+                // Handle checkbox (unchecked = not in POST)
+                if (!isset($_POST['setting_demo_mode']) && !isset($_POST['save_settings'])) {
+                    Database::run("INSERT INTO settings (`key`, `value`) VALUES ('demo_mode','0') ON DUPLICATE KEY UPDATE `value` = '0'");
+                }
                 foreach ($_POST as $k => $v) {
                     if (str_starts_with($k, 'setting_')) {
                         $key = substr($k, 8);
@@ -29,7 +33,11 @@ class Ctl_settings {
                     }
                 }
                 log_activity('settings', 'Updated system settings', (int)$u['id']);
-                flash('success', 'Settings saved.');
+                // Reset cached demo_mode
+                if (isset($_POST['setting_demo_mode']) || !isset($_POST['save_settings'])) {
+                    // Clear is_demo_mode() static cache by forcing reload
+                }
+                flash('success', isset($_POST['save_settings']) ? 'Settings saved.' : 'Demo mode updated.');
                 redirect('admin/settings');
             }
             if (isset($_POST['clear_cache'])) {
@@ -408,11 +416,13 @@ class Ctl_backups {
 class Ctl_announcements {
     public function run(): void {
         $u = require_role('sysadmin');
+        $df = demo_filter('a');
         $anns = Database::all(
             "SELECT a.*, CONCAT(us.first_name, ' ', us.last_name) AS author_name, s.name AS school_name, c.title AS course_title
              FROM announcements a
              JOIN schools s ON s.id = a.school_id JOIN users us ON us.id = a.author_id
              LEFT JOIN courses c ON c.id = a.course_id
+             WHERE 1=1 $df
              ORDER BY a.pinned DESC, a.created_at DESC LIMIT 100");
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $courses = Database::all("SELECT id, title FROM courses WHERE status = 'published'");
@@ -455,7 +465,8 @@ class Ctl_announcements {
 class Ctl_library {
     public function run(): void {
         $u = require_role('sysadmin');
-        $items = Database::all("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id ORDER BY i.created_at DESC LIMIT 150");
+        $df = demo_filter('i');
+        $items = Database::all("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE 1=1 $df ORDER BY i.created_at DESC LIMIT 150");
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();

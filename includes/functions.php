@@ -381,11 +381,14 @@ function require_student_feature(string $feature): void {
 
 /** Check if demo mode is active (settings-based). */
 function is_demo_mode(): bool {
-    static $cached = null;
-    if ($cached === null) {
-        $cached = (setting('demo_mode') ?? '0') === '1';
-    }
-    return $cached;
+    return (setting('demo_mode') ?? '0') === '1';
+}
+
+/** Returns SQL fragment to filter out demo data when in normal mode. */
+function demo_filter(string $tableAlias = ''): string {
+    if (is_demo_mode()) return '';
+    $col = ($tableAlias ? $tableAlias . '.' : '') . 'is_demo';
+    return " AND $col = 0";
 }
 
 /** DEMO data badge — marks seeded demo rows in ERP/portal views. */

@@ -31,13 +31,14 @@ class Ctl_registrar {
     }
 
     private function dashboard(array $u, int $sid): void {
+        $df = demo_filter('c');
         $stats = [
             'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role='student' AND school_id=? AND status='active'", [$sid], 0),
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE school_id=?", [$sid], 0),
-            'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id=?", [$sid], 0),
-            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams e JOIN courses c ON c.id=e.course_id WHERE c.school_id=?", [$sid], 0),
-            'graded' => (int)Database::scalar("SELECT COUNT(*) FROM exam_attempts ea JOIN exams e ON e.id=ea.exam_id JOIN courses c ON c.id=e.course_id WHERE c.school_id=? AND ea.status='graded'", [$sid], 0),
-            'transcripts' => (int)Database::scalar("SELECT COUNT(DISTINCT user_id) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id=?", [$sid], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE school_id=? AND is_demo = 0", [$sid], 0),
+            'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id=? AND c.is_demo = 0", [$sid], 0),
+            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams e JOIN courses c ON c.id=e.course_id WHERE c.school_id=? AND c.is_demo = 0", [$sid], 0),
+            'graded' => (int)Database::scalar("SELECT COUNT(*) FROM exam_attempts ea JOIN exams e ON e.id=ea.exam_id JOIN courses c ON c.id=e.course_id WHERE c.school_id=? AND ea.status='graded' AND c.is_demo = 0", [$sid], 0),
+            'transcripts' => (int)Database::scalar("SELECT COUNT(DISTINCT user_id) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id=? AND c.is_demo = 0", [$sid], 0),
         ];
         $recent = Database::all(
             "SELECT ce.id, ce.enrolled_at, ce.progress, CONCAT(us.first_name,' ',us.last_name) AS student, us.student_id, co.title AS course
@@ -96,6 +97,7 @@ class Ctl_registrar {
         $semFilter = (int)($_GET['semester'] ?? 0);
         $semCond = $semFilter ? ' AND ce.semester_id = ' . $semFilter : '';
         $where = "co.school_id = ? AND (CONCAT(us.first_name,' ',us.last_name) LIKE ? OR us.student_id LIKE ? OR co.title LIKE ?)$semCond";
+        $df = demo_filter('co');
         $rows = Database::all(
             "SELECT ce.id, ce.enrolled_at, ce.progress, ce.completed, ce.semester_id, CONCAT(us.first_name,' ',us.last_name) AS student,
                     us.student_id AS sid_no, co.title AS course, co.id AS course_id, co.credit_hours, s.name AS semester
@@ -103,8 +105,8 @@ class Ctl_registrar {
              JOIN courses co ON co.id = ce.course_id
              JOIN users us ON us.id = ce.user_id
              LEFT JOIN semesters s ON s.id = ce.semester_id
-             WHERE $where ORDER BY ce.enrolled_at DESC LIMIT 200", [$sid, $like, $like, $like]);
-        $courses = Database::all("SELECT id, title, code, credit_hours FROM courses WHERE school_id = ? AND status = 'published' ORDER BY title", [$sid]);
+             WHERE $where $df ORDER BY ce.enrolled_at DESC LIMIT 200", [$sid, $like, $like, $like]);
+        $courses = Database::all("SELECT id, title, code, credit_hours FROM courses WHERE school_id = ? AND status = 'published' $df ORDER BY title", [$sid]);
         $students = Database::all("SELECT id, student_id, CONCAT(first_name,' ',last_name) AS name FROM users WHERE school_id = ? AND role='student' AND status='active' ORDER BY last_name LIMIT 500", [$sid]);
         $semesters = Database::all(
             "SELECT s.id, s.name, y.name AS year_name FROM semesters s
@@ -490,9 +492,10 @@ class Ctl_registrar {
             flash('success', 'Announcement published to ' . count($targets) . ' users.');
             redirect('registrar/announcements');
         }
+        $df = demo_filter('a');
         $rows = Database::all(
             "SELECT a.*, sc.name AS school_name FROM announcements a JOIN schools sc ON sc.id = a.school_id
-             WHERE a.school_id = ? ORDER BY a.created_at DESC LIMIT 30", [$sid]);
+             WHERE a.school_id = ? $df ORDER BY a.created_at DESC LIMIT 30", [$sid]);
         Router::render('app/registrar/announcements', ['title' => 'Announcements', 'rows' => $rows]);
     }
 

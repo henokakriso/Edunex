@@ -64,10 +64,11 @@ class Ctl_vice_dean {
             }
             redirect('vice_dean/courses');
         }
+        $df = demo_filter('co');
         $rows = Database::all(
             "SELECT co.*, CONCAT(t.first_name,' ',t.last_name) AS teacher, d.name AS dept
              FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
-             WHERE d.faculty_id = ? ORDER BY co.status, co.created_at DESC LIMIT 100", [$fid]);
+             WHERE d.faculty_id = ? $df ORDER BY co.status, co.created_at DESC LIMIT 100", [$fid]);
         Router::render('app/vice_dean/courses', ['title' => 'Course Approval', 'rows' => $rows]);
     }
 

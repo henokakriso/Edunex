@@ -7,12 +7,13 @@ class Ctl_teacher_assignments {
     public function run(): void {
         $u = require_role('teacher');
         $uid = (int)$u['id'];
+        $df = demo_filter('a');
         $assignments = Database::all(
             "SELECT a.*, c.title AS course_title, s.name AS subject_name,
                     (SELECT COUNT(*) FROM assignment_submissions s2 WHERE s2.assignment_id = a.id) AS subs,
                     (SELECT COUNT(*) FROM assignment_submissions s2 WHERE s2.assignment_id = a.id AND s2.status = 'submitted') AS pending
              FROM assignments a JOIN courses c ON c.id = a.course_id LEFT JOIN subjects s ON s.id = c.subject_id
-             WHERE a.teacher_id = ? ORDER BY a.due_date DESC", [$uid]);
+             WHERE a.teacher_id = ? $df ORDER BY a.due_date DESC", [$uid]);
         $courses = SubjectAuth::courses((int)$u['id']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -180,6 +181,7 @@ class Ctl_student_assignments {
         $u = require_role('student');
         require_student_feature('assignments');
         $uid = (int)$u['id'];
+        $df = demo_filter('a');
         $assigns = Database::all(
             "SELECT a.*, c.title AS course_title,
                     s.status AS sub_status, s.score, s.submitted_at AS my_submitted_at, s.id AS sub_id
@@ -187,7 +189,7 @@ class Ctl_student_assignments {
              JOIN courses c ON c.id = a.course_id
              JOIN course_enrollments ce ON ce.course_id = a.course_id AND ce.user_id = ?
              LEFT JOIN assignment_submissions s ON s.assignment_id = a.id AND s.student_id = ?
-             ORDER BY a.due_date", [$uid, $uid]);
+             WHERE 1=1 $df ORDER BY a.due_date", [$uid, $uid]);
         foreach ($assigns as &$a) {
             $a['submitted'] = (bool)$a['sub_id'];
             $a['overdue'] = !$a['submitted'] && strtotime($a['due_date']) < time();

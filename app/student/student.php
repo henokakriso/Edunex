@@ -13,12 +13,13 @@ class Ctl_courses {
     public function run(): void {
         $u = require_role('student');
         $uid = (int)$u['id'];
+        $df = demo_filter('c');
         $courses = Database::all(
             "SELECT c.*, u.first_name AS tfirst, u.last_name AS tlast, ce.progress, ce.completed,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS total_lessons,
                     (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.lesson_id IN (SELECT id FROM lessons l2 WHERE l2.course_id = c.id) AND lp.user_id = ? AND lp.completed = 1) AS done_lessons
              FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id JOIN users u ON u.id = c.teacher_id
-             WHERE ce.user_id = ? AND c.status = 'published'
+             WHERE ce.user_id = ? AND c.status = 'published' $df
              ORDER BY ce.enrolled_at DESC", [$uid, $uid]);
         Router::render('app/student/courses', ['title' => 'My Courses', 'courses' => $courses]);
     }
@@ -30,13 +31,14 @@ class Ctl_exams {
         $u = require_role('student');
         require_student_feature('exams');
         $uid = (int)$u['id'];
+        $df = demo_filter('e');
         $exams = Database::all(
             "SELECT e.*, c.title AS course_title,
                     a.id AS attempt_id, a.status AS attempt_status, a.score, a.total_points, a.started_at, a.submitted_at
              FROM exams e JOIN courses c ON c.id = e.course_id
              JOIN course_enrollments ce ON ce.course_id = e.course_id AND ce.user_id = ?
              LEFT JOIN exam_attempts a ON a.exam_id = e.id AND a.student_id = ? AND a.id = (SELECT MAX(a2.id) FROM exam_attempts a2 WHERE a2.exam_id = e.id AND a2.student_id = ?)
-             WHERE e.status = 'published' AND e.end_time > NOW()
+             WHERE e.status = 'published' AND e.end_time > NOW() $df
              ORDER BY e.start_time", [$uid, $uid, $uid]);
         foreach ($exams as &$ex) {
             $ex['open'] = strtotime($ex['start_time']) <= time() + 120;
@@ -52,6 +54,8 @@ class Ctl_grades {
         require_student_feature('grades');
         if (inactive_student($u)) { flash('info', 'Inactive (re-exam) accounts have access to courses and exams only.'); redirect('student/dashboard'); }
         $uid = (int)$u['id'];
+        $dfExam = demo_filter('e');
+        $dfAssign = demo_filter('a');
         $semesters = Database::all(
             "SELECT s.*, y.name AS year_name FROM semesters s
              JOIN academic_years y ON y.id = s.year_id
@@ -71,14 +75,14 @@ class Ctl_grades {
                     a.score, a.total_points, a.submitted_at, a.status,
                     e.passing_score
              FROM exam_attempts a JOIN exams e ON e.id = a.exam_id JOIN courses c ON c.id = e.course_id
-             WHERE a.student_id = ? AND a.status = 'graded' ORDER BY a.submitted_at DESC", [$uid]);
+             WHERE a.student_id = ? AND a.status = 'graded' $dfExam ORDER BY a.submitted_at DESC", [$uid]);
         foreach ($exams as &$x) { $x['semester'] = $semesterOf($x['submitted_at']); }
         $assigns = Database::all(
             "SELECT a.title, c.title AS course_title, c.level AS course_level, c.id AS course_id,
                     s.score, a.max_score, s.graded_at, s.feedback
              FROM assignment_submissions s JOIN assignments a ON a.id = s.assignment_id
              JOIN courses c ON c.id = a.course_id
-             WHERE s.student_id = ? AND s.status = 'graded' ORDER BY s.graded_at DESC", [$uid]);
+             WHERE s.student_id = ? AND s.status = 'graded' $dfAssign ORDER BY s.graded_at DESC", [$uid]);
         foreach ($assigns as &$a) { $a['semester'] = $semesterOf($a['graded_at']); }
         $courses = Database::all(
             "SELECT c.title, ce.progress,
@@ -98,10 +102,11 @@ class Ctl_attendance {
         require_student_feature('attendance');
         if (inactive_student($u)) { flash('info', 'Inactive (re-exam) accounts have access to courses and exams only.'); redirect('student/dashboard'); }
         $uid = (int)$u['id'];
+        $df = demo_filter('at');
         $rows = Database::all(
             "SELECT at.*, c.title AS course_title, us.first_name AS tfirst, us.last_name AS tlast
              FROM attendance at JOIN courses c ON c.id = at.course_id JOIN users us ON us.id = at.recorded_by
-             WHERE at.student_id = ? ORDER BY at.date DESC, at.id DESC LIMIT 120", [$uid]);
+             WHERE at.student_id = ? $df ORDER BY at.date DESC, at.id DESC LIMIT 120", [$uid]);
         $summary = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
         foreach ($rows as $r) {
             $summary[$r['status']] = ($summary[$r['status']] ?? 0) + 1;

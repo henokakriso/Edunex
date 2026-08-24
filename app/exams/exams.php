@@ -177,11 +177,12 @@ class Ctl_exams {
         $uid = (int)$u['id'];
         $myCourses = self::authorizedCourses($uid);
         $courseFilter = (int)($_GET['course'] ?? 0);
+        $df = demo_filter('e');
         $sql = "SELECT e.*, c.title AS course_title, c.subject_id, s.name AS subject_name,
                 (SELECT COUNT(*) FROM exam_questions q WHERE q.exam_id = e.id) AS question_count,
                 (SELECT COUNT(*) FROM exam_attempts t WHERE t.exam_id = e.id AND t.status = 'submitted') AS pending_count
                 FROM exams e JOIN courses c ON c.id = e.course_id LEFT JOIN subjects s ON s.id = c.subject_id
-                WHERE e.teacher_id = ?";
+                WHERE e.teacher_id = ? $df";
         $args = [$u['id']];
         if ($courseFilter) { $sql .= " AND e.course_id = ?"; $args[] = $courseFilter; }
         $sql .= " ORDER BY e.created_at DESC";

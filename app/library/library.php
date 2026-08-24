@@ -9,10 +9,11 @@ class Ctl_index {
         if (!module_active((int)$u['school_id'], 'library')) { http_response_code(403); die('The Library module is not installed for your school.'); }
         $q = trim($_GET['q'] ?? '');
         $type = $_GET['type'] ?? '';
+        $df = demo_filter('i');
         $sql = "SELECT i.*, s.name AS school_name,
                     (SELECT COUNT(*) FROM library_favorites f WHERE f.item_id = i.id) AS favs
                 FROM library_items i JOIN schools s ON s.id = i.school_id
-                WHERE i.status = 'published'";
+                WHERE i.status = 'published' $df";
         $args = [];
         // All users only see their own school's library
         if ((int)$u['school_id'] > 0) { $sql .= " AND i.school_id = ?"; $args[] = (int)$u['school_id']; }

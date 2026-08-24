@@ -7,12 +7,13 @@ class Ctl_badges {
     public function run(): void {
         $u = require_login();
         $uid = (int)$u['id'];
+        $dfBadge = demo_filter('b');
         $me = Database::one("SELECT xp, level, streak FROM users WHERE id = ?", [$uid]);
         $mine = Database::all(
             "SELECT b.*, ub.earned_at FROM user_badges ub JOIN badges b ON b.id = ub.badge_id
              WHERE ub.user_id = ? ORDER BY ub.earned_at DESC", [$uid]);
         $mineIds = array_column($mine, 'id');
-        $all = Database::all("SELECT * FROM badges ORDER BY xp_required");
+        $all = Database::all("SELECT * FROM badges WHERE 1=1 $dfBadge ORDER BY xp_required");
         foreach ($all as &$b) $b['earned'] = in_array($b['id'], $mineIds);
         unset($b);
         Router::render('app/gamification/badges', [
