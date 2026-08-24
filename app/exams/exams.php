@@ -173,7 +173,7 @@ class Ctl_result {
 /* =============== TEACHER: exam list =============== */
 class Ctl_exams {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $myCourses = self::authorizedCourses($uid);
         $courseFilter = (int)($_GET['course'] ?? 0);
@@ -225,7 +225,7 @@ class Ctl_exams {
 /* =============== TEACHER: create/edit exam + questions =============== */
 class Ctl_exam {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $id = (int)($_GET['id'] ?? 0);
         $myCourses = Ctl_exams::authorizedCourses((int)$u['id']);
         $exam = null;
@@ -386,7 +386,7 @@ class Ctl_exam {
 /* =============== TEACHER: grade manual questions =============== */
 class Ctl_grade {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $examId = (int)($_GET['exam'] ?? 0);
         $exam = Database::one("SELECT e.*, c.title AS course_title FROM exams e JOIN courses c ON c.id = e.course_id WHERE e.id = ? AND e.teacher_id = ?", [$examId, $u['id']]);
         if (!$exam) { flash('danger', 'Exam not found.'); redirect('teacher/exams'); }

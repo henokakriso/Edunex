@@ -5,7 +5,7 @@
 
 class Ctl_teacher_assignments {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $df = demo_filter('a');
         $assignments = Database::all(
@@ -60,7 +60,7 @@ class Ctl_teacher_assignments {
 
 class Ctl_teacher_assignment {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $courses = SubjectAuth::courses($uid);
         $id = (int)($_GET['id'] ?? 0);

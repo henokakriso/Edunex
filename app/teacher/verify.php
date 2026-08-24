@@ -3,7 +3,7 @@
 
 class Ctl_verify {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

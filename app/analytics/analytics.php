@@ -201,7 +201,7 @@ class Ctl_teacher {
     }
 
     public function run(): void {
-        $u = require_role('teacher', 'director');
+        $u = require_role('teacher', 'director', 'lecturer');
         $uid = (int)$u['id'];
         $isDirector = $u['role'] === 'director';
         if ($isDirector) {
@@ -269,12 +269,14 @@ class Ctl_teacher {
                 $courses = [];
             }
             $series = [];
-            for ($i = 29; $i >= 0; $i--) {
-                $d = date('Y-m-d', strtotime("-$i days"));
-                $args = array_merge($ids, [$d]);
-                $series[] = ['date' => $d, 'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.id IN (" . implode(',', $placeholders) . ") AND DATE(ce.enrolled_at) = ?", $args, 0)];
+            if ($ids) {
+                for ($i = 29; $i >= 0; $i--) {
+                    $d = date('Y-m-d', strtotime("-$i days"));
+                    $args = array_merge($ids, [$d]);
+                    $series[] = ['date' => $d, 'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.id IN (" . implode(',', $placeholders) . ") AND DATE(ce.enrolled_at) = ?", $args, 0)];
+                }
             }
-            $topStudents = Database::all(
+            $topStudents = $ids ? Database::all(
                 "SELECT us.id, CONCAT(us.first_name, ' ', us.last_name) AS name, us.student_id, us.xp,
                         (SELECT COUNT(*) FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id WHERE lp.user_id = us.id AND lp.completed = 1 AND l.course_id IN (" . implode(',', $placeholders) . ")) AS lessons_done,
                         (SELECT ROUND(AVG(t.score / t.total_points * 100)) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE t.student_id = us.id AND t.status = 'graded' AND t.total_points > 0 AND e.course_id IN (" . implode(',', $placeholders) . ")) AS exam_avg
@@ -282,7 +284,7 @@ class Ctl_teacher {
                      EXISTS (SELECT 1 FROM lesson_progress lp2 JOIN lessons l2 ON l2.id = lp2.lesson_id WHERE lp2.user_id = us.id AND lp2.completed = 1 AND l2.course_id IN (" . implode(',', $placeholders) . "))
                      OR EXISTS (SELECT 1 FROM exam_attempts t3 JOIN exams e3 ON e3.id = t3.exam_id WHERE t3.student_id = us.id AND t3.status = 'graded' AND e3.course_id IN (" . implode(',', $placeholders) . "))
                  )
-                 ORDER BY lessons_done DESC, exam_avg DESC LIMIT 10", array_merge($ids, [$u['school_id']], $ids, $ids));
+                 ORDER BY lessons_done DESC, exam_avg DESC LIMIT 10", array_merge($ids, [$u['school_id']], $ids, $ids)) : [];
         }
         $analysis = self::analyze($courses, $series);
         Router::render('app/analytics/teacher', [

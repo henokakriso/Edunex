@@ -24,7 +24,7 @@
     <div class="flex-col"><label class="small faint">Course *</label>
       <select class="input" name="course_id" required>
         <option value="">— Select course —</option>
-        <?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?> (<?= e($c['code'] ?: '') ?>) · <?= (float)$c['credit_hours'] ?> cr</option><?php endforeach; ?>
+        <?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?> (<?= e($c['code'] ?: '') ?>) · <?= (float)$c['credits'] ?> cr</option><?php endforeach; ?>
       </select>
     </div>
     <div class="flex-col"><label class="small faint">Student *</label>
@@ -53,7 +53,7 @@
         <tr>
           <td><b><?= e($r['student']) ?></b><p class="tiny faint"><?= e($r['sid_no'] ?: '—') ?></p></td>
           <td><?= e($r['course']) ?></td>
-          <td class="tiny"><?= (float)$r['credit_hours'] ?></td>
+          <td class="tiny"><?= (float)$r['credits'] ?></td>
           <td class="tiny faint"><?= e($r['semester'] ?: '—') ?></td>
           <td class="small faint"><?= e(date('M j, Y', strtotime($r['enrolled_at']))) ?></td>
           <td>

@@ -61,7 +61,7 @@
           <tr>
             <td><b><?= e($t['course']) ?></b></td>
             <td><?= e($t['course_code'] ?: '—') ?></td>
-            <td class="tiny"><?= (float)$t['credit_hours'] ?></td>
+            <td class="tiny"><?= (float)$t['credits'] ?></td>
             <td class="tiny faint"><?= $t['semester'] ? e($t['semester']) . ($t['year_name'] ? ' · ' . e($t['year_name']) : '') : '—' ?></td>
             <td><?= $t['exam_avg'] !== null ? e($t['exam_avg']) . '%' : '—' ?></td>
             <td><?= $t['assign_avg'] !== null ? e($t['assign_avg']) . '%' : '—' ?></td>

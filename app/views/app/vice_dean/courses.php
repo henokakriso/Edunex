@@ -15,7 +15,7 @@
           <td><b><?= e($r['title']) ?></b><div class="tiny faint"><?= e($r['code'] ?: '') ?></div></td>
           <td class="small"><?= e($r['teacher']) ?></td>
           <td class="small"><?= e($r['dept']) ?></td>
-          <td class="tiny"><?= (float)$r['credit_hours'] ?></td>
+          <td class="tiny"><?= (float)$r['credits'] ?></td>
           <td><span class="badge <?= $r['status'] === 'published' ? 'badge-success' : '' ?>"><?= e($r['status']) ?></span></td>
           <td>
             <?php if ($r['status'] === 'draft'): ?>

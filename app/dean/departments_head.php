@@ -160,7 +160,7 @@ class Ctl_dept_head {
         $dept = $this->dept($sid);
         $students = Database::all(
             "SELECT u.id, u.student_id, CONCAT(u.first_name,' ',u.last_name) AS student,
-                    COALESCE(SUM(co.credit_hours), 0) AS credits
+                    COALESCE(SUM(co.credits), 0) AS credits
              FROM users u LEFT JOIN course_enrollments ce ON ce.user_id = u.id
              LEFT JOIN courses co ON co.id = ce.course_id
              WHERE u.department_id = ? AND u.role = 'student'

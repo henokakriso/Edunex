@@ -9,7 +9,7 @@
 
 class Ctl_book {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $sid = (int)$u['school_id'];
 

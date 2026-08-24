@@ -2,7 +2,7 @@
 /* =============== TEACHER: homeroom class overview =============== */
 class Ctl_homeroom {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $groups = Database::all("SELECT * FROM student_groups WHERE homeroom_teacher_id = ? ORDER BY name", [$uid]);
         if (!$groups) {

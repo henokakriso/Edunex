@@ -5,7 +5,7 @@
 
 class Ctl_dashboard {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $df = demo_filter('c');
         $stats = [
@@ -66,7 +66,7 @@ class Ctl_dashboard {
 
 class Ctl_courses {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $df = demo_filter('c');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -119,7 +119,7 @@ class Ctl_courses {
 
 class Ctl_course {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $id = (int)($_GET['id'] ?? 0);
         $course = Database::one("SELECT * FROM courses WHERE id = ? AND teacher_id = ?", [$id, $uid]);
@@ -192,7 +192,7 @@ class Ctl_course {
 
 class Ctl_lesson {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $courseId = (int)($_GET['course'] ?? 0);
         $course = Database::one("SELECT * FROM courses WHERE id = ? AND teacher_id = ?", [$courseId, $uid]);

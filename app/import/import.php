@@ -78,7 +78,7 @@ class Ctl_import_common {
 /* ============ TEACHER: import parents ============ */
 class Ctl_import {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $sid = (int)$u['school_id'];
         $result = null; $msg = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

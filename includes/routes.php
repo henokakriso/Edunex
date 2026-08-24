@@ -44,23 +44,23 @@ Router::page('student/leaderboard', 'student/leaderboard.php', 'student');
 Router::page('student/theses', 'student/theses.php', 'student');
 
 /* ---- Teacher ---- */
-Router::page('teacher/dashboard', 'teacher/dashboard.php', 'teacher');
-Router::page('teacher/courses', 'teacher/courses.php', 'teacher');
-Router::page('teacher/course', 'teacher/course.php', 'teacher');
-Router::page('teacher/lesson', 'teacher/lesson.php', 'teacher');
-Router::page('teacher/exams', 'teacher/exams.php', 'teacher');
-Router::page('teacher/exam', 'teacher/exam.php', 'teacher');
-Router::page('teacher/assignments', 'teacher/assignments.php', 'teacher');
-Router::page('teacher/assignment', 'teacher/assignment.php', 'teacher');
-Router::page('assignments/review/post', 'assignments/review_post.php', ['student', 'teacher']);
-Router::page('assignments/review/list', 'assignments/review_list.php', ['student', 'teacher']);
-Router::page('teacher/grade', 'teacher/grade.php', 'teacher', 'grades.manage');
-Router::page('teacher/attendance', 'teacher/attendance.php', 'teacher', 'attendance.record');
-Router::page('teacher/students', 'teacher/students.php', 'teacher', 'attendance.view');
-Router::page('teacher/homeroom', 'teacher/homeroom.php', 'teacher');
-Router::page('teacher/verify', 'teacher/verify.php', 'teacher', 'attendance.record');
-Router::page('teacher/import', 'teacher/import.php', 'teacher');
-Router::page('teacher/book', 'teacher/book.php', 'teacher');
+Router::page('teacher/dashboard', 'teacher/dashboard.php', ['teacher', 'lecturer']);
+Router::page('teacher/courses', 'teacher/courses.php', ['teacher', 'lecturer']);
+Router::page('teacher/course', 'teacher/course.php', ['teacher', 'lecturer']);
+Router::page('teacher/lesson', 'teacher/lesson.php', ['teacher', 'lecturer']);
+Router::page('teacher/exams', 'teacher/exams.php', ['teacher', 'lecturer']);
+Router::page('teacher/exam', 'teacher/exam.php', ['teacher', 'lecturer']);
+Router::page('teacher/assignments', 'teacher/assignments.php', ['teacher', 'lecturer']);
+Router::page('teacher/assignment', 'teacher/assignment.php', ['teacher', 'lecturer']);
+Router::page('assignments/review/post', 'assignments/review_post.php', ['student', 'teacher', 'lecturer']);
+Router::page('assignments/review/list', 'assignments/review_list.php', ['student', 'teacher', 'lecturer']);
+Router::page('teacher/grade', 'teacher/grade.php', ['teacher', 'lecturer'], 'grades.manage');
+Router::page('teacher/attendance', 'teacher/attendance.php', ['teacher', 'lecturer'], 'attendance.record');
+Router::page('teacher/students', 'teacher/students.php', ['teacher', 'lecturer'], 'attendance.view');
+Router::page('teacher/homeroom', 'teacher/homeroom.php', ['teacher', 'lecturer']);
+Router::page('teacher/verify', 'teacher/verify.php', ['teacher', 'lecturer'], 'attendance.record');
+Router::page('teacher/import', 'teacher/import.php', ['teacher', 'lecturer']);
+Router::page('teacher/book', 'teacher/book.php', ['teacher', 'lecturer']);
 Router::page('teacher/book/job', 'teacher/book_job.php', 'teacher');
 Router::page('director/dashboard', 'director/dashboard.php', 'director');
 Router::page('director/teachers', 'director/teachers.php', 'director');
@@ -71,10 +71,10 @@ Router::page('director/faculties', 'director/faculties.php', 'director');
 Router::page('director/reports', 'director/reports.php', 'director');
 Router::page('director/analytics', 'director/analytics.php', 'director');
 
-Router::page('teacher/reports', 'teacher/reports.php', 'teacher');
-Router::page('teacher/analytics', 'teacher/analytics.php', 'teacher');
-Router::page('teacher/library', 'teacher/library.php', 'teacher');
-Router::page('teacher/forum', 'teacher/forum.php', 'teacher');
+Router::page('teacher/reports', 'teacher/reports.php', ['teacher', 'lecturer']);
+Router::page('teacher/analytics', 'teacher/analytics.php', ['teacher', 'lecturer']);
+Router::page('teacher/library', 'teacher/library.php', ['teacher', 'lecturer']);
+Router::page('teacher/forum', 'teacher/forum.php', ['teacher', 'lecturer']);
 
 /* ---- Admin ---- */
 Router::page('admin/dashboard', 'admin/dashboard.php', 'sysadmin');

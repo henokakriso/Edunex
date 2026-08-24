@@ -56,7 +56,7 @@ class Ctl_registrar {
                 $courseId = (int)($_POST['course_id'] ?? 0);
                 $studentId = (int)($_POST['student_id'] ?? 0);
                 $semesterId = (int)($_POST['semester_id'] ?? 0);
-                $course = Database::one("SELECT id, title, credit_hours FROM courses WHERE id = ? AND school_id = ?", [$courseId, $sid]);
+                $course = Database::one("SELECT id, title, credits FROM courses WHERE id = ? AND school_id = ?", [$courseId, $sid]);
                 $student = Database::one("SELECT id FROM users WHERE id = ? AND school_id = ? AND role = 'student'", [$studentId, $sid]);
                 if (!$course || !$student) {
                     flash('danger', 'Course or student not found in your school.');
@@ -100,13 +100,13 @@ class Ctl_registrar {
         $df = demo_filter('co');
         $rows = Database::all(
             "SELECT ce.id, ce.enrolled_at, ce.progress, ce.completed, ce.semester_id, CONCAT(us.first_name,' ',us.last_name) AS student,
-                    us.student_id AS sid_no, co.title AS course, co.id AS course_id, co.credit_hours, s.name AS semester
+                    us.student_id AS sid_no, co.title AS course, co.id AS course_id, co.credits, s.name AS semester
              FROM course_enrollments ce
              JOIN courses co ON co.id = ce.course_id
              JOIN users us ON us.id = ce.user_id
              LEFT JOIN semesters s ON s.id = ce.semester_id
              WHERE $where $df ORDER BY ce.enrolled_at DESC LIMIT 200", [$sid, $like, $like, $like]);
-        $courses = Database::all("SELECT id, title, code, credit_hours FROM courses WHERE school_id = ? AND status = 'published' $df ORDER BY title", [$sid]);
+        $courses = Database::all("SELECT id, title, code, credits FROM courses WHERE school_id = ? AND status = 'published' $df ORDER BY title", [$sid]);
         $students = Database::all("SELECT id, student_id, CONCAT(first_name,' ',last_name) AS name FROM users WHERE school_id = ? AND role='student' AND status='active' ORDER BY last_name LIMIT 500", [$sid]);
         $semesters = Database::all(
             "SELECT s.id, s.name, y.name AS year_name FROM semesters s
@@ -135,7 +135,7 @@ class Ctl_registrar {
                  WHERE u.id = ? AND u.school_id = ? AND u.role = 'student'", [$studentId, $sid]);
             if ($student) {
                 $transcript = Database::all(
-                    "SELECT co.id AS course_id, co.title AS course, co.code AS course_code, co.credit_hours,
+                    "SELECT co.id AS course_id, co.title AS course, co.code AS course_code, co.credits,
                             ce.semester_id, s.name AS semester, y.name AS year_name,
                             (SELECT ROUND(AVG(ea.score),1) FROM exam_attempts ea JOIN exams e ON e.id=ea.exam_id
                              WHERE e.course_id=co.id AND ea.student_id=? AND ea.status='graded') AS exam_avg,
@@ -154,7 +154,7 @@ class Ctl_registrar {
                 foreach ($transcript as $row) {
                     $total = self::finalScore((float)$row['exam_avg'], (float)$row['assign_avg']);
                     if ($total === null) continue;
-                    $credits = (float)$row['credit_hours'];
+                    $credits = (float)$row['credits'];
                     $pts = self::gradePoints($total) * $credits;
                     $cgPoints += $pts;
                     $cgCredits += $credits;
@@ -376,7 +376,7 @@ class Ctl_registrar {
         $rows = Database::all(
             "SELECT u.id, u.student_id, CONCAT(u.first_name,' ',u.last_name) AS student, u.email,
                     d.name AS dept_name, d.required_credits,
-                    COALESCE(SUM(co.credit_hours), 0) AS earned_credits,
+                    COALESCE(SUM(co.credits), 0) AS earned_credits,
                     COUNT(CASE WHEN (SELECT ROUND(AVG(ea.score),1) FROM exam_attempts ea JOIN exams e ON e.id=ea.exam_id
                                     WHERE e.course_id=co.id AND ea.student_id=u.id AND ea.status='graded') >= 50
                               OR (SELECT ROUND(AVG(s2.score),1) FROM assignment_submissions s2 JOIN assignments a2 ON a2.id=s2.assignment_id

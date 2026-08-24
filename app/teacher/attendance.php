@@ -5,7 +5,7 @@
 
 class Ctl_attendance {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $sid = (int)$u['school_id'];
         $isHomeroom = (bool)Database::one(
@@ -100,7 +100,7 @@ class Ctl_attendance {
 
 class Ctl_students {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
         $courses = SubjectAuth::courses($uid);
         $authIds = array_column($courses, 'id');

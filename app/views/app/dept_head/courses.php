@@ -15,7 +15,7 @@
           <td><b><?= e($r['title']) ?></b></td>
           <td class="tiny"><?= e($r['code'] ?: '—') ?></td>
           <td class="small"><?= e($r['teacher']) ?></td>
-          <td class="tiny"><?= (float)$r['credit_hours'] ?></td>
+          <td class="tiny"><?= (float)$r['credits'] ?></td>
           <td><span class="badge <?= $r['status'] === 'published' ? 'badge-success' : '' ?>"><?= e($r['status']) ?></span></td>
         </tr>
       <?php endforeach; ?>

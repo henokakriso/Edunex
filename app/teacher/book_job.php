@@ -5,7 +5,7 @@
 
 class Ctl_book_job {
     public function run(): void {
-        $u = require_role('teacher');
+        $u = require_role('teacher', 'lecturer');
         $id = (string)($_GET['job'] ?? '');
         if (!AiJob::validId($id) || !is_dir(AiJob::dir($id))) {
             flash('danger', 'Job not found.');
