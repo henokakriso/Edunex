@@ -263,7 +263,7 @@ $__icons = [
       <div class="brand">
         <span class="brand-logo">E</span>
         <div>
-          <div class="brand-name">Edunex</div>
+          <div class="brand-name">Edunex<?php if (is_demo_mode()): ?> <span style="display:inline-block;font-size:0.55em;background:var(--warning,#f59e0b);color:#000;padding:1px 5px;border-radius:4px;vertical-align:middle;cursor:help" title="DEMO mode active — sample data shown. Switch to Normal mode in Settings.">DEMO</span><?php endif; ?></div>
           <div class="brand-sub"><?= e(setting('site_name', 'Learning')) ?> · <?= e($__u['school_name'] ?? '') ?></div>
         </div>
       </div>

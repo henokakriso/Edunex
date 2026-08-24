@@ -3,12 +3,14 @@ $groups = [
   'General' => ['site_name', 'tagline', 'contact_email', 'contact_phone', 'address', 'support_phone', 'currency'],
   'AI & Learning' => ['ai_enabled', 'ai_provider', 'ai_model', 'ai_api_url', 'ai_api_key'],
   'Policies' => ['registration_enabled', 'transfer_enabled', 'exam_grace', 'max_upload_mb'],
+  'Demo Mode' => ['demo_mode'],
 ];
 $inputs = [
   'site_name' => 'text', 'tagline' => 'text', 'contact_email' => 'email', 'contact_phone' => 'text',
   'address' => 'text', 'support_phone' => 'text', 'currency' => 'text',
   'ai_enabled' => 'select', 'ai_language' => 'select', 'registration_enabled' => 'select',
   'transfer_enabled' => 'select', 'exam_grace' => 'number', 'max_upload_mb' => 'number',
+  'demo_mode' => 'select',
 ];
 ?>
 <div class="page-head">
@@ -27,7 +29,13 @@ $inputs = [
         <?php foreach ($keys as $k): ?>
           <div class="flex-col">
             <label class="small faint"><?= e(str_replace('_', ' ', ucfirst($k))) ?></label>
-            <?php if (($inputs[$k] ?? 'text') === 'select'): ?>
+            <?php if ($k === 'demo_mode'): ?>
+              <select class="input" name="setting_<?= e($k) ?>">
+                <option value="1" <?= ($settings[$k] ?? '') == '1' ? 'selected' : '' ?>>Demo (show sample data)</option>
+                <option value="0" <?= ($settings[$k] ?? '') != '1' ? 'selected' : '' ?>>Normal (empty until you add data)</option>
+              </select>
+              <p class="tiny faint" style="margin-top:4px">Demo mode shows pre-filled sample data across all pages. Normal mode shows only data you create manually.</p>
+            <?php elseif (($inputs[$k] ?? 'text') === 'select'): ?>
               <select class="input" name="setting_<?= e($k) ?>">
                 <option value="1" <?= $settings[$k] == '1' ? 'selected' : '' ?>>Enabled</option>
                 <option value="0" <?= $settings[$k] != '1' ? 'selected' : '' ?>>Disabled</option>

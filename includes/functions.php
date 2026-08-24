@@ -379,11 +379,25 @@ function require_student_feature(string $feature): void {
     }
 }
 
+/** Check if demo mode is active (settings-based). */
+function is_demo_mode(): bool {
+    static $cached = null;
+    if ($cached === null) {
+        $cached = (setting('demo_mode') ?? '0') === '1';
+    }
+    return $cached;
+}
+
 /** DEMO data badge — marks seeded demo rows in ERP/portal views. */
 function demo_badge(array $row): string {
     return !empty($row['is_demo'])
         ? '<span class="badge badge-warning" title="Seeded demo data">DEMO</span>'
         : '';
+}
+
+/** Return demo-only data or empty array depending on demo_mode setting. */
+function demo_or_empty(array $demoData): array {
+    return is_demo_mode() ? $demoData : [];
 }
 
 /** JSON response */

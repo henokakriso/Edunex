@@ -33,6 +33,7 @@ class Ctl_university {
 
     /* ========== PROGRAMS ========== */
     private function programs(array $u, int $sid): void {
+        $demo = is_demo_mode() ? '' : ' AND p.is_demo = 0';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_program'])) {
@@ -69,7 +70,7 @@ class Ctl_university {
              FROM programs p
              LEFT JOIN faculties f ON f.id = p.faculty_id
              LEFT JOIN departments d ON d.id = p.department_id
-             WHERE p.school_id = ? AND p.status != 'archived'
+             WHERE p.school_id = ? AND p.status != 'archived' $demo
              ORDER BY f.name, d.name, p.name", [$sid]);
         $faculties = Database::all("SELECT id, name FROM faculties WHERE school_id = ? ORDER BY name", [$sid]);
         $departments = Database::all("SELECT id, name FROM departments WHERE school_id = ? AND status = 'active' ORDER BY name", [$sid]);
@@ -148,6 +149,7 @@ class Ctl_university {
     private function registration(array $u, int $sid): void {
         $studentId = $u['role'] === 'student' ? (int)$u['id'] : (int)($_GET['student_id'] ?? 0);
         $semesterId = (int)($_GET['semester_id'] ?? 0);
+        $demo = is_demo_mode() ? '' : ' AND co.is_demo = 0';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -177,7 +179,7 @@ class Ctl_university {
                  FROM course_offerings co
                  JOIN courses c ON c.id = co.course_id
                  LEFT JOIN users u ON u.id = co.lecturer_id
-                 WHERE co.semester_id = ? AND co.status = 'open'
+                 WHERE co.semester_id = ? AND co.status = 'open' $demo
                  ORDER BY c.code", [$activeSem]);
             if ($studentId) {
                 $registered = Database::all(
@@ -341,10 +343,11 @@ class Ctl_university {
     /* ========== FEES / BURSAR ========== */
     private function fees(array $u, int $sid): void {
         $studentId = (int)$u['id'];
+        $demo = is_demo_mode() ? '' : ' AND i.is_demo = 0';
         $invoices = Database::all(
             "SELECT i.*, sem.name AS sem_name
              FROM invoices i JOIN semesters sem ON sem.id = i.semester_id
-             WHERE i.student_id = ? ORDER BY i.created_at DESC", [$studentId]);
+             WHERE i.student_id = ? $demo ORDER BY i.created_at DESC", [$studentId]);
         $payments = Database::all(
             "SELECT p.*, i.id AS inv_id FROM payments p
              JOIN invoices i ON i.id = p.invoice_id
@@ -394,11 +397,13 @@ class Ctl_university {
             }
         }
 
-        $feeStructures = Database::all("SELECT * FROM fee_structures WHERE school_id = ? AND status = 'active' ORDER BY name", [$sid]);
+        $demoFee = is_demo_mode() ? '' : ' AND fs.is_demo = 0';
+        $demoInv = is_demo_mode() ? '' : ' AND i.is_demo = 0';
+        $feeStructures = Database::all("SELECT * FROM fee_structures WHERE school_id = ? AND status = 'active' $demoFee ORDER BY name", [$sid]);
         $invoices = Database::all(
             "SELECT i.*, CONCAT(u.first_name,' ',u.last_name) AS student_name, u.student_id AS sid_no, sem.name AS sem_name
              FROM invoices i JOIN users u ON u.id = i.student_id JOIN semesters sem ON sem.id = i.semester_id
-             WHERE u.school_id = ? ORDER BY i.created_at DESC LIMIT 100", [$sid]);
+             WHERE u.school_id = ? $demoInv ORDER BY i.created_at DESC LIMIT 100", [$sid]);
         $students = Database::all("SELECT id, student_id, CONCAT(first_name,' ',last_name) AS name FROM users WHERE school_id = ? AND role = 'student' AND status = 'active' ORDER BY last_name LIMIT 500", [$sid]);
         $semesters = Database::all(
             "SELECT s.id, s.name FROM semesters s JOIN academic_years y ON y.id = s.year_id
@@ -411,6 +416,7 @@ class Ctl_university {
 
     /* ========== THESES ========== */
     private function theses(array $u, int $sid): void {
+        $demo = is_demo_mode() ? '' : ' AND t.is_demo = 0';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_thesis'])) {
@@ -429,7 +435,7 @@ class Ctl_university {
             $myThesis = Database::one(
                 "SELECT t.*, CONCAT(u.first_name,' ',u.last_name) AS advisor_name
                  FROM theses t LEFT JOIN users u ON u.id = t.advisor_id
-                 WHERE t.student_id = ? ORDER BY t.created_at DESC LIMIT 1", [(int)$u['id']]);
+                 WHERE t.student_id = ? $demo ORDER BY t.created_at DESC LIMIT 1", [(int)$u['id']]);
         } else {
             $theses = Database::all(
                 "SELECT t.*, CONCAT(u.first_name,' ',u.last_name) AS student_name, u.student_id AS sid_no,
@@ -437,7 +443,7 @@ class Ctl_university {
                  FROM theses t
                  JOIN users u ON u.id = t.student_id
                  LEFT JOIN users a ON a.id = t.advisor_id
-                 WHERE t.program_id IN (SELECT id FROM programs WHERE school_id = ?)
+                 WHERE t.program_id IN (SELECT id FROM programs WHERE school_id = ?) $demo
                  ORDER BY t.created_at DESC LIMIT 100", [$sid]);
         }
         Router::render('app/university/theses', [
@@ -496,13 +502,14 @@ class Ctl_university {
             $semesterId = (int)Database::scalar(
                 "SELECT s.id FROM semesters s JOIN academic_years y ON y.id = s.year_id WHERE y.school_id = ? ORDER BY y.start_date DESC, s.start_date DESC LIMIT 1", [$sid], 0);
         }
+        $demo = is_demo_mode() ? '' : ' AND s.is_demo = 0';
         $rows = Database::all(
             "SELECT s.day, s.start_time, s.end_time, s.schedule_type, c.title, c.code, co.room, CONCAT(u.first_name,' ',u.last_name) AS lecturer
              FROM schedules s
              JOIN course_offerings co ON co.id = s.course_offering_id
              JOIN courses c ON c.id = co.course_id
              LEFT JOIN users u ON u.id = co.lecturer_id
-             WHERE co.semester_id = ?
+             WHERE co.semester_id = ? $demo
              ORDER BY FIELD(s.day,'monday','tuesday','wednesday','thursday','friday','saturday'), s.start_time", [$semesterId]);
         $semesters = Database::all(
             "SELECT s.id, s.name FROM semesters s JOIN academic_years y ON y.id = s.year_id
@@ -514,6 +521,7 @@ class Ctl_university {
 
     /* ========== ID CARDS ========== */
     private function id_cards(array $u, int $sid): void {
+        $demo = is_demo_mode() ? '' : ' AND sc.is_demo = 0';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['generate_card'])) {
@@ -526,7 +534,7 @@ class Ctl_university {
         $cards = Database::all(
             "SELECT sc.*, CONCAT(u.first_name,' ',u.last_name) AS student_name, u.student_id AS sid_no
              FROM student_cards sc JOIN users u ON u.id = sc.student_id
-             WHERE u.school_id = ? ORDER BY sc.issued_at DESC LIMIT 200", [$sid]);
+             WHERE u.school_id = ? $demo ORDER BY sc.issued_at DESC LIMIT 200", [$sid]);
         $students = Database::all(
             "SELECT id, student_id, CONCAT(first_name,' ',last_name) AS name
              FROM users WHERE school_id = ? AND role = 'student' AND status = 'active' ORDER BY last_name LIMIT 500", [$sid]);

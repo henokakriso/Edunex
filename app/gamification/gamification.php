@@ -96,11 +96,29 @@ class Ctl_leaderboard {
         $sid = (int)my_school_id();
         $scope = $_GET['scope'] ?? 'school';
         $role = in_array($_GET['role'] ?? 'student', ['student', 'teacher', 'parent'], true) ? $_GET['role'] : 'student';
-        $roleWhere = $scope === 'school' ? " AND school_id = ?" : '';
-        $args = $scope === 'school' ? [$sid] : [];
+
+        $gradeFilter = '';
+        $args = [$role];
+        if ($scope === 'school') {
+            $gradeFilter = " AND school_id = ?";
+            $args[] = $sid;
+        }
+
+        if ($role === 'student') {
+            $myGroupId = (int)($u['group_id'] ?? 0);
+            if ($myGroupId > 0) {
+                $myGrade = Database::scalar("SELECT grade FROM student_groups WHERE id = ?", [$myGroupId], '');
+                if ($myGrade !== '') {
+                    $gradeFilter .= " AND group_id IN (SELECT id FROM student_groups WHERE grade = ? AND school_id = ?)";
+                    $args[] = $myGrade;
+                    $args[] = $sid;
+                }
+            }
+        }
+
         $list = Database::all(
-            "SELECT id, first_name, last_name, xp, level, streak, role FROM users
-             WHERE role = ? $roleWhere ORDER BY xp DESC LIMIT 100", array_merge([$role], $args));
+            "SELECT id, first_name, last_name, xp, level, streak, role, group_id FROM users
+             WHERE role = ? $gradeFilter ORDER BY xp DESC LIMIT 100", $args);
         Router::render('app/gamification/leaderboard', ['title' => 'Leaderboard', 'list' => $list, 'scope' => $scope, 'role' => $role]);
     }
 }
