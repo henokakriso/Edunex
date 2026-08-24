@@ -14,13 +14,13 @@ class Ctl_index {
                 FROM library_items i JOIN schools s ON s.id = i.school_id
                 WHERE i.status = 'published'";
         $args = [];
-        // Directors only see their own school's library
-        if ($u['role'] === 'director') { $sql .= " AND i.school_id = ?"; $args[] = (int)$u['school_id']; }
+        // All users only see their own school's library
+        if ((int)$u['school_id'] > 0) { $sql .= " AND i.school_id = ?"; $args[] = (int)$u['school_id']; }
         if ($q !== '') { $sql .= " AND (i.title LIKE ? OR i.author LIKE ? OR i.category LIKE ? OR i.description LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }
         if (in_array($type, ['book','notes','paper','slides','video','past_exam','tutorial'], true)) { $sql .= " AND i.type = ?"; $args[] = $type; }
         $sql .= " ORDER BY i.downloads DESC, i.created_at DESC LIMIT 80";
         $items = Database::all($sql, $args);
-        $types = $u['role'] === 'director'
+        $types = (int)$u['school_id'] > 0
             ? Database::all("SELECT type, COUNT(*) AS n FROM library_items WHERE status = 'published' AND school_id = ? GROUP BY type", [$u['school_id']])
             : Database::all("SELECT type, COUNT(*) AS n FROM library_items WHERE status = 'published' GROUP BY type");
         $myFavs = $u ? array_map(fn($f) => (int)$f['item_id'], Database::all("SELECT item_id FROM library_favorites WHERE user_id = ?", [$u['id']])) : [];
@@ -50,11 +50,11 @@ class Ctl_item {
         $id = (int)($_GET['id'] ?? 0);
         $item = Database::one("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE i.id = ?", [$id]);
         if (!$item) { flash('danger', 'Item not found.'); redirect('library'); }
-        if ($u['role'] === 'director' && (int)$item['school_id'] !== (int)$u['school_id']) {
+        if ((int)$u['school_id'] > 0 && (int)$item['school_id'] !== (int)$u['school_id']) {
             flash('danger', 'Access denied.');
             redirect('library');
         }
-        $related = $u['role'] === 'director'
+        $related = (int)$u['school_id'] > 0
             ? Database::all(
                 "SELECT * FROM library_items WHERE status = 'published' AND school_id = ? AND id != ? AND category = ? LIMIT 4",
                 [$u['school_id'], $id, $item['category']])

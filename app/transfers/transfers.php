@@ -80,7 +80,9 @@ class Ctl_new {
             flash('success', 'Transfer request submitted. An administrator will review it.');
             redirect('transfers');
         }
-        $schools = Database::all("SELECT * FROM schools WHERE id != ? ORDER BY name", [$u['school_id']]);
+        $schools = Database::all(
+            "SELECT * FROM schools WHERE id != ? AND education_level = (SELECT education_level FROM schools WHERE id = ?) AND status = 'active' ORDER BY name",
+            [$u['school_id'], $u['school_id']]);
         Router::render('app/transfers/new', ['title' => 'New Transfer', 'schools' => $schools]);
     }
 }

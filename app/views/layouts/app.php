@@ -182,7 +182,7 @@ $__nav = [
     ['uni_schedule', 'My Timetable', 'university/my-schedule', icon('clock')],
     ['uni_transcript', 'Transcript', 'university/transcript', icon('file-text')],
     ['uni_clearance', 'Clearance', 'university/clearance', icon('check-circle')],
-    ['uni_fees', 'My Fees', 'university/fees', icon('dollar')],
+    ['uni_fees', 'Payments', 'university/fees', icon('dollar')],
     ['uni_theses', 'Thesis', 'university/theses', icon('book')],
   ],
   'parent' => [

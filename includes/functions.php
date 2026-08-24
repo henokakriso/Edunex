@@ -366,7 +366,7 @@ function student_can(string $feature): bool {
         'primary' => ['grades', 'homework', 'reading', 'games', 'ai-reader', 'ai-tutor'],
         'middle' => ['grades', 'homework', 'reading', 'games', 'ai-reader', 'assignments', 'ai-tutor', 'attendance', 'messages', 'materials', 'exams-simple', 'leaderboard'],
         'secondary' => ['grades', 'homework', 'reading', 'games', 'ai-reader', 'assignments', 'ai-tutor', 'attendance', 'messages', 'materials', 'exams', 'projects', 'research', 'career', 'certificates', 'leaderboard', 'transfers', 'schedule'],
-        'university' => ['grades', 'homework', 'reading', 'games', 'ai-reader', 'assignments', 'ai-tutor', 'attendance', 'messages', 'materials', 'exams', 'projects', 'research', 'career', 'certificates', 'leaderboard', 'transfers', 'thesis', 'schedule'],
+        'university' => ['grades', 'homework', 'reading', 'games', 'ai-reader', 'assignments', 'ai-tutor', 'attendance', 'messages', 'materials', 'exams', 'projects', 'research', 'career', 'certificates', 'leaderboard', 'transfers', 'thesis', 'schedule', 'registration', 'clearance', 'transcript', 'payments'],
     ];
     return in_array($feature, $allowed[$t] ?? ['grades', 'homework', 'reading', 'games'], true);
 }

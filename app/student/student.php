@@ -156,8 +156,8 @@ class Ctl_leaderboard {
         $board = Database::all(
             "SELECT us.id, CONCAT(us.first_name, ' ', us.last_name) AS name, us.avatar, us.student_id, us.xp
              FROM users us
-             WHERE us.role = 'student'
-             ORDER BY us.xp DESC LIMIT 10");
+             WHERE us.role = 'student' AND us.school_id = ?
+             ORDER BY us.xp DESC LIMIT 10", [(int)$u['school_id']]);
         $rank = 1;
         foreach ($board as &$b) { $b['rank'] = $rank++; }
         $me = null;
