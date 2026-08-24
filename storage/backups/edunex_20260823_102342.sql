@@ -1,3 +1,4 @@
+mysqldump: [Warning] Using a password on the command line interface can be insecure.
 -- MySQL dump 10.13  Distrib 8.4.7, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: edunex
@@ -14,6 +15,7 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
 --
 -- Table structure for table `academic_years`
@@ -32,7 +34,7 @@ CREATE TABLE `academic_years` (
   PRIMARY KEY (`id`),
   KEY `school_id` (`school_id`),
   CONSTRAINT `academic_years_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +43,7 @@ CREATE TABLE `academic_years` (
 
 LOCK TABLES `academic_years` WRITE;
 /*!40000 ALTER TABLE `academic_years` DISABLE KEYS */;
-INSERT INTO `academic_years` VALUES (1,1,'2025/2026','2025-09-01','2026-07-31',0),(2,2,'2025/2026','2025-09-01','2026-07-31',1),(3,3,'2025/2026','2025-09-01','2026-07-31',0),(4,1,'2028/29',NULL,NULL,0);
+INSERT INTO `academic_years` VALUES (1,1,'2025/2026','2025-09-01','2026-07-31',1),(2,2,'2025/2026','2025-09-01','2026-07-31',1),(3,3,'2025/2026','2025-09-01','2026-07-31',1);
 /*!40000 ALTER TABLE `academic_years` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -63,7 +65,7 @@ CREATE TABLE `activity_logs` (
   PRIMARY KEY (`id`),
   KEY `idx_activity_user` (`user_id`),
   KEY `idx_activity_time` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,7 +74,7 @@ CREATE TABLE `activity_logs` (
 
 LOCK TABLES `activity_logs` WRITE;
 /*!40000 ALTER TABLE `activity_logs` DISABLE KEYS */;
-INSERT INTO `activity_logs` VALUES (1,2,'api_login','Desktop app login: admin@edunex.local','127.0.0.1','curl/8.20.0','2026-08-01 02:00:08'),(2,6,'api_login','Desktop app login: admin2@edunex.local','127.0.0.1','curl/8.20.0','2026-08-01 02:00:08'),(3,2,'login','Signed in as admin','127.0.0.1','curl/8.20.0','2026-08-01 02:00:09'),(4,2,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:09'),(5,2,'user','Created user Test User (teacher)','127.0.0.1','curl/8.20.0','2026-08-01 02:00:10'),(6,8,'login','Signed in as director','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(7,8,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(8,3,'login','Signed in as teacher','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(9,3,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(10,4,'login','Signed in as student','127.0.0.1','curl/8.20.0','2026-08-01 02:00:12'),(11,4,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:12'),(12,5,'login','Signed in as parent','127.0.0.1','curl/8.20.0','2026-08-01 02:00:13'),(13,5,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:13'),(14,2,'api_login','Desktop app login: admin@edunex.local','127.0.0.1','curl/8.20.0','2026-08-01 02:00:15'),(15,4,'api_login','Desktop app login: student@edunex.local','127.0.0.1','curl/8.20.0','2026-08-01 02:00:16'),(16,2,'login','Signed in as admin','127.0.0.1','curl/8.20.0','2026-08-01 02:00:24'),(17,2,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:24'),(18,8,'login','Signed in as director','127.0.0.1','curl/8.20.0','2026-08-01 02:00:26'),(19,8,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:26'),(20,3,'login','Signed in as teacher','127.0.0.1','curl/8.20.0','2026-08-01 02:00:28'),(21,3,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:28'),(22,4,'login','Signed in as student','127.0.0.1','curl/8.20.0','2026-08-01 02:00:30'),(23,4,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:30'),(24,5,'login','Signed in as parent','127.0.0.1','curl/8.20.0','2026-08-01 02:00:31'),(25,5,'login','Signed in','127.0.0.1','curl/8.20.0','2026-08-01 02:00:31'),(26,4,'login','Signed in as student','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:15'),(27,4,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:15'),(28,4,'ai_chat','Tutor: hey','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:29'),(29,4,'ai_chat','Tutor: i want maths','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:41'),(30,4,'ai_chat','Tutor: explain 2+2','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:56'),(31,4,'xp','+10 XP — Completed lesson: Introduction to Algebra','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:06:11'),(32,4,'xp','+10 XP — Submitted assignment: Motion Lab Report','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:08:21'),(33,4,'ai_chat','Tutor: hey','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:08:50'),(34,8,'login','Signed in as director','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:10:16'),(35,8,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:10:16'),(36,8,'transfer','Transfer code TRF-7301-B7D3 issued for Liya Girma','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:10:41'),(37,3,'login','Signed in as teacher','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:25'),(38,3,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:25'),(39,3,'user','Verified student #10 (Henok Arega)','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:29'),(40,10,'login','Signed in as student','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:45'),(41,10,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:45'),(42,10,'ai_chat','Tutor: i want maths','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:57'),(43,10,'xp','+20 XP — Enrolled in Mathematics 101','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:13:49'),(44,10,'xp','+10 XP — Completed lesson: Triangles and Angles','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:13:57'),(45,5,'login','Signed in as parent','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:17:14'),(46,5,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:17:14'),(47,5,'login','Signed in as parent','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:22:17'),(48,5,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:22:17'),(49,5,'xp','+15 XP — Goal completed','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:25:02'),(50,10,'login','Signed in as student','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:38:03'),(51,10,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:38:03'),(52,10,'xp','+10 XP — Completed lesson: Introduction to Algebra','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:39:17'),(53,10,'xp','+10 XP — Completed lesson: Triangles and Angles','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:39:20'),(54,5,'login','Signed in as parent','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:41:31'),(55,5,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:41:31'),(56,10,'login','Signed in as student','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:00:18'),(57,10,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:00:18'),(58,1,'login','Signed in as admin','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:04:04'),(59,1,'login','Signed in','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:04:04'),(60,1,'user','Deleted user Test User','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:14:30'),(61,1,'user','Created user nat nat (director)','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:16:22'),(62,1,'school','Created school holeta','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:18:42'),(63,1,'announcement','Posted: Hello New Year','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:38:13'),(64,1,'report','Generated report: hell grades','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:47:58'),(65,1,'report','Generated report: hell grades','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:48:23');
+INSERT INTO `activity_logs` VALUES (1,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:37:03'),(2,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:37:03'),(3,8,'transfer','Transfer code TRF-FA5C-7B0B issued for Liya Girma','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:40:25'),(4,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:42:28'),(5,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:42:28'),(6,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-21 22:52:56'),(7,1,'login','Signed in','::1','curl/8.20.0','2026-08-21 22:52:56'),(8,2,'login','Signed in as admin','::1','curl/8.20.0','2026-08-21 22:53:24'),(9,2,'login','Signed in','::1','curl/8.20.0','2026-08-21 22:53:24'),(10,2,'login','Signed in as admin','::1','curl/8.20.0','2026-08-21 22:53:37'),(11,2,'login','Signed in','::1','curl/8.20.0','2026-08-21 22:53:37'),(12,8,'login','Signed in as director','::1','curl/8.20.0','2026-08-21 22:53:50'),(13,8,'login','Signed in','::1','curl/8.20.0','2026-08-21 22:53:50'),(14,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:00:08'),(15,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:00:08'),(16,2,'school.suspended','Regional admin admin@edunex.local set school #1 to suspended','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:00:27'),(17,2,'school.active','Regional admin admin@edunex.local set school #1 to active','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:00:29'),(18,2,'announcement.create','Regional admin announced to school #1','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:02:00'),(19,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:02:29'),(20,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:02:29'),(21,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:06'),(22,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:06'),(23,2,'announcement.create','Regional admin announced to school #3','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:19'),(24,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:26'),(25,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:26'),(26,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:06'),(27,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:06'),(28,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:29'),(29,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:29'),(30,8,'ai_chat','Tutor: hello','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:08:57'),(31,8,'ai_chat','Tutor: Solve 2x + 6 = 14','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:21:38'),(32,8,'ai_chat','Tutor: hey','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:44:23'),(33,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:10:33'),(34,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:10:33'),(35,8,'ai_chat','Tutor: explain 2+2','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:10:49'),(36,8,'ai_chat','Tutor: what is Erosion?','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:11:04'),(37,8,'ai_chat','Tutor: hey','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:11:16'),(38,8,'ai_chat','Tutor: who are you?','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:11:20'),(39,8,'ai_chat','Tutor: i want maths','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:11:30'),(40,8,'ai_chat','Tutor: Cat','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:12:32'),(41,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:15:41'),(42,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:15:41'),(43,2,'announcement.create','Regional admin announced to school #1','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:15:47'),(44,2,'announcement.create','Regional admin announced to school #3','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:15:53'),(45,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:16:27'),(46,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:16:27'),(47,8,'ai_chat','Tutor: cat','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:06'),(48,8,'ai_chat','Tutor: C D _','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:38'),(49,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:46'),(50,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:46'),(51,2,'announcement.create','Regional admin announced to school #1','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:54'),(52,2,'announcement.create','Regional admin announced to school #3','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:46:00'),(53,2,'announcement.create','Regional admin announced to school #3','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:46:08'),(54,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:46:24'),(55,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:46:24'),(56,4,'login','Signed in as student','::1','curl/8.20.0','2026-08-22 00:56:26'),(57,4,'login','Signed in','::1','curl/8.20.0','2026-08-22 00:56:26'),(58,4,'ai_chat','Tutor: What is 2+2?','::1','curl/8.20.0','2026-08-22 01:09:10'),(59,2,'login','Signed in as admin','::1','curl/8.20.0','2026-08-22 01:09:47'),(60,4,'login','Signed in as student','::1','curl/8.20.0','2026-08-22 01:10:40'),(61,4,'login','Signed in','::1','curl/8.20.0','2026-08-22 01:10:40'),(62,4,'ai_chat','Tutor: What is 2 plus 2','::1','curl/8.20.0','2026-08-22 01:18:37'),(63,8,'ai_chat','Tutor: who are you?','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 01:28:28'),(64,8,'ai_chat','Tutor: explain 2+2','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 01:28:58'),(65,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 01:29:53'),(66,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 01:29:53'),(67,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:22:54'),(68,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:22:54'),(69,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:23:49'),(70,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:23:49'),(71,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:27:53'),(72,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:27:53'),(73,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:46:32'),(74,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:46:32'),(75,8,'login','Signed in as director','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:47:16'),(76,8,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:47:16'),(77,8,'user','Director created teacher Henok Arega','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:48:54'),(78,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:46:10'),(79,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:46:10'),(80,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:51:26'),(81,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:51:26'),(82,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:52:18'),(83,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:52:18'),(84,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:53:22'),(85,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:53:22'),(86,1,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:55:18'),(87,1,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:55:18'),(88,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:56:22'),(89,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:56:22'),(90,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:57:14'),(91,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:57:14'),(92,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:57:27'),(93,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:57:27'),(94,1,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 06:57:51'),(95,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 06:57:51'),(96,1,'login','Signed in as sysadmin','::1','curl/8.20.0','2026-08-23 07:01:21'),(97,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:01:21'),(98,1,'login','Signed in as sysadmin','::1','curl/8.20.0','2026-08-23 07:06:31'),(99,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:06:31'),(100,4,'login','Signed in as student','::1','curl/8.20.0','2026-08-23 07:06:31'),(101,4,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:06:31'),(102,1,'login','Signed in as sysadmin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:08:52'),(103,1,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:08:52'),(104,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:09:05'),(105,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:09:05'),(106,1,'login','Signed in as sysadmin','::1','curl/8.20.0','2026-08-23 07:10:55'),(107,1,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:10:55'),(108,2,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 07:12:34'),(109,2,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:12:34'),(110,2,'login','Signed in as admin','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:15:50'),(111,2,'login','Signed in','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:15:50'),(112,2,'login','Signed in as admin','::1','curl/8.20.0','2026-08-23 07:20:40'),(113,2,'login','Signed in','::1','curl/8.20.0','2026-08-23 07:20:40');
 /*!40000 ALTER TABLE `activity_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -88,12 +90,13 @@ CREATE TABLE `ai_cards` (
   `deck_id` int unsigned NOT NULL,
   `front` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `back` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `box` int DEFAULT '0',
   `reviewed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `deck_id` (`deck_id`),
   CONSTRAINT `ai_cards_ibfk_1` FOREIGN KEY (`deck_id`) REFERENCES `ai_decks` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +105,6 @@ CREATE TABLE `ai_cards` (
 
 LOCK TABLES `ai_cards` WRITE;
 /*!40000 ALTER TABLE `ai_cards` DISABLE KEYS */;
-INSERT INTO `ai_cards` VALUES (1,1,'hey','you',0,NULL);
 /*!40000 ALTER TABLE `ai_cards` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -125,7 +127,7 @@ CREATE TABLE `ai_chats` (
   KEY `course_id` (`course_id`),
   CONSTRAINT `ai_chats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ai_chats_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,7 +136,7 @@ CREATE TABLE `ai_chats` (
 
 LOCK TABLES `ai_chats` WRITE;
 /*!40000 ALTER TABLE `ai_chats` DISABLE KEYS */;
-INSERT INTO `ai_chats` VALUES (1,4,NULL,'New chat',NULL,'2026-08-01 02:00:13'),(2,8,NULL,'New chat',NULL,'2026-08-01 02:00:27'),(3,3,NULL,'New chat',NULL,'2026-08-01 02:00:28'),(4,4,NULL,'New chat',NULL,'2026-08-01 02:00:30'),(5,4,NULL,'New chat',NULL,'2026-08-01 02:05:26'),(6,4,NULL,'explain 2+2',NULL,'2026-08-01 02:05:29'),(7,4,NULL,'New chat',NULL,'2026-08-01 02:08:44'),(8,4,NULL,'hey',NULL,'2026-08-01 02:08:50'),(9,10,NULL,'New chat',NULL,'2026-08-01 02:12:52'),(10,10,NULL,'i want maths',NULL,'2026-08-01 02:12:57'),(11,10,NULL,'New chat',NULL,'2026-08-01 11:41:14');
+INSERT INTO `ai_chats` VALUES (3,4,NULL,'What is 2 plus 2',NULL,'2026-08-22 01:08:39');
 /*!40000 ALTER TABLE `ai_chats` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -153,7 +155,7 @@ CREATE TABLE `ai_decks` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `ai_decks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,7 +164,6 @@ CREATE TABLE `ai_decks` (
 
 LOCK TABLES `ai_decks` WRITE;
 /*!40000 ALTER TABLE `ai_decks` DISABLE KEYS */;
-INSERT INTO `ai_decks` VALUES (1,4,'h','2026-08-01 02:09:00');
 /*!40000 ALTER TABLE `ai_decks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -182,7 +183,7 @@ CREATE TABLE `ai_messages` (
   PRIMARY KEY (`id`),
   KEY `chat_id` (`chat_id`),
   CONSTRAINT `ai_messages_ibfk_1` FOREIGN KEY (`chat_id`) REFERENCES `ai_chats` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,7 +192,7 @@ CREATE TABLE `ai_messages` (
 
 LOCK TABLES `ai_messages` WRITE;
 /*!40000 ALTER TABLE `ai_messages` DISABLE KEYS */;
-INSERT INTO `ai_messages` VALUES (1,6,'user','hey','2026-08-01 02:05:29'),(2,6,'ai','👋 Good morning, Liya Girma! Welcome back.\n\nYour learning streak is **3 day(s)** — keep it alive! 🔥\n\nI can help you:\n• Explain any topic (try \'Explain recursion\')\n• Summarize lessons (\'Summarize Chapter 1\')\n• Create quizzes (\'Quiz me on algebra\')\n• Make flashcards (\'Create flashcards\')\n• Translate to Amharic (\'Translate good morning to Amharic\')\n• Draw diagrams (\'Diagram binary tree\')\n• Check your exam readiness (\'Am I ready for my exam?\')\n\nWhat shall we learn today?','2026-08-01 02:05:29'),(3,6,'user','i want maths','2026-08-01 02:05:41'),(4,6,'ai','I\'d love to explain **i want maths**, but I need a bit more context. Here\'s what I can do:\n\n🤖 **I\'m your AI Tutor** — I remember our conversation and adapt to your pace.\n\n**Try asking me:**\n• *Explain recursion*\n• *Summarize Chapter 3*\n• *Create a quiz about algebra*\n• *Generate flashcards*\n• *Explain with a diagram*\n• *Translate thank you to Amharic* (አመሰግናለሁ!)\n• *Explain like I\'m five*\n• *Correct my grammar: i goed to school*\n• *Create a study plan*\n• *Am I ready for my exam?*\n• *Suggest my weak topics*\n\nI also learn from your courses — ask me to summarize any of your lessons!','2026-08-01 02:05:41'),(5,6,'user','explain 2+2','2026-08-01 02:05:56'),(6,6,'ai','I\'d love to explain **2+2**, but I need a bit more context. Here\'s what I can do:\n\n🤖 **I\'m your AI Tutor** — I remember our conversation and adapt to your pace.\n\n**Try asking me:**\n• *Explain recursion*\n• *Summarize Chapter 3*\n• *Create a quiz about algebra*\n• *Generate flashcards*\n• *Explain with a diagram*\n• *Translate thank you to Amharic* (አመሰግናለሁ!)\n• *Explain like I\'m five*\n• *Correct my grammar: i goed to school*\n• *Create a study plan*\n• *Am I ready for my exam?*\n• *Suggest my weak topics*\n\nI also learn from your courses — ask me to summarize any of your lessons!','2026-08-01 02:05:56'),(7,8,'user','hey','2026-08-01 02:08:50'),(8,8,'ai','👋 Good morning, Liya Girma! Welcome back.\n\nYour learning streak is **1 day(s)** — keep it alive! 🔥\n\nI can help you:\n• Explain any topic (try \'Explain recursion\')\n• Summarize lessons (\'Summarize Chapter 1\')\n• Create quizzes (\'Quiz me on algebra\')\n• Make flashcards (\'Create flashcards\')\n• Translate to Amharic (\'Translate good morning to Amharic\')\n• Draw diagrams (\'Diagram binary tree\')\n• Check your exam readiness (\'Am I ready for my exam?\')\n\nWhat shall we learn today?','2026-08-01 02:08:50'),(9,10,'user','i want maths','2026-08-01 02:12:57'),(10,10,'ai','I\'d love to explain **i want maths**, but I need a bit more context. Here\'s what I can do:\n\n🤖 **I\'m your AI Tutor** — I remember our conversation and adapt to your pace.\n\n**Try asking me:**\n• *Explain recursion*\n• *Summarize Chapter 3*\n• *Create a quiz about algebra*\n• *Generate flashcards*\n• *Explain with a diagram*\n• *Translate thank you to Amharic* (አመሰግናለሁ!)\n• *Explain like I\'m five*\n• *Correct my grammar: i goed to school*\n• *Create a study plan*\n• *Am I ready for my exam?*\n• *Suggest my weak topics*\n\nI also learn from your courses — ask me to summarize any of your lessons!','2026-08-01 02:12:57');
+INSERT INTO `ai_messages` VALUES (23,3,'user','What is 2+2?','2026-08-22 01:09:10'),(24,3,'ai','2 +','2026-08-22 01:09:10'),(25,3,'user','What is 2 plus 2','2026-08-22 01:18:37'),(26,3,'ai','2 +2 =4.','2026-08-22 01:18:37');
 /*!40000 ALTER TABLE `ai_messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -250,7 +251,7 @@ CREATE TABLE `announcements` (
   CONSTRAINT `announcements_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `announcements_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `announcements_ibfk_3` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -259,8 +260,39 @@ CREATE TABLE `announcements` (
 
 LOCK TABLES `announcements` WRITE;
 /*!40000 ALTER TABLE `announcements` DISABLE KEYS */;
-INSERT INTO `announcements` VALUES (2,1,1,3,'Midterm exam schedule published','The Algebra midterm will take place next week. Review chapters 1-2.',1,'course','2026-08-01 01:59:37'),(4,1,NULL,1,'Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh',1,'all','2026-08-01 22:38:13');
+INSERT INTO `announcements` VALUES (1,1,NULL,2,'Welcome to the new academic year!','We are excited to welcome all students back. The digital library now has 200+ resources.',1,'all','2026-08-21 22:36:25'),(2,1,1,3,'Midterm exam schedule published','The Algebra midterm will take place next week. Review chapters 1-2.',1,'course','2026-08-21 22:36:25'),(3,1,NULL,2,'Library maintenance on Sunday','The library will be briefly offline Sunday 02:00-04:00.',0,'all','2026-08-21 22:36:25'),(4,1,NULL,2,'hgh','hhhhhhhhhhhhhh',0,'all','2026-08-21 23:02:00'),(5,3,NULL,2,'cccccccc','ccccccccccc',0,'all','2026-08-21 23:03:19'),(6,1,NULL,2,'gdgd','dgdgdg',0,'all','2026-08-22 00:15:47'),(7,3,NULL,2,'dgdg','dgdgdgd',0,'all','2026-08-22 00:15:53'),(9,1,NULL,2,'FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff',0,'all','2026-08-22 00:45:54'),(10,3,NULL,2,'fffffffffffffffff','ffffffffffffff',0,'all','2026-08-22 00:46:00'),(11,3,NULL,2,'ffffffffff','ffffffffffffffffffff',0,'all','2026-08-22 00:46:08');
 /*!40000 ALTER TABLE `announcements` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `assignment_reviews`
+--
+
+DROP TABLE IF EXISTS `assignment_reviews`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_reviews` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `submission_id` int unsigned NOT NULL,
+  `user_id` int unsigned NOT NULL,
+  `role` enum('teacher','student') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `submission_id` (`submission_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `assignment_reviews_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `assignment_submissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `assignment_reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `assignment_reviews`
+--
+
+LOCK TABLES `assignment_reviews` WRITE;
+/*!40000 ALTER TABLE `assignment_reviews` DISABLE KEYS */;
+/*!40000 ALTER TABLE `assignment_reviews` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -291,7 +323,7 @@ CREATE TABLE `assignment_submissions` (
   CONSTRAINT `assignment_submissions_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `assignment_submissions_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `assignment_submissions_ibfk_3` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,7 +332,7 @@ CREATE TABLE `assignment_submissions` (
 
 LOCK TABLES `assignment_submissions` WRITE;
 /*!40000 ALTER TABLE `assignment_submissions` DISABLE KEYS */;
-INSERT INTO `assignment_submissions` VALUES (1,1,4,'I solved problems 1-20. Please see the attached PDF.','','2026-07-28 07:00:00',0,88.00,'Excellent work! Careful with problem 14.',NULL,3,'2026-07-29 09:00:00','graded'),(2,2,4,'gjghj','','2026-08-01 02:08:21',0,NULL,NULL,NULL,NULL,NULL,'submitted');
+INSERT INTO `assignment_submissions` VALUES (1,1,4,'I solved problems 1-20. Please see the attached PDF.','','2026-07-28 07:00:00',0,88.00,'Excellent work! Careful with problem 14.',NULL,3,'2026-07-29 09:00:00','graded');
 /*!40000 ALTER TABLE `assignment_submissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -337,7 +369,7 @@ CREATE TABLE `assignments` (
 
 LOCK TABLES `assignments` WRITE;
 /*!40000 ALTER TABLE `assignments` DISABLE KEYS */;
-INSERT INTO `assignments` VALUES (1,1,3,'Algebra Worksheet 1','Solve the 20 problems in the attached sheet. Show all your steps.','[{\"criterion\":\"Correctness\",\"max\":60,\"weight\":60},{\"criterion\":\"Steps shown\",\"max\":25,\"weight\":25},{\"criterion\":\"Presentation\",\"max\":15,\"weight\":15}]',100.00,'2026-08-06 04:59:37',1,10.00,'2026-08-01 01:59:37'),(2,2,3,'Motion Lab Report','Write a lab report about free-fall motion using the provided template.',NULL,50.00,'2026-08-04 04:59:37',1,5.00,'2026-08-01 01:59:37');
+INSERT INTO `assignments` VALUES (1,1,3,'Algebra Worksheet 1','Solve the 20 problems in the attached sheet. Show all your steps.','[{\"criterion\":\"Correctness\",\"max\":60,\"weight\":60},{\"criterion\":\"Steps shown\",\"max\":25,\"weight\":25},{\"criterion\":\"Presentation\",\"max\":15,\"weight\":15}]',100.00,'2026-08-27 01:36:25',1,10.00,'2026-08-21 22:36:25'),(2,2,3,'Motion Lab Report','Write a lab report about free-fall motion using the provided template.',NULL,50.00,'2026-08-25 01:36:25',1,5.00,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `assignments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -374,7 +406,7 @@ CREATE TABLE `attendance` (
 
 LOCK TABLES `attendance` WRITE;
 /*!40000 ALTER TABLE `attendance` DISABLE KEYS */;
-INSERT INTO `attendance` VALUES (1,1,1,4,'2026-07-23','present',3,'','2026-08-01 01:59:37'),(2,1,1,4,'2026-07-24','present',3,'','2026-08-01 01:59:37'),(3,1,1,4,'2026-07-25','late',3,'','2026-08-01 01:59:37'),(4,1,1,4,'2026-07-26','present',3,'','2026-08-01 01:59:37'),(5,1,1,4,'2026-07-27','absent',3,'','2026-08-01 01:59:37'),(6,1,1,4,'2026-07-28','present',3,'','2026-08-01 01:59:37'),(7,1,1,4,'2026-07-29','present',3,'','2026-08-01 01:59:37'),(8,1,1,4,'2026-07-30','excused',3,'','2026-08-01 01:59:37'),(9,1,1,4,'2026-07-31','present',3,'','2026-08-01 01:59:37'),(10,1,1,4,'2026-08-01','present',3,'','2026-08-01 01:59:37');
+INSERT INTO `attendance` VALUES (1,1,1,4,'2026-08-13','present',3,'','2026-08-21 22:36:25'),(2,1,1,4,'2026-08-14','present',3,'','2026-08-21 22:36:25'),(3,1,1,4,'2026-08-15','late',3,'','2026-08-21 22:36:25'),(4,1,1,4,'2026-08-16','present',3,'','2026-08-21 22:36:25'),(5,1,1,4,'2026-08-17','absent',3,'','2026-08-21 22:36:25'),(6,1,1,4,'2026-08-18','present',3,'','2026-08-21 22:36:25'),(7,1,1,4,'2026-08-19','present',3,'','2026-08-21 22:36:25'),(8,1,1,4,'2026-08-20','excused',3,'','2026-08-21 22:36:25'),(9,1,1,4,'2026-08-21','present',3,'','2026-08-21 22:36:25'),(10,1,1,4,'2026-08-22','present',3,'','2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `attendance` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -421,7 +453,7 @@ DROP TABLE IF EXISTS `badges`;
 CREATE TABLE `badges` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 0xF09F8E96,
+  `icon` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'medal',
   `description` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `xp_required` int DEFAULT '0',
   `category` enum('learning','streak','quiz','attendance','community','level') COLLATE utf8mb4_unicode_ci DEFAULT 'learning',
@@ -435,7 +467,7 @@ CREATE TABLE `badges` (
 
 LOCK TABLES `badges` WRITE;
 /*!40000 ALTER TABLE `badges` DISABLE KEYS */;
-INSERT INTO `badges` VALUES (1,'First Steps','🌱','Complete your first lesson',50,'learning'),(2,'Bookworm','📚','Read 5 lessons',200,'learning'),(3,'Quiz Whiz','🧠','Score 80%+ on any quiz',300,'quiz'),(4,'Perfect Attendance','🎯','7 days of perfect attendance',350,'attendance'),(5,'On Fire','🔥','7-day learning streak',400,'streak'),(6,'Scholar','🎓','Complete a full course',600,'level'),(7,'Helping Hand','🤝','Answer 5 forum questions',250,'community'),(8,'Marathoner','🏃','Reach level 5',500,'level'),(9,'First Steps','🌱','Complete your first lesson',50,'learning'),(10,'Bookworm','📚','Read 5 lessons',200,'learning'),(11,'Quiz Whiz','🧠','Score 80%+ on any quiz',300,'quiz'),(12,'Perfect Attendance','🎯','7 days of perfect attendance',350,'attendance'),(13,'On Fire','🔥','7-day learning streak',400,'streak'),(14,'Scholar','🎓','Complete a full course',600,'level'),(15,'Helping Hand','🤝','Answer 5 forum questions',250,'community'),(16,'Marathoner','🏃','Reach level 5',500,'level');
+INSERT INTO `badges` VALUES (1,'First Steps','leaf','Complete your first lesson',50,'learning'),(2,'Bookworm','books','Read 5 lessons',200,'learning'),(3,'Quiz Whiz','brain','Score 80%+ on any quiz',300,'quiz'),(4,'Perfect Attendance','target','7 days of perfect attendance',350,'attendance'),(5,'On Fire','flame','7-day learning streak',400,'streak'),(6,'Scholar','graduation','Complete a full course',600,'level'),(7,'Helping Hand','handshake','Answer 5 forum questions',250,'community'),(8,'Marathoner','run','Reach level 5',500,'level'),(9,'First Steps','leaf','Complete your first lesson',50,'learning'),(10,'Bookworm','books','Read 5 lessons',200,'learning'),(11,'Quiz Whiz','brain','Score 80%+ on any quiz',300,'quiz'),(12,'Perfect Attendance','target','7 days of perfect attendance',350,'attendance'),(13,'On Fire','flame','7-day learning streak',400,'streak'),(14,'Scholar','graduation','Complete a full course',600,'level'),(15,'Helping Hand','handshake','Answer 5 forum questions',250,'community'),(16,'Marathoner','run','Reach level 5',500,'level');
 /*!40000 ALTER TABLE `badges` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -460,7 +492,7 @@ CREATE TABLE `bookmarks` (
   CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bookmarks_ibfk_3` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -469,7 +501,6 @@ CREATE TABLE `bookmarks` (
 
 LOCK TABLES `bookmarks` WRITE;
 /*!40000 ALTER TABLE `bookmarks` DISABLE KEYS */;
-INSERT INTO `bookmarks` VALUES (1,10,1,2,'','2026-08-01 11:38:50');
 /*!40000 ALTER TABLE `bookmarks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -506,7 +537,7 @@ CREATE TABLE `calendar_events` (
 
 LOCK TABLES `calendar_events` WRITE;
 /*!40000 ALTER TABLE `calendar_events` DISABLE KEYS */;
-INSERT INTO `calendar_events` VALUES (1,1,4,'Algebra Midterm','exam','2026-08-08 04:59:37','2026-08-08 04:59:37',0,'','','2026-08-01 01:59:37'),(2,1,4,'Physics Lab Report due','assignment','2026-08-04 04:59:37',NULL,0,'','','2026-08-01 01:59:37'),(3,1,4,'Algebra Worksheet due','assignment','2026-08-06 04:59:37',NULL,0,'','','2026-08-01 01:59:37'),(4,1,NULL,'School Sports Day','event','2026-08-13 04:59:37','2026-08-13 04:59:37',1,'','','2026-08-01 01:59:37'),(5,1,4,'Study group: Data Structures','meeting','2026-08-03 04:59:37',NULL,0,'','','2026-08-01 01:59:37');
+INSERT INTO `calendar_events` VALUES (1,1,4,'Algebra Midterm','exam','2026-08-29 01:36:25','2026-08-29 01:36:25',0,'','','2026-08-21 22:36:25'),(2,1,4,'Physics Lab Report due','assignment','2026-08-25 01:36:25',NULL,0,'','','2026-08-21 22:36:25'),(3,1,4,'Algebra Worksheet due','assignment','2026-08-27 01:36:25',NULL,0,'','','2026-08-21 22:36:25'),(4,1,NULL,'School Sports Day','event','2026-09-03 01:36:25','2026-09-03 01:36:25',1,'','','2026-08-21 22:36:25'),(5,1,4,'Study group: Data Structures','meeting','2026-08-24 01:36:25',NULL,0,'','','2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `calendar_events` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -532,7 +563,7 @@ CREATE TABLE `certificates` (
   KEY `course_id` (`course_id`),
   CONSTRAINT `certificates_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `certificates_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -541,7 +572,6 @@ CREATE TABLE `certificates` (
 
 LOCK TABLES `certificates` WRITE;
 /*!40000 ALTER TABLE `certificates` DISABLE KEYS */;
-INSERT INTO `certificates` VALUES (1,10,1,'CERT-8C34CCEF','875e4d165ac7ec260ed52d7a6c340d32f58d4b3d39688ce922badad610a812d7','2026-08-01 14:39:20','Passed');
 /*!40000 ALTER TABLE `certificates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -572,7 +602,7 @@ CREATE TABLE `challenges` (
 
 LOCK TABLES `challenges` WRITE;
 /*!40000 ALTER TABLE `challenges` DISABLE KEYS */;
-INSERT INTO `challenges` VALUES (1,1,'Study 5 lessons this week','Complete 5 lessons in any course.',100,'2026-07-29','2026-08-05'),(2,1,'Perfect quiz score','Get 100% on any practice quiz.',150,'2026-08-01','2026-08-08');
+INSERT INTO `challenges` VALUES (1,1,'Study 5 lessons this week','Complete 5 lessons in any course.',100,'2026-08-19','2026-08-26'),(2,1,'Perfect quiz score','Get 100% on any practice quiz.',150,'2026-08-22','2026-08-29');
 /*!40000 ALTER TABLE `challenges` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -600,7 +630,7 @@ CREATE TABLE `conversation_members` (
 
 LOCK TABLES `conversation_members` WRITE;
 /*!40000 ALTER TABLE `conversation_members` DISABLE KEYS */;
-INSERT INTO `conversation_members` VALUES (1,3,NULL),(1,4,NULL),(2,2,NULL),(2,3,NULL),(2,4,NULL),(3,4,NULL);
+INSERT INTO `conversation_members` VALUES (1,3,NULL),(1,4,NULL),(2,2,'2026-08-22 03:15:59'),(2,3,NULL),(2,4,NULL),(3,4,'2026-08-22 02:50:17'),(3,8,'2026-08-22 04:29:33'),(5,5,NULL),(5,8,'2026-08-22 04:29:42'),(8,2,'2026-08-23 08:23:25'),(8,8,'2026-08-22 04:29:16');
 /*!40000 ALTER TABLE `conversation_members` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -616,11 +646,12 @@ CREATE TABLE `conversations` (
   `school_id` int unsigned NOT NULL,
   `is_group` tinyint(1) DEFAULT '0',
   `title` varchar(160) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `conv_key` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `school_id` (`school_id`),
   CONSTRAINT `conversations_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -629,7 +660,7 @@ CREATE TABLE `conversations` (
 
 LOCK TABLES `conversations` WRITE;
 /*!40000 ALTER TABLE `conversations` DISABLE KEYS */;
-INSERT INTO `conversations` VALUES (1,1,0,'Liya & David','2026-08-01 01:59:37'),(2,1,1,'Math 101 Class Group','2026-08-01 01:59:37'),(3,1,0,'','2026-08-01 02:09:32');
+INSERT INTO `conversations` VALUES (1,1,0,'Liya & David','11114c0cc54c878610cab851b8341a3cd468ae93b470a249601ec677681c1391','2026-08-21 22:36:25'),(2,1,1,'Math 101 Class Group','098f8063a0592f300b7a1b5dc8e75364022dc7c392bb6039fb19bf0137a54650','2026-08-21 22:36:25'),(3,1,0,'','84aba32a1b0cff4ab63487bccf71bbb6a52fc9fcecac7c55f1b725a139f906e3','2026-08-21 23:21:49'),(4,1,0,'','test','2026-08-21 23:36:46'),(5,1,1,'tr','dd400531f2547282b27650b617ec48a569e29cf6372ef7e359099105aaf38990','2026-08-22 00:14:33'),(8,1,0,'','edc5f7bec5834baee0edf3fdff05e8267fee58431c720346ad5a2bc52ed47608','2026-08-22 01:28:09');
 /*!40000 ALTER TABLE `conversations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -653,7 +684,7 @@ CREATE TABLE `course_enrollments` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `course_enrollments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `course_enrollments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -662,7 +693,7 @@ CREATE TABLE `course_enrollments` (
 
 LOCK TABLES `course_enrollments` WRITE;
 /*!40000 ALTER TABLE `course_enrollments` DISABLE KEYS */;
-INSERT INTO `course_enrollments` VALUES (1,1,4,33.30,0,NULL,'2026-08-01 01:59:37'),(2,2,4,0.00,0,NULL,'2026-08-01 01:59:37'),(3,3,4,25.00,0,NULL,'2026-08-01 01:59:37'),(4,1,10,100.00,1,'2026-08-01 14:39:20','2026-08-01 02:13:49');
+INSERT INTO `course_enrollments` VALUES (1,1,4,50.00,0,NULL,'2026-08-21 22:36:25'),(2,2,4,0.00,0,NULL,'2026-08-21 22:36:25'),(3,3,4,25.00,0,NULL,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `course_enrollments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -730,7 +761,7 @@ CREATE TABLE `courses` (
 
 LOCK TABLES `courses` WRITE;
 /*!40000 ALTER TABLE `courses` DISABLE KEYS */;
-INSERT INTO `courses` VALUES (1,1,3,1,'Mathematics 101','MATH101','Foundations of algebra, geometry and calculus for Grade 9 students.','','Grade 9','published',0.00,'2026-08-01 01:59:37'),(2,1,3,2,'Physics Foundations','PHY101','Mechanics, motion and energy explained with real Ethiopian examples.','','Grade 9','published',0.00,'2026-08-01 01:59:37'),(3,3,7,4,'Data Structures','CS201','Arrays, linked lists, stacks, queues, trees and graphs with C.','','1st Year','published',0.00,'2026-08-01 01:59:37');
+INSERT INTO `courses` VALUES (1,1,3,1,'Mathematics 101','MATH101','Foundations of algebra, geometry and calculus for Grade 9 students.','','Grade 9','published',0.00,'2026-08-21 22:36:25'),(2,1,3,2,'Physics Foundations','PHY101','Mechanics, motion and energy explained with real Ethiopian examples.','','Grade 9','published',0.00,'2026-08-21 22:36:25'),(3,3,7,4,'Data Structures','CS201','Arrays, linked lists, stacks, queues, trees and graphs with C.','','1st Year','published',0.00,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `courses` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -746,10 +777,14 @@ CREATE TABLE `departments` (
   `school_id` int unsigned NOT NULL,
   `name` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
   `head` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `faculty_id` int unsigned DEFAULT NULL,
+  `status` enum('active','archived') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
   PRIMARY KEY (`id`),
   KEY `school_id` (`school_id`),
-  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_dept_faculty` (`faculty_id`),
+  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `departments_ibfk_2` FOREIGN KEY (`faculty_id`) REFERENCES `faculties` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -758,7 +793,7 @@ CREATE TABLE `departments` (
 
 LOCK TABLES `departments` WRITE;
 /*!40000 ALTER TABLE `departments` DISABLE KEYS */;
-INSERT INTO `departments` VALUES (1,1,'Science','Dr. Bekele'),(2,1,'Languages','Mrs. Tigist'),(3,2,'Computer Science','Prof. Alem'),(4,2,'Engineering','Dr. Marta'),(5,3,'General','Mr. Dawit'),(6,1,'AI','henok');
+INSERT INTO `departments` VALUES (1,1,'Science','Dr. Bekele',NULL,'active'),(2,1,'Languages','Mrs. Tigist',NULL,'active'),(3,2,'Computer Science','Prof. Alem',NULL,'active'),(4,2,'Engineering','Dr. Marta',NULL,'active'),(5,3,'General','Mr. Dawit',NULL,'active');
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -782,7 +817,7 @@ CREATE TABLE `exam_answers` (
   KEY `question_id` (`question_id`),
   CONSTRAINT `exam_answers_ibfk_1` FOREIGN KEY (`attempt_id`) REFERENCES `exam_attempts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `exam_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `exam_questions` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -818,7 +853,7 @@ CREATE TABLE `exam_attempts` (
   KEY `student_id` (`student_id`),
   CONSTRAINT `exam_attempts_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`id`) ON DELETE CASCADE,
   CONSTRAINT `exam_attempts_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -827,7 +862,7 @@ CREATE TABLE `exam_attempts` (
 
 LOCK TABLES `exam_attempts` WRITE;
 /*!40000 ALTER TABLE `exam_attempts` DISABLE KEYS */;
-INSERT INTO `exam_attempts` VALUES (1,1,4,'2026-07-20 09:00:00','2026-07-20 09:20:00',NULL,NULL,7.00,12.00,'graded'),(2,2,4,'2026-08-01 05:06:32',NULL,'{\"q_7\":\"0\",\"q_8\":\"True\"}',NULL,NULL,0.00,'in_progress'),(3,1,10,'2026-08-01 14:39:39',NULL,'{\"q_1\":\"3\",\"q_2\":\"2\",\"q_3\":\"True\",\"q_4\":\"\",\"q_5\":\"\"}',NULL,NULL,0.00,'in_progress');
+INSERT INTO `exam_attempts` VALUES (1,1,4,'2026-07-20 09:00:00','2026-07-20 09:20:00',NULL,NULL,7.00,12.00,'graded');
 /*!40000 ALTER TABLE `exam_attempts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -887,6 +922,7 @@ CREATE TABLE `exams` (
   `shuffle_questions` tinyint(1) DEFAULT '0',
   `show_result` tinyint(1) DEFAULT '1',
   `status` enum('draft','published','closed') COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `results_sent_at` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `course_id` (`course_id`),
@@ -902,8 +938,42 @@ CREATE TABLE `exams` (
 
 LOCK TABLES `exams` WRITE;
 /*!40000 ALTER TABLE `exams` DISABLE KEYS */;
-INSERT INTO `exams` VALUES (1,1,3,'Algebra Midterm','Covers chapters 1-2: algebra basics and linear equations.','midterm',30,'2026-08-01 04:59:37','2026-08-08 04:59:37',50.00,1,0,1,'published','2026-08-01 01:59:37'),(2,3,7,'Data Structures Quiz 1','Quick quiz on arrays and pointers.','quiz',15,'2026-08-01 04:59:37','2026-08-04 04:59:37',50.00,1,0,1,'published','2026-08-01 01:59:37'),(3,1,3,'Practice: True/False','Practice session for exam readiness.','practice',10,'2026-08-01 04:59:37','2026-08-03 04:59:37',50.00,1,0,1,'published','2026-08-01 01:59:37');
+INSERT INTO `exams` VALUES (1,1,3,'Algebra Midterm','Covers chapters 1-2: algebra basics and linear equations.','midterm',30,'2026-08-22 01:36:25','2026-08-29 01:36:25',50.00,1,0,1,'published',NULL,'2026-08-21 22:36:25'),(2,3,7,'Data Structures Quiz 1','Quick quiz on arrays and pointers.','quiz',15,'2026-08-22 01:36:25','2026-08-25 01:36:25',50.00,1,0,1,'published',NULL,'2026-08-21 22:36:25'),(3,1,3,'Practice: True/False','Practice session for exam readiness.','practice',10,'2026-08-22 01:36:25','2026-08-24 01:36:25',50.00,1,0,1,'published',NULL,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `exams` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `faculties`
+--
+
+DROP TABLE IF EXISTS `faculties`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `faculties` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` int unsigned NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dean_id` int unsigned DEFAULT NULL,
+  `vice_dean_id` int unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_fac_school` (`school_id`),
+  KEY `dean_id` (`dean_id`),
+  KEY `vice_dean_id` (`vice_dean_id`),
+  CONSTRAINT `faculties_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `faculties_ibfk_2` FOREIGN KEY (`dean_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `faculties_ibfk_3` FOREIGN KEY (`vice_dean_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `faculties`
+--
+
+LOCK TABLES `faculties` WRITE;
+/*!40000 ALTER TABLE `faculties` DISABLE KEYS */;
+/*!40000 ALTER TABLE `faculties` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -964,7 +1034,7 @@ CREATE TABLE `files` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `files_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `files_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -973,7 +1043,7 @@ CREATE TABLE `files` (
 
 LOCK TABLES `files` WRITE;
 /*!40000 ALTER TABLE `files` DISABLE KEYS */;
-INSERT INTO `files` VALUES (1,1,2,'My Documents','My Documents','','folder',0,1,NULL,1,NULL,'2026-08-01 01:59:37'),(2,1,5,'','','','',0,1,NULL,1,NULL,'2026-08-01 11:33:13'),(3,1,5,'hello','','','',0,1,NULL,1,NULL,'2026-08-01 11:33:21');
+INSERT INTO `files` VALUES (1,1,2,'My Documents','My Documents','','folder',0,1,NULL,1,NULL,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1005,7 +1075,7 @@ CREATE TABLE `forum_posts` (
 
 LOCK TABLES `forum_posts` WRITE;
 /*!40000 ALTER TABLE `forum_posts` DISABLE KEYS */;
-INSERT INTO `forum_posts` VALUES (1,1,3,'Try the AC method: multiply a and c, find factors that sum to b.',1,'2026-08-01 01:59:37'),(2,1,4,'That helped a lot, thank you!',0,'2026-08-01 01:59:37');
+INSERT INTO `forum_posts` VALUES (1,1,3,'Try the AC method: multiply a and c, find factors that sum to b.',1,'2026-08-21 22:36:25'),(2,1,4,'That helped a lot, thank you!',0,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `forum_posts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1039,7 +1109,7 @@ CREATE TABLE `forum_topics` (
 
 LOCK TABLES `forum_topics` WRITE;
 /*!40000 ALTER TABLE `forum_topics` DISABLE KEYS */;
-INSERT INTO `forum_topics` VALUES (1,1,4,'How do I solve quadratic equations?','I keep getting confused with factoring. Any tips?',0,0,'2026-08-01 01:59:37'),(2,1,3,'Office hours this week','I will be available Wednesday 14:00-16:00.',0,0,'2026-08-01 01:59:37');
+INSERT INTO `forum_topics` VALUES (1,1,4,'How do I solve quadratic equations?','I keep getting confused with factoring. Any tips?',0,0,'2026-08-21 22:36:25'),(2,1,3,'Office hours this week','I will be available Wednesday 14:00-16:00.',0,0,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `forum_topics` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1062,7 +1132,7 @@ CREATE TABLE `goals` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `goals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1071,8 +1141,50 @@ CREATE TABLE `goals` (
 
 LOCK TABLES `goals` WRITE;
 /*!40000 ALTER TABLE `goals` DISABLE KEYS */;
-INSERT INTO `goals` VALUES (1,4,'Finish Mathematics 101',100,50,'lessons','2026-08-31',0),(2,5,'hello',5,5,'lessons',NULL,1);
+INSERT INTO `goals` VALUES (1,4,'Finish Mathematics 101',100,50,'lessons','2026-09-21',0);
 /*!40000 ALTER TABLE `goals` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `grade_audit`
+--
+
+DROP TABLE IF EXISTS `grade_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `grade_audit` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` int unsigned NOT NULL,
+  `course_id` int unsigned NOT NULL,
+  `school_id` int unsigned NOT NULL,
+  `assessment_type` enum('exam','assignment','manual') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'exam',
+  `assessment_id` int unsigned NOT NULL,
+  `old_score` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `new_score` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` enum('create','update','delete','override') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'update',
+  `reason` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `actor_id` int unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_grade_audit_student` (`student_id`),
+  KEY `idx_grade_audit_course` (`course_id`),
+  KEY `idx_grade_audit_assessment` (`assessment_type`,`assessment_id`),
+  KEY `school_id` (`school_id`),
+  KEY `actor_id` (`actor_id`),
+  CONSTRAINT `grade_audit_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `grade_audit_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `grade_audit_ibfk_3` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `grade_audit_ibfk_4` FOREIGN KEY (`actor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `grade_audit`
+--
+
+LOCK TABLES `grade_audit` WRITE;
+/*!40000 ALTER TABLE `grade_audit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `grade_audit` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1097,7 +1209,7 @@ CREATE TABLE `ledger` (
   KEY `idx_ledger_school` (`school_id`,`id`),
   KEY `idx_ledger_entity` (`entity_type`,`entity_id`),
   CONSTRAINT `ledger_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1106,7 +1218,6 @@ CREATE TABLE `ledger` (
 
 LOCK TABLES `ledger` WRITE;
 /*!40000 ALTER TABLE `ledger` DISABLE KEYS */;
-INSERT INTO `ledger` VALUES (1,1,0,'ledger.genesis','school',1,'{\"genesis\":1,\"school\":\"Addis Ababa International School\",\"created\":\"2026-08-01T14:39:20+03:00\"}','0000000000000000000000000000000000000000000000000000000000000000','316a4f815d7a8cc4b1a3d240424329c4f8c2879da8b43dd6411b21a11efb2839','2026-08-01 11:39:20'),(2,1,10,'certificate.issued','certificate',1,'{\"cert_code\":\"CERT-8C34CCEF\",\"course_id\":1,\"course\":\"Mathematics 101\"}','316a4f815d7a8cc4b1a3d240424329c4f8c2879da8b43dd6411b21a11efb2839','7b06bde8e4602b01668bcf9992d5f5a0b13f6fd0d415c22463c690ec49c97d80','2026-08-01 11:39:20');
 /*!40000 ALTER TABLE `ledger` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1130,7 +1241,7 @@ CREATE TABLE `lesson_progress` (
   KEY `lesson_id` (`lesson_id`),
   CONSTRAINT `lesson_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lesson_progress_ibfk_2` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1139,7 +1250,6 @@ CREATE TABLE `lesson_progress` (
 
 LOCK TABLES `lesson_progress` WRITE;
 /*!40000 ALTER TABLE `lesson_progress` DISABLE KEYS */;
-INSERT INTO `lesson_progress` VALUES (1,4,1,1,1,0,'2026-08-01 05:06:11'),(2,10,3,1,1,0,'2026-08-01 14:39:20'),(3,10,1,1,1,0,'2026-08-01 14:39:17');
 /*!40000 ALTER TABLE `lesson_progress` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1203,6 +1313,7 @@ CREATE TABLE `library_favorites` (
 
 LOCK TABLES `library_favorites` WRITE;
 /*!40000 ALTER TABLE `library_favorites` DISABLE KEYS */;
+INSERT INTO `library_favorites` VALUES (8,7,'2026-08-21 23:04:52');
 /*!40000 ALTER TABLE `library_favorites` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1230,7 +1341,7 @@ CREATE TABLE `library_items` (
   KEY `school_id` (`school_id`),
   KEY `idx_library_search` (`title`,`category`),
   CONSTRAINT `library_items_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1239,7 +1350,7 @@ CREATE TABLE `library_items` (
 
 LOCK TABLES `library_items` WRITE;
 /*!40000 ALTER TABLE `library_items` DISABLE KEYS */;
-INSERT INTO `library_items` VALUES (1,1,'Algebra Workbook 2026','book','MoE Ethiopia','Mathematics','Official workbook for Grade 9 algebra.','','',120,'published','2026-08-01 01:59:37'),(2,1,'Physics Notes Chapter 1','notes','Mr. David Alemu','Physics','Handwritten-style notes on motion.','','',45,'published','2026-08-01 01:59:37'),(3,1,'2019 National Exam Math','past_exam','MoE','Exams','Past national exam paper for practice.','','',230,'published','2026-08-01 01:59:37'),(4,1,'Introduction to C Programming','book','K&R','Programming','Classic C programming reference.','','',89,'published','2026-08-01 01:59:37'),(5,1,'Data Structures Slides','slides','Prof. Kebede','Computer Science','Lecture slides on trees and graphs.','','',60,'published','2026-08-01 01:59:37'),(6,1,'Amharic-English Dictionary','book','Academy','Languages','Bilingual dictionary for students.','','',150,'published','2026-08-01 01:59:37'),(7,1,'Ethiopian History Timeline','notes','Mrs. Tigist','History','Quick timeline of key events.','','',34,'published','2026-08-01 01:59:37'),(8,1,'Science Fair Video','video','BDU Media','Science','Documentary on Ethiopian scientists.','','',76,'published','2026-08-01 01:59:37'),(9,1,'C programming','book','henok','STEM','ghgjh','','uploads/library/20260802_013953_eb52d0ce75f5.pdf',0,'published','2026-08-01 22:39:53');
+INSERT INTO `library_items` VALUES (1,1,'Algebra Workbook 2026','book','MoE Ethiopia','Mathematics','Official workbook for Grade 9 algebra.','','',120,'published','2026-08-21 22:36:25'),(2,1,'Physics Notes Chapter 1','notes','Mr. David Alemu','Physics','Handwritten-style notes on motion.','','',45,'published','2026-08-21 22:36:25'),(3,1,'2019 National Exam Math','past_exam','MoE','Exams','Past national exam paper for practice.','','',230,'published','2026-08-21 22:36:25'),(4,1,'Introduction to C Programming','book','K&R','Programming','Classic C programming reference.','','',89,'published','2026-08-21 22:36:25'),(5,1,'Data Structures Slides','slides','Prof. Kebede','Computer Science','Lecture slides on trees and graphs.','','',60,'published','2026-08-21 22:36:25'),(6,1,'Amharic-English Dictionary','book','Academy','Languages','Bilingual dictionary for students.','','',150,'published','2026-08-21 22:36:25'),(7,1,'Ethiopian History Timeline','notes','Mrs. Tigist','History','Quick timeline of key events.','','',34,'published','2026-08-21 22:36:25'),(8,1,'Science Fair Video','video','BDU Media','Science','Documentary on Ethiopian scientists.','','',76,'published','2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `library_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1260,7 +1371,7 @@ CREATE TABLE `login_history` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `login_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1269,7 +1380,7 @@ CREATE TABLE `login_history` (
 
 LOCK TABLES `login_history` WRITE;
 /*!40000 ALTER TABLE `login_history` DISABLE KEYS */;
-INSERT INTO `login_history` VALUES (1,2,'success','127.0.0.1','desktop-api','2026-08-01 02:00:08'),(2,5,'failed','127.0.0.1','desktop-api','2026-08-01 02:00:08'),(3,6,'success','127.0.0.1','desktop-api','2026-08-01 02:00:08'),(4,2,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:09'),(5,8,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(6,3,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:11'),(7,4,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:12'),(8,5,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:13'),(9,2,'success','127.0.0.1','desktop-api','2026-08-01 02:00:15'),(10,5,'failed','127.0.0.1','desktop-api','2026-08-01 02:00:15'),(11,4,'success','127.0.0.1','desktop-api','2026-08-01 02:00:16'),(12,2,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:24'),(13,8,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:26'),(14,3,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:28'),(15,4,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:30'),(16,5,'success','127.0.0.1','curl/8.20.0','2026-08-01 02:00:31'),(17,2,'failed','127.0.0.1','','2026-08-01 02:04:25'),(18,4,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:05:15'),(19,8,'failed','127.0.0.1','','2026-08-01 02:09:52'),(20,8,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:10:16'),(21,3,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:25'),(22,10,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:12:45'),(23,5,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 02:17:14'),(24,5,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:22:17'),(25,10,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:38:03'),(26,5,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 11:41:31'),(27,10,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:00:18'),(28,2,'failed','127.0.0.1','','2026-08-01 22:01:24'),(29,2,'failed','127.0.0.1','','2026-08-01 22:01:48'),(30,2,'failed','127.0.0.1','','2026-08-01 22:03:26'),(31,2,'failed','127.0.0.1','','2026-08-01 22:03:32'),(32,2,'failed','127.0.0.1','','2026-08-01 22:03:36'),(33,1,'success','127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-01 22:04:04');
+INSERT INTO `login_history` VALUES (1,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:37:03'),(2,2,'failed','::1','','2026-08-21 22:42:20'),(3,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 22:42:28'),(4,1,'success','::1','curl/8.20.0','2026-08-21 22:52:56'),(5,2,'success','::1','curl/8.20.0','2026-08-21 22:53:24'),(6,2,'success','::1','curl/8.20.0','2026-08-21 22:53:37'),(7,8,'success','::1','curl/8.20.0','2026-08-21 22:53:50'),(8,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:02:29'),(9,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:06'),(10,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:03:26'),(11,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:06'),(12,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-21 23:04:29'),(13,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:10:33'),(14,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:15:41'),(15,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:16:27'),(16,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:45:46'),(17,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 00:46:24'),(18,4,'success','::1','curl/8.20.0','2026-08-22 00:56:26'),(19,4,'success','::1','curl/8.20.0','2026-08-22 01:10:39'),(20,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-22 01:29:53'),(21,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:22:54'),(22,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:23:49'),(23,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:27:53'),(24,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:46:32'),(25,8,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 05:47:16'),(26,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:46:10'),(27,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:51:26'),(28,1,'success','::1','curl/8.20.0','2026-08-23 06:52:18'),(29,1,'success','::1','curl/8.20.0','2026-08-23 06:53:22'),(30,1,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 06:55:18'),(31,1,'success','::1','curl/8.20.0','2026-08-23 06:56:22'),(32,1,'success','::1','curl/8.20.0','2026-08-23 06:57:14'),(33,1,'success','::1','curl/8.20.0','2026-08-23 06:57:27'),(34,1,'success','::1','curl/8.20.0','2026-08-23 06:57:51'),(35,1,'success','::1','curl/8.20.0','2026-08-23 07:01:21'),(36,1,'success','::1','curl/8.20.0','2026-08-23 07:06:31'),(37,4,'success','::1','curl/8.20.0','2026-08-23 07:06:31'),(38,1,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:08:52'),(39,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:09:05'),(40,1,'success','::1','curl/8.20.0','2026-08-23 07:10:55'),(41,2,'success','::1','curl/8.20.0','2026-08-23 07:12:34'),(42,2,'success','::1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','2026-08-23 07:15:50'),(43,2,'success','::1','curl/8.20.0','2026-08-23 07:20:40');
 /*!40000 ALTER TABLE `login_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1285,6 +1396,7 @@ CREATE TABLE `messages` (
   `conversation_id` int unsigned NOT NULL,
   `sender_id` int unsigned NOT NULL,
   `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hmac` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `attachment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -1292,7 +1404,7 @@ CREATE TABLE `messages` (
   KEY `sender_id` (`sender_id`),
   CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1301,7 +1413,7 @@ CREATE TABLE `messages` (
 
 LOCK TABLES `messages` WRITE;
 /*!40000 ALTER TABLE `messages` DISABLE KEYS */;
-INSERT INTO `messages` VALUES (1,1,3,'Great question in the forum today!','','2026-08-01 01:59:37'),(2,1,4,'Thank you teacher!','','2026-08-01 01:59:37'),(3,2,3,'Reminder: midterm next week.','','2026-08-01 01:59:37'),(4,2,2,'Don\'t forget to register for the science fair.','','2026-08-01 01:59:37');
+INSERT INTO `messages` VALUES (1,1,3,'Great question in the forum today!','','','2026-08-21 22:36:25'),(2,1,4,'Thank you teacher!','','','2026-08-21 22:36:25'),(3,2,3,'Reminder: midterm next week.','','','2026-08-21 22:36:25'),(4,2,2,'Don\'t forget to register for the science fair.','','','2026-08-21 22:36:25'),(5,3,8,'KG28RCT491Jvuuf54EH6fQ6dAdzICG5NXFaURawqWDUe+sd5vqUPGsJmwibGqkqWPPlMOjLq+LHQdG66lRsYDTuHBn5uGIzo1mc=','d98e6c32cb2bf881ca1641efdc94ea858cdd79fccc8ddda52e38dbc61abeb0b3','','2026-08-22 00:14:08'),(6,5,8,'gR8XWUksf6OflCBRLcAztTYTyEqGtEn+cjrF1mIJX2KYPvod30qd','3afc2982562d2f3e419579c895f61f9046dc3f8af865242d53a4f591333bfa95','','2026-08-22 00:14:39'),(10,8,8,'GcyEe33RVPCp7VWQ32AILr7wHRGYixBN6YT7EVfAfdg=','c6a222b6da7ef6fe0f90fab72cd0759629ccdfec0fc4da9adf360813c8307c2c','','2026-08-22 01:28:09'),(11,8,8,'Og49V9gWjJfLrUM3nxHlRjFUC5l5PvQ0+UVOjm9Q','37c05399db8adce168467e399c3491f24cf6fff34520949d418c75552b34f770','','2026-08-22 01:28:19');
 /*!40000 ALTER TABLE `messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1324,7 +1436,7 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `idx_notif_user` (`user_id`,`read_at`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1333,7 +1445,7 @@ CREATE TABLE `notifications` (
 
 LOCK TABLES `notifications` WRITE;
 /*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
-INSERT INTO `notifications` VALUES (1,4,'assignment','Algebra Worksheet 1 graded','You received 88/100.','assignments/view?sub=1',NULL,'2026-08-01 01:59:37'),(2,4,'exam','Algebra Midterm is coming up','The midterm starts in 7 days.','exams/view?e=1',NULL,'2026-08-01 01:59:37'),(3,4,'announcement','Welcome to Edunex','Explore your courses and AI tutor!','dashboard',NULL,'2026-08-01 01:59:37'),(4,4,'achievement','Achievement unlocked: Quiz Whiz','Score 80%+ on any quiz','gamification/badges',NULL,'2026-08-01 02:06:11'),(5,4,'achievement','Achievement unlocked: Perfect Attendance','7 days of perfect attendance','gamification/badges',NULL,'2026-08-01 02:06:11'),(6,4,'achievement','Achievement unlocked: On Fire','7-day learning streak','gamification/badges',NULL,'2026-08-01 02:06:11'),(7,4,'achievement','Achievement unlocked: Scholar','Complete a full course','gamification/badges',NULL,'2026-08-01 02:06:11'),(8,4,'achievement','Achievement unlocked: Helping Hand','Answer 5 forum questions','gamification/badges',NULL,'2026-08-01 02:06:11'),(9,4,'achievement','Achievement unlocked: Marathoner','Reach level 5','gamification/badges',NULL,'2026-08-01 02:06:11'),(10,4,'achievement','Achievement unlocked: First Steps','Complete your first lesson','gamification/badges',NULL,'2026-08-01 02:06:11'),(11,4,'achievement','Achievement unlocked: Bookworm','Read 5 lessons','gamification/badges',NULL,'2026-08-01 02:06:11'),(12,4,'achievement','Achievement unlocked: Quiz Whiz','Score 80%+ on any quiz','gamification/badges',NULL,'2026-08-01 02:06:11'),(13,4,'achievement','Achievement unlocked: Perfect Attendance','7 days of perfect attendance','gamification/badges',NULL,'2026-08-01 02:06:11'),(14,4,'achievement','Achievement unlocked: On Fire','7-day learning streak','gamification/badges',NULL,'2026-08-01 02:06:11'),(15,4,'achievement','Achievement unlocked: Scholar','Complete a full course','gamification/badges',NULL,'2026-08-01 02:06:11'),(16,4,'achievement','Achievement unlocked: Helping Hand','Answer 5 forum questions','gamification/badges',NULL,'2026-08-01 02:06:11'),(17,4,'achievement','Achievement unlocked: Marathoner','Reach level 5','gamification/badges',NULL,'2026-08-01 02:06:11'),(18,3,'assignment','New submission: Motion Lab Report','Liya submitted an assignment.','teacher/assignment&id=2',NULL,'2026-08-01 02:08:21'),(19,10,'achievement','Account verified','Your homeroom teacher approved your account. Welcome to Edunex!','student/dashboard','2026-08-01 14:38:11','2026-08-01 02:12:29'),(20,5,'achievement','Achievement unlocked: First Steps','Complete your first lesson','gamification/badges','2026-08-01 14:30:46','2026-08-01 11:25:02'),(21,5,'achievement','Achievement unlocked: First Steps','Complete your first lesson','gamification/badges','2026-08-01 14:30:46','2026-08-01 11:25:02'),(22,5,'achievement','Level up! You reached level 2','Goal completed','gamification','2026-08-01 14:30:46','2026-08-01 11:25:02'),(23,10,'achievement','Achievement unlocked: First Steps','Complete your first lesson','gamification/badges',NULL,'2026-08-01 11:39:20'),(24,10,'achievement','Achievement unlocked: First Steps','Complete your first lesson','gamification/badges',NULL,'2026-08-01 11:39:20'),(25,10,'achievement','Course completed! 🎓','You earned a certificate for Mathematics 101.','certificates',NULL,'2026-08-01 11:39:20'),(26,4,'announcement','Transfer approved!','Welcome to your new school.','dashboard',NULL,'2026-08-01 22:36:47'),(27,1,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(28,2,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(29,8,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(30,11,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(31,3,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(32,10,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(33,5,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(34,6,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(35,4,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13'),(36,7,'announcement','Hello New Year','fjfjgfjgfgfjgfjgfjfghfjh','communication/announcements',NULL,'2026-08-01 22:38:13');
+INSERT INTO `notifications` VALUES (1,4,'assignment','Algebra Worksheet 1 graded','You received 88/100.','assignments/view?sub=1',NULL,'2026-08-21 22:36:25'),(2,4,'exam','Algebra Midterm is coming up','The midterm starts in 7 days.','exams/view?e=1',NULL,'2026-08-21 22:36:25'),(3,4,'announcement','Welcome to Edunex','Explore your courses and AI tutor!','communication/announcement&id=1',NULL,'2026-08-21 22:36:25'),(4,4,'message','New message','hello teachers there will be meeting on Tuesdy','messages&conv=3',NULL,'2026-08-22 00:14:08'),(5,5,'message','New message','hello henok','messages&conv=5',NULL,'2026-08-22 00:14:39'),(14,2,'announcement','FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff','communication/announcement&id=9','2026-08-22 03:46:15','2026-08-22 00:45:54'),(15,8,'announcement','FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff','communication/announcement&id=9','2026-08-22 04:28:19','2026-08-22 00:45:54'),(16,3,'announcement','FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff','communication/announcement&id=9',NULL,'2026-08-22 00:45:54'),(17,4,'announcement','FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff','communication/announcement&id=9',NULL,'2026-08-22 00:45:54'),(18,5,'announcement','FDSFffffffffffffff','fffffffffffffffffffffffffffffffffff','communication/announcement&id=9',NULL,'2026-08-22 00:45:54'),(19,7,'announcement','fffffffffffffffff','ffffffffffffff','communication/announcement&id=10',NULL,'2026-08-22 00:46:00'),(20,7,'announcement','ffffffffff','ffffffffffffffffffff','communication/announcement&id=11',NULL,'2026-08-22 00:46:08'),(21,2,'message','Suggestion about \"Library maintenance on Sunday\"','Test suggestion','messages&conv=7','2026-08-22 04:30:14','2026-08-22 00:59:13'),(22,2,'message','Suggestion about \"Library maintenance on Sunday\"','This is a test suggestion','messages&conv=7','2026-08-22 04:30:14','2026-08-22 01:08:24'),(23,2,'message','Suggestion about \"FDSFffffffffffffff\"','okay','messages&conv=8','2026-08-22 04:30:14','2026-08-22 01:28:09'),(24,2,'message','Suggestion about \"FDSFffffffffffffff\"','hh','messages&conv=8','2026-08-22 04:30:14','2026-08-22 01:28:19');
 /*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1446,7 +1558,7 @@ CREATE TABLE `reports` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1455,7 +1567,6 @@ CREATE TABLE `reports` (
 
 LOCK TABLES `reports` WRITE;
 /*!40000 ALTER TABLE `reports` DISABLE KEYS */;
-INSERT INTO `reports` VALUES (1,1,1,'student','hell grades','csv','reports/student_20260802_014758.csv','{\"school\":0}','2026-08-01 22:47:58'),(2,1,1,'teacher','hell grades','csv','reports/teacher_20260802_014823.csv','{\"school\":0}','2026-08-01 22:48:23');
 /*!40000 ALTER TABLE `reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1479,8 +1590,37 @@ CREATE TABLE `role_permissions` (
 
 LOCK TABLES `role_permissions` WRITE;
 /*!40000 ALTER TABLE `role_permissions` DISABLE KEYS */;
-INSERT INTO `role_permissions` VALUES ('director','analytics.view'),('director','attendance.view'),('director','courses.view'),('director','exams.view'),('director','library.view'),('director','reports.generate'),('director','schools.view'),('director','students.view'),('director','teachers.manage'),('director','transfers.manage'),('director','users.import'),('teacher','announcements.manage'),('teacher','assignments.manage'),('teacher','attendance.manage'),('teacher','courses.manage'),('teacher','exams.manage'),('teacher','forum.manage'),('teacher','grades.manage'),('teacher','library.manage'),('teacher','parents.manage'),('teacher','reports.generate'),('teacher','students.verify'),('teacher','users.import'),('student','assignments.submit'),('student','certificates.view'),('student','courses.view'),('student','exams.take'),('student','forum.post'),('student','library.view'),('student','messages.send'),('parent','children.view'),('parent','reports.view'),('guest','courses.view');
+INSERT INTO `role_permissions` VALUES ('admin','ai.assistant'),('admin','ai.flashcards'),('admin','ai.tutor'),('admin','analytics.view'),('admin','announcements.manage'),('admin','assignments.create'),('admin','assignments.grade'),('admin','assignments.manage'),('admin','attendance.export'),('admin','attendance.manage'),('admin','attendance.record'),('admin','attendance.view'),('admin','backups.manage'),('admin','badges.manage'),('admin','calendar.create'),('admin','calendar.view'),('admin','comments.view'),('admin','courses.create'),('admin','courses.manage'),('admin','courses.view'),('admin','dashboard'),('admin','exams.create'),('admin','exams.grade'),('admin','exams.manage'),('admin','exams.take'),('admin','exams.view'),('admin','files.manage'),('admin','files.upload'),('admin','files.view'),('admin','forum.moderate'),('admin','forum.post'),('admin','gamification.view'),('admin','goals.award'),('admin','grades.export'),('admin','grades.manage'),('admin','grades.view'),('admin','leaderboard.view'),('admin','ledger.verify'),('admin','lessons.manage'),('admin','library.manage'),('admin','library.upload'),('admin','library.view'),('admin','logs.view'),('admin','messages.send'),('admin','messages.view'),('admin','notifications.view'),('admin','profile.view'),('admin','reports.export'),('admin','reports.view'),('admin','search.global'),('admin','settings.manage'),('admin','transfers.approve'),('admin','transfers.manage'),('admin','users.create'),('admin','users.manage'),('admin','users.view'),('director','accounting.view'),('director','analytics.view'),('director','announcements.manage'),('director','attendance.view'),('director','courses.view'),('director','exams.view'),('director','library.view'),('director','messages.send'),('director','messages.view'),('director','reports.export'),('director','reports.generate'),('director','schools.view'),('director','students.view'),('director','teachers.manage'),('director','transfers.manage'),('director','users.import'),('director','users.view'),('teacher','ai.assistant'),('teacher','ai.flashcards'),('teacher','ai.tutor'),('teacher','analytics.view'),('teacher','announcements.manage'),('teacher','assignments.create'),('teacher','assignments.grade'),('teacher','assignments.manage'),('teacher','attendance.manage'),('teacher','attendance.record'),('teacher','attendance.view'),('teacher','calendar.create'),('teacher','calendar.view'),('teacher','courses.manage'),('teacher','courses.view'),('teacher','exams.create'),('teacher','exams.grade'),('teacher','exams.manage'),('teacher','files.upload'),('teacher','files.view'),('teacher','forum.manage'),('teacher','forum.post'),('teacher','goals.award'),('teacher','grades.manage'),('teacher','grades.view'),('teacher','lessons.manage'),('teacher','library.manage'),('teacher','library.upload'),('teacher','library.view'),('teacher','messages.send'),('teacher','messages.view'),('teacher','parents.manage'),('teacher','reports.generate'),('teacher','reports.view'),('teacher','students.verify'),('teacher','users.import'),('student','ai.assistant'),('student','ai.flashcards'),('student','ai.tutor'),('student','assignments.submit'),('student','attendance.view'),('student','calendar.view'),('student','certificates.view'),('student','courses.enroll'),('student','courses.view'),('student','exams.take'),('student','exams.view'),('student','files.upload'),('student','files.view'),('student','forum.post'),('student','forum.reply'),('student','gamification.view'),('student','goals.view'),('student','grades.view'),('student','leaderboard.view'),('student','library.borrow'),('student','library.view'),('student','messages.send'),('student','transfers.apply'),('student','transfers.view'),('parent','assignments.view'),('parent','attendance.view'),('parent','calendar.view'),('parent','children.view'),('parent','courses.view'),('parent','grades.view'),('parent','messages.send'),('parent','messages.view'),('parent','reports.view'),('guest','courses.view');
 /*!40000 ALTER TABLE `role_permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `school_modules`
+--
+
+DROP TABLE IF EXISTS `school_modules`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_modules` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` int unsigned NOT NULL,
+  `module_key` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `enabled` tinyint(1) DEFAULT '1',
+  `installed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_school_mod` (`school_id`,`module_key`),
+  CONSTRAINT `school_modules_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `school_modules`
+--
+
+LOCK TABLES `school_modules` WRITE;
+/*!40000 ALTER TABLE `school_modules` DISABLE KEYS */;
+INSERT INTO `school_modules` VALUES (1,1,'core',1,NULL),(2,1,'auth',1,NULL),(3,1,'user-management',1,NULL),(4,1,'security',1,NULL),(5,1,'backup',1,NULL),(6,1,'api',1,NULL),(7,1,'analytics',1,NULL),(8,1,'messaging',1,NULL),(9,1,'notifications',1,NULL),(10,1,'teacher-portal',1,NULL),(11,1,'parent-portal',1,NULL),(12,1,'student-portal',1,NULL),(13,1,'academic',1,NULL),(14,1,'attendance',1,NULL),(15,1,'library',1,NULL),(16,1,'ai-tutor',1,NULL),(17,1,'gamification',1,NULL),(18,1,'high-school',1,NULL),(19,1,'examination',1,NULL),(20,1,'certificate',1,NULL),(21,1,'lms',1,NULL),(22,1,'online-courses',1,NULL),(23,2,'core',1,NULL),(24,2,'auth',1,NULL),(25,2,'user-management',1,NULL),(26,2,'security',1,NULL),(27,2,'backup',1,NULL),(28,2,'api',1,NULL),(29,2,'analytics',1,NULL),(30,2,'messaging',1,NULL),(31,2,'notifications',1,NULL),(32,2,'teacher-portal',1,NULL),(33,2,'parent-portal',1,NULL),(34,2,'student-portal',1,NULL),(35,2,'academic',1,NULL),(36,2,'attendance',1,NULL),(37,2,'library',1,NULL),(38,2,'ai-tutor',1,NULL),(39,2,'gamification',1,NULL),(40,2,'high-school',1,NULL),(41,2,'examination',1,NULL),(42,2,'certificate',1,NULL),(43,2,'lms',1,NULL),(44,2,'online-courses',1,NULL),(45,3,'core',1,NULL),(46,3,'auth',1,NULL),(47,3,'user-management',1,NULL),(48,3,'security',1,NULL),(49,3,'backup',1,NULL),(50,3,'api',1,NULL),(51,3,'analytics',1,NULL),(52,3,'messaging',1,NULL),(53,3,'notifications',1,NULL),(54,3,'teacher-portal',1,NULL),(55,3,'parent-portal',1,NULL),(56,3,'student-portal',1,NULL),(57,3,'academic',1,NULL),(58,3,'attendance',1,NULL),(59,3,'library',1,NULL),(60,3,'ai-tutor',1,NULL),(61,3,'gamification',1,NULL),(62,3,'high-school',1,NULL),(63,3,'examination',1,NULL),(64,3,'certificate',1,NULL),(65,3,'lms',1,NULL),(66,3,'online-courses',1,NULL);
+/*!40000 ALTER TABLE `school_modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1492,9 +1632,11 @@ DROP TABLE IF EXISTS `schools`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `schools` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `admin_id` int unsigned DEFAULT NULL,
   `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` enum('school','university','college','training','other') COLLATE utf8mb4_unicode_ci DEFAULT 'school',
+  `education_level` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT 'secondary',
   `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `city` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT '',
@@ -1504,7 +1646,7 @@ CREATE TABLE `schools` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1513,7 +1655,7 @@ CREATE TABLE `schools` (
 
 LOCK TABLES `schools` WRITE;
 /*!40000 ALTER TABLE `schools` DISABLE KEYS */;
-INSERT INTO `schools` VALUES (1,'Addis Ababa International School','AAIS','school','','','000-000-0000','','','active','2026-08-01 01:59:37'),(2,'Bahir Dar University','BDU','university','','Bahir Dar','','info@bdu.edu.et','','active','2026-08-01 01:59:37'),(3,'Hawassa Preparatory School','HPS','school','','Hawassa','','info@hps.edu.et','','active','2026-08-01 01:59:37'),(4,'holeta','HSS','school','Addis Abeba','Addis Ababa','000-000-0000','test@test.com','','active','2026-08-01 22:18:42');
+INSERT INTO `schools` VALUES (1,2,'Addis Ababa International School','AAIS','school','secondary','','Addis Ababa','','info@aais.edu.et','','active','2026-08-21 22:36:25'),(2,6,'Bahir Dar University','BDU','university','secondary','','Bahir Dar','','info@bdu.edu.et','','active','2026-08-21 22:36:25'),(3,2,'Hawassa Preparatory School','HPS','school','secondary','','Hawassa','','info@hps.edu.et','','active','2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `schools` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1533,7 +1675,7 @@ CREATE TABLE `semesters` (
   PRIMARY KEY (`id`),
   KEY `year_id` (`year_id`),
   CONSTRAINT `semesters_ibfk_1` FOREIGN KEY (`year_id`) REFERENCES `academic_years` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1542,7 +1684,7 @@ CREATE TABLE `semesters` (
 
 LOCK TABLES `semesters` WRITE;
 /*!40000 ALTER TABLE `semesters` DISABLE KEYS */;
-INSERT INTO `semesters` VALUES (1,1,'Semester 1','2025-09-01','2026-01-31'),(2,2,'Semester 1','2025-09-01','2026-01-31'),(3,3,'Semester 1','2025-09-01','2026-01-31'),(4,1,'',NULL,NULL);
+INSERT INTO `semesters` VALUES (1,1,'Semester 1','2025-09-01','2026-01-31'),(2,2,'Semester 1','2025-09-01','2026-01-31'),(3,3,'Semester 1','2025-09-01','2026-01-31');
 /*!40000 ALTER TABLE `semesters` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1565,7 +1707,7 @@ CREATE TABLE `sessions` (
   UNIQUE KEY `selector` (`selector`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1574,6 +1716,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
+INSERT INTO `sessions` VALUES (2,2,'b6518f44ef54356b63bfe9b9','119c5a0d90a7ee2d8437ab55ff1ac6aaad74077448efc4a97d8b67250c0109fc','::1','','2026-09-21 01:42:28'),(3,1,'2e865178bab1d73e95cedb6a','e0fdf2fcc0149dca755bbf39ec5ade20f284b34d53520d2927d70ad048512f58','::1','','2026-09-21 01:52:56'),(4,2,'918380184527d925bb53a07d','3d81f57bea93258dc851656a0511bdd2677be03730213ea83d9ffa565e64948e','::1','','2026-09-21 01:53:24'),(5,2,'179d25d9e399fdb5f8e14085','ae12b9c9d426745f1acbec85ee62b008b91c34999145611005b5c88f2aa46180','::1','','2026-09-21 01:53:37'),(6,8,'9b4e5877b4289e89cf7bedfd','4ab23dabd117dd7fbb08e139df04c3fe826d0fca8018528c4c6f2ce0422af776','::1','','2026-09-21 01:53:50'),(7,2,'8d273b21b9815f45c2657d54','7e57652eea0cc1a919612d54f383c7d958d6419a03e71bc7d23ec9040557df89','::1','','2026-09-21 02:00:08'),(10,2,'4eacc3586f0ff2c9c24ce243','13bc58898ab993ebadd21757ccffd30ff0f3739d98da92698c5bbf3d30af7716','::1','','2026-09-21 04:09:47');
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1620,7 +1763,7 @@ CREATE TABLE `student_groups` (
   KEY `homeroom_teacher_id` (`homeroom_teacher_id`),
   CONSTRAINT `student_groups_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_groups_ibfk_2` FOREIGN KEY (`homeroom_teacher_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1629,8 +1772,44 @@ CREATE TABLE `student_groups` (
 
 LOCK TABLES `student_groups` WRITE;
 /*!40000 ALTER TABLE `student_groups` DISABLE KEYS */;
-INSERT INTO `student_groups` VALUES (1,1,'Grade 9-A','9','A',3),(2,1,'Grade 10-B','10','B',3),(3,2,'CS Year 1','1st','A',NULL),(4,3,'Grade 8-C','8','C',NULL),(5,1,'8','8','r',NULL);
+INSERT INTO `student_groups` VALUES (1,1,'Grade 9-A','9','A',3),(2,1,'Grade 10-B','10','B',9),(3,2,'CS Year 1','1st','A',NULL),(4,3,'Grade 8-C','8','C',NULL);
 /*!40000 ALTER TABLE `student_groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `student_notes`
+--
+
+DROP TABLE IF EXISTS `student_notes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_notes` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `lesson_id` int unsigned DEFAULT NULL,
+  `course_id` int unsigned DEFAULT NULL,
+  `title` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `body` longtext COLLATE utf8mb4_unicode_ci,
+  `pinned` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_course` (`course_id`),
+  KEY `lesson_id` (`lesson_id`),
+  CONSTRAINT `student_notes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_notes_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `student_notes_ibfk_3` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `student_notes`
+--
+
+LOCK TABLES `student_notes` WRITE;
+/*!40000 ALTER TABLE `student_notes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_notes` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1646,12 +1825,13 @@ CREATE TABLE `subjects` (
   `department_id` int unsigned DEFAULT NULL,
   `name` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `status` enum('active','archived') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
   PRIMARY KEY (`id`),
   KEY `school_id` (`school_id`),
   KEY `department_id` (`department_id`),
   CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `subjects_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1660,8 +1840,35 @@ CREATE TABLE `subjects` (
 
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
-INSERT INTO `subjects` VALUES (1,1,1,'Mathematics','MATH101'),(2,1,1,'Physics','PHY101'),(3,1,2,'English','ENG101'),(4,2,3,'Data Structures','CS201'),(5,2,4,'Circuit Theory','EE201'),(6,3,5,'General Science','GSC101'),(7,2,NULL,'Concrete','HSS');
+INSERT INTO `subjects` VALUES (1,1,1,'Mathematics','MATH101','active'),(2,1,1,'Physics','PHY101','active'),(3,1,2,'English','ENG101','active'),(4,2,3,'Data Structures','CS201','active'),(5,2,4,'Circuit Theory','EE201','active'),(6,3,5,'General Science','GSC101','active');
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `teacher_subjects`
+--
+
+DROP TABLE IF EXISTS `teacher_subjects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `teacher_subjects` (
+  `teacher_id` int unsigned NOT NULL,
+  `subject_id` int unsigned NOT NULL,
+  `assigned_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`teacher_id`,`subject_id`),
+  KEY `subject_id` (`subject_id`),
+  CONSTRAINT `teacher_subjects_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `teacher_subjects_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `teacher_subjects`
+--
+
+LOCK TABLES `teacher_subjects` WRITE;
+/*!40000 ALTER TABLE `teacher_subjects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `teacher_subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1684,7 +1891,7 @@ CREATE TABLE `transfer_codes` (
   UNIQUE KEY `code` (`code`),
   KEY `school_id` (`school_id`),
   CONSTRAINT `transfer_codes_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1693,7 +1900,7 @@ CREATE TABLE `transfer_codes` (
 
 LOCK TABLES `transfer_codes` WRITE;
 /*!40000 ALTER TABLE `transfer_codes` DISABLE KEYS */;
-INSERT INTO `transfer_codes` VALUES (1,'TRF-AAIS-0001',1,NULL,'referral',0,'2026-10-30 04:59:37','2026-08-01 01:59:37'),(2,'TRF-BDU-0001',2,NULL,'referral',0,'2026-10-30 04:59:37','2026-08-01 01:59:37'),(3,'TRF-HPS-0001',3,NULL,'referral',0,'2026-10-30 04:59:37','2026-08-01 01:59:37'),(4,'TRF-7301-B7D3',1,4,'transfer',0,'2026-10-30 05:10:41','2026-08-01 02:10:41'),(5,'TRF-4543-7FAB',1,NULL,'transfer',0,'2026-10-31 00:00:00','2026-08-01 22:36:34');
+INSERT INTO `transfer_codes` VALUES (1,'TRF-AAIS-0001',1,NULL,'referral',0,'2026-11-20 01:36:25','2026-08-21 22:36:25'),(2,'TRF-BDU-0001',2,NULL,'referral',0,'2026-11-20 01:36:25','2026-08-21 22:36:25'),(3,'TRF-HPS-0001',3,NULL,'referral',0,'2026-11-20 01:36:25','2026-08-21 22:36:25'),(4,'TRF-FA5C-7B0B',1,4,'transfer',0,'2026-11-20 01:40:25','2026-08-21 22:40:25');
 /*!40000 ALTER TABLE `transfer_codes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1711,7 +1918,7 @@ CREATE TABLE `transfer_requests` (
   `from_school_id` int unsigned NOT NULL,
   `to_school_id` int unsigned NOT NULL,
   `referral_code` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT '',
-  `status` enum('pending','approved','rejected','completed') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `status` enum('pending','approved','rejected','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `reason` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `approved_by` int unsigned DEFAULT NULL,
   `decided_at` datetime DEFAULT NULL,
@@ -1725,7 +1932,7 @@ CREATE TABLE `transfer_requests` (
   CONSTRAINT `transfer_requests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `transfer_requests_ibfk_2` FOREIGN KEY (`from_school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   CONSTRAINT `transfer_requests_ibfk_3` FOREIGN KEY (`to_school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1734,7 +1941,6 @@ CREATE TABLE `transfer_requests` (
 
 LOCK TABLES `transfer_requests` WRITE;
 /*!40000 ALTER TABLE `transfer_requests` DISABLE KEYS */;
-INSERT INTO `transfer_requests` VALUES (1,4,NULL,1,2,'','completed','',1,'2026-08-02 01:36:47',NULL,NULL,'2026-08-01 02:07:30');
 /*!40000 ALTER TABLE `transfer_requests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1762,7 +1968,7 @@ CREATE TABLE `user_badges` (
 
 LOCK TABLES `user_badges` WRITE;
 /*!40000 ALTER TABLE `user_badges` DISABLE KEYS */;
-INSERT INTO `user_badges` VALUES (4,1,'2026-08-01 01:59:37'),(4,2,'2026-08-01 01:59:37'),(4,3,'2026-08-01 02:06:11'),(4,4,'2026-08-01 02:06:11'),(4,5,'2026-08-01 02:06:11'),(4,6,'2026-08-01 02:06:11'),(4,7,'2026-08-01 02:06:11'),(4,8,'2026-08-01 02:06:11'),(4,9,'2026-08-01 02:06:11'),(4,10,'2026-08-01 02:06:11'),(4,11,'2026-08-01 02:06:11'),(4,12,'2026-08-01 02:06:11'),(4,13,'2026-08-01 02:06:11'),(4,14,'2026-08-01 02:06:11'),(4,15,'2026-08-01 02:06:11'),(4,16,'2026-08-01 02:06:11'),(5,1,'2026-08-01 11:25:02'),(5,9,'2026-08-01 11:25:02'),(10,1,'2026-08-01 11:39:20'),(10,9,'2026-08-01 11:39:20');
+INSERT INTO `user_badges` VALUES (4,1,'2026-08-21 22:36:25'),(4,2,'2026-08-21 22:36:25');
 /*!40000 ALTER TABLE `user_badges` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1791,7 +1997,6 @@ CREATE TABLE `user_challenges` (
 
 LOCK TABLES `user_challenges` WRITE;
 /*!40000 ALTER TABLE `user_challenges` DISABLE KEYS */;
-INSERT INTO `user_challenges` VALUES (2,1,0,0),(2,2,0,0),(3,1,0,0),(3,2,0,0),(4,1,1,0),(4,2,2,0),(5,1,0,0),(5,2,0,0),(8,1,0,0),(8,2,0,0),(10,1,1,0),(10,2,0,0);
 /*!40000 ALTER TABLE `user_challenges` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1805,7 +2010,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `school_id` int unsigned DEFAULT NULL,
-  `role` enum('admin','director','teacher','student','parent','guest') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'student',
+  `role` enum('admin','sysadmin','director','teacher','student','parent','guest') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'student',
   `first_name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
   `last_name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1825,14 +2030,16 @@ CREATE TABLE `users` (
   `verified_by` int unsigned DEFAULT NULL,
   `verified_at` datetime DEFAULT NULL,
   `enrollment_status` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
-  `twofa_secret` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `twofa_secret` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT '',
   `twofa_enabled` tinyint(1) DEFAULT '0',
+  `hena_counter` int unsigned DEFAULT '0',
   `xp` int DEFAULT '0',
   `level` int DEFAULT '1',
   `streak` int DEFAULT '0',
   `streak_last` date DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `status` enum('active','pending','suspended','banned') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `session_version` int DEFAULT '0',
   `privacy` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -1845,7 +2052,7 @@ CREATE TABLE `users` (
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`),
   CONSTRAINT `users_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `student_groups` (`id`) ON DELETE SET NULL,
   CONSTRAINT `users_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1854,7 +2061,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,NULL,'admin','Super','Admin','superadmin@edunex.local','',NULL,'$2y$12$FfFAMGO6yjT6junPJhM.2.0HJ0cb1ilASKXtoSpAGhkYSbkWwuUzS','','en','dark',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,'active','',0,0,1,0,NULL,'2026-08-02 01:04:04','active',NULL,'2026-08-01 01:59:37'),(2,1,'admin','Sara','Tesfaye','admin@edunex.local','+251911000001',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,5000,8,12,NULL,'2026-08-01 05:00:24','active',NULL,'2026-08-01 01:59:37'),(3,1,'teacher','David','Alemu','teacher@edunex.local','+251911000002',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,2500,6,5,NULL,'2026-08-01 05:12:25','active',NULL,'2026-08-01 01:59:37'),(4,2,'student','Liya','Girma','student@edunex.local','+251911000003','AAIS-2026-000001','$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','om','dark',1,5,1,'',NULL,NULL,1,3,'2026-08-01 04:59:37','active','',0,1220,4,1,'2026-08-01','2026-08-01 05:05:15','active',NULL,'2026-08-01 01:59:37'),(5,1,'parent','Hana','Girma','parent@edunex.local','+251911000004',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,115,2,1,'2026-08-01','2026-08-01 14:41:31','active',NULL,'2026-08-01 01:59:37'),(6,2,'admin','Kebede','Hailu','admin2@edunex.local','+251911000005',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','am','light',NULL,NULL,3,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,300,2,1,NULL,'2026-08-01 05:00:08','active',NULL,'2026-08-01 01:59:37'),(7,3,'teacher','Meron','Tesfa','teacher3@edunex.local','+251911000006',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','light',NULL,NULL,5,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,800,3,2,NULL,'2026-08-01 04:59:37','active',NULL,'2026-08-01 01:59:37'),(8,1,'director','Dir','One','director@edunex.local','+251911000007',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,'2026-08-01 04:59:37','active','',0,1000,3,1,NULL,'2026-08-01 05:10:16','active',NULL,'2026-08-01 01:59:37'),(10,1,'student','Henok','Arega','henockarega111@gmail.com','0987546132','AAI-2026-000002','$2y$12$y5bf0r1kHGFZhT95y1pHXuqrda4H6KjTpjP/DBguMUEFqCFqFTxuS','','en','dark',2,NULL,NULL,NULL,NULL,NULL,1,3,'2026-08-01 05:12:29','active','',0,50,1,1,'2026-08-01','2026-08-02 01:00:18','active',NULL,'2026-08-01 02:02:44'),(11,1,'director','nat','nat','nat@nat.com','+251912563434',NULL,'$2y$12$b8tap2AlbsEDK8xJ9J.7DuG5cNLLhN5FXTZXl3GndvUVXpKL0TErq','','en','dark',NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,'active','',0,0,1,0,NULL,NULL,'active',NULL,'2026-08-01 22:16:22');
+INSERT INTO `users` VALUES (1,NULL,'sysadmin','Super','Admin','superadmin@edunex.local','',NULL,'$2y$12$9qbvc17hFQyjtZbj9MMWkebNK0EO11bajz0KidA.m86kfUKMXeXfi','','en','dark',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,'active','',0,0,0,1,0,NULL,'2026-08-23 10:10:55','active',1,NULL,'2026-08-21 22:36:25'),(2,1,'admin','Sara','Tesfaye','admin@edunex.local','+251911000001',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,5000,8,12,NULL,'2026-08-23 10:20:40','active',1,NULL,'2026-08-21 22:36:25'),(3,1,'teacher','David','Alemu','teacher@edunex.local','+251911000002',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,2500,6,5,NULL,'2026-08-22 01:36:25','active',1,NULL,'2026-08-21 22:36:25'),(4,1,'student','Liya','Girma','student@edunex.local','+251911000003','AAIS-2026-000001','$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',1,5,1,NULL,NULL,NULL,1,3,'2026-08-22 01:36:25','active','',0,0,1200,4,3,NULL,'2026-08-23 10:06:31','active',1,NULL,'2026-08-21 22:36:25'),(5,1,'parent','Hana','Girma','parent@edunex.local','+251911000004',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','dark',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,100,1,0,NULL,'2026-08-22 01:36:25','active',1,NULL,'2026-08-21 22:36:25'),(6,2,'admin','Kebede','Hailu','admin2@edunex.local','+251911000005',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','am','light',NULL,NULL,3,NULL,NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,300,2,1,NULL,'2026-08-22 01:36:25','active',1,NULL,'2026-08-21 22:36:25'),(7,3,'teacher','Meron','Tesfa','teacher3@edunex.local','+251911000006',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','','en','light',NULL,NULL,5,NULL,NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,800,3,2,NULL,'2026-08-22 01:36:25','active',1,NULL,'2026-08-21 22:36:25'),(8,1,'director','Dir','One','director@edunex.local','+251911000007',NULL,'$2y$12$OVIoqjH/hqK2zN.z663sLOkTdCMgHWLgFTfBVImfZuuKlByi0f75u','avatars/20260823_082726_26f7a07876f4.jpeg','en','dark',NULL,NULL,1,'',NULL,NULL,1,NULL,'2026-08-22 01:36:25','active','',0,0,1000,3,1,NULL,'2026-08-23 08:47:16','active',1,NULL,'2026-08-21 22:36:25'),(9,1,'teacher','Henok','Arega','test@test.com','',NULL,'$2y$12$Ktg03dDgMHyLJmtxpCGuqu6E8ydSBJCaszIONuXN/iVMr37Bq8I9y','','en','dark',NULL,NULL,1,NULL,NULL,NULL,1,NULL,NULL,'active','',0,0,0,1,0,NULL,NULL,'active',0,NULL,'2026-08-23 05:48:54');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1867,4 +2074,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-02  1:59:26
+-- Dump completed on 2026-08-23 10:23:43
