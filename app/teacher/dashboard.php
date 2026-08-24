@@ -9,20 +9,20 @@ class Ctl_dashboard {
         $uid = (int)$u['id'];
         $df = demo_filter('c');
         $stats = [
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
-            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE teacher_id = ? AND status = 'published' AND is_demo = 0", [$uid], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses c WHERE teacher_id = ? $df", [$uid], 0),
+            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses c WHERE teacher_id = ? AND status = 'published' $df", [$uid], 0),
             'students' => (int)Database::scalar(
-                "SELECT COUNT(DISTINCT ce.user_id) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.teacher_id = ?", [$uid], 0),
-            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
-            'assignments' => (int)Database::scalar("SELECT COUNT(*) FROM assignments WHERE teacher_id = ? AND is_demo = 0", [$uid], 0),
+                "SELECT COUNT(DISTINCT ce.user_id) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.teacher_id = ? $df", [$uid], 0),
+            'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams e JOIN courses c ON c.id = e.course_id WHERE c.teacher_id = ? $df", [$uid], 0),
+            'assignments' => (int)Database::scalar("SELECT COUNT(*) FROM assignments a JOIN courses c ON c.id = a.course_id WHERE c.teacher_id = ? $df", [$uid], 0),
             'pending_grades' => (int)Database::scalar(
-                "SELECT COUNT(*) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE e.teacher_id = ? AND t.status = 'submitted'", [$uid], 0),
+                "SELECT COUNT(*) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id JOIN courses c ON c.id = e.course_id WHERE c.teacher_id = ? AND t.status = 'submitted' $df", [$uid], 0),
             'pending_submissions' => (int)Database::scalar(
-                "SELECT COUNT(*) FROM assignment_submissions s JOIN assignments a ON a.id = s.assignment_id WHERE a.teacher_id = ? AND s.status = 'submitted'", [$uid], 0),
+                "SELECT COUNT(*) FROM assignment_submissions s JOIN assignments a ON a.id = s.assignment_id JOIN courses c ON c.id = a.course_id WHERE c.teacher_id = ? AND s.status = 'submitted' $df", [$uid], 0),
             'pending_verify' => (int)Database::scalar(
                 "SELECT COUNT(*) FROM users us WHERE us.role='student' AND us.school_id = ? AND us.status = 'pending' AND (us.group_id IS NULL OR us.group_id IN (SELECT id FROM student_groups WHERE homeroom_teacher_id = ?))", [$u['school_id'], $uid], 0),
             'inactive' => (int)Database::scalar(
-                "SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id JOIN users us ON us.id = ce.user_id WHERE c.teacher_id = ? AND us.enrollment_status = 'inactive'", [$uid], 0),
+                "SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id JOIN users us ON us.id = ce.user_id WHERE c.teacher_id = ? AND us.enrollment_status = 'inactive' $df", [$uid], 0),
             'lessons' => (int)Database::scalar(
                 "SELECT COUNT(DISTINCT l.id) FROM lessons l JOIN course_modules m ON m.id = l.module_id JOIN courses c ON c.id = m.course_id WHERE c.teacher_id = ?", [$uid], 0),
         ];
@@ -41,13 +41,14 @@ class Ctl_dashboard {
             $end = date('Y-m-d', strtotime("-" . ($i - 1) . " weeks monday") - 1);
             $n = (int)Database::scalar(
                 "SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id
-                 WHERE c.teacher_id = ? AND ce.enrolled_at BETWEEN ? AND ?", [$uid, $start . ' 00:00:00', $end . ' 23:59:59'], 0);
+                 WHERE c.teacher_id = ? AND ce.enrolled_at BETWEEN ? AND ? $df", [$uid, $start . ' 00:00:00', $end . ' 23:59:59'], 0);
             $weeks[] = ['label' => date('M j', strtotime($start)), 'count' => $n];
         }
+        $dfR = demo_filter('c');
         $recent = Database::all(
             "SELECT ce.enrolled_at, u.first_name, u.last_name, u.avatar, c.title AS course_title, c.id AS course_id
              FROM course_enrollments ce JOIN users u ON u.id = ce.user_id JOIN courses c ON c.id = ce.course_id
-             WHERE c.teacher_id = ? ORDER BY ce.enrolled_at DESC LIMIT 8", [$uid]);
+             WHERE c.teacher_id = ? $dfR ORDER BY ce.enrolled_at DESC LIMIT 8", [$uid]);
         $activities = Database::all(
             "SELECT * FROM activity_logs WHERE user_id = ? OR ip = ? ORDER BY created_at DESC LIMIT 8", [$uid, $_SERVER['REMOTE_ADDR'] ?? '']);
         $todo = [];

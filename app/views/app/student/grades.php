@@ -105,7 +105,7 @@ th{background:#f8f9fa;font-weight:600;color:#444}.row-num{color:#999;width:36px;
 <td><?= rtrim(rtrim((string)$ex['score'],'0'),'.') ?>/<?= rtrim(rtrim((string)$ex['total_points'],'0'),'.') ?> (<?= $pct ?>%)</td>
 <td class="faint"><?= e(date('M j, Y', strtotime($ex['submitted_at']))) ?></td></tr>
 <?php endforeach; ?></tbody></table></div>
-<?php endforeach; endforeach; endforeach; ?>
+<?php endforeach; endforeach; ?>
 <?php foreach ($assignsBy as $level => $sems): foreach ($sems as $sem => $rows): ?>
 <div class="section"><h3><?= e($level) ?> · <?= e($sem) ?> — Assignments</h3>
 <table><thead><tr><th class="row-num">#</th><th>Assignment</th><th>Course</th><th>Score</th><th>Feedback</th></tr></thead><tbody>

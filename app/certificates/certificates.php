@@ -13,11 +13,12 @@ class Ctl_index {
             if (!$uid) { $k = Database::all("SELECT id FROM users WHERE parent_id = ?", [$u['id']]); $uid = (int)($k[0]['id'] ?? 0); }
             if (!$uid) { flash('info', 'No linked student.'); redirect('parent/dashboard'); }
         }
+        $df = demo_filter('c');
         $certs = Database::all(
             "SELECT c.*, co.title AS course_title, co.code AS course_code, u.first_name, u.last_name, u.student_id,
                     (SELECT ROUND(AVG(t.score/t.total_points*100)) FROM exam_attempts t WHERE t.student_id = c.student_id AND t.status = 'graded' AND t.total_points > 0) AS avg_score
              FROM certificates c JOIN courses co ON co.id = c.course_id JOIN users u ON u.id = c.student_id
-             WHERE c.student_id = ? ORDER BY c.issued_at DESC", [$uid]);
+             WHERE c.student_id = ? $df ORDER BY c.issued_at DESC", [$uid]);
         Router::render('app/certificates/index', ['title' => 'Certificates', 'certs' => $certs, 'isParent' => $u['role'] === 'parent']);
     }
 }

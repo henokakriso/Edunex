@@ -32,16 +32,17 @@ class Ctl_dean {
 
     private function dashboard(array $u): void {
         $fid = $this->fid();
+        $dfCo = demo_filter('co');
         $stats = [
             'departments' => (int)Database::scalar("SELECT COUNT(*) FROM departments WHERE faculty_id = ? AND status='active'", [$fid], 0),
             'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users t JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND t.role='teacher'", [$fid], 0),
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ?", [$fid], 0),
-            'pending' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft'", [$fid], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? $dfCo", [$fid], 0),
+            'pending' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft' $dfCo", [$fid], 0),
             'students' => (int)Database::scalar(
                 "SELECT COUNT(DISTINCT ce.user_id) FROM course_enrollments ce
                  JOIN courses co ON co.id = ce.course_id
                  JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
-                 WHERE d.faculty_id = ?", [$fid], 0),
+                 WHERE d.faculty_id = ? $dfCo", [$fid], 0),
             'exams' => (int)Database::scalar(
                 "SELECT COUNT(*) FROM exams e JOIN courses co ON co.id = e.course_id
                  JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
@@ -50,7 +51,7 @@ class Ctl_dean {
         $recent = Database::all(
             "SELECT co.id, co.title, co.status, co.created_at, CONCAT(t.first_name,' ',t.last_name) AS teacher
              FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
-             WHERE d.faculty_id = ? ORDER BY co.created_at DESC LIMIT 8", [$fid]);
+             WHERE d.faculty_id = ? $dfCo ORDER BY co.created_at DESC LIMIT 8", [$fid]);
         Router::render('app/dean/dashboard', ['title' => 'Dean Dashboard', 'faculty' => $this->faculty, 'stats' => $stats, 'recent' => $recent]);
     }
 
@@ -108,13 +109,14 @@ class Ctl_dean {
             redirect('dean/courses');
         }
         $status = (string)($_GET['status'] ?? 'draft');
+        $dfCo2 = demo_filter('co');
         $rows = Database::all(
             "SELECT co.*, CONCAT(t.first_name,' ',t.last_name) AS teacher, d.name AS department
              FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
-             WHERE d.faculty_id = ? AND co.status = ? ORDER BY co.created_at DESC LIMIT 100", [$fid, in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft']);
+             WHERE d.faculty_id = ? AND co.status = ? $dfCo2 ORDER BY co.created_at DESC LIMIT 100", [$fid, in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft']);
         $counts = [
-            'draft' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft'", [$fid], 0),
-            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='published'", [$fid], 0),
+            'draft' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft' $dfCo2", [$fid], 0),
+            'published' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='published' $dfCo2", [$fid], 0),
         ];
         Router::render('app/dean/courses', ['title' => 'Course Approval', 'faculty' => $this->faculty, 'rows' => $rows, 'status' => $status, 'counts' => $counts]);
     }

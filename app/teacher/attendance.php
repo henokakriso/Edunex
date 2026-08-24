@@ -11,12 +11,13 @@ class Ctl_attendance {
         $isHomeroom = (bool)Database::one(
             "SELECT 1 FROM student_groups WHERE school_id = ? AND homeroom_teacher_id = ? LIMIT 1", [$sid, $uid]);
 
+        $df = demo_filter('c');
         if ($isHomeroom) {
             $courses = Database::all(
                 "SELECT c.id, c.title, c.subject_id, c.teacher_id, s.name AS subject_name,
                         CONCAT(t.first_name, ' ', t.last_name) AS teacher_name
                  FROM courses c JOIN subjects s ON s.id = c.subject_id LEFT JOIN users t ON t.id = c.teacher_id
-                 WHERE c.school_id = ? ORDER BY s.name, c.title", [$sid]);
+                 WHERE c.school_id = ? $df ORDER BY s.name, c.title", [$sid]);
         } else {
             $courses = array_map(fn($c) => $c + ['teacher_id' => $uid, 'teacher_name' => null], SubjectAuth::courses($uid));
         }
@@ -78,10 +79,11 @@ class Ctl_attendance {
         $students = [];
         $existing = [];
         if ($courseId) {
+            $dfSt = demo_filter('ce');
             $students = Database::all(
                 "SELECT us.id, CONCAT(us.first_name, ' ', us.last_name) AS name, us.student_id, us.avatar
                  FROM course_enrollments ce JOIN users us ON us.id = ce.user_id
-                 WHERE ce.course_id = ? ORDER BY us.last_name", [$courseId]);
+                 WHERE ce.course_id = ? $dfSt ORDER BY us.last_name", [$courseId]);
             foreach (Database::all("SELECT * FROM attendance WHERE course_id = ? AND date = ?", [$courseId, $date]) as $r) {
                 $existing[$r['student_id']] = $r;
             }
@@ -159,6 +161,7 @@ class Ctl_students {
             redirect('teacher/students' . ($courseId ? '&course=' . $courseId : ''));
         }
 
+        $dfSt2 = demo_filter('c');
         $students = Database::all(
             "SELECT us.id, CONCAT(us.first_name, ' ', us.last_name) AS name, us.student_id, us.email, us.phone, us.avatar,
                     c.title AS course_title, s.name AS subject_name, ce.course_id, ce.progress, ce.completed, ce.enrolled_at,
@@ -169,7 +172,7 @@ class Ctl_students {
              FROM course_enrollments ce JOIN users us ON us.id = ce.user_id JOIN courses c ON c.id = ce.course_id
              JOIN subjects s ON s.id = c.subject_id
              LEFT JOIN users p ON p.id = us.parent_id
-             WHERE c.id IN ($inAuth)" . ($courseId ? " AND ce.course_id = ?" : "") . "
+             WHERE c.id IN ($inAuth) $dfSt2" . ($courseId ? " AND ce.course_id = ?" : "") . "
              ORDER BY us.last_name, us.first_name",
             $courseId ? [$courseId] : []);
         $parents = Database::all("SELECT id, first_name, last_name, email FROM users WHERE role = 'parent' AND school_id = ? ORDER BY first_name LIMIT 200", [$u['school_id']]);

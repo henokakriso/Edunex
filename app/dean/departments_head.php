@@ -33,16 +33,17 @@ class Ctl_vice_dean {
     private function dashboard(array $u, int $sid): void {
         $fid = $this->fid($sid);
         $faculty = Database::one("SELECT * FROM faculties WHERE id = ? AND school_id = ?", [$fid, $sid]);
+        $dfVd = demo_filter('co');
         $stats = [
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ?", [$fid], 0),
-            'pending' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft'", [$fid], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? $dfVd", [$fid], 0),
+            'pending' => (int)Database::scalar("SELECT COUNT(*) FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id WHERE d.faculty_id = ? AND co.status='draft' $dfVd", [$fid], 0),
             'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users u JOIN departments d ON d.id = u.department_id WHERE d.faculty_id = ? AND u.role='teacher'", [$fid], 0),
             'departments' => (int)Database::scalar("SELECT COUNT(*) FROM departments WHERE faculty_id = ? AND status='active'", [$fid], 0),
         ];
         $recent = Database::all(
             "SELECT co.title, co.status, CONCAT(t.first_name,' ',t.last_name) AS teacher, co.approved_at
              FROM courses co JOIN users t ON t.id = co.teacher_id JOIN departments d ON d.id = t.department_id
-             WHERE d.faculty_id = ? ORDER BY co.created_at DESC LIMIT 8", [$fid]);
+             WHERE d.faculty_id = ? $dfVd ORDER BY co.created_at DESC LIMIT 8", [$fid]);
         Router::render('app/vice_dean/dashboard', ['title' => 'Vice Dean', 'stats' => $stats, 'recent' => $recent, 'faculty' => $faculty]);
     }
 
@@ -112,10 +113,11 @@ class Ctl_dept_head {
     private function dashboard(array $u, int $sid): void {
         $dept = $this->dept($sid);
         if (!$dept) { http_response_code(403); die('You are not linked to an active department.'); }
+        $dfCo = demo_filter('c');
         $stats = [
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses c JOIN users t ON t.id = c.teacher_id WHERE t.department_id = ?", [$dept['id']], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses c JOIN users t ON t.id = c.teacher_id WHERE t.department_id = ? $dfCo", [$dept['id']], 0),
             'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE department_id = ? AND role='teacher'", [$dept['id']], 0),
-            'theses' => (int)Database::scalar("SELECT COUNT(*) FROM theses WHERE department_id = ? AND status='submitted'", [$dept['id']], 0),
+            'theses' => (int)Database::scalar("SELECT COUNT(*) FROM theses th WHERE th.department_id = ? AND th.status='submitted'", [$dept['id']], 0),
             'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE department_id = ? AND role='student'", [$dept['id']], 0),
         ];
         Router::render('app/dept_head/dashboard', ['title' => 'Department Head', 'stats' => $stats, 'dept' => $dept]);
@@ -123,10 +125,11 @@ class Ctl_dept_head {
 
     private function courses(array $u, int $sid): void {
         $dept = $this->dept($sid);
+        $dfCo = demo_filter('co');
         $rows = Database::all(
             "SELECT co.*, CONCAT(t.first_name,' ',t.last_name) AS teacher
              FROM courses co JOIN users t ON t.id = co.teacher_id
-             WHERE t.department_id = ? ORDER BY co.status, co.created_at DESC LIMIT 100", [$dept['id']]);
+             WHERE t.department_id = ? $dfCo ORDER BY co.status, co.created_at DESC LIMIT 100", [$dept['id']]);
         Router::render('app/dept_head/courses', ['title' => 'Department Courses', 'rows' => $rows]);
     }
 
@@ -149,15 +152,17 @@ class Ctl_dept_head {
             }
             redirect('dept_head/theses');
         }
+        $dfTh = demo_filter('th');
         $rows = Database::all(
             "SELECT th.*, CONCAT(st.first_name,' ',st.last_name) AS student, st.student_id
              FROM theses th JOIN users st ON st.id = th.student_id
-             WHERE th.department_id = ? ORDER BY th.submitted_at DESC LIMIT 100", [$dept['id']]);
+             WHERE th.department_id = ? $dfTh ORDER BY th.submitted_at DESC LIMIT 100", [$dept['id']]);
         Router::render('app/dept_head/theses', ['title' => 'Theses', 'rows' => $rows, 'dept' => $dept]);
     }
 
     private function analytics(array $u, int $sid): void {
         $dept = $this->dept($sid);
+        $dfCo = demo_filter('co');
         $students = Database::all(
             "SELECT u.id, u.student_id, CONCAT(u.first_name,' ',u.last_name) AS student,
                     COALESCE(SUM(co.credits), 0) AS credits

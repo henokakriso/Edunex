@@ -3,13 +3,14 @@ class Ctl_student_courses {
     public function run(): void {
         $u = require_role('student');
         $uid = (int)$u['id'];
+        $df = demo_filter('ce');
         $courses = Database::all(
             "SELECT c.*, ce.progress, ce.completed, ce.enrolled_at,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS total_lessons,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id AND l.id IN (SELECT lesson_id FROM lesson_progress WHERE user_id = ? AND completed = 1)) AS done_lessons,
                     u.first_name AS tfirst, u.last_name AS tlast
              FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id JOIN users u ON u.id = c.teacher_id
-             WHERE ce.user_id = ? ORDER BY ce.enrolled_at DESC", [$uid, $uid]);
+             WHERE ce.user_id = ? $df ORDER BY ce.enrolled_at DESC", [$uid, $uid]);
         Router::render('app/student/courses', ['title' => 'My Courses', 'courses' => $courses]);
     }
 }
@@ -156,8 +157,10 @@ class Ctl_courses_view {
             // Directors preview course detail + contents read-only — no enrollment
             $readonly = true;
         }
-        $topics = Database::all("SELECT * FROM forum_topics WHERE course_id = ? ORDER BY pinned DESC, created_at DESC LIMIT 6", [$id]);
-        $anns = Database::all("SELECT * FROM announcements WHERE course_id = ? ORDER BY created_at DESC LIMIT 5", [$id]);
+        $dfFt = demo_filter('ft');
+        $topics = Database::all("SELECT * FROM forum_topics ft WHERE ft.course_id = ? $dfFt ORDER BY ft.pinned DESC, ft.created_at DESC LIMIT 6", [$id]);
+        $dfAn = demo_filter('an');
+        $anns = Database::all("SELECT * FROM announcements an WHERE an.course_id = ? $dfAn ORDER BY an.created_at DESC LIMIT 5", [$id]);
         $teacherCourses = Database::all("SELECT id, title FROM courses WHERE teacher_id = ? AND id != ?", [$course['teacher_id'], $id]);
         Router::render('app/courses/view', [
             'title' => $course['title'], 'course' => $course, 'modules' => $modules,

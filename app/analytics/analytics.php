@@ -23,20 +23,24 @@ class Ctl_student {
                 'lessons' => (int)Database::scalar("SELECT COUNT(*) FROM lesson_progress WHERE user_id = ? AND completed = 1 AND DATE(last_accessed) = ?", [$uid, $d], 0),
             ];
         }
+        $dfCe = demo_filter('ce');
         $perCourse = Database::all(
             "SELECT c.title, ce.progress, ce.completed,
                     (SELECT AVG(t.score/t.total_points*100) FROM exam_attempts t JOIN exams e ON e.id = t.exam_id WHERE t.student_id = ? AND e.course_id = c.id AND t.status='graded' AND t.total_points > 0) AS avg_score
-             FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE ce.user_id = ?", [$uid, $uid]);
-        $attendance = Database::all("SELECT status, COUNT(*) AS n FROM attendance WHERE student_id = ? GROUP BY status", [$uid]);
+             FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE ce.user_id = ? $dfCe", [$uid, $uid]);
+        $dfAt = demo_filter('at');
+        $attendance = Database::all("SELECT status, COUNT(*) AS n FROM attendance at WHERE student_id = ? $dfAt GROUP BY status", [$uid]);
+        $dfEa = demo_filter('t');
         $exams = Database::all(
             "SELECT e.title, c.title AS course_title, t.score, t.total_points, t.status, t.submitted_at FROM exam_attempts t
              JOIN exams e ON e.id = t.exam_id JOIN courses c ON c.id = e.course_id
-             WHERE t.student_id = ? AND t.status = 'graded' ORDER BY t.submitted_at DESC LIMIT 12", [$uid]);
+             WHERE t.student_id = ? AND t.status = 'graded' $dfEa ORDER BY t.submitted_at DESC LIMIT 12", [$uid]);
         $student = Database::one("SELECT * FROM users WHERE id = ?", [$uid]);
 
         /* === Performance trend data === */
 
         // Subject performance: average exam score per subject
+        $dfEa2 = demo_filter('t');
         $subjectPerf = Database::all(
             "SELECT s.name AS subject, ROUND(AVG(t.score / NULLIF(t.total_points, 0) * 100), 1) AS avg_pct,
                     COUNT(t.id) AS exam_count
@@ -44,7 +48,7 @@ class Ctl_student {
              JOIN exams e ON e.id = t.exam_id
              JOIN courses c ON c.id = e.course_id
              JOIN subjects s ON s.id = c.subject_id
-             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0
+             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0 $dfEa2
              GROUP BY s.id ORDER BY avg_pct DESC", [$uid]);
 
         // Assignment completion rate
@@ -59,10 +63,11 @@ class Ctl_student {
         $assignCompletion = $totalAssign > 0 ? round($submittedAssign / $totalAssign * 100, 1) : 0;
 
         // Exam score trend: scores over time for the performance chart
+        $dfEa3 = demo_filter('t');
         $examTrend = Database::all(
             "SELECT DATE(t.submitted_at) AS dt, ROUND(t.score / NULLIF(t.total_points, 0) * 100, 1) AS pct
              FROM exam_attempts t
-             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0
+             WHERE t.student_id = ? AND t.status = 'graded' AND t.total_points > 0 $dfEa3
              ORDER BY t.submitted_at ASC", [$uid]);
         $trendLabels = array_column($examTrend, 'dt');
         $trendValues = array_map('floatval', array_column($examTrend, 'pct'));

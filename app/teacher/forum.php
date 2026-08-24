@@ -6,7 +6,7 @@ require_once __DIR__ . "/../forum/forum.php";
 class Ctl_teacher_forum {
     public function run(): void {
         $u = require_login();
-        if ($u['role'] !== 'teacher') { flash('danger', 'Teachers only.'); redirect('dashboard'); }
+        if (!in_array($u['role'], ['teacher', 'lecturer'], true)) { flash('danger', 'Teachers only.'); redirect('dashboard'); }
         $uid = (int)$u['id'];
 
         $courses = SubjectAuth::courses($uid);
@@ -36,11 +36,12 @@ class Ctl_teacher_forum {
             }
         }
 
+        $df = demo_filter('t');
         $topics = Database::all(
             "SELECT t.*, u.first_name, u.last_name, (SELECT COUNT(*) FROM forum_posts p WHERE p.topic_id = t.id) AS posts,
                     (SELECT MAX(p.created_at) FROM forum_posts p WHERE p.topic_id = t.id) AS last_post
              FROM forum_topics t JOIN users u ON u.id = t.author_id
-             WHERE t.course_id = ? ORDER BY t.pinned DESC, t.created_at DESC", [$courseId]);
+             WHERE t.course_id = ? $df ORDER BY t.pinned DESC, t.created_at DESC", [$courseId]);
         Router::render('app/teacher/forum', [
             'title' => 'Discussion', 'course' => $course, 'topics' => $topics,
             'courses' => $courses, 'courseId' => $courseId,

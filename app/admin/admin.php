@@ -8,6 +8,7 @@
 class Ctl_dashboard {
     public function run(): void {
         $u = require_role('sysadmin');
+        $dfCo = demo_filter('c');
         $stats = [
             'schools' => (int)Database::scalar("SELECT COUNT(*) FROM schools", [], 0),
             'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'student'", [], 0),
@@ -16,7 +17,7 @@ class Ctl_dashboard {
             'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'director'", [], 0),
             'active_users' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE status = 'active'", [], 0),
             'online' => (int)Database::scalar("SELECT COUNT(DISTINCT user_id) FROM login_history WHERE status = 'success' AND created_at > NOW() - INTERVAL 15 MINUTE", [], 0),
-            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses", [], 0),
+            'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses c WHERE 1=1 $dfCo", [], 0),
             'subjects' => (int)Database::scalar("SELECT COUNT(*) FROM subjects", [], 0),
             'departments' => (int)Database::scalar("SELECT COUNT(*) FROM departments", [], 0),
             'library' => (int)Database::scalar("SELECT COUNT(*) FROM library_items", [], 0),
@@ -30,7 +31,7 @@ class Ctl_dashboard {
             'ai_msgs' => (int)Database::scalar("SELECT COUNT(*) FROM ai_messages", [], 0),
             'ai_users' => (int)Database::scalar("SELECT COUNT(DISTINCT ac.user_id) FROM ai_chats ac", [], 0),
             'admins' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'admin'", [], 0),
-            'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments", [], 0),
+            'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce WHERE 1=1", [], 0),
         ];
 
         // --- Regional admin performance (schools assigned, workload) ---
@@ -96,11 +97,13 @@ class Ctl_dashboard {
         $gradeDist = [];
         foreach ($gradeLabels as $g) $gradeDist[] = (int)($gmap[$g] ?? 0);
 
+        $dfCc = demo_filter('ce');
         $courseCompletion = Database::all(
             "SELECT ce.course_id, c.title,
                     COUNT(*) AS total,
                     SUM(ce.completed = 1) AS done
              FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id
+             WHERE 1=1 $dfCc
              GROUP BY ce.course_id, c.title ORDER BY total DESC LIMIT 8");
         $compLabels = []; $compRates = [];
         foreach ($courseCompletion as $cc) { $compLabels[] = mb_strimwidth($cc['title'], 0, 18, '…'); $compRates[] = (int)$cc['total'] ? round((int)$cc['done'] / (int)$cc['total'] * 100) : 0; }

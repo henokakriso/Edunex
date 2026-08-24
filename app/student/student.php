@@ -136,15 +136,18 @@ class Ctl_schedule {
         foreach ($events as &$ev) {
             $ev['start_time'] = date('H:i', strtotime($ev['event_date']));
         }
+        $dfExam = demo_filter('e');
         $exams = Database::all(
             "SELECT e.title, e.start_time AS event_date, e.duration_min, c.title AS course_title, 'exam' AS event_type
              FROM exams e JOIN courses c ON c.id = e.course_id
              JOIN course_enrollments en ON en.course_id = e.course_id AND en.user_id = ?
-             WHERE e.status = 'published' AND e.end_time > NOW()", [$uid]);
+             WHERE e.status = 'published' AND e.end_time > NOW() $dfExam", [$uid]);
+        $dfAssign = demo_filter('a');
         $assigns = Database::all(
             "SELECT a.title, a.due_date AS event_date, 0 AS duration_min, c.title AS course_title, 'assignment' AS event_type
              FROM assignments a JOIN courses c ON c.id = a.course_id
-             JOIN course_enrollments en ON en.course_id = a.course_id AND en.user_id = ?", [$uid]);
+             JOIN course_enrollments en ON en.course_id = a.course_id AND en.user_id = ?
+             WHERE 1=1 $dfAssign", [$uid]);
         $all = array_merge($events, $exams, $assigns);
         usort($all, fn($a, $b) => strtotime($a['event_date']) <=> strtotime($b['event_date']));
         Router::render('app/student/schedule', ['title' => 'My Schedule', 'all' => $all]);
@@ -196,15 +199,17 @@ class Ctl_grades_subject {
             }
             return ['name' => 'Other', 'order' => 0];
         };
+        $dfEa = demo_filter('a');
         $exams = Database::all(
             "SELECT e.id, e.title, a.score, a.total_points, a.submitted_at, e.passing_score
              FROM exam_attempts a JOIN exams e ON e.id = a.exam_id
-             WHERE a.student_id = ? AND a.status = 'graded' AND e.course_id = ?
+             WHERE a.student_id = ? AND a.status = 'graded' AND e.course_id = ? $dfEa
              ORDER BY a.submitted_at DESC", [$uid, $id]);
+        $dfAs = demo_filter('s');
         $assigns = Database::all(
             "SELECT a.title, s.score, a.max_score, s.graded_at, s.feedback
              FROM assignment_submissions s JOIN assignments a ON a.id = s.assignment_id
-             WHERE s.student_id = ? AND s.status = 'graded' AND a.course_id = ?
+             WHERE s.student_id = ? AND s.status = 'graded' AND a.course_id = ? $dfAs
              ORDER BY s.graded_at DESC", [$uid, $id]);
         $groups = [];
         foreach ($exams as &$x) {

@@ -32,10 +32,11 @@ class Ctl_theses {
             redirect('student/theses');
         }
 
+        $df = demo_filter('th');
         $rows = Database::all(
             "SELECT th.*, d.name AS dept_name FROM theses th
              LEFT JOIN departments d ON d.id = th.department_id
-             WHERE th.student_id = ? ORDER BY th.submitted_at DESC LIMIT 20", [$uid]);
+             WHERE th.student_id = ? $df ORDER BY th.submitted_at DESC LIMIT 20", [$uid]);
         Router::render('app/student/theses', ['title' => 'My Theses', 'rows' => $rows]);
     }
 }
