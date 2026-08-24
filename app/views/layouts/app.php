@@ -375,6 +375,17 @@ $__icons = [
             </div>
             <a class="dropdown-item" href="<?= url('index.php?r=settings/profile') ?>"><?= icon('gear') ?> Profile settings</a>
             <a class="dropdown-item" href="<?= url('index.php?r=settings/security') ?>"><?= icon('lock') ?> Security</a>
+            <?php if (in_array($__u['role'] ?? '', ['sysadmin', 'admin', 'registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'director'], true)): ?>
+            <div class="dropdown-divider"></div>
+            <form method="post" action="<?= url('index.php?r=admin/toggle-demo') ?>" style="margin:0">
+              <?= csrf_field() ?>
+              <button type="submit" class="dropdown-item" style="gap:8px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font:inherit;color:inherit">
+                <?= is_demo_mode() ? icon('eye-off') : icon('eye') ?>
+                <?= is_demo_mode() ? 'Switch to Normal' : 'Switch to Demo' ?>
+                <span style="margin-left:auto;font-size:10px;padding:2px 6px;border-radius:4px;<?= is_demo_mode() ? 'background:var(--warning,#f59e0b);color:#000' : 'background:var(--success,#22c55e);color:#fff' ?>"><?= is_demo_mode() ? 'DEMO' : 'NORMAL' ?></span>
+              </button>
+            </form>
+            <?php endif; ?>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item danger" href="<?= url('index.php?r=auth/logout') ?>"><?= icon('logout') ?> Log out</a>
           </div>

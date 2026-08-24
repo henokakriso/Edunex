@@ -275,6 +275,9 @@ Router::page('api/attendance-mobile', 'api/attendance_mobile.php', '*');
 Router::page('api/login', 'api/login.php', '*');
 Router::page('api/activity', 'api/activity.php', '*');
 
+/* ---- Demo toggle (any authenticated user with admin/sysadmin) ---- */
+Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['sysadmin', 'admin', 'registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'director', 'student', 'parent']);
+
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');
 Router::page('verify/clearance', 'verify/verify.php', 'guest');
