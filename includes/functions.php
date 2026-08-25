@@ -112,7 +112,7 @@ function require_role(string ...$roles): array {
 /** Post-login landing page for the current user's role */
 function dashboard_path(): string {
     return match (me()['role'] ?? '') {
-        'sysadmin' => 'admin/dashboard', 'admin' => 'regional/dashboard', 'director' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
+        'sysadmin' => 'admin/dashboard', 'admin' => 'regional/dashboard', 'zonal_admin' => 'zonal/dashboard', 'woreda_admin' => 'woreda/dashboard', 'director' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
         'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'dean/dashboard', 'dept_head' => 'dean/dashboard',
         'lecturer' => 'teacher/dashboard', 'bursar' => 'university/fees/manage', 'student_affairs' => 'university/clearance/manage',
         'librarian' => 'library',

@@ -28,7 +28,7 @@ Router::page('auth/logout', 'auth/logout.php', '*');
 Router::page('auth/sessions', 'auth/sessions.php', '*');
 
 /* ---------------- App ---------------- */
-Router::page('dashboard', 'dashboard.php', ['admin', 'teacher', 'student', 'parent', 'director']);
+Router::page('dashboard', 'dashboard.php', ['admin', 'teacher', 'student', 'parent', 'director', 'zonal_admin', 'woreda_admin']);
 Router::page('user/profile', 'user/profile.php', '*');
 
 /* ---- Student ---- */
@@ -122,6 +122,28 @@ Router::page('regional/analytics', 'regional/regional.php', 'admin');
 Router::page('regional/announcements', 'regional/regional.php', 'admin');
 Router::page('regional/backups', 'regional/regional.php', 'admin');
 Router::page('regional/audit', 'regional/regional.php', 'admin');
+
+/* ---- Zonal Admin ---- */
+Router::page('zonal/dashboard', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/woredas', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/woreda', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/schools', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/school', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/directors', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/director', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/analytics', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/announcements', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/audit', 'zonal/zonal.php', 'zonal_admin');
+
+/* ---- Woreda Admin ---- */
+Router::page('woreda/dashboard', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/schools', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/school', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/directors', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/director', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/analytics', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/announcements', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/audit', 'woreda/woreda.php', 'woreda_admin');
 
 /* ---- Registrar ---- */
 Router::page('registrar/dashboard', 'registrar/registrar.php', 'registrar');
@@ -276,7 +298,7 @@ Router::page('api/login', 'api/login.php', '*');
 Router::page('api/activity', 'api/activity.php', '*');
 
 /* ---- Demo toggle (any authenticated user with admin/sysadmin) ---- */
-Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['sysadmin', 'admin', 'registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'director', 'student', 'parent']);
+Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['sysadmin', 'admin', 'registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'director', 'student', 'parent', 'zonal_admin', 'woreda_admin']);
 
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');
