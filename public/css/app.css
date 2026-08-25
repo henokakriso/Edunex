@@ -799,13 +799,15 @@ kbd { font-family: inherit; }
 
 /* Users list layout */
 .users-list-head {
-  display: flex; align-items: center;
+  display: grid; grid-template-columns: 36px 1fr 110px 50px 150px 85px 95px 100px;
+  align-items: center; gap: 0;
   padding: 10px 12px; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
   border-bottom: 1px solid var(--border); background: var(--bg-soft);
 }
 .user-list-row {
-  display: flex; align-items: center;
+  display: grid; grid-template-columns: 36px 1fr 110px 50px 150px 85px 95px 100px;
+  align-items: center; gap: 0;
   padding: 12px 12px; border-bottom: 1px solid var(--border);
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
   cursor: pointer;
@@ -815,18 +817,18 @@ kbd { font-family: inherit; }
 .user-list-row .chk { padding: 2px; }
 .user-list-row .row-act { display: flex; gap: 6px; align-items: center; }
 
-/* Column widths */
-.ul-col { display: flex; align-items: center; padding: 0 6px; }
+/* Column alignment */
+.ul-col { display: flex; align-items: center; padding: 0 6px; overflow: hidden; }
 .ul-col:first-child { padding-left: 0; }
 .ul-col:last-child { padding-right: 0; }
-.ul-col-chk { width: 36px; flex-shrink: 0; justify-content: center; padding: 0; }
-.ul-col-user { flex: 1; min-width: 0; padding-right: 4px; }
-.ul-col-role { width: 110px; flex-shrink: 0; }
-.ul-col-id { width: 50px; flex-shrink: 0; justify-content: flex-start; text-align: left; }
-.ul-col-school { width: 150px; flex-shrink: 0; justify-content: flex-start; text-align: left; }
-.ul-col-status { width: 85px; flex-shrink: 0; justify-content: flex-start; text-align: left; }
-.ul-col-joined { width: 95px; flex-shrink: 0; justify-content: flex-start; text-align: left; }
-.ul-col-actions { width: 100px; flex-shrink: 0; justify-content: flex-start; text-align: left; }
+.ul-col-chk { justify-content: center; padding: 0; }
+.ul-col-user { min-width: 0; }
+.ul-col-role { justify-content: flex-start; }
+.ul-col-id { justify-content: flex-start; text-align: left; }
+.ul-col-school { justify-content: flex-start; text-align: left; }
+.ul-col-status { justify-content: flex-start; text-align: left; }
+.ul-col-joined { justify-content: flex-start; text-align: left; }
+.ul-col-actions { justify-content: flex-start; text-align: left; }
 
 /* Bulk actions bar */
 .bulk-bar {
