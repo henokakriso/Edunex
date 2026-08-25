@@ -823,7 +823,7 @@ kbd { font-family: inherit; }
 .ul-col:last-child { padding-right: 0; }
 .ul-col-chk { justify-content: center; padding: 0; }
 .ul-col-user { min-width: 0; }
-.ul-col-role { justify-content: flex-start; }
+.ul-col-role { justify-content: flex-start; text-align: left; }
 .ul-col-id { justify-content: flex-start; text-align: left; }
 .ul-col-school { justify-content: flex-start; text-align: left; }
 .ul-col-status { justify-content: flex-start; text-align: left; }
