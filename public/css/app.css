@@ -815,20 +815,38 @@ kbd { font-family: inherit; }
 .user-list-row:last-child { border-bottom: none; }
 .user-list-row:hover { background: var(--bg-hover); box-shadow: 0 2px 12px rgba(0,0,0,.08); transform: translateY(-1px); }
 .user-list-row .chk { padding: 2px; }
-.user-list-row .row-act { display: flex; gap: 6px; align-items: center; }
+.user-list-row .row-act { display: flex; gap: 6px; align-items: center; justify-content: center; }
 
 /* Column alignment */
-.ul-col { display: flex; align-items: center; padding: 0 6px; overflow: hidden; }
+.ul-col { display: flex; align-items: center; justify-content: center; padding: 0 6px; overflow: hidden; text-align: center; }
 .ul-col:first-child { padding-left: 0; }
 .ul-col:last-child { padding-right: 0; }
 .ul-col-chk { justify-content: center; padding: 0; }
-.ul-col-user { min-width: 0; }
-.ul-col-role { justify-content: flex-start; text-align: left; }
-.ul-col-id { justify-content: flex-start; text-align: left; }
-.ul-col-school { justify-content: flex-start; text-align: left; }
-.ul-col-status { justify-content: flex-start; text-align: left; }
-.ul-col-joined { justify-content: flex-start; text-align: left; }
-.ul-col-actions { justify-content: flex-start; text-align: left; }
+.ul-col-user { justify-content: center; text-align: center; }
+.ul-col-role { justify-content: center; text-align: center; }
+.ul-col-id { justify-content: center; text-align: center; }
+.ul-col-school { justify-content: center; text-align: center; }
+.ul-col-status { justify-content: center; text-align: center; }
+.ul-col-joined { justify-content: center; text-align: center; }
+.ul-col-actions { justify-content: center; text-align: center; }
+
+/* Wrap horizontally on small screens */
+@media (max-width: 1100px) {
+  .users-list-head { display: none; }
+  .user-list-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px; padding: 14px 16px;
+  }
+  .ul-col { justify-content: center; text-align: center; }
+  .ul-col-chk { grid-column: 1; }
+  .ul-col-user { grid-column: 2; }
+  .ul-col-role { grid-column: 1; }
+  .ul-col-id { grid-column: 2; }
+  .ul-col-school { grid-column: 1 / -1; }
+  .ul-col-status { grid-column: 1; }
+  .ul-col-joined { grid-column: 2; }
+  .ul-col-actions { grid-column: 1 / -1; }
+}
 
 /* Bulk actions bar */
 .bulk-bar {
