@@ -415,6 +415,8 @@ class Ctl_schools {
                     'city' => trim($_POST['city'] ?? ''), 'phone' => trim($_POST['phone'] ?? ''),
                     'email' => trim($_POST['email'] ?? ''),
                     'education_level' => in_array($_POST['education_level'] ?? 'secondary', ['kg', 'primary', 'secondary', 'preparatory', 'university', 'college', 'training', 'other'], true) ? $_POST['education_level'] : 'secondary',
+                    'zone_id' => (int)($_POST['zone_id'] ?? 0) ?: null,
+                    'woreda_id' => (int)($_POST['woreda_id'] ?? 0) ?: null,
                 ];
                 if (!$data['name'] || !$data['code']) { flash('danger', 'Name and code required.'); redirect('admin/schools' . $suffix); }
                 if (Database::one("SELECT id FROM schools WHERE code = ?", [$data['code']])) { flash('danger', 'School code already exists.'); redirect('admin/schools' . $suffix); }
@@ -431,6 +433,8 @@ class Ctl_schools {
                     'address' => trim($_POST['address'] ?? ''), 'city' => trim($_POST['city'] ?? ''),
                     'phone' => trim($_POST['phone'] ?? ''), 'email' => trim($_POST['email'] ?? ''),
                     'status' => $_POST['status'] ?? 'active',
+                    'zone_id' => (int)($_POST['zone_id'] ?? 0) ?: null,
+                    'woreda_id' => (int)($_POST['woreda_id'] ?? 0) ?: null,
                 ], 'id = ?', [$sid]);
                 ensure_school_modules((int)$sid);
                 flash('success', 'School updated. Level defaults were applied automatically.');

@@ -34,6 +34,20 @@
       <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Address</label><input class="input" name="address"></div>
       <div class="flex-col"><label class="small faint">Phone</label><input class="input" name="phone"></div>
       <div class="flex-col"><label class="small faint">Email</label><input class="input" type="email" name="email"></div>
+      <div class="flex-col"><label class="small faint">Zone</label>
+        <select class="input" name="zone_id"><option value="">— None —</option>
+          <?php foreach (Database::all("SELECT id, name FROM zones ORDER BY name") as $z): ?>
+            <option value="<?= (int)$z['id'] ?>"><?= e($z['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="flex-col"><label class="small faint">Woreda</label>
+        <select class="input" name="woreda_id"><option value="">— None —</option>
+          <?php foreach (Database::all("SELECT id, name FROM woredas ORDER BY name") as $w): ?>
+            <option value="<?= (int)$w['id'] ?>"><?= e($w['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
     </div>
     <div class="flex gap-10" style="margin-top:16px">
       <button class="btn btn-success" name="create_school" value="1"><?= icon('rocket') ?> Create</button>

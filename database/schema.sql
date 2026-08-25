@@ -33,8 +33,12 @@ CREATE TABLE schools (
   email VARCHAR(120) DEFAULT '',
   logo VARCHAR(255) DEFAULT '',
   status ENUM('active','suspended') DEFAULT 'active',
+  zone_id INT UNSIGNED NULL,
+  woreda_id INT UNSIGNED NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+  FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (zone_id) REFERENCES zones(id) ON DELETE SET NULL,
+  FOREIGN KEY (woreda_id) REFERENCES woredas(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE school_modules (
@@ -1474,6 +1478,26 @@ CREATE TABLE academic_events (
   event_type ENUM('holiday','ceremony','deadline','exam','registration') NOT NULL DEFAULT 'deadline',
   description TEXT,
   FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Ethiopian education hierarchy
+CREATE TABLE IF NOT EXISTS zones (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  region_admin_id INT UNSIGNED NULL,
+  admin_id INT UNSIGNED NULL,
+  status VARCHAR(20) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS woredas (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  zone_id INT UNSIGNED NOT NULL,
+  admin_id INT UNSIGNED NULL,
+  status VARCHAR(20) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (zone_id) REFERENCES zones(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 SET FOREIGN_KEY_CHECKS = 1;
