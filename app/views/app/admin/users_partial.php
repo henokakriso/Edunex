@@ -30,14 +30,15 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 <div class="card" style="margin-bottom:18px;padding:16px">
   <form method="get" class="ajax-nav flex gap-10" style="flex-wrap:wrap;align-items:end">
     <input type="hidden" name="r" value="admin/users">
-    <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, email or student ID" style="min-width:220px"></div>
+    <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
+      <div class="input-icon-wrap"><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, email or ID" style="min-width:220px;padding-right:36px"><button type="submit" class="input-icon-btn" title="Search"><?= icon('search') ?></button></div>
+    </div>
     <div class="flex-col"><label class="small faint">Status</label>
       <select class="input" name="status" onchange="this.form.submit()">
         <option value="">All statuses</option>
         <?php foreach (['active', 'pending', 'suspended', 'banned'] as $st): ?><option value="<?= $st ?>" <?= $status === $st ? 'selected' : '' ?>><?= ucfirst($st) ?></option><?php endforeach; ?>
       </select>
     </div>
-    <button class="btn"><?= icon('search') ?> Search</button>
     <?php if ($q !== '' || $role !== '' || $status !== ''): ?><a class="ajax-nav btn btn-ghost" href="<?= e(url('admin/users')) ?>">✕ Reset</a><?php endif; ?>
   </form>
   <div class="chips" style="margin-top:14px;padding:4px 0">
