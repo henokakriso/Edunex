@@ -1,6 +1,6 @@
 <?php /* Admin users view — superadmin interactive list */
-$roleCls = ['regional' => 'badge-danger', 'principal' => 'badge-accent', 'teacher' => 'badge-accent', 'student' => 'badge-success', 'parent' => 'badge-warning', 'guest' => 'badge-muted'];
-$roleIco = ['regional' => icon('shield'), 'principal' => icon('graduation'), 'teacher' => icon('user') . '‍' . icon('school'), 'student' => icon('users-card'), 'parent' => icon('users'), 'guest' => icon('user')];
+$roleCls = ['regional' => 'badge-danger', 'principal' => 'badge-accent', 'teacher' => 'badge-accent', 'student' => 'badge-success', 'parent' => 'badge-warning', 'guest' => 'badge-muted', 'ministry' => 'badge-danger', 'registrar' => 'badge-accent', 'dean' => 'badge-accent', 'vice_dean' => 'badge-accent', 'hod' => 'badge-accent', 'lecturer' => 'badge-accent', 'bursar' => 'badge-warning', 'student_affairs' => 'badge-warning', 'librarian' => 'badge-muted', 'zonal' => 'badge-danger', 'woreda' => 'badge-danger', 'it_admin' => 'badge-muted'];
+$roleIco = ['regional' => icon('shield'), 'principal' => icon('graduation'), 'teacher' => icon('user') . '‍' . icon('school'), 'student' => icon('users-card'), 'parent' => icon('users'), 'guest' => icon('user'), 'ministry' => icon('shield'), 'registrar' => icon('note'), 'dean' => icon('graduation'), 'vice_dean' => icon('graduation'), 'hod' => icon('folder'), 'lecturer' => icon('book'), 'bursar' => icon('dollar'), 'student_affairs' => icon('users'), 'librarian' => icon('university'), 'zonal' => icon('shield'), 'woreda' => icon('shield'), 'it_admin' => icon('wrench')];
 $statusCls = ['active' => 'badge-success', 'pending' => 'badge-warning', 'suspended' => 'badge-danger', 'banned' => 'badge-danger'];
 $f = fn(string $k) => e($_GET[$k] ?? '');
 $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(array_filter(array_merge(
@@ -42,8 +42,12 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   </form>
   <div class="chips" style="margin-top:14px;padding:4px 0">
     <a class="ajax-nav chip <?= $role === '' && $status === '' ? 'on' : '' ?>" href="<?= e($mk('role')) ?>">All · <?= number_format($stats['total']) ?></a>
-    <?php foreach (['regional', 'principal', 'teacher', 'student', 'parent'] as $r): ?>
-      <a class="ajax-nav chip <?= $role === $r ? 'on' : '' ?>" href="<?= e($mk('role', $r)) ?>"><?= $roleIco[$r] ?> <?= ucfirst($r) ?> · <?= (int)($roleCounts[$r] ?? 0) ?></a>
+    <?php
+    $chipRoles = ['regional', 'principal', 'teacher', 'student', 'parent', 'registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'zonal', 'woreda', 'it_admin'];
+    foreach ($chipRoles as $r):
+      if (empty($roleCounts[$r])) continue;
+    ?>
+      <a class="ajax-nav chip <?= $role === $r ? 'on' : '' ?>" href="<?= e($mk('role', $r)) ?>"><?= $roleIco[$r] ?? '' ?> <?= ucfirst($r) ?> · <?= (int)($roleCounts[$r] ?? 0) ?></a>
     <?php endforeach; ?>
   </div>
 </div>

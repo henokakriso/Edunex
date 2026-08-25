@@ -170,7 +170,7 @@ class Ctl_users {
 
         $where = "1=1";
         $args = [];
-        if (in_array($role, ['regional', 'principal', 'teacher', 'student', 'parent', 'guest'], true)) { $where .= " AND us.role = ?"; $args[] = $role; }
+        if (in_array($role, ['ministry', 'regional', 'zonal', 'woreda', 'principal', 'teacher', 'student', 'parent', 'guest', 'registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'it_admin'], true)) { $where .= " AND us.role = ?"; $args[] = $role; }
         if (in_array($status, ['active', 'pending', 'suspended', 'banned'], true)) { $where .= " AND us.status = ?"; $args[] = $status; }
         if ($q !== '') { $where .= " AND (us.first_name LIKE ? OR us.last_name LIKE ? OR us.email LIKE ? OR us.student_id LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }
 
