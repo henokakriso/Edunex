@@ -170,6 +170,7 @@ CREATE TABLE users (
   status ENUM('active','pending','suspended','banned') DEFAULT 'pending',
   session_version INT DEFAULT 0,
   privacy JSON,
+  is_demo TINYINT(1) NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (school_id) REFERENCES users(id),
   FOREIGN KEY (group_id) REFERENCES student_groups(id) ON DELETE SET NULL,

@@ -174,7 +174,9 @@ class Ctl_users {
         if (in_array($status, ['active', 'pending', 'suspended', 'banned'], true)) { $where .= " AND us.status = ?"; $args[] = $status; }
         if ($q !== '') { $where .= " AND (us.first_name LIKE ? OR us.last_name LIKE ? OR us.email LIKE ? OR us.student_id LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }
 
-        $total = (int)Database::scalar("SELECT COUNT(*) FROM users us WHERE $where", $args, 0);
+        $df = demo_filter('us');
+        $dfU = demo_filter('');
+        $total = (int)Database::scalar("SELECT COUNT(*) FROM users us WHERE $where $df", $args, 0);
         $pages = max(1, (int)ceil($total / $perPage));
         if ($page > $pages) $page = $pages;
         $offset = ($page - 1) * $perPage;
@@ -185,14 +187,14 @@ class Ctl_users {
              LEFT JOIN schools s ON s.id = us.school_id
              LEFT JOIN student_groups g ON g.id = us.group_id
              LEFT JOIN departments d ON d.id = us.department_id
-             WHERE $where ORDER BY $orderBy LIMIT $perPage OFFSET $offset", $args);
+             WHERE $where $df ORDER BY $orderBy LIMIT $perPage OFFSET $offset", $args);
 
-        $statRows = Database::all("SELECT status, COUNT(*) c FROM users us WHERE $where GROUP BY status", $args);
+        $statRows = Database::all("SELECT status, COUNT(*) c FROM users us WHERE $where $df GROUP BY status", $args);
         $stats = ['total' => $total, 'active' => 0, 'pending' => 0, 'suspended' => 0, 'banned' => 0];
         foreach ($statRows as $sr) $stats[$sr['status']] = (int)$sr['c'];
         $stats['new_month'] = (int)Database::scalar(
-            "SELECT COUNT(*) FROM users WHERE created_at >= ?", [date('Y-m-01')], 0);
-        $roleCounts = Database::all("SELECT role, COUNT(*) c FROM users GROUP BY role");
+            "SELECT COUNT(*) FROM users WHERE created_at >= ? $dfU", [date('Y-m-01')], 0);
+        $roleCounts = Database::all("SELECT role, COUNT(*) c FROM users WHERE 1=1 $dfU GROUP BY role");
         $roleCounts = array_column($roleCounts, 'c', 'role');
 
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
