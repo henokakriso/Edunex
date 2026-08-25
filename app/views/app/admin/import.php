@@ -5,7 +5,7 @@
 
 <div class="card" style="max-width:680px">
   <div class="tabs" style="margin-bottom:16px">
-    <a class="tab <?= $target === 'director' ? 'active' : '' ?>" href="<?= e(url('admin/import&type=director')) ?>">Directors</a>
+    <a class="tab <?= $target === 'principal' ? 'active' : '' ?>" href="<?= e(url('admin/import&type=director')) ?>">Directors</a>
     <a class="tab <?= $target === 'teacher' ? 'active' : '' ?>" href="<?= e(url('admin/import&type=teacher')) ?>">Teachers</a>
     <a class="tab <?= $target === 'student' ? 'active' : '' ?>" href="<?= e(url('admin/import&type=student')) ?>">Students</a>
   </div>
@@ -13,7 +13,7 @@
   <form method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <input type="hidden" name="type" value="<?= e($target) ?>">
-    <?php if ($target !== 'director'): ?>
+    <?php if ($target !== 'principal'): ?>
       <div class="field">
         <label>School</label>
         <select class="select" name="school_id" required>
@@ -24,7 +24,7 @@
     <?php endif; ?>
     <div class="field">
       <label>Spreadsheet file
-        <?php if ($target === 'director'): ?>(columns: first_name, last_name, email, phone)
+        <?php if ($target === 'principal'): ?>(columns: first_name, last_name, email, phone)
         <?php elseif ($target === 'teacher'): ?>(columns: first_name, last_name, email, phone, department)
         <?php else: ?>(columns: first_name, last_name, email, phone, class)<?php endif; ?>
       </label>

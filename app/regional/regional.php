@@ -1,6 +1,6 @@
 <?php
 /**
- * Regional Admin (role 'admin') — supervises only the schools assigned to them.
+ * Regional Admin (role 'regional') — supervises only the schools assigned to them.
  * Every query is scoped by schools.admin_id = current admin. No cross-school access.
  */
 
@@ -27,7 +27,7 @@ class RegionalScope {
 
 class Ctl_regional {
     public function run(): void {
-        $u = require_role('admin');
+        $u = require_role('regional');
         $uid = (int)$u['id'];
         $action = trim($_GET['r'] ?? '', '/');
         $route = str_replace('regional/', '', $action);
@@ -37,7 +37,7 @@ class Ctl_regional {
             'schools' => $this->schools($u),
             'school' => $this->school($u),
             'directors' => $this->directors($u),
-            'director' => $this->director($u),
+            'principal' => $this->director($u),
             'analytics' => $this->analytics($u),
             'announcements' => $this->announcements($u),
             'backups' => $this->backups($u),
@@ -60,7 +60,7 @@ class Ctl_regional {
             'schools' => count($schools),
             'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role = 'student' AND school_id IN ($idList)"),
             'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id IN ($idList)"),
-            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role = 'director' AND school_id IN ($idList)"),
+            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role = 'principal' AND school_id IN ($idList)"),
             'courses' => $this->stat("SELECT COUNT(*) FROM courses WHERE school_id IN ($idList)"),
             'enroll30' => $this->stat("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.school_id IN ($idList) AND ce.enrolled_at >= NOW() - INTERVAL 30 DAY"),
             'pending_transfers' => $this->stat("SELECT COUNT(*) FROM transfer_requests WHERE status = 'pending' AND to_school_id IN ($idList)"),
@@ -74,7 +74,7 @@ class Ctl_regional {
                 'school' => $sc,
                 'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'student' AND school_id = ?", [$sc['id']], 0),
                 'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id = ?", [$sc['id']], 0),
-                'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'director' AND school_id = ?", [$sc['id']], 0),
+                'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'principal' AND school_id = ?", [$sc['id']], 0),
                 'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE school_id = ?", [$sc['id']], 0),
             ];
         }
@@ -99,7 +99,7 @@ class Ctl_regional {
         }
         $rows = Database::all(
             "SELECT sc.*,
-                    (SELECT COUNT(*) FROM users WHERE role = 'director' AND school_id = sc.id) AS directors,
+                    (SELECT COUNT(*) FROM users WHERE role = 'principal' AND school_id = sc.id) AS directors,
                     (SELECT COUNT(*) FROM users WHERE role = 'student' AND school_id = sc.id) AS students,
                     (SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id = sc.id) AS teachers
              FROM schools sc WHERE sc.admin_id = ? ORDER BY sc.status, sc.name", [$uid]);
@@ -124,7 +124,7 @@ class Ctl_regional {
         $stats = [
             'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'student' AND school_id = ?", [$id], 0),
             'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id = ?", [$id], 0),
-            'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'director' AND school_id = ?", [$id], 0),
+            'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'principal' AND school_id = ?", [$id], 0),
             'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE school_id = ?", [$id], 0),
             'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.school_id = ?", [$id], 0),
             'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams e JOIN courses c ON c.id = e.course_id WHERE c.school_id = ?", [$id], 0),
@@ -133,7 +133,7 @@ class Ctl_regional {
         ];
         $recent = Database::all(
             "SELECT CONCAT(u.first_name, ' ', u.last_name) AS name, u.role, u.status, u.last_login
-             FROM users u WHERE u.school_id = ? AND u.role IN ('teacher', 'director')
+             FROM users u WHERE u.school_id = ? AND u.role IN ('teacher', 'principal')
              ORDER BY u.last_login DESC LIMIT 8", [$id]);
         Router::render('app/regional/school', ['title' => $school['name'], 'school' => $school, 'stats' => $stats, 'recent' => $recent]);
     }
@@ -154,7 +154,7 @@ class Ctl_regional {
                 }
                 $pass = $_POST['password'] !== '' ? (string)$_POST['password'] : random_password();
                 Database::insert('users', [
-                    'school_id' => $schoolId, 'role' => 'director', 'first_name' => trim((string)$_POST['first_name']),
+                    'school_id' => $schoolId, 'role' => 'principal', 'first_name' => trim((string)$_POST['first_name']),
                     'last_name' => trim((string)$_POST['last_name']), 'email' => $email, 'phone' => trim((string)$_POST['phone'] ?? ''),
                     'password_hash' => password_hash($pass, PASSWORD_BCRYPT), 'status' => 'active',
                 ]);
@@ -166,7 +166,7 @@ class Ctl_regional {
             }
             if (isset($_POST['toggle_director'])) {
                 $did = (int)($_POST['id'] ?? 0);
-                $d = Database::one("SELECT * FROM users WHERE id = ? AND role = 'director'", [$did]);
+                $d = Database::one("SELECT * FROM users WHERE id = ? AND role = 'principal'", [$did]);
                 if (!$d) { flash('danger', 'Director not found.'); redirect('regional/directors'); }
                 RegionalScope::requireSchool($uid, (int)$d['school_id']);
                 $newStatus = ($d['status'] ?? 'active') === 'active' ? 'suspended' : 'active';
@@ -179,14 +179,14 @@ class Ctl_regional {
         $rows = Database::all(
             "SELECT u.*, sc.name AS school_name
              FROM users u JOIN schools sc ON sc.id = u.school_id
-             WHERE u.role = 'director' AND u.school_id IN ($idList) ORDER BY sc.name, u.first_name", []);
+             WHERE u.role = 'principal' AND u.school_id IN ($idList) ORDER BY sc.name, u.first_name", []);
         Router::render('app/regional/directors', ['title' => 'Directors', 'rows' => $rows, 'schools' => $schools]);
     }
 
     private function director(array $u): void {
         $uid = (int)$u['id'];
         $id = (int)($_GET['id'] ?? 0);
-        $d = Database::one("SELECT u.*, sc.name AS school_name FROM users u JOIN schools sc ON sc.id = u.school_id WHERE u.id = ? AND u.role = 'director'", [$id]);
+        $d = Database::one("SELECT u.*, sc.name AS school_name FROM users u JOIN schools sc ON sc.id = u.school_id WHERE u.id = ? AND u.role = 'principal'", [$id]);
         if (!$d) { flash('danger', 'Director not found.'); redirect('regional/directors'); }
         RegionalScope::requireSchool($uid, (int)$d['school_id']);
 
@@ -232,7 +232,7 @@ class Ctl_regional {
                 'name' => (string)Database::scalar("SELECT name FROM schools WHERE id = ?", [$scId], ''),
                 'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'student' AND school_id = ?", [$scId], 0),
                 'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id = ?", [$scId], 0),
-                'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'director' AND school_id = ?", [$scId], 0),
+                'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'principal' AND school_id = ?", [$scId], 0),
                 'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE school_id = ?", [$scId], 0),
                 'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id WHERE c.school_id = ?", [$scId], 0),
                 'exams' => (int)Database::scalar("SELECT COUNT(*) FROM exams e JOIN courses c ON c.id = e.course_id WHERE c.school_id = ?", [$scId], 0),

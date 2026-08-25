@@ -70,7 +70,7 @@ function ai_save_chat(array $u, int $chatId, string $userMsg, string $aiReply): 
 class Ctl_tutor {
     public function run(): void {
         $u = require_login();
-        if (in_array($u['role'], ['student', 'teacher', 'director'], true) && !module_active((int)$u['school_id'], 'ai-tutor')) { http_response_code(403); die('The AI Tutor module is not installed for your school.'); }
+        if (in_array($u['role'], ['student', 'teacher', 'principal'], true) && !module_active((int)$u['school_id'], 'ai-tutor')) { http_response_code(403); die('The AI Tutor module is not installed for your school.'); }
         $uid = (int)$u['id'];
         // keep the model set warm in the background → instant topic switching
         if (AiRouter::available() && (string)setting('ai_router') !== 'off') AiRouter::warmAsync();

@@ -6,13 +6,13 @@ $role = $role ?? '';
 <div class="page-head">
   <div>
     <h1>Course catalog</h1>
-    <p class="sub"><?= $role === 'director' ? 'Courses published in your school' : 'Explore courses published across your schools.' ?></p>
+    <p class="sub"><?= $role === 'principal' ? 'Courses published in your school' : 'Explore courses published across your schools.' ?></p>
   </div>
   <form class="search-box" style="max-width:280px" method="get">
     <input type="hidden" name="r" value="courses">
     <span><?= icon('search') ?></span><input name="q" placeholder="Search courses…" value="<?= e($_GET['q'] ?? '') ?>">
   </form>
-  <?php if ($role === 'director'): ?>
+  <?php if ($role === 'principal'): ?>
     <button class="btn btn-primary" data-open-modal="new-course"><?= icon('plus') ?> New course</button>
   <?php endif; ?>
 </div>
@@ -21,7 +21,7 @@ $role = $role ?? '';
   $catalog = array_values(array_filter($catalog, fn($c) => !$q || str_contains(mb_strtolower($c['title']), $q) || str_contains(mb_strtolower($c['description'] ?? ''), $q)));
 ?>
 
-<?php if ($role === 'director'): ?>
+<?php if ($role === 'principal'): ?>
   <!-- Director: column/row table -->
   <?php if (!$catalog): ?><div class="empty"><span class="empty-ico"><?= icon('search') ?></span>No courses found</div><?php endif; ?>
   <div class="table-wrap dir-table" style="background:var(--bg-elev)">

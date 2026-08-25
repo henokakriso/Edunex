@@ -102,7 +102,7 @@ class Ctl_import {
 /* ============ DIRECTOR: import teachers/students ============ */
 class Ctl_director_import {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
         $result = null; $msg = '';
         $target = $_GET['type'] ?? 'teacher';
@@ -121,16 +121,16 @@ class Ctl_director_import {
 /* ============ ADMIN (super admin): import directors/teachers/students ============ */
 class Ctl_admin_import {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $result = null; $msg = '';
-        $target = $_GET['type'] ?? 'director';
-        if (!in_array($target, ['director', 'teacher', 'student'], true)) $target = 'director';
+        $target = $_GET['type'] ?? 'principal';
+        if (!in_array($target, ['principal', 'teacher', 'student'], true)) $target = 'principal';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $target = in_array($_POST['type'] ?? '', ['director', 'teacher', 'student'], true) ? $_POST['type'] : 'director';
+            $target = in_array($_POST['type'] ?? '', ['principal', 'teacher', 'student'], true) ? $_POST['type'] : 'principal';
             $schoolId = (int)($_POST['school_id'] ?? 0);
-            if ($target !== 'director' && !$schoolId) { $msg = 'Select the school for these accounts.'; }
+            if ($target !== 'principal' && !$schoolId) { $msg = 'Select the school for these accounts.'; }
             else {
-                $sid = $target === 'director' ? null : $schoolId;
+                $sid = $target === 'principal' ? null : $schoolId;
                 [$msg, $result] = Ctl_import_common::handle($target, $sid);
                 if ($result && $result['created']) {
                     log_activity('user', 'Super admin imported ' . count($result['created']) . " $target accounts", (int)$u['id']);

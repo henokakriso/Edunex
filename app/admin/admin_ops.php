@@ -7,7 +7,7 @@
 /* =============== ADMIN: settings =============== */
 class Ctl_settings {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $settings = [];
         foreach (Database::all("SELECT * FROM settings") as $s) $settings[$s['key']] = $s['value'];
         $defaults = [
@@ -52,7 +52,7 @@ class Ctl_settings {
 /* =============== ADMIN: roles & permissions =============== */
 class Ctl_roles {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $perms = [];
         foreach (Database::all("SELECT * FROM role_permissions ORDER BY permission") as $r) {
             $perms[$r['role']][] = $r['permission'];
@@ -75,7 +75,7 @@ class Ctl_roles {
             flash('success', 'Permissions saved.');
             redirect('admin/roles');
         }
-        $roles = ['admin', 'director', 'teacher', 'student', 'parent'];
+        $roles = ['regional', 'principal', 'teacher', 'student', 'parent'];
         Router::render('app/admin/roles', ['title' => 'Roles & Permissions', 'perms' => $perms, 'all' => $all, 'roles' => $roles]);
     }
 
@@ -103,8 +103,8 @@ class Ctl_roles {
     private function seedDefaults(): void {
         Database::run("DELETE FROM role_permissions");
         $defaults = [
-            'admin' => ['dashboard', 'profile.view', 'notifications.view', 'courses.manage', 'courses.view', 'courses.create', 'lessons.manage', 'exams.manage', 'exams.create', 'exams.take', 'exams.grade', 'exams.view', 'assignments.manage', 'assignments.create', 'assignments.grade', 'attendance.record', 'attendance.view', 'attendance.manage', 'attendance.export', 'grades.manage', 'grades.view', 'grades.export', 'library.manage', 'library.view', 'library.upload', 'forum.post', 'forum.moderate', 'messages.send', 'messages.view', 'announcements.manage', 'gamification.view', 'badges.manage', 'goals.award', 'leaderboard.view', 'files.view', 'files.upload', 'files.manage', 'calendar.view', 'calendar.create', 'ai.tutor', 'ai.assistant', 'ai.flashcards', 'transfers.manage', 'transfers.approve', 'users.manage', 'users.view', 'users.create', 'reports.view', 'reports.export', 'analytics.view', 'settings.manage', 'backups.manage', 'logs.view', 'ledger.verify'],
-            'director' => ['dashboard', 'courses.view', 'exams.view', 'attendance.view', 'attendance.manage', 'grades.view', 'library.view', 'messages.view', 'messages.send', 'announcements.manage', 'reports.view', 'reports.export', 'analytics.view', 'transfers.view', 'transfers.approve', 'users.view', 'gamification.view', 'leaderboard.view', 'calendar.view', 'ai.tutor', 'ai.assistant', 'ai.flashcards'],
+            'regional' => ['dashboard', 'profile.view', 'notifications.view', 'courses.manage', 'courses.view', 'courses.create', 'lessons.manage', 'exams.manage', 'exams.create', 'exams.take', 'exams.grade', 'exams.view', 'assignments.manage', 'assignments.create', 'assignments.grade', 'attendance.record', 'attendance.view', 'attendance.manage', 'attendance.export', 'grades.manage', 'grades.view', 'grades.export', 'library.manage', 'library.view', 'library.upload', 'forum.post', 'forum.moderate', 'messages.send', 'messages.view', 'announcements.manage', 'gamification.view', 'badges.manage', 'goals.award', 'leaderboard.view', 'files.view', 'files.upload', 'files.manage', 'calendar.view', 'calendar.create', 'ai.tutor', 'ai.assistant', 'ai.flashcards', 'transfers.manage', 'transfers.approve', 'users.manage', 'users.view', 'users.create', 'reports.view', 'reports.export', 'analytics.view', 'settings.manage', 'backups.manage', 'logs.view', 'ledger.verify'],
+            'principal' => ['dashboard', 'courses.view', 'exams.view', 'attendance.view', 'attendance.manage', 'grades.view', 'library.view', 'messages.view', 'messages.send', 'announcements.manage', 'reports.view', 'reports.export', 'analytics.view', 'transfers.view', 'transfers.approve', 'users.view', 'gamification.view', 'leaderboard.view', 'calendar.view', 'ai.tutor', 'ai.assistant', 'ai.flashcards'],
             'teacher' => ['dashboard', 'courses.view', 'courses.manage', 'lessons.manage', 'exams.manage', 'exams.create', 'exams.take', 'exams.grade', 'exams.view', 'assignments.manage', 'assignments.create', 'assignments.grade', 'attendance.record', 'attendance.view', 'grades.view', 'grades.manage', 'library.view', 'library.upload', 'forum.post', 'forum.reply', 'messages.send', 'messages.view', 'announcements.create', 'gamification.view', 'goals.award', 'leaderboard.view', 'files.view', 'files.upload', 'calendar.view', 'calendar.create', 'ai.tutor', 'ai.assistant', 'ai.flashcards', 'reports.view', 'analytics.view'],
             'student' => ['dashboard', 'courses.view', 'courses.enroll', 'exams.take', 'exams.view', 'assignments.submit', 'attendance.view', 'grades.view', 'library.view', 'library.borrow', 'forum.post', 'forum.reply', 'messages.send', 'messages.view', 'gamification.view', 'leaderboard.view', 'goals.view', 'files.view', 'files.upload', 'calendar.view', 'ai.tutor', 'ai.assistant', 'ai.flashcards', 'transfers.view', 'transfers.apply'],
             'parent' => ['dashboard', 'courses.view', 'grades.view', 'attendance.view', 'assignments.view', 'messages.send', 'messages.view', 'reports.view', 'calendar.view'],
@@ -118,7 +118,7 @@ class Ctl_roles {
 /* =============== ADMIN: permissions (alias page) =============== */
 class Ctl_permissions {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         redirect('admin/roles');
     }
 }
@@ -126,7 +126,7 @@ class Ctl_permissions {
 /* =============== ADMIN: logs =============== */
 class Ctl_logs {
     public function run(): void {
-        $u = require_role('sysadmin', 'admin');
+        $u = require_role('ministry', 'regional');
         $action = trim($_GET['action'] ?? '');
         $q = trim($_GET['q'] ?? '');
         $days = (int)($_GET['days'] ?? 0);
@@ -234,7 +234,7 @@ class Ctl_logs {
 /* =============== ADMIN: analytics =============== */
 class Ctl_analytics {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $range = $_GET['range'] ?? '30';
         $days = (int)$range;
         $loginSeries = [];
@@ -275,7 +275,7 @@ class Ctl_analytics {
 /* =============== ADMIN: reports =============== */
 class Ctl_reports {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $reports = Database::all(
             "SELECT r.*, s.name AS school_name, CONCAT(us.first_name, ' ', us.last_name) AS user_name
              FROM reports r JOIN schools s ON s.id = r.school_id JOIN users us ON us.id = r.user_id
@@ -335,7 +335,7 @@ class Ctl_reports {
 /* =============== ADMIN: backups =============== */
 class Ctl_backups {
     public function run(): void {
-        $u = require_role('sysadmin', 'admin');
+        $u = require_role('ministry', 'regional');
         $backups = [];
         $dir = STORAGE_PATH . '/backups';
         if (is_dir($dir)) {
@@ -415,7 +415,7 @@ class Ctl_backups {
 /* =============== ADMIN: announcements =============== */
 class Ctl_announcements {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $df = demo_filter('a');
         $anns = Database::all(
             "SELECT a.*, CONCAT(us.first_name, ' ', us.last_name) AS author_name, s.name AS school_name, c.title AS course_title
@@ -464,7 +464,7 @@ class Ctl_announcements {
 /* =============== ADMIN: library =============== */
 class Ctl_library {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $df = demo_filter('i');
         $items = Database::all("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE 1=1 $df ORDER BY i.created_at DESC LIMIT 150");
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
@@ -499,7 +499,7 @@ class Ctl_library {
 /* =============== ADMIN: transfers =============== */
 class Ctl_transfers {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $requests = Database::all(
             "SELECT t.*, st.first_name AS sf, st.last_name AS sl, st.student_id,
                     fs.name AS from_school, ts.name AS to_school
@@ -558,7 +558,7 @@ class Ctl_transfers {
 /* =============== ADMIN: transfer detail =============== */
 class Ctl_transfer {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $id = (int)($_GET['id'] ?? 0);
         $req = Database::one(
             "SELECT t.*, st.first_name AS sf, st.last_name AS sl, st.email AS semail, st.student_id AS sstid, st.status AS sstatus,
@@ -616,8 +616,8 @@ class Ctl_transfer {
 /* =============== ADMIN: integrity ledger =============== */
 class Ctl_ledger {
     public function run(): void {
-        $u = require_role('sysadmin', 'director');
-        $schoolId = (int)($u['role'] === 'director' ? $u['school_id'] : ($_GET['school'] ?? $u['school_id'] ?? 0));
+        $u = require_role('ministry', 'principal');
+        $schoolId = (int)($u['role'] === 'principal' ? $u['school_id'] : ($_GET['school'] ?? $u['school_id'] ?? 0));
         $schoolId = (int)$schoolId;
         if ($schoolId <= 0) {
             $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
@@ -629,7 +629,7 @@ class Ctl_ledger {
             csrf_verify();
             if (isset($_POST['enable_2fa'])) {
                 $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, email, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('admin','director','teacher')", [$staffId, $schoolId]);
+                $staff = Database::one("SELECT id, first_name, last_name, email, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
                 if (!$staff) { flash('danger', 'Staff member not found.'); redirect('admin/ledger&school=' . $schoolId); }
                 // Re-issuing rotates the key, so refuse to clobber a key that's already enabled
                 // but whose file the recipient may not have downloaded yet.
@@ -649,7 +649,7 @@ class Ctl_ledger {
             }
             if (isset($_POST['download_2fa_key'])) {
                 $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('admin','director','teacher')", [$staffId, $schoolId]);
+                $staff = Database::one("SELECT id, first_name, last_name, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
                 if (!$staff || (int)$staff['twofa_enabled'] !== 1) { flash('danger', 'Staff member has no active 2FA key.'); redirect('admin/ledger&school=' . $schoolId); }
                 $path = STORAGE_PATH . '/keys/hena_' . $staffId . '.hena';
                 if (!is_file($path)) {
@@ -668,7 +668,7 @@ class Ctl_ledger {
             }
             if (isset($_POST['disable_2fa'])) {
                 $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND school_id = ? AND role IN ('admin','director','teacher')", [$staffId, $schoolId]);
+                $staff = Database::one("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
                 if ($staff) {
                     Auth::henaReset($staffId);
                     @unlink(STORAGE_PATH . '/keys/hena_' . $staffId . '.hena');
@@ -711,7 +711,7 @@ class Ctl_ledger {
         // 2FA coverage for the ledger's staff (who can sign records)
         $staff = Database::all(
             "SELECT us.id, us.first_name, us.last_name, us.email, us.role, us.twofa_enabled, us.last_login
-             FROM users us WHERE us.school_id = ? AND us.role IN ('admin','director','teacher')
+             FROM users us WHERE us.school_id = ? AND us.role IN ('regional','principal','teacher')
              ORDER BY us.role, us.last_name", [$schoolId]);
         $staffTwofa = ['ok' => 0, 'total' => count($staff)];
         foreach ($staff as $s) if ((int)$s['twofa_enabled'] === 1) $staffTwofa['ok']++;
@@ -734,7 +734,7 @@ class Ctl_ledger {
 /* =============== ADMIN: security console (ledger-scoped) =============== */
 class Ctl_security {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schoolId = (int)($_GET['school'] ?? $u['school_id'] ?? 0);
         if ($schoolId <= 0) {
             $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
@@ -778,7 +778,7 @@ class Ctl_security {
             }
             if (isset($_POST['enable_2fa'])) {
                 $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('admin','director','teacher')", [$staffId, $schoolId]);
+                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
                 if (!$staff) { flash('danger', 'Staff member not found.'); redirect('admin/security&school=' . $schoolId); }
                 if ((int)Database::scalar("SELECT twofa_enabled FROM users WHERE id = ?", [$staffId], 0) === 1) { flash('danger', '2FA already enabled for ' . $staff['first_name'] . '.'); redirect('admin/security&school=' . $schoolId); }
                 $file = Auth::henaIssue($staffId);
@@ -791,7 +791,7 @@ class Ctl_security {
             }
             if (isset($_POST['disable_2fa'])) {
                 $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('admin','director','teacher')", [$staffId, $schoolId]);
+                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
                 if ($staff) {
                     Auth::henaReset($staffId);
                     @unlink(STORAGE_PATH . '/keys/hena_' . $staffId . '.hena');
@@ -831,7 +831,7 @@ class Ctl_security {
 /* =============== ADMIN: system =============== */
 class Ctl_system {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $info = [
             'PHP version' => PHP_VERSION,
             'PHP SAPI' => php_sapi_name(),
@@ -855,7 +855,7 @@ class Ctl_system {
 /* =============== ADMIN: badge & achievement manager =============== */
 class Ctl_admin_badges {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $cats = ['learning' => 'Learning', 'streak' => 'Streaks', 'quiz' => 'Quizzes', 'attendance' => 'Attendance', 'community' => 'Community', 'level' => 'Levels'];
         $icons = ['medal', 'medal-gold', 'medal-silver', 'medal-bronze', 'trophy', 'crown', 'star', 'flame', 'bolt', 'leaf', 'brain', 'books', 'graduation', 'target', 'handshake', 'run', 'heart', 'rocket', 'smile', 'thumbs-up'];
 
@@ -911,7 +911,7 @@ class Ctl_admin_badges {
 /* =============== ADMIN: module registry =============== */
 class Ctl_modules {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         $mode = $_GET['view'] ?? '';
         $q = trim($_GET['q'] ?? '');
         $cat = $_GET['cat'] ?? '';
@@ -967,7 +967,7 @@ class Ctl_modules {
 /* =============== ADMIN: per-school module installer =============== */
 class Ctl_school_modules {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         $sid = (int)($_GET['id'] ?? 0);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -1010,7 +1010,7 @@ class Ctl_school_modules {
 /* =============== ADMIN: national AI usage report =============== */
 class Ctl_ai_reports {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         $perSchool = Database::all(
             "SELECT sc.id, sc.name, sc.education_level,
                     (SELECT COUNT(*) FROM ai_chats ac JOIN users u2 ON u2.id = ac.user_id WHERE u2.school_id = sc.id) AS chats,
@@ -1061,7 +1061,7 @@ class Ctl_override {
             flash('success', 'Override exited. Back to your own account.');
             redirect('dashboard');
         }
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             $target = Database::one("SELECT id, role, first_name, last_name, email, status FROM users WHERE id = ?", [(int)($_POST['user_id'] ?? 0)]);
@@ -1093,7 +1093,7 @@ class Ctl_override {
                 unset($_SESSION['user']['password_hash'], $_SESSION['user']['twofa_secret']);
                 $_SESSION['sv'] = (int)$targetRow['session_version'];
                 $_SESSION['impersonated_by'] = (int)$u['id'];
-                log_activity('override.impersonate', 'Emergency impersonation of ' . $target['email'] . ' by sysadmin', (int)$u['id']);
+                log_activity('override.impersonate', 'Emergency impersonation of ' . $target['email'] . ' by ministry', (int)$u['id']);
                 flash('warning', 'You are now acting as ' . $target['email'] . ' (emergency override). Exit via the banner.');
                 redirect('dashboard');
             }
@@ -1113,7 +1113,7 @@ class Ctl_override {
             $rows = Database::all(
                 "SELECT u.id, u.role, u.first_name, u.last_name, u.email, u.status, sc.name AS school_name
                  FROM users u LEFT JOIN schools sc ON sc.id = u.school_id
-                 WHERE u.role IN ('admin','director','registrar','dean','teacher','student')
+                 WHERE u.role IN ('regional','principal','registrar','dean','teacher','student')
                  ORDER BY u.status, u.last_name LIMIT 30");
         }
         Router::render('app/admin/override', ['title' => 'Emergency Override', 'rows' => $rows, 'q' => $q]);
@@ -1123,7 +1123,7 @@ class Ctl_override {
 /* =============== ADMIN: financial summaries (finance module) =============== */
 class Ctl_finance {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         $rows = [];
         $schools = Database::all("SELECT id, name, education_level FROM schools ORDER BY name");
         foreach ($schools as $sc) {
@@ -1147,7 +1147,7 @@ class Ctl_finance {
 /* =============== ADMIN: license management =============== */
 class Ctl_licenses {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_license'])) {

@@ -43,7 +43,7 @@ $highlight = function (string $text) use ($q): string {
           $href = $link . $r['id'];
           if ($key === 'lessons') $href = 'courses/learn&id=' . $r['course_id'] . '&lesson=' . $r['id'];
           if ($key === 'topics') $href = 'courses/discuss&course=' . $r['course_id'] . '&topic=' . $r['id'];
-          if ($key === 'exams' && in_array($__u['role'] ?? '', ['admin', 'teacher'], true)) $href = 'exams/result&id=' . $r['id'];
+          if ($key === 'exams' && in_array($__u['role'] ?? '', ['regional', 'teacher'], true)) $href = 'exams/result&id=' . $r['id'];
           ?>
           <a class="list-row" href="<?= e(url($href)) ?>" style="padding:9px 0;border-bottom:1px solid var(--border);color:inherit;text-decoration:none">
             <div class="flex-1">

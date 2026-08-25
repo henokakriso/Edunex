@@ -8,7 +8,7 @@
 /* ============ DIRECTOR: dashboard ============ */
 class Ctl_dashboard {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
         $stats = [
             'teachers' => Database::scalar("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=?", [$sid], 0),
@@ -72,7 +72,7 @@ class Ctl_dashboard {
 /* ============ DIRECTOR: manage teachers ============ */
 class Ctl_teachers {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -206,7 +206,7 @@ class Ctl_teachers {
 /* ============ DIRECTOR: students + active/inactive ============ */
 class Ctl_students {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();

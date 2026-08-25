@@ -1,5 +1,5 @@
 <?php /* Gamification hub view */
-$isAdmin = ($__u['role'] ?? '') === 'sysadmin';
+$isAdmin = ($__u['role'] ?? '') === 'ministry';
 $isPlayer = $isPlayer ?? ($__u['role'] ?? '') === 'student';
 ?>
 <?php if ($isAdmin): ?>

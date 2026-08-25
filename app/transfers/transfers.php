@@ -75,7 +75,7 @@ class Ctl_new {
                 flash('success', 'Transfer approved instantly via referral code!');
                 redirect('transfers');
             }
-            $admins = Database::all("SELECT id FROM users WHERE role = 'sysadmin'");
+            $admins = Database::all("SELECT id FROM users WHERE role = 'ministry'");
             foreach ($admins as $a) notify((int)$a['id'], 'system', 'New transfer request', 'Student ' . ($u['student_id'] ?? '') . ' wants to transfer to ' . $school['name'], 'admin/transfers');
             flash('success', 'Transfer request submitted. An administrator will review it.');
             redirect('transfers');
@@ -89,7 +89,7 @@ class Ctl_new {
 
 class Ctl_redeem {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_code'])) {

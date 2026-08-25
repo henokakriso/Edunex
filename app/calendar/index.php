@@ -35,7 +35,7 @@ class Ctl_index {
         } elseif ($u['role'] === 'teacher') {
             $examSql .= " AND e.teacher_id = ?";
             $examArgs[] = $uid;
-        } elseif (in_array($u['role'], ['admin', 'director'], true)) {
+        } elseif (in_array($u['role'], ['regional', 'principal'], true)) {
             if (!empty($u['school_id'])) {
                 $examSql .= " AND c.school_id = ?";
                 $examArgs[] = $u['school_id'];
@@ -56,7 +56,7 @@ class Ctl_index {
             csrf_verify();
             if (isset($_POST['create_event'])) {
                 // Only teachers, admins (super admin) and directors may create events.
-                if (!in_array($u['role'], ['admin', 'director', 'teacher'], true)) {
+                if (!in_array($u['role'], ['regional', 'principal', 'teacher'], true)) {
                     flash('danger', 'Only teachers, directors and admins can create events.');
                     redirect('calendar&month=' . $month . '&year=' . $year);
                 }

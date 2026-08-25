@@ -23,7 +23,7 @@
         <?php endif; ?>
         <div class="flex-col"><label class="small faint">Role</label>
           <select class="input" name="role">
-            <?php foreach (['student', 'teacher', 'parent', 'director', 'registrar', 'dean', 'admin', 'sysadmin'] as $r): ?><option value="<?= $r ?>" <?= $target['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option><?php endforeach; ?>
+            <?php foreach (['student', 'teacher', 'parent', 'principal', 'registrar', 'dean', 'regional', 'ministry'] as $r): ?><option value="<?= $r ?>" <?= $target['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option><?php endforeach; ?>
           </select>
         </div>
         <div class="flex-col"><label class="small faint">Status</label>

@@ -28,7 +28,7 @@ class ZoneScope {
 
 class Ctl_zonal {
     public function run(): void {
-        $u = require_role('zonal_admin');
+        $u = require_role('zonal');
         $action = trim($_GET['r'] ?? '', '/');
         $route = str_replace('zonal/', '', $action);
         match ($route) {
@@ -38,7 +38,7 @@ class Ctl_zonal {
             'schools' => $this->schools($u),
             'school' => $this->school($u),
             'directors' => $this->directors($u),
-            'director' => $this->director($u),
+            'principal' => $this->director($u),
             'analytics' => $this->analytics($u),
             'announcements' => $this->announcements($u),
             'audit' => $this->audit($u),
@@ -59,7 +59,7 @@ class Ctl_zonal {
             'schools' => count($schools), 'woredas' => count($woredas),
             'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id IN ($idList)"),
             'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id IN ($idList)"),
-            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id IN ($idList)"),
+            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id IN ($idList)"),
             'courses' => $this->stat("SELECT COUNT(*) FROM courses WHERE school_id IN ($idList)"),
             'enroll30' => $this->stat("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id IN ($idList) AND ce.enrolled_at>=NOW()-INTERVAL 30 DAY"),
             'pending_transfers' => $this->stat("SELECT COUNT(*) FROM transfer_requests WHERE status='pending' AND to_school_id IN ($idList)"),
@@ -71,7 +71,7 @@ class Ctl_zonal {
                 'school' => $sc,
                 'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id=?", [$sid]),
                 'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=?", [$sid]),
-                'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id=?", [$sid]),
+                'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=?", [$sid]),
             ];
         }
         Router::render('app/zonal/dashboard', [
@@ -103,7 +103,7 @@ class Ctl_zonal {
         $woredas = Database::all(
             "SELECT w.*, (SELECT COUNT(*) FROM schools WHERE woreda_id=w.id) AS schools
              FROM woredas w WHERE w.zone_id=? ORDER BY w.name", [$zoneId]);
-        $admins = Database::all("SELECT id, first_name, last_name, email FROM users WHERE role='woreda_admin' AND school_id IS NULL ORDER BY first_name");
+        $admins = Database::all("SELECT id, first_name, last_name, email FROM users WHERE role='woreda' AND school_id IS NULL ORDER BY first_name");
         Router::render('app/zonal/woredas', ['title' => 'Woredas', 'woredas' => $woredas, 'admins' => $admins]);
     }
 
@@ -134,7 +134,7 @@ class Ctl_zonal {
         }
         $rows = Database::all(
             "SELECT sc.*, w.name AS woreda_name,
-                    (SELECT COUNT(*) FROM users WHERE role='director' AND school_id=sc.id) AS directors,
+                    (SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=sc.id) AS directors,
                     (SELECT COUNT(*) FROM users WHERE role='student' AND school_id=sc.id) AS students,
                     (SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=sc.id) AS teachers
              FROM schools sc LEFT JOIN woredas w ON w.id=sc.woreda_id
@@ -150,12 +150,12 @@ class Ctl_zonal {
         $stats = [
             'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id=?", [$id]),
             'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=?", [$id]),
-            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id=?", [$id]),
+            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=?", [$id]),
             'courses' => $this->stat("SELECT COUNT(*) FROM courses WHERE school_id=?", [$id]),
         ];
         $recent = Database::all(
             "SELECT CONCAT(u.first_name,' ',u.last_name) AS name, u.role, u.status, u.last_login
-             FROM users u WHERE u.school_id=? AND u.role IN ('teacher','director') ORDER BY u.last_login DESC LIMIT 8", [$id]);
+             FROM users u WHERE u.school_id=? AND u.role IN ('teacher','principal') ORDER BY u.last_login DESC LIMIT 8", [$id]);
         Router::render('app/zonal/school', ['title' => $school['name'], 'school' => $school, 'stats' => $stats, 'recent' => $recent]);
     }
 
@@ -173,7 +173,7 @@ class Ctl_zonal {
                 }
                 $pass = ($_POST['password'] ?? '') !== '' ? (string)$_POST['password'] : random_password();
                 Database::insert('users', [
-                    'school_id' => $schoolId, 'role' => 'director',
+                    'school_id' => $schoolId, 'role' => 'principal',
                     'first_name' => trim((string)$_POST['first_name']),
                     'last_name' => trim((string)$_POST['last_name']),
                     'email' => $email, 'phone' => trim((string)($_POST['phone'] ?? '')),
@@ -186,7 +186,7 @@ class Ctl_zonal {
             }
             if (isset($_POST['toggle_director'])) {
                 $did = (int)($_POST['id'] ?? 0);
-                $d = Database::one("SELECT * FROM users WHERE id=? AND role='director'", [$did]);
+                $d = Database::one("SELECT * FROM users WHERE id=? AND role='principal'", [$did]);
                 if (!$d) { flash('danger', 'Not found.'); redirect('zonal/directors'); }
                 ZoneScope::requireSchool($uid, (int)$d['school_id']);
                 $ns = ($d['status'] ?? 'active') === 'active' ? 'suspended' : 'active';
@@ -198,7 +198,7 @@ class Ctl_zonal {
         $rows = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.email, u.status, u.last_login, s.name AS school_name
              FROM users u JOIN schools s ON s.id=u.school_id
-             WHERE u.role='director' AND u.school_id IN (".ZoneScope::idList($uid).")
+             WHERE u.role='principal' AND u.school_id IN (".ZoneScope::idList($uid).")
              ORDER BY s.name", []);
         Router::render('app/zonal/directors', ['title' => 'Directors', 'rows' => $rows, 'schools' => $schools]);
     }
@@ -206,7 +206,7 @@ class Ctl_zonal {
     private function director(array $u): void {
         $uid = (int)$u['id'];
         $id = (int)($_GET['id'] ?? 0);
-        $d = Database::one("SELECT u.*, s.name AS school_name FROM users u JOIN schools s ON s.id=u.school_id WHERE u.id=? AND u.role='director'", [$id]);
+        $d = Database::one("SELECT u.*, s.name AS school_name FROM users u JOIN schools s ON s.id=u.school_id WHERE u.id=? AND u.role='principal'", [$id]);
         if (!$d) { flash('danger', 'Not found.'); redirect('zonal/directors'); }
         ZoneScope::requireSchool($uid, (int)$d['school_id']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -219,7 +219,7 @@ class Ctl_zonal {
             }
         }
         $activity = Database::all("SELECT * FROM activity_log WHERE user_id=? ORDER BY created_at DESC LIMIT 20", [$id]);
-        Router::render('app/zonal/director', ['title' => $d['first_name'].' '.$d['last_name'], 'director' => $d, 'activity' => $activity]);
+        Router::render('app/zonal/director', ['title' => $d['first_name'].' '.$d['last_name'], 'principal' => $d, 'activity' => $activity]);
     }
 
     private function analytics(array $u): void {

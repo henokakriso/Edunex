@@ -7,7 +7,7 @@ $next = $month === 12 ? 1 : $month + 1;
 $nextY = $month === 12 ? $year + 1 : $year;
 $todayDay = (int)date('j'); $todayMon = (int)date('n'); $todayYr = (int)date('Y');
 $isThisMonth = $todayMon === $month && $todayYr === $year;
-$canCreate = in_array($__u['role'] ?? '', ['admin', 'director', 'teacher'], true);
+$canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], true);
 ?>
 <div class="page-head page-head-flex">
   <div>
@@ -185,7 +185,7 @@ $canCreate = in_array($__u['role'] ?? '', ['admin', 'director', 'teacher'], true
 <script>
 (function () {
   let open = false;
-  const roleBadge = { admin: 'badge danger', director: 'badge danger', teacher: 'badge accent', student: 'badge warning', parent: 'badge muted' };
+  const roleBadge = { ministry: 'badge danger', regional: 'badge danger', principal: 'badge danger', teacher: 'badge accent', student: 'badge warning', parent: 'badge muted' };
   const typeName = { school: 'School', university: 'University', college: 'College', training: 'Training centre', other: 'Institution' };
 
   function build(p) {

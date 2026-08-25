@@ -8,7 +8,7 @@
 
 class Ctl_transfers {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

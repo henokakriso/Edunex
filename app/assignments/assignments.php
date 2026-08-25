@@ -242,7 +242,7 @@ class Ctl_assignments_view {
             redirect('assignments/view&id=' . $id);
         }
         $subs = null;
-        if ($u['role'] === 'teacher' || $u['role'] === 'sysadmin' || (int)$u['id'] === (int)$assign['teacher_id']) {
+        if ($u['role'] === 'teacher' || $u['role'] === 'ministry' || (int)$u['id'] === (int)$assign['teacher_id']) {
             $subs = Database::all(
                 "SELECT s.*, us.first_name, us.last_name FROM assignment_submissions s JOIN users us ON us.id = s.student_id WHERE s.assignment_id = ? ORDER BY s.submitted_at", [$id]);
         }

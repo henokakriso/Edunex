@@ -1,5 +1,5 @@
 <?php /* Groups view */
-$roleCls = ['admin' => 'badge-red', 'director' => 'badge accent', 'teacher' => 'badge-info', 'student' => 'badge-success', 'parent' => 'badge-muted'];
+$roleCls = ['regional' => 'badge-red', 'principal' => 'badge accent', 'teacher' => 'badge-info', 'student' => 'badge-success', 'parent' => 'badge-muted'];
 $roleCounts = array_count_values(array_column($candidates, 'role'));
 ?>
 <div class="page-head page-head-flex">
@@ -32,7 +32,7 @@ $roleCounts = array_count_values(array_column($candidates, 'role'));
         <label class="muted small" style="user-select:none">
           <input type="checkbox" class="select-all-cb" data-role="*"> <?= icon('check') ?> Select all visible
         </label>
-        <?php foreach (['student' => 'Students', 'teacher' => 'Teachers', 'director' => 'Directors', 'admin' => 'Admins', 'parent' => 'Parents'] as $roleKey => $roleLabel): ?>
+        <?php foreach (['student' => 'Students', 'teacher' => 'Teachers', 'principal' => 'Directors', 'regional' => 'Admins', 'parent' => 'Parents'] as $roleKey => $roleLabel): ?>
           <label class="muted small" style="user-select:none">
             <input type="checkbox" class="select-role-cb" data-role="<?= $roleKey ?>"> <?= e($roleLabel) ?>
           </label>
@@ -124,7 +124,7 @@ $roleCounts = array_count_values(array_column($candidates, 'role'));
     var n = document.querySelectorAll('.member-cb:checked').length;
     var el = document.getElementById('selected');
     if (el) el.textContent = n + ' selected';
-    ['student','teacher','director','admin','parent'].forEach(function (r) {
+    ['student','teacher','principal','regional','parent'].forEach(function (r) {
       var rows = document.querySelectorAll('.member-row[data-role="' + r + '"]');
       var on = [].filter.call(rows, function (r) { return r.querySelector('.member-cb').checked; }).length;
       // keep global "select all" boxes consistent

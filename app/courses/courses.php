@@ -22,7 +22,7 @@ class Ctl_courses_browse {
         $where = "c.status = 'published'";
         $params = [];
         // Directors manage and see ALL their school's courses (any status)
-        if ($role === 'director') {
+        if ($role === 'principal') {
             $where = "c.school_id = ?";
             $params[] = (int)$u['school_id'];
         }
@@ -41,7 +41,7 @@ class Ctl_courses_browse {
             }
         }
         // Director CRUD handlers
-        if ($role === 'director' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($role === 'principal' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             $sid = (int)$u['school_id'];
             $teacherIds = Database::all("SELECT id FROM users WHERE school_id = ? AND role = 'teacher'", [$sid]);
@@ -121,7 +121,7 @@ class Ctl_courses_browse {
              WHERE $where
              ORDER BY c.created_at DESC", $params);
         $extra = [];
-        if ($role === 'director') {
+        if ($role === 'principal') {
             $extra = [
                 'teachers' => Database::all(
                     "SELECT id, first_name, last_name FROM users WHERE school_id = ? AND role = 'teacher' ORDER BY first_name, last_name", [$u['school_id']]),
@@ -141,7 +141,7 @@ class Ctl_courses_view {
         $course = Database::one(
             "SELECT c.*, u.first_name AS tfirst, u.last_name AS tlast FROM courses c JOIN users u ON u.id = c.teacher_id WHERE c.id = ?", [$id]);
         if (!$course) { flash('danger', 'Course not found.'); redirect('courses'); }
-        if ($u['role'] === 'director' && (int)$course['school_id'] !== (int)$u['school_id']) {
+        if ($u['role'] === 'principal' && (int)$course['school_id'] !== (int)$u['school_id']) {
             flash('danger', 'Access denied.');
             redirect('courses');
         }
@@ -153,7 +153,7 @@ class Ctl_courses_view {
         $readonly = false;
         if ($u['role'] === 'student') {
             $enrolled = Database::one("SELECT * FROM course_enrollments WHERE course_id = ? AND user_id = ?", [$id, $u['id']]);
-        } elseif ($u['role'] === 'director') {
+        } elseif ($u['role'] === 'principal') {
             // Directors preview course detail + contents read-only — no enrollment
             $readonly = true;
         }
@@ -178,7 +178,7 @@ class Ctl_courses_learn {
         $course = Database::one("SELECT * FROM courses WHERE id = ? AND status = 'published'", [$courseId]);
         if (!$course) { flash('danger', 'Course not found.'); redirect('courses'); }
         $readonly = false;
-        if ($u['role'] === 'director') {
+        if ($u['role'] === 'principal') {
             // Directors preview lesson contents read-only — never enroll, take or complete
             if ((int)$course['school_id'] !== (int)$u['school_id']) { flash('danger', 'Access denied.'); redirect('courses'); }
             $isEnrolled = true;
@@ -192,7 +192,7 @@ class Ctl_courses_learn {
                 Database::insert('course_enrollments', ['course_id' => $courseId, 'user_id' => $u['id']]);
                 award_xp((int)$u['id'], 20, 'Enrolled in ' . $course['title']);
                 flash('success', 'You are enrolled. Happy learning!');
-            } elseif ($u['role'] !== 'sysadmin') {
+            } elseif ($u['role'] !== 'ministry') {
                 flash('info', 'Enroll in this course to start learning.');
                 redirect('courses/view&id=' . $courseId);
             }

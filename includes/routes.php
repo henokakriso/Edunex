@@ -28,7 +28,7 @@ Router::page('auth/logout', 'auth/logout.php', '*');
 Router::page('auth/sessions', 'auth/sessions.php', '*');
 
 /* ---------------- App ---------------- */
-Router::page('dashboard', 'dashboard.php', ['admin', 'teacher', 'student', 'parent', 'director', 'zonal_admin', 'woreda_admin']);
+Router::page('dashboard', 'dashboard.php', ['regional', 'teacher', 'student', 'parent', 'principal', 'zonal', 'woreda']);
 Router::page('user/profile', 'user/profile.php', '*');
 
 /* ---- Student ---- */
@@ -62,14 +62,14 @@ Router::page('teacher/verify', 'teacher/verify.php', ['teacher', 'lecturer'], 'a
 Router::page('teacher/import', 'teacher/import.php', ['teacher', 'lecturer']);
 Router::page('teacher/book', 'teacher/book.php', ['teacher', 'lecturer']);
 Router::page('teacher/book/job', 'teacher/book_job.php', 'teacher');
-Router::page('director/dashboard', 'director/dashboard.php', 'director');
-Router::page('director/teachers', 'director/teachers.php', 'director');
-Router::page('director/students', 'director/students.php', 'director');
-Router::page('director/import', 'director/import.php', 'director');
-Router::page('director/transfers', 'director/transfers.php', 'director');
-Router::page('director/faculties', 'director/faculties.php', 'director');
-Router::page('director/reports', 'director/reports.php', 'director');
-Router::page('director/analytics', 'director/analytics.php', 'director');
+Router::page('director/dashboard', 'director/dashboard.php', 'principal');
+Router::page('director/teachers', 'director/teachers.php', 'principal');
+Router::page('director/students', 'director/students.php', 'principal');
+Router::page('director/import', 'director/import.php', 'principal');
+Router::page('director/transfers', 'director/transfers.php', 'principal');
+Router::page('director/faculties', 'director/faculties.php', 'principal');
+Router::page('director/reports', 'director/reports.php', 'principal');
+Router::page('director/analytics', 'director/analytics.php', 'principal');
 
 Router::page('teacher/reports', 'teacher/reports.php', ['teacher', 'lecturer']);
 Router::page('teacher/analytics', 'teacher/analytics.php', ['teacher', 'lecturer']);
@@ -77,73 +77,73 @@ Router::page('teacher/library', 'teacher/library.php', ['teacher', 'lecturer']);
 Router::page('teacher/forum', 'teacher/forum.php', ['teacher', 'lecturer']);
 
 /* ---- Admin ---- */
-Router::page('admin/dashboard', 'admin/dashboard.php', 'sysadmin');
-Router::page('admin/import', 'admin/import.php', 'sysadmin');
-Router::page('admin/users', 'admin/users.php', 'sysadmin');
-Router::page('admin/user', 'admin/user.php', 'sysadmin');
-Router::page('admin/schools', 'admin/schools.php', 'sysadmin');
-Router::page('admin/school', 'admin/school.php', 'sysadmin');
-Router::page('admin/departments', 'admin/departments.php', 'sysadmin');
-Router::page('admin/department', 'admin/department.php', 'sysadmin');
-Router::page('admin/subjects', 'admin/subjects.php', 'sysadmin');
-Router::page('admin/groups', 'admin/groups.php', 'sysadmin');
-Router::page('admin/years', 'admin/years.php', 'sysadmin');
-Router::page('admin/courses', 'admin/courses.php', 'sysadmin');
-Router::page('admin/roles', 'admin/roles.php', 'sysadmin');
-Router::page('admin/settings', 'admin/settings.php', 'sysadmin');
-Router::page('admin/logs', 'admin/logs.php', ['sysadmin', 'admin']);
-Router::page('admin/analytics', 'admin/analytics.php', 'sysadmin');
-Router::page('admin/reports', 'admin/reports.php', 'sysadmin');
-Router::page('admin/backups', 'admin/backups.php', ['sysadmin', 'admin']);
-Router::page('admin/announcements', 'admin/announcements.php', 'sysadmin');
-Router::page('admin/library', 'admin/library.php', 'sysadmin');
-Router::page('admin/permissions', 'admin/permissions.php', 'sysadmin');
-Router::page('admin/transfers', 'admin/transfers.php', 'sysadmin');
-Router::page('admin/transfer', 'admin/transfer.php', 'sysadmin');
-Router::page('admin/system', 'admin/system.php', 'sysadmin');
-Router::page('admin/ledger', 'admin/ledger.php', 'sysadmin');
-Router::page('admin/security', 'admin/security.php', 'sysadmin');
-Router::page('admin/badges', 'admin/badges.php', 'sysadmin');
-Router::page('admin/modules', 'admin/modules.php', 'sysadmin');
-Router::page('admin/school-modules', 'admin/school_modules.php', 'sysadmin');
-Router::page('admin/ai-reports', 'admin/ai_reports.php', 'sysadmin');
-Router::page('admin/override', 'admin/override.php', 'sysadmin');
+Router::page('admin/dashboard', 'admin/dashboard.php', 'ministry');
+Router::page('admin/import', 'admin/import.php', 'ministry');
+Router::page('admin/users', 'admin/users.php', 'ministry');
+Router::page('admin/user', 'admin/user.php', 'ministry');
+Router::page('admin/schools', 'admin/schools.php', 'ministry');
+Router::page('admin/school', 'admin/school.php', 'ministry');
+Router::page('admin/departments', 'admin/departments.php', 'ministry');
+Router::page('admin/department', 'admin/department.php', 'ministry');
+Router::page('admin/subjects', 'admin/subjects.php', 'ministry');
+Router::page('admin/groups', 'admin/groups.php', 'ministry');
+Router::page('admin/years', 'admin/years.php', 'ministry');
+Router::page('admin/courses', 'admin/courses.php', 'ministry');
+Router::page('admin/roles', 'admin/roles.php', 'ministry');
+Router::page('admin/settings', 'admin/settings.php', 'ministry');
+Router::page('admin/logs', 'admin/logs.php', ['ministry', 'regional']);
+Router::page('admin/analytics', 'admin/analytics.php', 'ministry');
+Router::page('admin/reports', 'admin/reports.php', 'ministry');
+Router::page('admin/backups', 'admin/backups.php', ['ministry', 'regional']);
+Router::page('admin/announcements', 'admin/announcements.php', 'ministry');
+Router::page('admin/library', 'admin/library.php', 'ministry');
+Router::page('admin/permissions', 'admin/permissions.php', 'ministry');
+Router::page('admin/transfers', 'admin/transfers.php', 'ministry');
+Router::page('admin/transfer', 'admin/transfer.php', 'ministry');
+Router::page('admin/system', 'admin/system.php', 'ministry');
+Router::page('admin/ledger', 'admin/ledger.php', 'ministry');
+Router::page('admin/security', 'admin/security.php', 'ministry');
+Router::page('admin/badges', 'admin/badges.php', 'ministry');
+Router::page('admin/modules', 'admin/modules.php', 'ministry');
+Router::page('admin/school-modules', 'admin/school_modules.php', 'ministry');
+Router::page('admin/ai-reports', 'admin/ai_reports.php', 'ministry');
+Router::page('admin/override', 'admin/override.php', 'ministry');
 Router::page('admin/override-exit', 'admin/override.php', '*');
-Router::page('admin/finance', 'admin/finance.php', 'sysadmin');
-Router::page('admin/licenses', 'admin/licenses.php', 'sysadmin');
+Router::page('admin/finance', 'admin/finance.php', 'ministry');
+Router::page('admin/licenses', 'admin/licenses.php', 'ministry');
 
 /* ---- Regional Admin ---- */
-Router::page('regional/dashboard', 'regional/regional.php', 'admin');
-Router::page('regional/schools', 'regional/regional.php', 'admin');
-Router::page('regional/school', 'regional/regional.php', 'admin');
-Router::page('regional/directors', 'regional/regional.php', 'admin');
-Router::page('regional/director', 'regional/regional.php', 'admin');
-Router::page('regional/analytics', 'regional/regional.php', 'admin');
-Router::page('regional/announcements', 'regional/regional.php', 'admin');
-Router::page('regional/backups', 'regional/regional.php', 'admin');
-Router::page('regional/audit', 'regional/regional.php', 'admin');
+Router::page('regional/dashboard', 'regional/regional.php', 'regional');
+Router::page('regional/schools', 'regional/regional.php', 'regional');
+Router::page('regional/school', 'regional/regional.php', 'regional');
+Router::page('regional/directors', 'regional/regional.php', 'regional');
+Router::page('regional/director', 'regional/regional.php', 'regional');
+Router::page('regional/analytics', 'regional/regional.php', 'regional');
+Router::page('regional/announcements', 'regional/regional.php', 'regional');
+Router::page('regional/backups', 'regional/regional.php', 'regional');
+Router::page('regional/audit', 'regional/regional.php', 'regional');
 
 /* ---- Zonal Admin ---- */
-Router::page('zonal/dashboard', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/woredas', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/woreda', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/schools', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/school', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/directors', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/director', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/analytics', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/announcements', 'zonal/zonal.php', 'zonal_admin');
-Router::page('zonal/audit', 'zonal/zonal.php', 'zonal_admin');
+Router::page('zonal/dashboard', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/woredas', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/woreda', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/schools', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/school', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/directors', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/director', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/analytics', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/announcements', 'zonal/zonal.php', 'zonal');
+Router::page('zonal/audit', 'zonal/zonal.php', 'zonal');
 
 /* ---- Woreda Admin ---- */
-Router::page('woreda/dashboard', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/schools', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/school', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/directors', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/director', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/analytics', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/announcements', 'woreda/woreda.php', 'woreda_admin');
-Router::page('woreda/audit', 'woreda/woreda.php', 'woreda_admin');
+Router::page('woreda/dashboard', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/schools', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/school', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/directors', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/director', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/analytics', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/announcements', 'woreda/woreda.php', 'woreda');
+Router::page('woreda/audit', 'woreda/woreda.php', 'woreda');
 
 /* ---- Registrar ---- */
 Router::page('registrar/dashboard', 'registrar/registrar.php', 'registrar');
@@ -169,25 +169,25 @@ Router::page('vice_dean/courses', 'dean/departments_head.php', 'vice_dean');
 Router::page('vice_dean/analytics', 'dean/departments_head.php', 'vice_dean');
 
 /* ---- Department Head ---- */
-Router::page('dept_head/dashboard', 'dean/departments_head.php', 'dept_head');
-Router::page('dept_head/courses', 'dean/departments_head.php', 'dept_head');
-Router::page('dept_head/theses', 'dean/departments_head.php', 'dept_head');
-Router::page('dept_head/analytics', 'dean/departments_head.php', 'dept_head');
+Router::page('dept_head/dashboard', 'dean/departments_head.php', 'hod');
+Router::page('dept_head/courses', 'dean/departments_head.php', 'hod');
+Router::page('dept_head/theses', 'dean/departments_head.php', 'hod');
+Router::page('dept_head/analytics', 'dean/departments_head.php', 'hod');
 
 /* ---- University Module ---- */
-Router::page('university/programs', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head']);
-Router::page('university/program', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head']);
+Router::page('university/programs', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod']);
+Router::page('university/program', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod']);
 Router::page('university/semesters', 'university/university.php', ['registrar']);
 Router::page('university/registration', 'university/university.php', ['registrar', 'student']);
 Router::page('university/my-schedule', 'university/university.php', ['student']);
 Router::page('university/clearance', 'university/university.php', ['student']);
-Router::page('university/clearance/manage', 'university/university.php', ['registrar', 'dean', 'dept_head', 'bursar', 'librarian', 'student_affairs']);
+Router::page('university/clearance/manage', 'university/university.php', ['registrar', 'dean', 'hod', 'bursar', 'librarian', 'student_affairs']);
 Router::page('university/transcript', 'university/university.php', ['student']);
 Router::page('university/transcript/manage', 'university/university.php', ['registrar']);
 Router::page('university/fees', 'university/university.php', ['student']);
 Router::page('university/fees/manage', 'university/university.php', ['bursar', 'registrar']);
-Router::page('university/theses', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head', 'student']);
-Router::page('university/thesis', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'dept_head', 'student']);
+Router::page('university/theses', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student']);
+Router::page('university/thesis', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student']);
 Router::page('university/timetable', 'university/university.php', ['registrar', 'dean', 'student']);
 Router::page('university/id-cards', 'university/university.php', ['registrar', 'student_affairs']);
 
@@ -199,25 +199,25 @@ Router::page('parent/reports', 'parent/reports.php', 'parent');
 /* ---- Cross-role modules ---- */
 Router::page('courses', 'courses/browse.php', '*');
 Router::page('courses/view', 'courses/view.php', '*');
-Router::page('courses/learn', 'courses/learn.php', ['student', 'teacher', 'parent', 'admin', 'director']);
+Router::page('courses/learn', 'courses/learn.php', ['student', 'teacher', 'parent', 'regional', 'principal']);
 Router::page('courses/discuss', 'courses/discuss.php', '*');
-Router::page('courses/certificate', 'courses/certificate.php', ['student', 'admin', 'teacher']);
+Router::page('courses/certificate', 'courses/certificate.php', ['student', 'regional', 'teacher']);
 
 Router::page('exams/take', 'exams/take.php', ['student', 'teacher']);
-Router::page('exams/result', 'exams/result.php', ['student', 'teacher', 'admin']);
+Router::page('exams/result', 'exams/result.php', ['student', 'teacher', 'regional']);
 
-Router::page('assignments/view', 'assignments/view.php', ['student', 'teacher', 'parent', 'admin']);
+Router::page('assignments/view', 'assignments/view.php', ['student', 'teacher', 'parent', 'regional']);
 
-Router::page('ai/tutor', 'ai/tutor.php', ['student', 'teacher', 'director']);
-Router::page('ai/tutor/stream', 'ai/tutor_stream.php', ['student', 'teacher', 'director']);
-Router::page('ai/assistant', 'ai/assistant.php', ['student', 'teacher', 'director']);
-Router::page('ai/assistant/stream', 'ai/assistant_stream.php', ['student', 'teacher', 'director']);
-Router::page('ai/job/progress', 'ai/job_progress.php', ['student', 'teacher', 'director']);
-Router::page('ai/job/cancel', 'ai/job_cancel.php', ['student', 'teacher', 'director']);
-Router::page('ai/history', 'ai/history.php', ['student', 'teacher', 'director']);
-Router::page('ai/flashcards', 'ai/flashcards.php', ['student', 'teacher', 'director']);
-Router::page('ai/flashcard-image', 'ai/flashcard_image.php', ['student', 'teacher', 'director']);
-Router::page('ai/quiz', 'ai/quiz.php', ['student', 'teacher', 'director']);
+Router::page('ai/tutor', 'ai/tutor.php', ['student', 'teacher', 'principal']);
+Router::page('ai/tutor/stream', 'ai/tutor_stream.php', ['student', 'teacher', 'principal']);
+Router::page('ai/assistant', 'ai/assistant.php', ['student', 'teacher', 'principal']);
+Router::page('ai/assistant/stream', 'ai/assistant_stream.php', ['student', 'teacher', 'principal']);
+Router::page('ai/job/progress', 'ai/job_progress.php', ['student', 'teacher', 'principal']);
+Router::page('ai/job/cancel', 'ai/job_cancel.php', ['student', 'teacher', 'principal']);
+Router::page('ai/history', 'ai/history.php', ['student', 'teacher', 'principal']);
+Router::page('ai/flashcards', 'ai/flashcards.php', ['student', 'teacher', 'principal']);
+Router::page('ai/flashcard-image', 'ai/flashcard_image.php', ['student', 'teacher', 'principal']);
+Router::page('ai/quiz', 'ai/quiz.php', ['student', 'teacher', 'principal']);
 
 Router::page('library', 'library/index.php', '*');
 Router::page('library/item', 'library/item.php', '*');
@@ -233,25 +233,25 @@ Router::page('calendar', 'calendar/index.php', '*');
 
 Router::page('analytics/student', 'analytics/student.php', ['student', 'parent']);
 Router::page('analytics/teacher', 'analytics/teacher.php', 'teacher');
-Router::page('analytics/admin', 'analytics/admin.php', 'admin');
+Router::page('analytics/admin', 'analytics/admin.php', 'regional');
 
 Router::page('certificates', 'certificates/index.php', ['student', 'parent']);
 Router::page('certificates/view', 'certificates/view.php', '*');
 Router::page('certificates/verify', 'certificates/verify.php', '*');
 
-Router::page('gamification', 'gamification/index.php', ['student', 'admin']);
-Router::page('gamification/badges', 'gamification/badges.php', ['student', 'admin']);
-Router::page('gamification/leaderboard', 'gamification/leaderboard.php', ['student', 'admin']);
+Router::page('gamification', 'gamification/index.php', ['student', 'regional']);
+Router::page('gamification/badges', 'gamification/badges.php', ['student', 'regional']);
+Router::page('gamification/leaderboard', 'gamification/leaderboard.php', ['student', 'regional']);
 
 Router::page('notes', 'notes/notes.php', ['student', 'teacher', 'parent']);
 Router::page('games', 'games/games.php', ['student', 'teacher']);
 Router::page('search', 'search/index.php', '*');
 
-Router::page('files', 'files/index.php', 'admin');
-Router::page('files/view', 'files/view.php', 'admin');
+Router::page('files', 'files/index.php', 'regional');
+Router::page('files/view', 'files/view.php', 'regional');
 
-Router::page('reports/index', 'reports/index.php', ['admin', 'teacher']);
-Router::page('reports/export', 'reports/export.php', ['admin', 'teacher', 'director']);
+Router::page('reports/index', 'reports/index.php', ['regional', 'teacher']);
+Router::page('reports/export', 'reports/export.php', ['regional', 'teacher', 'principal']);
 
 Router::page('settings/profile', 'settings/profile.php', '*');
 Router::page('settings/password', 'settings/password.php', '*');
@@ -263,7 +263,7 @@ Router::page('settings/sessions', 'settings/sessions.php', '*');
 
 Router::page('transfers', 'transfers/index.php', ['student', 'parent']);
 Router::page('transfers/new', 'transfers/new.php', ['student', 'parent']);
-Router::page('transfers/redeem', 'transfers/redeem.php', 'admin');
+Router::page('transfers/redeem', 'transfers/redeem.php', 'regional');
 
 /* ---- Public / misc ---- */
 Router::view('errors/404', 'errors/404');
@@ -298,7 +298,7 @@ Router::page('api/login', 'api/login.php', '*');
 Router::page('api/activity', 'api/activity.php', '*');
 
 /* ---- Demo toggle (any authenticated user with admin/sysadmin) ---- */
-Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['sysadmin', 'admin', 'registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'director', 'student', 'parent', 'zonal_admin', 'woreda_admin']);
+Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['ministry', 'regional', 'registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'principal', 'student', 'parent', 'zonal', 'woreda']);
 
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');

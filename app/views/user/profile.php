@@ -1,6 +1,6 @@
 <?php /* Public profile view */
 $p = $profile;
-$roleBadge = ['admin' => 'badge danger', 'director' => 'badge danger', 'teacher' => 'badge accent',
+$roleBadge = ['regional' => 'badge danger', 'principal' => 'badge danger', 'teacher' => 'badge accent',
               'student' => 'badge warning', 'parent' => 'badge muted'][$p['role']] ?? 'badge muted';
 $schoolType = $schoolType ?? [];
 ?>

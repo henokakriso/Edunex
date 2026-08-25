@@ -19,9 +19,11 @@
       <div class="flex-col"><label class="small faint">Role</label>
         <select class="input" name="role" id="nu-role">
           <option value="student">Student</option><option value="teacher">Teacher</option>
-          <option value="parent">Parent</option><option value="director">Director</option>
+          <option value="parent">Parent</option><option value="principal">Principal</option>
           <option value="registrar">Registrar</option><option value="dean">Dean</option>
-          <option value="admin">Admin (Regional)</option><option value="sysadmin">Super Admin</option>
+          <option value="regional">Regional Admin</option><option value="ministry">Ministry (Super Admin)</option>
+          <option value="zonal">Zonal Admin</option><option value="woreda">Woreda Admin</option>
+          <option value="hod">Head of Department</option>
         </select>
       </div>
       <div class="flex-col"><label class="small faint">School *</label>

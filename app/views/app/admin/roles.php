@@ -1,5 +1,5 @@
 <?php /* Admin roles & permissions view */
-$roles = $roles ?? ['admin', 'director', 'teacher', 'student', 'parent'];
+$roles = $roles ?? ['regional', 'principal', 'teacher', 'student', 'parent'];
 $all = $all ?? [];
 $perms = $perms ?? [];
 ?>

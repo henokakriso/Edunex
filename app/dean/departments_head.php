@@ -93,7 +93,7 @@ class Ctl_dept_head {
     }
 
     public function run(): void {
-        $u = require_role('dept_head');
+        $u = require_role('hod');
         $sid = (int)$u['school_id'];
         $route = trim($_GET['r'] ?? '', '/');
         $route = str_replace('dept_head/', '', $route);

@@ -17,7 +17,7 @@ class Ctl_profile {
         if (!$profile) { flash('danger', 'User not found.'); redirect('dashboard'); }
 
         // Non-admins may only view profiles within their own school (or their own)
-        if ($u['role'] !== 'sysadmin' && (int)$u['id'] !== $id
+        if ($u['role'] !== 'ministry' && (int)$u['id'] !== $id
             && (int)($u['school_id'] ?? 0) !== (int)($profile['school_id'] ?? -1)) {
             flash('danger', 'Access denied.');
             redirect('dashboard');

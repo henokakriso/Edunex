@@ -91,7 +91,7 @@
           <option value="registrar">Registrar (school-wide)</option>
           <option value="dean">Dean (faculty)</option>
           <option value="vice_dean">Vice Dean (faculty)</option>
-          <option value="dept_head">Department Head</option>
+          <option value="hod">Head of Department</option>
         </select>
       </div>
       <div class="flex-col"><label class="small faint">Faculty (deans / vice deans)</label>

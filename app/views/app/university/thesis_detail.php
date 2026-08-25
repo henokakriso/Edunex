@@ -20,7 +20,7 @@
     <?php endif; ?>
   </div>
 
-  <?php if (in_array($u['role'], ['dean','dept_head'])): ?>
+  <?php if (in_array($u['role'], ['dean','hod'])): ?>
   <div class="card">
     <h3 class="card-title"><?= icon('settings') ?> Actions</h3>
     <?php if (!$thesis['advisor_id']): ?>

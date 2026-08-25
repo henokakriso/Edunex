@@ -10,7 +10,7 @@ $u = api_user();
 $q = trim((string)($_GET['q'] ?? ''));
 if (mb_strlen($q) < 2) api_out(['ok' => true, 'q' => $q, 'results' => []]);
 $like = '%' . $q . '%';
-$isAdmin = in_array($u['role'] ?? '', ['sysadmin'], true);
+$isAdmin = in_array($u['role'] ?? '', ['ministry'], true);
 $sid = $isAdmin ? null : ($u['school_id'] ?? null);
 
 $out = [];
@@ -38,7 +38,7 @@ if ($sid !== null) {
 foreach ($users as $usr) {
     $sub = $usr['role'] . ($usr['student_id'] ? ' · ' . $usr['student_id'] : '');
     if (!$usr['same_school']) $sub .= ' · other school';
-    $route = ($u['role'] ?? '') === 'sysadmin' && $usr['role'] === 'student'
+    $route = ($u['role'] ?? '') === 'ministry' && $usr['role'] === 'student'
         ? 'admin/user&id=' . $usr['id']
         : 'messages&to=' . $usr['id'];
     $out[] = [

@@ -6,7 +6,7 @@ $__unread = Database::scalar("SELECT COUNT(*) FROM notifications WHERE user_id =
 $__route = trim($_GET['r'] ?? '', '/');
 
 $__nav = [
-  'sysadmin' => [
+  'ministry' => [
     ['dash', 'Overview', 'dashboard', icon('chart-bar')],
     ['ACADEMIC'],
     ['users', 'Users', 'admin/users', icon('users')],
@@ -36,7 +36,7 @@ $__nav = [
     ['finance', 'Finance Summary', 'admin/finance', icon('banknote')],
     ['override', 'Emergency Override', 'admin/override', icon('shield')],
   ],
-  'admin' => [
+  'regional' => [
     ['dash', 'Overview', 'regional/dashboard', icon('chart-bar')],
     ['SCHOOLS'],
     ['schools', 'My Schools', 'regional/schools', icon('school')],
@@ -47,7 +47,7 @@ $__nav = [
     ['backups', 'Backups', 'regional/backups', icon('save')],
     ['audit', 'Audit Log', 'regional/audit', icon('note')],
   ],
-  'zonal_admin' => [
+  'zonal' => [
     ['dash', 'Overview', 'zonal/dashboard', icon('chart-bar')],
     ['WOREDAS'],
     ['woredas', 'Woredas', 'zonal/woredas', icon('folder')],
@@ -59,7 +59,7 @@ $__nav = [
     ['announcements', 'Announcements', 'zonal/announcements', icon('megaphone')],
     ['audit', 'Audit Log', 'zonal/audit', icon('note')],
   ],
-  'woreda_admin' => [
+  'woreda' => [
     ['dash', 'Overview', 'woreda/dashboard', icon('chart-bar')],
     ['SCHOOLS'],
     ['schools', 'My Woreda Schools', 'woreda/schools', icon('school')],
@@ -110,7 +110,7 @@ $__nav = [
     ['university_programs', 'Programs', 'university/programs', icon('book')],
     ['university_theses', 'Theses', 'university/theses', icon('book')],
   ],
-  'dept_head' => [
+  'hod' => [
     ['dash', 'Dashboard', 'dean/dashboard', icon('home')],
     ['DEPARTMENT'],
     ['courses', 'Courses', 'dept_head/courses', icon('exam')],
@@ -149,7 +149,7 @@ $__nav = [
     ['students', 'Students', 'teacher/students', icon('users')],
     ['analytics', 'Analytics', 'teacher/analytics', icon('chart-bar')],
   ],
-  'director' => [
+  'principal' => [
     ['dash', 'Dashboard', 'director/dashboard', icon('home')],
     ['PEOPLE'],
     ['teachers', 'Teachers', 'director/teachers', icon('users')],
@@ -248,10 +248,10 @@ if (($__u['role'] ?? '') === 'teacher' && Database::scalar("SELECT COUNT(*) FROM
 }
 
 /* Director: only show faculties for university/college schools */
-if (($__u['role'] ?? '') === 'director') {
+if (($__u['role'] ?? '') === 'principal') {
     $__schoolType = Database::scalar("SELECT type FROM schools WHERE id = ?", [$__u['school_id'] ?? 0], 'school');
     if (!in_array($__schoolType, ['university', 'college'], true)) {
-        $__nav['director'] = array_values(array_filter($__nav['director'], fn($i) => count($i) === 1 || $i[2] !== 'director/faculties'));
+        $__nav['principal'] = array_values(array_filter($__nav['principal'], fn($i) => count($i) === 1 || $i[2] !== 'director/faculties'));
     }
 }
 
@@ -315,12 +315,12 @@ $__icons = [
       <a class="nav-item <?= str_starts_with($__route, 'calendar') ? 'active' : '' ?>" href="<?= url('index.php?r=calendar') ?>">
         <span class="ico"><?= icon('calendar') ?></span>Calendar
       </a>
-      <?php if (in_array(($__u['role'] ?? ''), ['student', 'sysadmin'], true)): ?>
+      <?php if (in_array(($__u['role'] ?? ''), ['student', 'ministry'], true)): ?>
       <a class="nav-item <?= str_starts_with($__route, 'gamification') ? 'active' : '' ?>" href="<?= url('index.php?r=gamification') ?>">
         <span class="ico"><?= icon('game') ?></span>Gamification
       </a>
       <?php endif; ?>
-      <?php if (($__u['role'] ?? '') === 'sysadmin'): ?>
+      <?php if (($__u['role'] ?? '') === 'ministry'): ?>
       <a class="nav-item <?= str_starts_with($__route, 'files') ? 'active' : '' ?>" href="<?= url('index.php?r=files') ?>">
         <span class="ico"><?= icon('folder') ?></span>Files
       </a>

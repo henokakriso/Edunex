@@ -29,7 +29,7 @@ if ($u['role'] === 'student' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         Database::query("UPDATE transfer_requests SET status = 'approved' WHERE id = ?", [$rid]);
         api_out(['ok' => true, 'request_id' => $rid, 'auto_approved' => true]);
     }
-    $admins = Database::all("SELECT id FROM users WHERE role = 'sysadmin'");
+    $admins = Database::all("SELECT id FROM users WHERE role = 'ministry'");
     foreach ($admins as $a) notify((int)$a['id'], 'system', 'New transfer request', $u['student_id'] . ' wants to transfer', 'admin/transfers');
     api_out(['ok' => true, 'request_id' => $rid, 'auto_approved' => false]);
 }
@@ -41,7 +41,7 @@ if ($u['role'] === 'student') {
     api_out(['ok' => true, 'requests' => $reqs]);
 }
 
-if ($u['role'] === 'sysadmin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($u['role'] === 'ministry' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $in = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $rid = (int)($in['request_id'] ?? 0);
     $action = (string)($in['action'] ?? 'approve');
@@ -59,7 +59,7 @@ if ($u['role'] === 'sysadmin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     api_out(['ok' => true]);
 }
 
-if ($u['role'] === 'sysadmin') {
+if ($u['role'] === 'ministry') {
     $reqs = Database::all(
         "SELECT t.*, s.name AS to_school, fs.name AS from_school, st.first_name, st.last_name, st.student_id
          FROM transfer_requests t JOIN schools s ON s.id = t.to_school_id JOIN schools fs ON fs.id = t.from_school_id

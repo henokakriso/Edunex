@@ -206,9 +206,9 @@ class Ctl_teacher {
     }
 
     public function run(): void {
-        $u = require_role('teacher', 'director', 'lecturer');
+        $u = require_role('teacher', 'principal', 'lecturer');
         $uid = (int)$u['id'];
-        $isDirector = $u['role'] === 'director';
+        $isDirector = $u['role'] === 'principal';
         if ($isDirector) {
             $courses = Database::all(
                 "SELECT c.id, c.title, s.name AS subject_name,
@@ -303,7 +303,7 @@ class Ctl_teacher {
 
 class Ctl_admin {
     public function run(): void {
-        require_role('sysadmin');
+        require_role('ministry');
         redirect('admin/analytics');
     }
 }

@@ -6,7 +6,7 @@
 
 class Ctl_faculties {
     public function run(): void {
-        $u = require_role('director');
+        $u = require_role('principal');
         $sid = (int)$u['school_id'];
         $schoolType = (string)Database::scalar("SELECT type FROM schools WHERE id = ?", [$sid], 'school');
         if (!in_array($schoolType, ['university', 'college'], true)) {
@@ -48,7 +48,7 @@ class Ctl_faculties {
             }
             if (isset($_POST['create_staff'])) {
                 $role = (string)($_POST['role'] ?? '');
-                if (!in_array($role, ['registrar', 'dean', 'vice_dean', 'dept_head'], true)) { flash('danger', 'Invalid role.'); redirect('director/faculties'); }
+                if (!in_array($role, ['registrar', 'dean', 'vice_dean', 'hod'], true)) { flash('danger', 'Invalid role.'); redirect('director/faculties'); }
                 $first = trim((string)($_POST['first_name'] ?? ''));
                 $last = trim((string)($_POST['last_name'] ?? ''));
                 $email = strtolower(trim((string)($_POST['email'] ?? '')));
@@ -72,7 +72,7 @@ class Ctl_faculties {
                             Database::update('faculties', [$role === 'dean' ? 'dean_id' : 'vice_dean_id' => $newId], 'id = ?', [$fid]);
                         }
                     }
-                    if ($role === 'dept_head' && (int)($_POST['department_id'] ?? 0)) {
+                    if ($role === 'hod' && (int)($_POST['department_id'] ?? 0)) {
                         $did = (int)$_POST['department_id'];
                         if (Database::one("SELECT id FROM departments WHERE id = ? AND school_id = ?", [$did, $sid])) {
                             Database::update('users', ['department_id' => $did], 'id = ?', [$newId]);

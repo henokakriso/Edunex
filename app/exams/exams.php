@@ -155,7 +155,7 @@ class Ctl_result {
         $attemptId = (int)($_GET['a'] ?? 0);
         $attempt = Database::one("SELECT * FROM exam_attempts WHERE id = ?", [$attemptId]);
         if (!$attempt) { flash('danger', 'Attempt not found.'); redirect('student/exams'); }
-        $owner = (int)$attempt['student_id'] === (int)$u['id'] || in_array($u['role'], ['admin', 'teacher'], true);
+        $owner = (int)$attempt['student_id'] === (int)$u['id'] || in_array($u['role'], ['regional', 'teacher'], true);
         if (!$owner) { http_response_code(403); die('Access denied'); }
         $exam = Database::one("SELECT e.*, c.title AS course_title FROM exams e JOIN courses c ON c.id = e.course_id WHERE e.id = ?", [$attempt['exam_id']]);
         $answers = Database::all("SELECT * FROM exam_answers WHERE attempt_id = ? ORDER BY id", [$attemptId]);

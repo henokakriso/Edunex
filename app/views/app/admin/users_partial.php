@@ -1,6 +1,6 @@
 <?php /* Admin users view — superadmin interactive list */
-$roleCls = ['admin' => 'badge-danger', 'director' => 'badge-accent', 'teacher' => 'badge-accent', 'student' => 'badge-success', 'parent' => 'badge-warning', 'guest' => 'badge-muted'];
-$roleIco = ['admin' => icon('shield'), 'director' => icon('graduation'), 'teacher' => icon('user') . '‍' . icon('school'), 'student' => icon('users-card'), 'parent' => icon('users'), 'guest' => icon('user')];
+$roleCls = ['regional' => 'badge-danger', 'principal' => 'badge-accent', 'teacher' => 'badge-accent', 'student' => 'badge-success', 'parent' => 'badge-warning', 'guest' => 'badge-muted'];
+$roleIco = ['regional' => icon('shield'), 'principal' => icon('graduation'), 'teacher' => icon('user') . '‍' . icon('school'), 'student' => icon('users-card'), 'parent' => icon('users'), 'guest' => icon('user')];
 $statusCls = ['active' => 'badge-success', 'pending' => 'badge-warning', 'suspended' => 'badge-danger', 'banned' => 'badge-danger'];
 $f = fn(string $k) => e($_GET[$k] ?? '');
 $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(array_filter(array_merge(
@@ -42,7 +42,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   </form>
   <div class="chips" style="margin-top:14px">
     <a class="ajax-nav chip <?= $role === '' && $status === '' ? 'on' : '' ?>" href="<?= e($mk('role')) ?>">All · <?= number_format($stats['total']) ?></a>
-    <?php foreach (['admin', 'director', 'teacher', 'student', 'parent'] as $r): ?>
+    <?php foreach (['regional', 'principal', 'teacher', 'student', 'parent'] as $r): ?>
       <a class="ajax-nav chip <?= $role === $r ? 'on' : '' ?>" href="<?= e($mk('role', $r)) ?>"><?= $roleIco[$r] ?> <?= ucfirst($r) ?> · <?= (int)($roleCounts[$r] ?? 0) ?></a>
     <?php endforeach; ?>
   </div>

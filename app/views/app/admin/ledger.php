@@ -81,7 +81,7 @@ $hashMask = fn(string $h) => '<span class="mono tiny hash-mask" data-hash="' . e
         </div>
         <div class="twofa-filters" id="twofa-filters">
           <button type="button" class="chip active" data-role="all">All <span class="chip-count"><?= count($staff) ?></span></button>
-          <?php $roleCounts = []; foreach ($staff as $s) { $roleCounts[$s['role']] = ($roleCounts[$s['role']] ?? 0) + 1; } foreach (['admin', 'director', 'teacher'] as $r): ?>
+          <?php $roleCounts = []; foreach ($staff as $s) { $roleCounts[$s['role']] = ($roleCounts[$s['role']] ?? 0) + 1; } foreach (['regional', 'principal', 'teacher'] as $r): ?>
             <button type="button" class="chip" data-role="<?= $r ?>"><?= e(ucfirst($r)) ?><?= $r === 'teacher' ? 's' : 's' ?><span class="chip-count"><?= (int)($roleCounts[$r] ?? 0) ?></span></button>
           <?php endforeach; ?>
           <label class="chip chip-toggle" title="Highlight staff still lacking a USB key">

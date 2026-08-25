@@ -5,7 +5,7 @@
 
 class Ctl_index {
     public function run(): void {
-        $u = require_role('sysadmin', 'teacher', 'director');
+        $u = require_role('ministry', 'teacher', 'principal');
         $uid = (int)$u['id'];
         if (isset($_GET['download'])) {
             $rid = (int)$_GET['download'];
@@ -26,7 +26,7 @@ class Ctl_index {
             "SELECT r.*, s.name AS school_name FROM reports r JOIN schools s ON s.id = r.school_id
              WHERE r.user_id = ? ORDER BY r.created_at DESC LIMIT 100", [$uid]);
         $schoolName = null;
-        if ($u['role'] === 'director') {
+        if ($u['role'] === 'principal') {
             $schoolName = (string)Database::scalar("SELECT name FROM schools WHERE id = ?", [$u['school_id']], '');
         }
         Router::render('app/reports/index', ['title' => 'Reports', 'reports' => $reports, 'school_name' => $schoolName]);
@@ -35,7 +35,7 @@ class Ctl_index {
 
 class Ctl_export {
     public function run(): void {
-        $u = require_role('sysadmin', 'teacher', 'director');
+        $u = require_role('ministry', 'teacher', 'principal');
         $uid = (int)$u['id'];
         $type = $_GET['type'] ?? 'courses';
         $format = $_GET['format'] ?? 'csv';
@@ -70,7 +70,7 @@ class Ctl_export {
                      WHERE e.course_id IN ($in) ORDER BY e.created_at DESC"),
                 default => [['error' => 'Unknown type']],
             };
-        } elseif ($role === 'director') {
+        } elseif ($role === 'principal') {
             // directors see only their own school
             $rows = match ($type) {
                 'courses' => Database::all(

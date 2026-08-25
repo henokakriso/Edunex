@@ -12,11 +12,11 @@ $limit = min(200, max(1, (int)($_GET['limit'] ?? 50)));
 
 $where = "role != 'guest'";
 $args = [];
-if ($u['role'] !== 'sysadmin') {
+if ($u['role'] !== 'ministry') {
     $where .= " AND school_id = ?";
     $args[] = $u['school_id'];
 }
-if ($role !== '' && in_array($role, ['admin', 'teacher', 'student', 'parent'], true)) {
+if ($role !== '' && in_array($role, ['regional', 'teacher', 'student', 'parent'], true)) {
     $where .= " AND role = ?";
     $args[] = $role;
 }

@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/_auth.php';
 
 $u = api_user();
-if ($u['role'] !== 'sysadmin') api_out(['ok' => false, 'error' => 'forbidden'], 403);
+if ($u['role'] !== 'ministry') api_out(['ok' => false, 'error' => 'forbidden'], 403);
 $dir = STORAGE_PATH . '/backups';
 if (!is_dir($dir)) @mkdir($dir, 0775, true);
 

@@ -83,7 +83,7 @@ function me(): ?array {
 function my_school_id(): ?int {
     $u = me();
     if (!empty($u['school_id'])) return (int)$u['school_id'];
-    if (($u['role'] ?? '') === 'admin') {
+    if (($u['role'] ?? '') === 'regional') {
         $first = Database::scalar("SELECT MIN(id) FROM schools", [], null);
         return $first ? (int)$first : null;
     }
@@ -112,8 +112,8 @@ function require_role(string ...$roles): array {
 /** Post-login landing page for the current user's role */
 function dashboard_path(): string {
     return match (me()['role'] ?? '') {
-        'sysadmin' => 'admin/dashboard', 'admin' => 'regional/dashboard', 'zonal_admin' => 'zonal/dashboard', 'woreda_admin' => 'woreda/dashboard', 'director' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
-        'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'dean/dashboard', 'dept_head' => 'dean/dashboard',
+        'ministry' => 'admin/dashboard', 'regional' => 'regional/dashboard', 'zonal' => 'zonal/dashboard', 'woreda' => 'woreda/dashboard', 'principal' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
+        'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'dean/dashboard', 'hod' => 'dean/dashboard',
         'lecturer' => 'teacher/dashboard', 'bursar' => 'university/fees/manage', 'student_affairs' => 'university/clearance/manage',
         'librarian' => 'library',
         'parent' => 'parent/dashboard', 'student' => 'student/dashboard',
@@ -260,8 +260,8 @@ function initials(?array $u): string {
 /** Role label */
 function role_label(string $r): string {
     return match ($r) {
-        'admin' => 'Administrator', 'teacher' => 'Teacher', 'registrar' => 'Registrar', 'dean' => 'Dean',
-        'vice_dean' => 'Vice Dean', 'dept_head' => 'Department Head',
+        'regional' => 'Administrator', 'teacher' => 'Teacher', 'registrar' => 'Registrar', 'dean' => 'Dean',
+        'vice_dean' => 'Vice Dean', 'hod' => 'Department Head',
         'lecturer' => 'Lecturer', 'bursar' => 'Bursar',
         'student_affairs' => 'Student Affairs', 'librarian' => 'Librarian',
         'student' => 'Student', 'parent' => 'Parent', 'guest' => 'Guest',
@@ -460,7 +460,7 @@ function permissions_for(string $role): array {
 function can(string $perm): bool {
     $u = me();
     if (!$u) return false;
-    if ($u['role'] === 'admin') return true;
+    if ($u['role'] === 'regional') return true;
     return in_array($perm, permissions_for($u['role']), true);
 }
 

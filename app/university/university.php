@@ -6,7 +6,7 @@
 
 class Ctl_university {
     public function run(): void {
-        $u = require_role('registrar', 'dean', 'vice_dean', 'dept_head', 'lecturer', 'student', 'bursar', 'student_affairs', 'librarian');
+        $u = require_role('registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'student', 'bursar', 'student_affairs', 'librarian');
         $sid = (int)$u['school_id'];
         $route = trim($_GET['r'] ?? '', '/');
         $route = str_replace('university/', '', $route);
@@ -464,7 +464,7 @@ class Ctl_university {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (isset($_POST['assign_advisor']) && in_array($u['role'], ['dean','dept_head'])) {
+            if (isset($_POST['assign_advisor']) && in_array($u['role'], ['dean','hod'])) {
                 assign_thesis_advisor($tid, (int)$_POST['advisor_id']);
                 flash('success', 'Advisor assigned.');
             }
@@ -472,11 +472,11 @@ class Ctl_university {
                 submit_thesis_chapter((int)$_POST['chapter_id'], (int)$u['id']);
                 flash('success', 'Chapter submitted for review.');
             }
-            if (isset($_POST['defense_result']) && in_array($u['role'], ['dean','dept_head'])) {
+            if (isset($_POST['defense_result']) && in_array($u['role'], ['dean','hod'])) {
                 thesis_defense_result($tid, $_POST['result'] ?? 'pass', trim((string)($_POST['notes'] ?? '')));
                 flash('success', 'Defense result recorded.');
             }
-            if (isset($_POST['schedule_defense']) && in_array($u['role'], ['dean','dept_head'])) {
+            if (isset($_POST['schedule_defense']) && in_array($u['role'], ['dean','hod'])) {
                 schedule_defense($tid, (string)($_POST['defense_date'] ?? ''));
                 flash('success', 'Defense scheduled.');
             }
@@ -488,7 +488,7 @@ class Ctl_university {
             "SELECT tc.*, CONCAT(u.first_name,' ',u.last_name) AS member_name
              FROM thesis_committee tc JOIN users u ON u.id = tc.member_id
              WHERE tc.thesis_id = ?", [$tid]);
-        $lecturers = Database::all("SELECT id, CONCAT(first_name,' ',last_name) AS name FROM users WHERE school_id = ? AND role IN ('lecturer','dept_head','dean') ORDER BY last_name", [$sid]);
+        $lecturers = Database::all("SELECT id, CONCAT(first_name,' ',last_name) AS name FROM users WHERE school_id = ? AND role IN ('lecturer','hod','dean') ORDER BY last_name", [$sid]);
         Router::render('app/university/thesis_detail', [
             'title' => $thesis['title'] ?: 'Thesis', 'thesis' => $thesis,
             'chapters' => $chapters, 'committee' => $committee, 'lecturers' => $lecturers,

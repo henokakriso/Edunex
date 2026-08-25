@@ -7,14 +7,14 @@
 /* =============== ADMIN: dashboard =============== */
 class Ctl_dashboard {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $dfCo = demo_filter('c');
         $stats = [
             'schools' => (int)Database::scalar("SELECT COUNT(*) FROM schools", [], 0),
             'students' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'student'", [], 0),
             'teachers' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'teacher'", [], 0),
             'parents' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'parent'", [], 0),
-            'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'director'", [], 0),
+            'directors' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'principal'", [], 0),
             'active_users' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE status = 'active'", [], 0),
             'online' => (int)Database::scalar("SELECT COUNT(DISTINCT user_id) FROM login_history WHERE status = 'success' AND created_at > NOW() - INTERVAL 15 MINUTE", [], 0),
             'courses' => (int)Database::scalar("SELECT COUNT(*) FROM courses c WHERE 1=1 $dfCo", [], 0),
@@ -30,7 +30,7 @@ class Ctl_dashboard {
             'storage' => (int)Database::scalar("SELECT COALESCE(SUM(size),0) FROM files WHERE deleted_at IS NULL AND is_folder = 0", [], 0),
             'ai_msgs' => (int)Database::scalar("SELECT COUNT(*) FROM ai_messages", [], 0),
             'ai_users' => (int)Database::scalar("SELECT COUNT(DISTINCT ac.user_id) FROM ai_chats ac", [], 0),
-            'admins' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'admin'", [], 0),
+            'admins' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role = 'regional'", [], 0),
             'enrollments' => (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments ce WHERE 1=1", [], 0),
         ];
 
@@ -39,8 +39,8 @@ class Ctl_dashboard {
             "SELECT u.id, CONCAT(u.first_name,' ',u.last_name) AS name, u.email, u.last_login,
                     (SELECT COUNT(*) FROM schools s WHERE s.admin_id = u.id) AS schools,
                     (SELECT COUNT(*) FROM users st JOIN schools s ON s.id = st.school_id WHERE s.admin_id = u.id AND st.role='student') AS students,
-                    (SELECT COUNT(*) FROM users d JOIN schools s ON s.id = d.school_id WHERE s.admin_id = u.id AND d.role='director') AS directors
-             FROM users u WHERE u.role = 'admin' ORDER BY schools DESC");
+                    (SELECT COUNT(*) FROM users d JOIN schools s ON s.id = d.school_id WHERE s.admin_id = u.id AND d.role='principal') AS directors
+             FROM users u WHERE u.role = 'regional' ORDER BY schools DESC");
         foreach ($adminPerf as &$ap) {
             $ap['over'] = (int)$ap['schools'] > 15;
         }
@@ -156,7 +156,7 @@ class Ctl_dashboard {
 /* =============== ADMIN: users =============== */
 class Ctl_users {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $role = $_GET['role'] ?? '';
         $status = $_GET['status'] ?? '';
         $q = trim($_GET['q'] ?? '');
@@ -170,7 +170,7 @@ class Ctl_users {
 
         $where = "1=1";
         $args = [];
-        if (in_array($role, ['admin', 'director', 'teacher', 'student', 'parent', 'guest'], true)) { $where .= " AND us.role = ?"; $args[] = $role; }
+        if (in_array($role, ['regional', 'principal', 'teacher', 'student', 'parent', 'guest'], true)) { $where .= " AND us.role = ?"; $args[] = $role; }
         if (in_array($status, ['active', 'pending', 'suspended', 'banned'], true)) { $where .= " AND us.status = ?"; $args[] = $status; }
         if ($q !== '') { $where .= " AND (us.first_name LIKE ? OR us.last_name LIKE ? OR us.email LIKE ? OR us.student_id LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }
 
@@ -212,10 +212,10 @@ class Ctl_users {
                 if (Database::one("SELECT id FROM users WHERE email = ?", [$email])) { flash('danger', 'Email already in use.'); redirect('admin/users' . $suffix); }
                 $schoolId = (int)($_POST['school_id'] ?? 0);
                 if (!$schoolId) $schoolId = (int)$u['school_id'];
-                if (!$schoolId && in_array($role2, ['director', 'teacher', 'student', 'parent'], true)) {
+                if (!$schoolId && in_array($role2, ['principal', 'teacher', 'student', 'parent'], true)) {
                     flash('danger', 'Select the school for this account.'); redirect('admin/users' . $suffix);
                 }
-                if ($role2 === 'director' && $u['school_id'] !== null) {
+                if ($role2 === 'principal' && $u['school_id'] !== null) {
                     flash('danger', 'Only the Super Admin can create directors.'); redirect('admin/users' . $suffix);
                 }
                 $data = [
@@ -297,7 +297,7 @@ class Ctl_users {
 /* =============== ADMIN: user detail =============== */
 class Ctl_user {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $id = (int)($_GET['id'] ?? 0);
         $target = Database::one("SELECT us.*, s.name AS school_name FROM users us JOIN schools s ON s.id = us.school_id WHERE us.id = ?", [$id]);
         if (!$target) { flash('danger', 'User not found.'); redirect('admin/users'); }
@@ -359,7 +359,7 @@ class Ctl_user {
 /* =============== ADMIN: schools =============== */
 class Ctl_schools {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $q = trim($_GET['q'] ?? '');
         $type = $_GET['type'] ?? '';
         $status = $_GET['status'] ?? '';
@@ -387,7 +387,7 @@ class Ctl_schools {
                 (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id) AS total_users,
                 (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id AND us.role = 'student') AS students,
                 (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id AND us.role = 'teacher') AS teachers,
-                (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id AND us.role = 'director') AS directors,
+                (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id AND us.role = 'principal') AS directors,
                 (SELECT COUNT(*) FROM users us WHERE us.school_id = s.id AND us.role = 'parent') AS parents,
                 (SELECT COUNT(*) FROM courses c WHERE c.school_id = s.id) AS courses,
                 (SELECT COUNT(*) FROM departments d WHERE d.school_id = s.id) AS departments,
@@ -462,7 +462,7 @@ class Ctl_schools {
 /* =============== ADMIN: school profile =============== */
 class Ctl_school {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $id = (int)($_GET['id'] ?? 0);
         $school = Database::one("SELECT * FROM schools WHERE id = ?", [$id]);
         if (!$school) { flash('danger', 'School not found.'); redirect('admin/schools'); }
@@ -486,7 +486,7 @@ class Ctl_school {
             redirect('admin/school&id=' . $id);
         }
 
-        $directors = Database::all("SELECT id, CONCAT(first_name, ' ', last_name) AS name, email, status, last_login FROM users WHERE role = 'director' AND school_id = ?", [$id]);
+        $directors = Database::all("SELECT id, CONCAT(first_name, ' ', last_name) AS name, email, status, last_login FROM users WHERE role = 'principal' AND school_id = ?", [$id]);
         $vice = Database::all("SELECT id, CONCAT(first_name, ' ', last_name) AS name, email FROM users WHERE role = 'teacher' AND school_id = ? AND department_id IS NOT NULL AND status='active' ORDER BY last_login DESC LIMIT 3", [$id]);
         $teachers = Database::all("SELECT id, CONCAT(first_name, ' ', last_name) AS name, email, status FROM users WHERE role = 'teacher' AND school_id = ? ORDER BY created_at DESC LIMIT 12", [$id]);
         $students = Database::all("SELECT id, CONCAT(first_name, ' ', last_name) AS name, student_id, status, enrollment_status FROM users WHERE role = 'student' AND school_id = ? ORDER BY created_at DESC LIMIT 12", [$id]);
@@ -565,7 +565,7 @@ class Ctl_school {
 /* =============== ADMIN: departments =============== */
 class Ctl_departments {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $depts = Database::all("SELECT d.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.department_id = d.id) AS members FROM departments d JOIN schools s ON s.id = d.school_id ORDER BY d.status = 'archived', d.name");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -615,7 +615,7 @@ class Ctl_departments {
 /* =============== ADMIN: department detail =============== */
 class Ctl_department {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $id = (int)($_GET['id'] ?? 0);
         $dept = Database::one("SELECT d.*, s.name AS school_name FROM departments d JOIN schools s ON s.id = d.school_id WHERE d.id = ?", [$id]);
         if (!$dept) { flash('danger', 'Department not found.'); redirect('admin/departments'); }
@@ -655,7 +655,7 @@ class Ctl_department {
 /* =============== ADMIN: subjects =============== */
 class Ctl_subjects {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $depts = Database::all("SELECT id, name, school_id FROM departments WHERE status = 'active' ORDER BY name");
         $subjects = Database::all("SELECT s.*, sc.name AS school_name, d.name AS dept_name FROM subjects s JOIN schools sc ON sc.id = s.school_id LEFT JOIN departments d ON d.id = s.department_id ORDER BY s.status = 'archived', s.name");
@@ -705,7 +705,7 @@ class Ctl_subjects {
 /* =============== ADMIN: student groups =============== */
 class Ctl_groups {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $groups = Database::all("SELECT g.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.group_id = g.id) AS members FROM student_groups g JOIN schools s ON s.id = g.school_id ORDER BY g.name");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -731,7 +731,7 @@ class Ctl_groups {
 /* =============== ADMIN: academic years =============== */
 class Ctl_years {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $years = Database::all("SELECT y.*, s.name AS school_name FROM academic_years y JOIN schools s ON s.id = y.school_id ORDER BY y.start_date DESC");
         foreach ($years as &$y) {
@@ -769,7 +769,7 @@ class Ctl_years {
 /* =============== ADMIN: courses =============== */
 class Ctl_courses {
     public function run(): void {
-        $u = require_role('sysadmin');
+        $u = require_role('ministry');
         $schoolId = (int)($_GET['school'] ?? 0);
         $courses = Database::all(
             "SELECT c.*, s.name AS school_name, u.first_name AS tfirst, u.last_name AS tlast,

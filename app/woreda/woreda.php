@@ -25,7 +25,7 @@ class WoredaScope {
 
 class Ctl_woreda {
     public function run(): void {
-        $u = require_role('woreda_admin');
+        $u = require_role('woreda');
         $action = trim($_GET['r'] ?? '', '/');
         $route = str_replace('woreda/', '', $action);
         match ($route) {
@@ -33,7 +33,7 @@ class Ctl_woreda {
             'schools' => $this->schools($u),
             'school' => $this->school($u),
             'directors' => $this->directors($u),
-            'director' => $this->director($u),
+            'principal' => $this->director($u),
             'analytics' => $this->analytics($u),
             'announcements' => $this->announcements($u),
             'audit' => $this->audit($u),
@@ -55,7 +55,7 @@ class Ctl_woreda {
             'schools' => count($schools),
             'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id IN ($idList)"),
             'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id IN ($idList)"),
-            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id IN ($idList)"),
+            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id IN ($idList)"),
             'courses' => $this->stat("SELECT COUNT(*) FROM courses WHERE school_id IN ($idList)"),
             'enroll30' => $this->stat("SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id IN ($idList) AND ce.enrolled_at>=NOW()-INTERVAL 30 DAY"),
             'pending_transfers' => $this->stat("SELECT COUNT(*) FROM transfer_requests WHERE status='pending' AND to_school_id IN ($idList)"),
@@ -67,7 +67,7 @@ class Ctl_woreda {
                 'school' => $sc,
                 'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id=?", [$sid]),
                 'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=?", [$sid]),
-                'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id=?", [$sid]),
+                'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=?", [$sid]),
             ];
         }
         Router::render('app/woreda/dashboard', [
@@ -90,7 +90,7 @@ class Ctl_woreda {
         }
         $rows = Database::all(
             "SELECT sc.*,
-                    (SELECT COUNT(*) FROM users WHERE role='director' AND school_id=sc.id) AS directors,
+                    (SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=sc.id) AS directors,
                     (SELECT COUNT(*) FROM users WHERE role='student' AND school_id=sc.id) AS students,
                     (SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=sc.id) AS teachers
              FROM schools sc WHERE sc.woreda_id=? ORDER BY sc.status, sc.name",
@@ -105,12 +105,12 @@ class Ctl_woreda {
         $stats = [
             'students' => $this->stat("SELECT COUNT(*) FROM users WHERE role='student' AND school_id=?", [$id]),
             'teachers' => $this->stat("SELECT COUNT(*) FROM users WHERE role='teacher' AND school_id=?", [$id]),
-            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='director' AND school_id=?", [$id]),
+            'directors' => $this->stat("SELECT COUNT(*) FROM users WHERE role='principal' AND school_id=?", [$id]),
             'courses' => $this->stat("SELECT COUNT(*) FROM courses WHERE school_id=?", [$id]),
         ];
         $recent = Database::all(
             "SELECT CONCAT(u.first_name,' ',u.last_name) AS name, u.role, u.status, u.last_login
-             FROM users u WHERE u.school_id=? AND u.role IN ('teacher','director') ORDER BY u.last_login DESC LIMIT 8", [$id]);
+             FROM users u WHERE u.school_id=? AND u.role IN ('teacher','principal') ORDER BY u.last_login DESC LIMIT 8", [$id]);
         Router::render('app/woreda/school', ['title' => $school['name'], 'school' => $school, 'stats' => $stats, 'recent' => $recent]);
     }
 
@@ -128,7 +128,7 @@ class Ctl_woreda {
                 }
                 $pass = ($_POST['password'] ?? '') !== '' ? (string)$_POST['password'] : random_password();
                 Database::insert('users', [
-                    'school_id' => $schoolId, 'role' => 'director',
+                    'school_id' => $schoolId, 'role' => 'principal',
                     'first_name' => trim((string)$_POST['first_name']),
                     'last_name' => trim((string)$_POST['last_name']),
                     'email' => $email, 'phone' => trim((string)($_POST['phone'] ?? '')),
@@ -141,7 +141,7 @@ class Ctl_woreda {
             }
             if (isset($_POST['toggle_director'])) {
                 $did = (int)($_POST['id'] ?? 0);
-                $d = Database::one("SELECT * FROM users WHERE id=? AND role='director'", [$did]);
+                $d = Database::one("SELECT * FROM users WHERE id=? AND role='principal'", [$did]);
                 if (!$d) { flash('danger', 'Not found.'); redirect('woreda/directors'); }
                 WoredaScope::requireSchool($uid, (int)$d['school_id']);
                 $ns = ($d['status'] ?? 'active') === 'active' ? 'suspended' : 'active';
@@ -153,7 +153,7 @@ class Ctl_woreda {
         $rows = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.email, u.status, u.last_login, s.name AS school_name
              FROM users u JOIN schools s ON s.id=u.school_id
-             WHERE u.role='director' AND u.school_id IN (".WoredaScope::idList($uid).")
+             WHERE u.role='principal' AND u.school_id IN (".WoredaScope::idList($uid).")
              ORDER BY s.name", []);
         Router::render('app/woreda/directors', ['title' => 'Directors', 'rows' => $rows, 'schools' => $schools]);
     }
@@ -161,7 +161,7 @@ class Ctl_woreda {
     private function director(array $u): void {
         $uid = (int)$u['id'];
         $id = (int)($_GET['id'] ?? 0);
-        $d = Database::one("SELECT u.*, s.name AS school_name FROM users u JOIN schools s ON s.id=u.school_id WHERE u.id=? AND u.role='director'", [$id]);
+        $d = Database::one("SELECT u.*, s.name AS school_name FROM users u JOIN schools s ON s.id=u.school_id WHERE u.id=? AND u.role='principal'", [$id]);
         if (!$d) { flash('danger', 'Not found.'); redirect('woreda/directors'); }
         WoredaScope::requireSchool($uid, (int)$d['school_id']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -174,7 +174,7 @@ class Ctl_woreda {
             }
         }
         $activity = Database::all("SELECT * FROM activity_log WHERE user_id=? ORDER BY created_at DESC LIMIT 20", [$id]);
-        Router::render('app/woreda/director', ['title' => $d['first_name'].' '.$d['last_name'], 'director' => $d, 'activity' => $activity]);
+        Router::render('app/woreda/director', ['title' => $d['first_name'].' '.$d['last_name'], 'principal' => $d, 'activity' => $activity]);
     }
 
     private function analytics(array $u): void {
