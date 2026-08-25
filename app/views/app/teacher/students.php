@@ -123,7 +123,7 @@ $reExam = fn($s) => ($s['enrollment_status'] ?? 'active') === 'inactive';
 
       <div id="pm-current"></div>
 
-      <div style="border-top:1px solid var(--border);margin:2px 0"></div>
+      <div style="height:16px"></div>
 
       <form method="post" class="flex-col gap-8" id="pm-link-form">
         <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">

@@ -49,7 +49,7 @@
       <?= $lesson['content'] ?: '<p class="muted">The teacher hasn\'t added content for this lesson yet.</p>' ?>
     </div>
 
-    <div class="flex-between" style="margin-top:26px;padding-top:18px;border-top:1px solid var(--border)">
+    <div class="flex-between" style="margin-top:26px;padding-top:18px">
       <?php
         $prevL = null; $nextL = null;
         $ids = array_keys($allLessons);

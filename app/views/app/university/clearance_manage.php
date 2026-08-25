@@ -24,7 +24,7 @@
     <?php if (!empty($items[$r['id']])): ?>
       <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
         <?php foreach ($items[$r['id']] as $it): ?>
-          <div class="flex-row gap-6" style="align-items:center;border-top:1px solid var(--border);padding-top:6px">
+          <div class="flex-row gap-6" style="align-items:center;margin-top:8px;padding-top:6px">
             <span style="width:120px;font-weight:600;text-transform:capitalize"><?= e($it['department']) ?></span>
             <?php if ($it['status'] === 'pending'): ?>
               <form method="post" action="<?= e(url('university/clearance/manage')) ?>" class="flex-row gap-4" style="flex:1">

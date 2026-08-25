@@ -33,7 +33,7 @@
         </div>
         <form method="post" class="inline"><?= csrf_field() ?><button class="btn btn-sm <?= $y['is_current'] ? 'btn-ghost' : 'btn-success' ?>" name="set_current" value="<?= (int)$y['id'] ?>"><?= $y['is_current'] ? '✓ Current' : 'Set current' ?></button></form>
       </div>
-      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
+      <div style="margin-top:16px;padding-top:12px">
         <?php foreach ($y['semesters'] as $sem): ?>
           <div class="list-row" style="padding:6px 0">
             <span class="small flex-1"><b><?= e($sem['name']) ?></b> <span class="faint">· <?= $sem['start_date'] ? e(date('M j', strtotime($sem['start_date']))) . ' → ' . e(date('M j', strtotime($sem['end_date']))) : '' ?></span></span>

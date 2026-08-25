@@ -27,7 +27,7 @@
           <span class="faint"><?= (int)$rows ?></span>
         </div>
       <?php endforeach; ?>
-      <hr style="border:none;border-top:1px solid var(--border)">
+      <div style="height:16px"></div>
       <div class="flex-between small"><b>Total rows</b><b><?= (int)$total ?></b></div>
     </div>
   </div>

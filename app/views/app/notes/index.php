@@ -69,7 +69,7 @@ if (isset($_GET['edit'])) {
             <?php if ($n['lesson_title']): ?><span class="tiny faint"> → <?= e($n['lesson_title']) ?></span><?php endif; ?>
           </div>
           <div class="flex gap-6">
-            <form method="post" class="inline"><input type="hidden" name="action" value="pin"><input type="hidden" name="note_id" value="<?= (int)$n['id'] ?>"><button class="btn btn-sm" title="Pin"><?= $n['pinned'] ? '📌' : '📍' ?></button></form>
+            <form method="post" class="inline"><input type="hidden" name="action" value="pin"><input type="hidden" name="note_id" value="<?= (int)$n['id'] ?>"><button class="btn btn-sm" title="Pin"><?= $n['pinned'] ? icon('star') : icon('pin') ?></button></form>
             <a class="btn btn-sm" href="<?= url('notes&edit=' . $n['id'] . ($filterCourse ? '&course=' . $filterCourse : '')) ?>">Edit</a>
             <form method="post" class="inline" data-confirm="Delete this note?"><input type="hidden" name="action" value="delete"><input type="hidden" name="note_id" value="<?= (int)$n['id'] ?>"><button class="btn btn-sm btn-danger"><?= icon('trash') ?></button></form>
           </div>

@@ -216,7 +216,7 @@
 .temail:hover { color:var(--accent); text-decoration:underline; }
 .tlogin { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-faint); margin:0; }
 .tlogin .ico { width:12px; height:12px; }
-.tmetrics { display:flex; align-items:center; padding:12px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border); }
+.tmetrics { display:flex; align-items:center; padding:12px 0; margin-top:8px; }
 .tm { flex:1; display:flex; align-items:center; gap:7px; font-size:12.5px; }
 .tm + .tm { border-left:1px dashed var(--border); padding-left:16px; }
 .tm .ico { width:15px; height:15px; color:var(--text-faint); flex:none; }
@@ -226,7 +226,7 @@
 .tchip { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:600; }
 .tchip-none { display:inline-flex; align-items:center; gap:6px; border:1px dashed var(--border); color:var(--text-faint); border-radius:999px; padding:4px 12px; font-size:12px; }
 .tchip-none .ico { width:13px; height:13px; }
-.tactions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding-top:13px; border-top:1px solid color-mix(in srgb,var(--border) 65%,transparent); margin-top:auto; }
+.tactions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding-top:13px; margin-top:auto; }
 .tactions form { margin-left:auto; }
 .tactions .btn-danger { background:transparent; border:1px solid color-mix(in srgb,var(--danger) 25%,transparent); color:var(--danger); }
 .tactions .btn-danger:hover { background:var(--danger-soft); border-color:var(--danger); }

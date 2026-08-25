@@ -82,7 +82,7 @@ $statusMeta = ['submitted' => ['Awaiting grade', 'badge-warning'], 'graded' => [
       <div class="flex-between"><span class="small faint">Submissions</span><b class="small"><?= $subs ? count($subs) : '—' ?></b></div>
     </div>
     <?php if ($subs): ?>
-      <hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+      <div style="height:16px"></div>
       <h3 class="card-title" style="margin-top:0"><?= icon('users') ?> All submissions</h3>
       <?php foreach ($subs as $s2): $sm = $statusMeta[$s2['status']] ?? $statusMeta['submitted']; ?>
         <div class="list-row" style="padding:8px 0">

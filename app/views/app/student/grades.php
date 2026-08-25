@@ -90,7 +90,7 @@ th{background:#f8f9fa;font-weight:600;color:#444}.row-num{color:#999;width:36px;
 @media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}}
 </style></head><body>
 <div class="viewer-bar"><h1>Report Card — <?= e($__u['first_name'] . ' ' . $__u['last_name']) ?></h1>
-<div class="btns"><button class="btn-secondary" onclick="history.back()">← Back</button><a href="javascript:window.print()">🖨 Print</a><a href="javascript:downloadPDF()">⬇ Download PDF</a></div></div>
+<div class="btns"><button class="btn-secondary" onclick="history.back()">Back</button><a href="javascript:window.print()">Print</a><a href="javascript:downloadPDF()">Download PDF</a></div></div>
 <div class="report">
 <div class="report-header">
 <h2><?= e(setting('site_name') ?? 'Edunex') ?> — Report Card</h2>

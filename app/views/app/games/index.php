@@ -195,7 +195,7 @@ $mismatched = [];
           clearInterval(timer); started = false;
           document.getElementById('qr-board').innerHTML =
             '<div style="text-align:center;padding:30px">' +
-            '<h2>🏁 Race Over!</h2>' +
+            '<h2>Race Over!</h2>' +
             '<p class="small" style="margin:12px 0">Final Score: <b>' + score + '</b></p>' +
             '<button class="btn btn-primary" onclick="startRace()">Race Again</button></div>';
           document.getElementById('qr-start').style.display = '';

@@ -30,14 +30,14 @@ $cards = [
     <p class="sub">Executive control center · platform-wide</p>
   </div>
   <div class="flex gap-8">
-    <a class="btn btn-primary" href="<?= e(url('admin/users')) ?>">+ New user</a>
+    <a class="btn btn-primary" href="<?= e(url('admin/users')) ?>"><?= icon('user') ?> New user</a>
     <a class="btn btn-ghost" href="<?= e(url('admin/announcements')) ?>"><?= icon('megaphone') ?> Announce</a>
   </div>
 </div>
 
-<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px">
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px">
   <?php foreach ($cards as [$label, $val, $icon, $link]): ?>
-    <a class="card stat-card" href="<?= e(url($link)) ?>" style="padding:16px 14px;transition:transform .15s ease,box-shadow .15s ease">
+    <a class="card stat-card" href="<?= e(url($link)) ?>" style="padding:16px 14px;transition:transform .15s ease,box-shadow .15s ease;border:1px solid var(--border)">
       <div class="stat-icon" style="font-size:22px"><?= $icon ?></div>
       <div>
         <div class="stat-value" style="font-size:1.5rem"><?= is_int($val) ? (int)$val : e($val) ?></div>
@@ -48,26 +48,26 @@ $cards = [
 </div>
 
 <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('trend-up') ?> Student &amp; teacher growth</h3>
-    <div id="growth-chart" ></div></canvas>
+    <div id="growth-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('school') ?> School growth</h3>
-    <div id="school-chart" ></div></canvas>
+    <div id="school-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('key') ?> Daily logins — 30 days</h3>
-    <div id="login-chart" ></div></canvas>
+    <div id="login-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('doc') ?> Attendance trend — 30 days</h3>
-    <div id="attendance-chart" ></div></canvas>
+    <div id="attendance-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('users') ?> User roles</h3>
     <div class="flex gap-16" style="align-items:center;flex-wrap:wrap">
-      <div id="role-chart" width="120" ></div></canvas>
+      <div id="role-chart" width="120"></div>
       <div class="flex-col gap-4" style="flex:1;min-width:140px">
         <?php foreach ($roleDist as $i => $rd): ?>
           <div class="flex gap-6 small" style="align-items:center">
@@ -79,22 +79,22 @@ $cards = [
       </div>
     </div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('chart-bar') ?> Grade distribution</h3>
-    <div id="grade-chart" ></div></canvas>
+    <div id="grade-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('calendar') ?> Monthly registrations</h3>
-    <div id="reg-chart" ></div></canvas>
+    <div id="reg-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('check-circle') ?> Course completion rate</h3>
-    <div id="comp-chart" ></div></canvas>
+    <div id="comp-chart"></div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('refresh') ?> Transfer statistics</h3>
     <div class="flex gap-16" style="align-items:center;flex-wrap:wrap">
-      <div id="transfer-chart" width="120" ></div></canvas>
+      <div id="transfer-chart" width="120"></div>
       <div class="flex-col gap-4" style="flex:1;min-width:140px">
         <?php foreach ($tLabels as $i => $tl): ?>
           <div class="flex gap-6 small" style="align-items:center">
@@ -106,17 +106,17 @@ $cards = [
       </div>
     </div>
   </div>
-  <div class="card">
+  <div class="card" style="padding:22px">
     <h3 class="card-title" style="margin-top:0"><?= icon('clock') ?> Platform activity — last 7 days</h3>
-    <div id="activity-chart" ></div></canvas>
+    <div id="activity-chart"></div>
   </div>
 </div>
 
-<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-top:20px">
-  <div class="card">
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-top:24px">
+  <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('school') ?> Schools</h3>
     <?php foreach ($schoolStats as $s): ?>
-      <a class="list-row" href="<?= e(url('admin/school&id=' . $s['id'])) ?>" style="padding:9px 0;text-decoration:none">
+      <a class="list-row" href="<?= e(url('admin/school&id=' . $s['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
         <div class="avatar" style="background:var(--accent-soft)"><?= icon('school') ?></div>
         <div class="flex-1">
           <b class="small"><?= e($s['name']) ?> <span class="tiny faint">(<?= e($s['code']) ?>)</span></b>
@@ -126,10 +126,10 @@ $cards = [
       </a>
     <?php endforeach; ?>
   </div>
-  <div class="card">
+  <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('spark') ?> Recent signups</h3>
     <?php foreach ($newUsers as $nu): ?>
-      <a class="list-row" href="<?= e(url('admin/user&id=' . $nu['id'])) ?>" style="padding:8px 0;text-decoration:none">
+      <a class="list-row" href="<?= e(url('admin/user&id=' . $nu['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
         <div class="avatar"><?= e(mb_substr((string)$nu['name'], 0, 1)) ?></div>
         <div class="flex-1 small">
           <b><?= e($nu['name']) ?></b>
@@ -138,10 +138,10 @@ $cards = [
       </a>
     <?php endforeach; ?>
   </div>
-  <div class="card">
+  <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('note') ?> Recent activity</h3>
     <?php foreach (array_slice($activity, 0, 8) as $a): ?>
-      <div class="list-row" style="padding:8px 0">
+      <div class="list-row" style="padding:10px 12px;margin:4px 0;border-radius:10px">
         <div class="flex-1 small">
           <b><?= e($a['user_name'] ?: 'System') ?></b> — <?= e($a['description']) ?>
           <p class="tiny faint"><?= e($a['action']) ?> · <?= e(time_ago($a['created_at'])) ?></p>
@@ -149,22 +149,22 @@ $cards = [
       </div>
     <?php endforeach; ?>
   </div>
-  <div class="card">
+  <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('chain') ?> Blockchain integrity</h3>
     <p class="tiny faint" style="margin-top:-4px">Hash-chained ledger per school — grades, attendance & certificates</p>
     <?php foreach ($ledger as $lg): ?>
-      <a class="list-row" href="<?= e(url('admin/ledger&school=' . $lg['id'])) ?>" style="padding:8px 0;text-decoration:none">
+      <a class="list-row" href="<?= e(url('admin/ledger&school=' . $lg['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
         <div class="flex-1 small"><b><?= e($lg['school']) ?></b><p class="tiny faint"><?= (int)$lg['entries'] ?> chained records</p></div>
         <span class="badge <?= $lg['ok'] ? 'badge-success' : 'badge-danger' ?>"><?= $lg['ok'] ? icon('check-circle') . ' INTACT' : icon('ban-circle') . ' BROKEN #' . (int)$lg['broken_at'] ?></span>
       </a>
     <?php endforeach; ?>
     <?php if (!$ledger): ?><p class="muted small">No schools yet.</p><?php endif; ?>
   </div>
-  <div class="card">
+  <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('globe') ?> Regional admin performance</h3>
     <p class="tiny faint" style="margin-top:-4px">Capacity: 15 schools per admin · workload balance recommendations</p>
     <?php foreach ($adminPerf as $ap): ?>
-      <a class="list-row" href="<?= e(url('admin/user&id=' . (int)$ap['id'])) ?>" style="padding:8px 0;text-decoration:none">
+      <a class="list-row" href="<?= e(url('admin/user&id=' . (int)$ap['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
         <div class="avatar" style="background:var(--accent-soft)"><?= icon('globe') ?></div>
         <div class="flex-1 small">
           <b><?= e($ap['name']) ?></b>

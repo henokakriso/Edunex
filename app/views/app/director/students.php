@@ -96,7 +96,7 @@
 .sname { font-size:15px; font-weight:700; letter-spacing:-.15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .semail { font-size:12.5px; color:var(--text-dim); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .semail:hover { color:var(--accent); text-decoration:underline; }
-.smeta { display:flex; flex-wrap:wrap; gap:6px 16px; padding:10px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border); }
+.smeta { display:flex; flex-wrap:wrap; gap:6px 16px; padding:10px 0; margin-top:8px; }
 .smi { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim); }
 .smi .ico { width:13px; height:13px; color:var(--text-faint); }
 .smetrics { display:flex; align-items:center; }
@@ -105,7 +105,7 @@
 .sm .ico { width:15px; height:15px; color:var(--text-faint); flex:none; }
 .sm b { color:var(--text); font-size:15px; line-height:1; }
 .sm span { font-size:12px; color:var(--text-faint); }
-.sactions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding-top:13px; border-top:1px solid color-mix(in srgb,var(--border) 65%,transparent); margin-top:auto; }
+.sactions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding-top:13px; margin-top:auto; }
 .sactions form:last-child { margin-left:auto; }
 .info-bar { display:flex; flex-direction:column; gap:12px; margin-top:20px; padding:18px 22px; border:1px solid color-mix(in srgb,var(--info) 35%,var(--border)); border-radius:16px; background:linear-gradient(180deg,color-mix(in srgb,var(--info) 7%,transparent),transparent); }
 .info-bar > b { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--info); }

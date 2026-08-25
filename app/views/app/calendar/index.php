@@ -160,10 +160,10 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
       '<span class="badge" style="margin-top:8px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:color-mix(in srgb, ' + (colors[ev.type] || 'var(--muted)') + ' 15%, transparent);color:' + (colors[ev.type] || 'var(--muted)') + '">' + typeTxt + '</span>' +
       (ev.description ? '<p style="margin:10px 0">' + escapeHtml(ev.description) + '</p>' : '<p class="muted small" style="margin-top:10px">No description.</p>') +
       '<div class="tiny faint" style="margin-top:12px;line-height:1.7">' +
-      '<div>🗓 ' + (ev.all_day ? 'All day · ' + fmt(ev.start).split(',')[0] : fmt(ev.start) + (ev.end ? ' → ' + fmt(ev.end) : '')) + '</div>' +
-      (ev.location ? '<div>📍 ' + escapeHtml(ev.location) + '</div>' : '') +
+      '<div>' + (ev.all_day ? 'All day · ' + fmt(ev.start).split(',')[0] : fmt(ev.start) + (ev.end ? ' → ' + fmt(ev.end) : '')) + '</div>' +
+      (ev.location ? '<div>' + escapeHtml(ev.location) + '</div>' : '') +
       '</div>' +
-      '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '<div style="margin-top:14px;padding-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
       (ev.creator
         ? '<span style="font-size:14px"><b>' + escapeHtml(ev.creator.name) + '</b> <span class="tiny faint">· ' + escapeHtml(ev.creator.role) + ' · created this event</span></span>' +
           '<button type="button" class="btn btn-sm btn-ghost" onclick="openProfileDrawer(' + ev.creator.id + ')">' + escapeHtml('View profile') + '</button>'
@@ -190,7 +190,7 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 
   function build(p) {
     const b = roleBadge[p.role_key] || 'badge muted';
-    const school = p.school ? '<div class="profile-drawer-school"><div class="avatar" style="background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent)">🏫</div>' +
+    const school = p.school ? '<div class="profile-drawer-school"><div class="avatar" style="background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 13 9-6 9 6"/><path d="M6 11v8h12v-8"/><path d="M6 19h12M10 15h4"/></svg></div>' +
       '<div><b style="font-size:14px">' + escapeHtml(p.school.name) + '</b>' +
       '<p class="tiny faint">' + escapeHtml(typeName[p.school.type] || p.school.type) + (p.school.city ? ' · ' + escapeHtml(p.school.city) : '') + '</p>' +
       (p.school.address ? '<p class="tiny faint">' + escapeHtml(p.school.address) + '</p>' : '') + '</div></div>' : '<p class="muted small">Not assigned to any school.</p>';

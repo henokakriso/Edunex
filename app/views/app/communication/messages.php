@@ -27,7 +27,7 @@
       <?php endforeach; ?>
       <?php if (!$convs): ?><p class="muted small" style="padding:10px">No conversations yet. Start one with a classmate, teacher or a user from another school.</p><?php endif; ?>
     </div>
-    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
+    <div style="padding-top:12px;margin-top:10px">
       <div class="flex gap-8">
         <input class="input flex-1" id="msg-people-search" type="search" placeholder="Find someone to message…" autocomplete="off">
         <button class="btn btn-sm" id="msg-people-go" type="button"><?= icon('chat') ?> Open</button>
@@ -59,7 +59,7 @@
         <?php endforeach; ?>
         <?php if (!$messages): ?><p class="muted small" style="text-align:center;padding:30px">Say hi <?= icon('hand') ?></p><?php endif; ?>
       </div>
-      <form method="post" class="flex gap-8" style="border-top:1px solid var(--border);padding-top:12px">
+      <form method="post" class="flex gap-8" style="padding-top:12px">
         <?= csrf_field() ?>
         <input type="hidden" name="conv_id" value="<?= (int)$open['id'] ?>">
         <input class="input flex-1" name="body" placeholder="Type a message…" autofocus required>

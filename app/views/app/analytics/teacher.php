@@ -115,7 +115,7 @@
                 <span class="tiny faint" style="width:40px;text-align:right"><?= round((float)($pctBy[$c['title']] ?? 0), 1) ?>%</span>
               </a>
             <?php endforeach; ?>
-            <div class="flex gap-8" style="align-items:center;padding:8px 8px 0;margin-top:4px;border-top:1px solid var(--border)">
+            <div class="flex gap-8" style="align-items:center;padding:8px 8px 0;margin-top:8px">
               <span class="small faint" style="flex:1">Total</span>
               <b class="small" style="width:26px;text-align:right;color:var(--accent);font-variant-numeric:tabular-nums"><?= (int)$totStudents ?></b>
               <span class="tiny faint" style="width:40px;text-align:right">100%</span>

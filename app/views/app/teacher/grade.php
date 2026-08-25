@@ -65,7 +65,7 @@ $gradeMode = (int)($mode['manual'] ?? 0);
       <?= csrf_field() ?>
       <input type="hidden" name="grade_attempt" value="<?= (int)$att['id'] ?>">
       <?php foreach ($att['gradable'] as $q): $prev = $st[$q['id']] ?? ''; ?>
-        <div style="border-top:1px solid var(--border);padding-top:12px">
+        <div style="margin-top:16px;padding-top:12px">
           <b class="small">Q. <?= e($q['question']) ?></b>
           <?php if ($q['type'] === 'coding'): ?>
             <pre class="codeblock"><?= e((string)$prev) ?></pre>
