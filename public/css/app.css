@@ -799,13 +799,13 @@ kbd { font-family: inherit; }
 
 /* Users list layout */
 .users-list-head {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
   border-bottom: 1px solid var(--border); background: var(--bg-soft);
 }
 .user-list-row {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 8px;
   padding: 12px 16px; border-bottom: 1px solid var(--border);
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
   cursor: pointer;
