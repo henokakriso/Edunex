@@ -28,7 +28,7 @@ Router::page('auth/logout', 'auth/logout.php', '*');
 Router::page('auth/sessions', 'auth/sessions.php', '*');
 
 /* ---------------- App ---------------- */
-Router::page('dashboard', 'dashboard.php', ['regional', 'teacher', 'student', 'parent', 'principal', 'zonal', 'woreda']);
+Router::page('dashboard', 'dashboard.php', ['regional', 'teacher', 'student', 'parent', 'principal', 'zonal', 'woreda', 'ministry', 'bursar', 'student_affairs', 'librarian']);
 Router::page('user/profile', 'user/profile.php', '*');
 
 /* ---- Student ---- */

@@ -7,7 +7,7 @@ $__route = trim($_GET['r'] ?? '', '/');
 
 $__nav = [
   'ministry' => [
-    ['dash', 'Overview', 'dashboard', icon('chart-bar')],
+    ['dash', 'Overview', 'admin/dashboard', icon('chart-bar')],
     ['ACADEMIC'],
     ['users', 'Users', 'admin/users', icon('users')],
     ['schools', 'Schools', 'admin/schools', icon('school')],
