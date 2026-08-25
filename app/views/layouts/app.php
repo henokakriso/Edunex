@@ -69,6 +69,14 @@ $__nav = [
     ['announcements', 'Announcements', 'woreda/announcements', icon('megaphone')],
     ['audit', 'Audit Log', 'woreda/audit', icon('note')],
   ],
+  'it_admin' => [
+    ['dash', 'Dashboard', 'it_admin/dashboard', icon('home')],
+    ['FIX'],
+    ['fix', 'Enter Fix Token', 'it_admin/fix', icon('wrench')],
+    ['tickets', 'All Tickets', 'it_admin/tickets', icon('ticket')],
+    ['MANAGEMENT'],
+    ['audit', 'Audit Log', 'it_admin/audit', icon('note')],
+  ],
   'registrar' => [
     ['dash', 'Dashboard', 'registrar/dashboard', icon('home')],
     ['ACADEMIC'],
@@ -386,6 +394,10 @@ $__icons = [
 
         <button class="topbar-icon" data-theme-toggle onclick="EdunexTheme.toggle()" title="Toggle theme"><?= icon('sun') ?></button>
 
+        <?php if (($__u['role'] ?? '') !== 'it_admin'): ?>
+        <button class="topbar-icon" onclick="document.getElementById('report-issue-modal').style.display='flex'" title="Report Issue / Request Fix" style="color:var(--warning,#f59e0b)"><?= icon('wrench') ?></button>
+        <?php endif; ?>
+
         <div class="dropdown" style="position:relative">
           <button class="topbar-icon" style="border:none;background:none">
             <img class="avatar" src="<?= e(avatar_url($__u)) ?>" alt="avatar" style="border-radius:50%">
@@ -443,5 +455,46 @@ $__icons = [
   <?php if (isset($__scripts)): foreach ($__scripts as $s): ?>
     <script src="<?= url('public/js/' . $s) ?>"></script>
   <?php endforeach; endif; ?>
+
+  <!-- Report Issue Modal -->
+  <div id="report-issue-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
+    <div class="card" style="max-width:480px;width:90%;padding:1.5rem">
+      <h3 style="margin:0 0 1rem">Report Issue / Request Fix</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">
+        This creates a secure fix ticket. The IT admin can ONLY access this page — no other data or settings.
+      </p>
+      <form method="POST" action="<?= url('index.php?r=ticket/create') ?>">
+        <?= csrf_field() ?>
+        <input type="hidden" name="page_route" id="report-page-route" value="<?= e($__route) ?>">
+        <input type="hidden" name="page_label" id="report-page-label" value="<?= e($title ?? '') ?>">
+        <div class="form-group">
+          <label>Describe the issue</label>
+          <textarea name="description" class="form-control" rows="3" placeholder="What's wrong or what needs fixing?" required></textarea>
+        </div>
+        <div class="flex gap-10">
+          <button class="btn btn-primary" type="submit">Create Fix Ticket</button>
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('report-issue-modal').style.display='none'">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fix Ticket Result Modal -->
+  <?php if (!empty($_SESSION['fix_ticket'])): ?>
+  <?php $ft = $_SESSION['fix_ticket']; unset($_SESSION['fix_ticket']); ?>
+  <div id="fix-ticket-result" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
+    <div class="card" style="max-width:480px;width:90%;padding:1.5rem">
+      <h3 style="margin:0 0 0.5rem">Fix Ticket #<?= e($ft['id']) ?> Created</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Share this token with your IT admin:</p>
+      <div style="background:var(--bg-elevated,#1e293b);padding:1rem;border-radius:8px;font-family:monospace;font-size:0.9rem;word-break:break-all;margin-bottom:1rem;border:1px solid var(--border,#334155)">
+        <?= e($ft['token']) ?>
+      </div>
+      <p style="font-size:0.85rem;color:var(--muted)">Page: <b><?= e($ft['page']) ?></b></p>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.dataset.token).then(()=>this.textContent='Copied!')" data-token="<?= e($ft['token']) ?>">Copy Token</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('fix-ticket-result').style.display='none'">Close</button>
+    </div>
+  </div>
+  <script>setTimeout(()=>{var m=document.getElementById('fix-ticket-result');if(m)m.style.display='flex';},100);</script>
+  <?php endif; ?>
 </body>
 </html>

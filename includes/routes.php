@@ -297,8 +297,19 @@ Router::page('api/attendance-mobile', 'api/attendance_mobile.php', '*');
 Router::page('api/login', 'api/login.php', '*');
 Router::page('api/activity', 'api/activity.php', '*');
 
-/* ---- Demo toggle (any authenticated user with admin/sysadmin) ---- */
-Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['ministry', 'regional', 'registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'principal', 'student', 'parent', 'zonal', 'woreda']);
+/* ---- Demo toggle (any authenticated user) ---- */
+Router::page('admin/toggle-demo', 'admin/toggle_demo.php', ['ministry', 'regional', 'registrar', 'dean', 'vice_dean', 'hod', 'lecturer', 'bursar', 'student_affairs', 'librarian', 'teacher', 'principal', 'student', 'parent', 'zonal', 'woreda', 'it_admin']);
+
+/* ---- IT Admin (Fix Ticket System) ---- */
+Router::page('it_admin/dashboard', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/tickets', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/ticket', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/fix', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/fix-session', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/resolve', 'it_admin/it_admin.php', 'it_admin');
+Router::page('it_admin/audit', 'it_admin/it_admin.php', 'it_admin');
+Router::page('ticket/create', 'it_admin/it_admin.php', '*');
+Router::page('ticket/status', 'it_admin/it_admin.php', '*');
 
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');

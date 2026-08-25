@@ -115,7 +115,7 @@ function dashboard_path(): string {
         'ministry' => 'admin/dashboard', 'regional' => 'regional/dashboard', 'zonal' => 'zonal/dashboard', 'woreda' => 'woreda/dashboard', 'principal' => 'director/dashboard', 'teacher' => 'teacher/dashboard',
         'registrar' => 'registrar/dashboard', 'dean' => 'dean/dashboard', 'vice_dean' => 'dean/dashboard', 'hod' => 'dean/dashboard',
         'lecturer' => 'teacher/dashboard', 'bursar' => 'university/fees/manage', 'student_affairs' => 'university/clearance/manage',
-        'librarian' => 'library',
+        'librarian' => 'library', 'it_admin' => 'it_admin/dashboard',
         'parent' => 'parent/dashboard', 'student' => 'student/dashboard',
         default => 'landing'
     };
