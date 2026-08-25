@@ -66,71 +66,64 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   </div>
 </form>
 
-<!-- Users table -->
+<!-- Users list -->
 <div class="card" style="padding:0">
-  <div class="table-wrap" style="padding:0 12px">
-    <table class="table users-table" id="users-table">
-      <thead>
-        <tr>
-          <th style="width:36px"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></th>
-          <th class="th-sort <?= $sort === 'name' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'name') . ($sort === 'name' && $dir === 'asc' ? '&dir=desc' : '')) ?>">User<?= $sort === 'name' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
-          <th class="th-sort <?= $sort === 'role' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'role') . ($sort === 'role' && $dir === 'asc' ? '&dir=desc' : '')) ?>">Role<?= $sort === 'role' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
-          <th>User ID</th>
-          <th class="th-sort <?= $sort === 'school' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'school') . ($sort === 'school' && $dir === 'asc' ? '&dir=desc' : '')) ?>">School<?= $sort === 'school' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
-          <th>Status</th>
-          <th class="th-sort <?= $sort === 'created_at' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'created_at') . ($sort === 'created_at' && $dir === 'asc' ? '&dir=desc' : '')) ?>">Joined<?= $sort === 'created_at' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
-          <th class="actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($users as $us):
-          $protected = (int)$us['id'] === 1 || (int)$us['id'] === (int)$__u['id'];
-          $initials = e(mb_substr($us['first_name'], 0, 1) . mb_substr($us['last_name'], 0, 1));
-          $row = [
-              'id' => (int)$us['id'], 'name' => $us['first_name'] . ' ' . $us['last_name'],
-              'email' => $us['email'], 'phone' => $us['phone'] ?? '', 'role' => $us['role'],
-              'student_id' => $us['student_id'] ?? '', 'school' => $us['school_name'] ?? '',
-              'group' => $us['group_name'] ?? '', 'status' => $us['status'], 'level' => (int)($us['level'] ?? 0),
-              'xp' => (int)($us['xp'] ?? 0), 'joined' => date('M j, Y', strtotime($us['created_at'])),
-              'initials' => $initials, 'protected' => $protected,
-          ];
-        ?>
-          <tr class="list-row user-row" data-user='<?= e(json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'>
-            <td><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></td>
-            <td>
-              <div class="flex gap-10" style="align-items:center">
-                <div class="avatar" style="width:34px;height:34px;font-size:.72rem"><?= $initials ?></div>
-                <div class="min-0">
-                  <b class="small"><?= e($us['first_name'] . ' ' . $us['last_name']) ?><?= $protected ? ' <span class="tiny faint">(you)</span>' : '' ?></b>
-                  <p class="tiny faint ellipsis" style="max-width:230px"><?= e($us['email']) ?></p>
-                </div>
-              </div>
-            </td>
-            <td><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></td>
-            <td class="small mono">#<?= (int)$us['id'] ?></td>
-            <td class="small"><?= e($us['school_name']) ?><?= $us['group_name'] ? '<br><span class="tiny faint">' . e($us['group_name']) . '</span>' : '' ?></td>
-            <td><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></td>
-            <td class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></td>
-<td class="actions">
-              <div class="row-act">
-                <a class="icon-btn" title="View profile" href="<?= e(url('admin/user&id=' . $us['id'])) ?>"><?= icon('eye') ?></a>
-                <?php if (!$protected): ?>
-                  <?php if ($us['status'] === 'active'): ?>
-                    <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="set_status" value="<?= (int)$us['id'] ?>"><input type="hidden" name="new_status" value="suspended"><button class="icon-btn warn" title="Suspend" data-confirm="Suspend <?= e($us['first_name'] . ' ' . $us['last_name']) ?>?"><?= icon('pause') ?></button></form>
-                  <?php else: ?>
-                    <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="set_status" value="<?= (int)$us['id'] ?>"><input type="hidden" name="new_status" value="active"><button class="icon-btn success" title="Activate" data-confirm="Activate <?= e($us['first_name'] . ' ' . $us['last_name']) ?>?"><?= icon('check') ?></button></form>
-                  <?php endif; ?>
-                  <form method="post" class="inline" data-confirm="Delete <?= e($us['first_name'] . ' ' . $us['last_name']) ?>? All their data is removed.">
-                    <?= csrf_field() ?><input type="hidden" name="delete_user" value="<?= (int)$us['id'] ?>"><button class="icon-btn danger" title="Delete user"><?= icon('trash') ?></button>
-                  </form>
-                <?php endif; ?>
-              </div>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <!-- Table header (desktop) -->
+  <div class="users-list-head">
+    <div style="width:36px"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
+    <div class="flex-1">User</div>
+    <div style="width:120px">Role</div>
+    <div style="width:70px">ID</div>
+    <div style="width:160px">School</div>
+    <div style="width:90px">Status</div>
+    <div style="width:100px">Joined</div>
+    <div style="width:80px;text-align:right">Actions</div>
   </div>
+
+  <?php foreach ($users as $us):
+    $protected = (int)$us['id'] === 1 || (int)$us['id'] === (int)$__u['id'];
+    $initials = e(mb_substr($us['first_name'], 0, 1) . mb_substr($us['last_name'], 0, 1));
+    $row = [
+        'id' => (int)$us['id'], 'name' => $us['first_name'] . ' ' . $us['last_name'],
+        'email' => $us['email'], 'phone' => $us['phone'] ?? '', 'role' => $us['role'],
+        'student_id' => $us['student_id'] ?? '', 'school' => $us['school_name'] ?? '',
+        'group' => $us['group_name'] ?? '', 'status' => $us['status'], 'level' => (int)($us['level'] ?? 0),
+        'xp' => (int)($us['xp'] ?? 0), 'joined' => date('M j, Y', strtotime($us['created_at'])),
+        'initials' => $initials, 'protected' => $protected,
+    ];
+  ?>
+    <div class="user-list-row" data-user='<?= e(json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'>
+      <div style="width:36px"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
+      <div class="flex-1 flex gap-10" style="align-items:center;min-width:0">
+        <div class="avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $initials ?></div>
+        <div class="min-0">
+          <b class="small"><?= e($us['first_name'] . ' ' . $us['last_name']) ?><?= $protected ? ' <span class="tiny faint">(you)</span>' : '' ?></b>
+          <p class="tiny faint ellipsis" style="max-width:200px"><?= e($us['email']) ?></p>
+        </div>
+      </div>
+      <div style="width:120px"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
+      <div style="width:70px" class="small mono">#<?= (int)$us['id'] ?></div>
+      <div style="width:160px" class="small"><?= e($us['school_name']) ?><?= $us['group_name'] ? '<br><span class="tiny faint">' . e($us['group_name']) . '</span>' : '' ?></div>
+      <div style="width:90px"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
+      <div style="width:100px" class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>
+      <div style="width:80px;text-align:right" class="actions">
+        <div class="row-act" style="justify-content:flex-end">
+          <a class="icon-btn" title="View profile" href="<?= e(url('admin/user&id=' . $us['id'])) ?>"><?= icon('eye') ?></a>
+          <?php if (!$protected): ?>
+            <?php if ($us['status'] === 'active'): ?>
+              <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="set_status" value="<?= (int)$us['id'] ?>"><input type="hidden" name="new_status" value="suspended"><button class="icon-btn warn" title="Suspend" data-confirm="Suspend <?= e($us['first_name'] . ' ' . $us['last_name']) ?>?"><?= icon('pause') ?></button></form>
+            <?php else: ?>
+              <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="set_status" value="<?= (int)$us['id'] ?>"><input type="hidden" name="new_status" value="active"><button class="icon-btn success" title="Activate" data-confirm="Activate <?= e($us['first_name'] . ' ' . $us['last_name']) ?>?"><?= icon('check') ?></button></form>
+            <?php endif; ?>
+            <form method="post" class="inline" data-confirm="Delete <?= e($us['first_name'] . ' ' . $us['last_name']) ?>? All their data is removed.">
+              <?= csrf_field() ?><input type="hidden" name="delete_user" value="<?= (int)$us['id'] ?>"><button class="icon-btn danger" title="Delete user"><?= icon('trash') ?></button>
+            </form>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  <?php endforeach; ?>
+
   <?php if (!$users): ?>
     <div class="empty" style="padding:34px"><span class="empty-ico"><?= icon('search') ?></span><b>No users found</b><p class="tiny faint">Try a different search, role or status filter.</p></div>
   <?php endif; ?>

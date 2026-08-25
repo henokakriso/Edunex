@@ -589,7 +589,7 @@
   const drawerBody = document.getElementById('drawer-body');
   const backdrop = document.getElementById('drawer-backdrop');
 
-  const rows = () => [...document.querySelectorAll('.user-row')];
+  const rows = () => [...document.querySelectorAll('.user-list-row')];
   const checked = () => rows().filter(r => {
     const c = r.querySelector('.row-chk');
     return c && !c.disabled && c.checked;
@@ -702,7 +702,7 @@
       swap(link.getAttribute('href'));
       return;
     }
-    const row = e.target.closest('.list-row');
+    const row = e.target.closest('.user-list-row');
     if (!row || e.target.closest('a, button, summary, label, input, form, details')) return;
     e.stopPropagation();
     if (row.dataset.drawerUrl) {
