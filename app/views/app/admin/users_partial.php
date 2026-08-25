@@ -74,7 +74,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
           <th style="width:36px"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></th>
           <th class="th-sort <?= $sort === 'name' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'name') . ($sort === 'name' && $dir === 'asc' ? '&dir=desc' : '')) ?>">User<?= $sort === 'name' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
           <th class="th-sort <?= $sort === 'role' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'role') . ($sort === 'role' && $dir === 'asc' ? '&dir=desc' : '')) ?>">Role<?= $sort === 'role' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
-          <th>Student ID</th>
+          <th>User ID</th>
           <th class="th-sort <?= $sort === 'school' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'school') . ($sort === 'school' && $dir === 'asc' ? '&dir=desc' : '')) ?>">School<?= $sort === 'school' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
           <th>Status</th>
           <th class="th-sort <?= $sort === 'created_at' ? 'on' : '' ?>"><a class="ajax-nav" href="<?= e($mk('sort', 'created_at') . ($sort === 'created_at' && $dir === 'asc' ? '&dir=desc' : '')) ?>">Joined<?= $sort === 'created_at' ? ($dir === 'asc' ? ' ↑' : ' ↓') : '' ?></a></th>
@@ -106,7 +106,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
               </div>
             </td>
             <td><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></td>
-            <td class="small mono"><?= e($us['student_id'] ?? '—') ?></td>
+            <td class="small mono">#<?= (int)$us['id'] ?></td>
             <td class="small"><?= e($us['school_name']) ?><?= $us['group_name'] ? '<br><span class="tiny faint">' . e($us['group_name']) . '</span>' : '' ?></td>
             <td><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></td>
             <td class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></td>
