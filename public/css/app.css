@@ -104,6 +104,7 @@ body {
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+a.card:hover, a.list-row:hover, a.stat-card:hover { text-decoration: none; }
 
 img { max-width: 100%; }
 
@@ -902,9 +903,9 @@ kbd { font-family: inherit; }
 a.list-row, div.list-row, .list-row:not(tr) {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 6px; border-radius: 10px;
-  transition: background var(--transition);
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: var(--bg-hover); }
+a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: var(--bg-hover); box-shadow: 0 2px 12px rgba(0,0,0,.1); transform: translateY(-1px); }
 tr.list-row { display: table-row; }
 
 /* Chart mount points render inline SVG nicely */
@@ -915,7 +916,8 @@ tr.list-row { display: table-row; }
 #view-root div[id$="-chart"] { position: relative; }
 
 /* Stat cards (school profile) — icon left, value right, no overlap */
-.stat-card { display: flex; align-items: center; gap: 14px; }
+.stat-card { display: flex; align-items: center; gap: 14px; transition: box-shadow .2s, transform .2s, border-color .2s; }
+.stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.15); transform: translateY(-2px); border-color: var(--accent); }
 .stat-card .stat-icon { margin-bottom: 0; flex-shrink: 0; }
 .stat-card .stat-value { font-size: 1.6rem; line-height: 1.05; }
 .stat-card > div:last-child { min-width: 0; }
