@@ -68,16 +68,16 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 
 <!-- Users list -->
 <div class="card" style="padding:0;overflow:visible">
-  <!-- Table header (desktop) -->
+  <!-- Table header -->
   <div class="users-list-head">
-    <div style="width:36px;flex-shrink:0"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
-    <div style="flex:1;min-width:0">User</div>
-    <div style="width:100px;flex-shrink:0">Role</div>
-    <div style="width:50px;flex-shrink:0">ID</div>
-    <div style="width:140px;flex-shrink:0">School</div>
-    <div style="width:80px;flex-shrink:0">Status</div>
-    <div style="width:90px;flex-shrink:0">Joined</div>
-    <div style="width:100px;flex-shrink:0;text-align:right">Actions</div>
+    <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
+    <div class="ul-col ul-col-user">User</div>
+    <div class="ul-col ul-col-role">Role</div>
+    <div class="ul-col ul-col-id">ID</div>
+    <div class="ul-col ul-col-school">School</div>
+    <div class="ul-col ul-col-status">Status</div>
+    <div class="ul-col ul-col-joined">Joined</div>
+    <div class="ul-col ul-col-actions">Actions</div>
   </div>
 
   <?php foreach ($users as $us):
@@ -93,20 +93,22 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     ];
   ?>
     <div class="user-list-row" data-user='<?= e(json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'>
-      <div style="width:36px;flex-shrink:0"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
-      <div style="flex:1;min-width:0" class="flex gap-10" style="align-items:center">
-        <div class="avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $initials ?></div>
-        <div class="min-0">
-          <b class="small"><?= e($us['first_name'] . ' ' . $us['last_name']) ?><?= $protected ? ' <span class="tiny faint">(you)</span>' : '' ?></b>
-          <p class="tiny faint ellipsis"><?= e($us['email']) ?></p>
+      <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
+      <div class="ul-col ul-col-user">
+        <div class="flex gap-10" style="align-items:center">
+          <div class="avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $initials ?></div>
+          <div class="min-0">
+            <b class="small"><?= e($us['first_name'] . ' ' . $us['last_name']) ?><?= $protected ? ' <span class="tiny faint">(you)</span>' : '' ?></b>
+            <p class="tiny faint ellipsis"><?= e($us['email']) ?></p>
+          </div>
         </div>
       </div>
-      <div style="width:100px;flex-shrink:0"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
-      <div style="width:50px;flex-shrink:0" class="small mono">#<?= (int)$us['id'] ?></div>
-      <div style="width:140px;flex-shrink:0" class="small ellipsis"><?= e($us['school_name']) ?></div>
-      <div style="width:80px;flex-shrink:0"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
-      <div style="width:90px;flex-shrink:0" class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>
-      <div style="width:100px;flex-shrink:0;text-align:right" class="actions">
+      <div class="ul-col ul-col-role"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
+      <div class="ul-col ul-col-id small mono">#<?= (int)$us['id'] ?></div>
+      <div class="ul-col ul-col-school small ellipsis"><?= e($us['school_name']) ?></div>
+      <div class="ul-col ul-col-status"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
+      <div class="ul-col ul-col-joined small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>
+      <div class="ul-col ul-col-actions">
         <div class="row-act" style="justify-content:flex-end">
           <a class="icon-btn" title="View profile" href="<?= e(url('admin/user&id=' . $us['id'])) ?>"><?= icon('eye') ?></a>
           <?php if (!$protected): ?>
