@@ -7,7 +7,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     ['role' => $role, 'status' => $status, 'q' => $q], [$k => $v]
 ), fn($x) => $x !== '')));
 ?>
-<div class="page-head flex-between" style="flex-wrap:wrap;gap:12px">
+<div class="page-head flex-between" style="flex-wrap:wrap;gap:12px;margin-bottom:22px">
   <div>
     <h1><?= icon('users') ?> Users</h1>
     <p class="sub"><?= number_format($total) ?> user<?= $total === 1 ? '' : 's' ?> · <?= $pages > 1 ? 'page ' . $page . ' of ' . $pages : 'all on one page' ?></p>
@@ -19,7 +19,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 </div>
 
 <!-- Stats -->
-<div class="stat-grid" style="margin-bottom:18px">
+<div class="stat-grid" style="margin-bottom:22px;gap:14px">
   <a class="stat-box clickable ajax-nav" href="<?= e($mk('')) ?>"><span class="tiny faint">Total users</span><b class="h2"><?= number_format($stats['total']) ?></b><span class="tiny faint"><?= $stats['new_month'] ?> new this month</span></a>
   <a class="stat-box clickable ajax-nav" href="<?= e($mk('status', 'active')) ?>"><span class="tiny faint">Active</span><b class="h2" style="color:var(--success)"><?= number_format($stats['active']) ?></b><span class="tiny faint">online & enrolled</span></a>
   <a class="stat-box clickable ajax-nav" href="<?= e($mk('status', 'suspended')) ?>"><span class="tiny faint">Suspended</span><b class="h2" style="color:var(--danger)"><?= number_format($stats['suspended']) ?></b><span class="tiny faint"><?= number_format($stats['banned']) ?> banned</span></a>
@@ -27,7 +27,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 </div>
 
 <!-- Filters -->
-<div class="card" style="margin-bottom:18px">
+<div class="card" style="margin-bottom:18px;padding:16px">
   <form method="get" class="ajax-nav flex gap-10" style="flex-wrap:wrap;align-items:end">
     <input type="hidden" name="r" value="admin/users">
     <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, email or student ID" style="min-width:220px"></div>
@@ -40,7 +40,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     <button class="btn"><?= icon('search') ?> Search</button>
     <?php if ($q !== '' || $role !== '' || $status !== ''): ?><a class="ajax-nav btn btn-ghost" href="<?= e(url('admin/users')) ?>">✕ Reset</a><?php endif; ?>
   </form>
-  <div class="chips" style="margin-top:14px">
+  <div class="chips" style="margin-top:14px;padding:4px 0">
     <a class="ajax-nav chip <?= $role === '' && $status === '' ? 'on' : '' ?>" href="<?= e($mk('role')) ?>">All · <?= number_format($stats['total']) ?></a>
     <?php foreach (['regional', 'principal', 'teacher', 'student', 'parent'] as $r): ?>
       <a class="ajax-nav chip <?= $role === $r ? 'on' : '' ?>" href="<?= e($mk('role', $r)) ?>"><?= $roleIco[$r] ?> <?= ucfirst($r) ?> · <?= (int)($roleCounts[$r] ?? 0) ?></a>
@@ -62,8 +62,8 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 </form>
 
 <!-- Users table -->
-<div class="card">
-  <div class="table-wrap">
+<div class="card" style="padding:0">
+  <div class="table-wrap" style="padding:0 12px">
     <table class="table users-table" id="users-table">
       <thead>
         <tr>
