@@ -67,17 +67,17 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 </form>
 
 <!-- Users list -->
-<div class="card" style="padding:0">
+<div class="card" style="padding:0;overflow:visible">
   <!-- Table header (desktop) -->
   <div class="users-list-head">
-    <div style="width:36px"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
-    <div class="flex-1">User</div>
-    <div style="width:120px">Role</div>
-    <div style="width:70px">ID</div>
-    <div style="width:160px">School</div>
-    <div style="width:90px">Status</div>
-    <div style="width:100px">Joined</div>
-    <div style="width:80px;text-align:right">Actions</div>
+    <div style="width:36px;flex-shrink:0"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
+    <div style="flex:1;min-width:0">User</div>
+    <div style="width:100px;flex-shrink:0">Role</div>
+    <div style="width:50px;flex-shrink:0">ID</div>
+    <div style="width:140px;flex-shrink:0">School</div>
+    <div style="width:80px;flex-shrink:0">Status</div>
+    <div style="width:90px;flex-shrink:0">Joined</div>
+    <div style="width:100px;flex-shrink:0;text-align:right">Actions</div>
   </div>
 
   <?php foreach ($users as $us):
@@ -93,20 +93,20 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     ];
   ?>
     <div class="user-list-row" data-user='<?= e(json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'>
-      <div style="width:36px"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
-      <div class="flex-1 flex gap-10" style="align-items:center;min-width:0">
+      <div style="width:36px;flex-shrink:0"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
+      <div style="flex:1;min-width:0" class="flex gap-10" style="align-items:center">
         <div class="avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $initials ?></div>
         <div class="min-0">
           <b class="small"><?= e($us['first_name'] . ' ' . $us['last_name']) ?><?= $protected ? ' <span class="tiny faint">(you)</span>' : '' ?></b>
-          <p class="tiny faint ellipsis" style="max-width:200px"><?= e($us['email']) ?></p>
+          <p class="tiny faint ellipsis"><?= e($us['email']) ?></p>
         </div>
       </div>
-      <div style="width:120px"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
-      <div style="width:70px" class="small mono">#<?= (int)$us['id'] ?></div>
-      <div style="width:160px" class="small"><?= e($us['school_name']) ?><?= $us['group_name'] ? '<br><span class="tiny faint">' . e($us['group_name']) . '</span>' : '' ?></div>
-      <div style="width:90px"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
-      <div style="width:100px" class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>
-      <div style="width:80px;text-align:right" class="actions">
+      <div style="width:100px;flex-shrink:0"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
+      <div style="width:50px;flex-shrink:0" class="small mono">#<?= (int)$us['id'] ?></div>
+      <div style="width:140px;flex-shrink:0" class="small ellipsis"><?= e($us['school_name']) ?></div>
+      <div style="width:80px;flex-shrink:0"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
+      <div style="width:90px;flex-shrink:0" class="small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>
+      <div style="width:100px;flex-shrink:0;text-align:right" class="actions">
         <div class="row-act" style="justify-content:flex-end">
           <a class="icon-btn" title="View profile" href="<?= e(url('admin/user&id=' . $us['id'])) ?>"><?= icon('eye') ?></a>
           <?php if (!$protected): ?>
