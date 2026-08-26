@@ -74,7 +74,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
           </div>
         </div>
       </div>
-      <div class="sl-col sl-col-type"><span class="badge badge-accent"><?= e(ucfirst($s['type'])) ?></span></div>
+      <div class="sl-col sl-col-type small"><?= e(ucfirst($s['type'])) ?></div>
       <div class="sl-col sl-col-city small"><?= e($s['city'] ?: '—') ?></div>
       <div class="sl-col sl-col-users small mono"><?= number_format((int)$s['total_users']) ?></div>
       <div class="sl-col sl-col-status"><span class="badge <?= $s['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($s['status']) ?></span></div>
