@@ -73,12 +73,12 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   <div class="users-list-head">
     <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
     <div class="ul-col ul-col-number">#</div>
-    <div class="ul-col ul-col-user"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">User<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-role"><a class="ajax-nav sort-link" href="<?= e($sortUrl('role',$sort,$dir)) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-id"><a class="ajax-nav sort-link" href="<?= e($sortUrl('id',$sort,$dir)) ?>">ID<?php if($sort==='id'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('school',$sort,$dir)) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-joined"><a class="ajax-nav sort-link" href="<?= e($sortUrl('created_at',$sort,$dir)) ?>">Joined<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-user"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">User<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="ul-col ul-col-role"><a class="ajax-nav sort-link" href="<?= e($sortUrl('role',$sort,$dir)) ?>">Role<span class="sort-arrow<?= $sort==='role' ? ' active' : '' ?>"><?= $sort==='role' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="ul-col ul-col-id"><a class="ajax-nav sort-link" href="<?= e($sortUrl('id',$sort,$dir)) ?>">ID<span class="sort-arrow<?= $sort==='id' ? ' active' : '' ?>"><?= $sort==='id' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="ul-col ul-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('school',$sort,$dir)) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="ul-col ul-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="ul-col ul-col-joined"><a class="ajax-nav sort-link" href="<?= e($sortUrl('created_at',$sort,$dir)) ?>">Joined<span class="sort-arrow<?= $sort==='created_at' ? ' active' : '' ?>"><?= $sort==='created_at' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
     <div class="ul-col ul-col-actions">Actions</div>
   </div>
 

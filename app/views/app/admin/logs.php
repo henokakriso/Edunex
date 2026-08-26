@@ -66,10 +66,10 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
     <table class="table" style="table-layout:auto">
       <thead><tr style="text-align:center">
         <th style="width:36px">#</th>
-        <th style="min-width:140px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('created_at')) ?>">When<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th style="min-width:160px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('user')) ?>">User<?php if($sort==='user'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th style="min-width:180px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th style="min-width:100px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('action')) ?>">Action<?php if($sort==='action'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th style="min-width:140px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('created_at')) ?>">When<span class="sort-arrow<?= $sort==='created_at' ? ' active' : '' ?>"><?= $sort==='created_at' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th style="min-width:160px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('user')) ?>">User<span class="sort-arrow<?= $sort==='user' ? ' active' : '' ?>"><?= $sort==='user' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th style="min-width:180px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th style="min-width:100px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('action')) ?>">Action<span class="sort-arrow<?= $sort==='action' ? ' active' : '' ?>"><?= $sort==='action' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
         <th style="min-width:200px">Detail</th>
       </tr></thead>
       <tbody>

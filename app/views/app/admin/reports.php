@@ -33,12 +33,12 @@
   <h3 class="card-title" style="margin-top:0"><?= icon('folder') ?> Generated reports</h3>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('title')) ?>">Title<?php if($sort==='title'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('type')) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('by')) ?>">By<?php if($sort==='by'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('title')) ?>">Title<span class="sort-arrow<?= $sort==='title' ? ' active' : '' ?>"><?= $sort==='title' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('by')) ?>">By<span class="sort-arrow<?= $sort==='by' ? ' active' : '' ?>"><?= $sort==='by' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th>Format</th>
-      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('created_at')) ?>">Created<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('created_at')) ?>">Created<span class="sort-arrow<?= $sort==='created_at' ? ' active' : '' ?>"><?= $sort==='created_at' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th></th>
     </tr></thead>
     <tbody>

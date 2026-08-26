@@ -35,11 +35,11 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
   <?php $lbSortUrl = fn($col) => url('admin/library?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='desc' ? 'asc' : 'desc'])); ?>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('title')) ?>">Item<?php if($sort==='title'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('type')) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('downloads')) ?>">Downloads<?php if($sort==='downloads'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('title')) ?>">Item<span class="sort-arrow<?= $sort==='title' ? ' active' : '' ?>"><?= $sort==='title' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('downloads')) ?>">Downloads<span class="sort-arrow<?= $sort==='downloads' ? ' active' : '' ?>"><?= $sort==='downloads' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th></th>
     </tr></thead>
     <tbody>

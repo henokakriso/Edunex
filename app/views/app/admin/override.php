@@ -14,10 +14,10 @@
   <?php $oSortUrl = fn($col) => url('admin/override?' . http_build_query(array_filter(['q'=>$q,'sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'], fn($x)=>$x!==''))); ?>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('user')) ?>">User<?php if($sort==='user'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('role')) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('user')) ?>">User<span class="sort-arrow<?= $sort==='user' ? ' active' : '' ?>"><?= $sort==='user' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('role')) ?>">Role<span class="sort-arrow<?= $sort==='role' ? ' active' : '' ?>"><?= $sort==='role' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th style="width:430px">Emergency actions</th>
     </tr></thead>
     <tbody>

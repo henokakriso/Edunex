@@ -13,12 +13,12 @@
   <table class="table">
     <thead><tr>
       <th>License key</th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('institution')) ?>">Institution<?php if($sort==='institution'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('type')) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('seats')) ?>">Seats<?php if($sort==='seats'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('issued')) ?>">Issued<?php if($sort==='issued'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('expires')) ?>">Expires<?php if($sort==='expires'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('institution')) ?>">Institution<span class="sort-arrow<?= $sort==='institution' ? ' active' : '' ?>"><?= $sort==='institution' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('seats')) ?>">Seats<span class="sort-arrow<?= $sort==='seats' ? ' active' : '' ?>"><?= $sort==='seats' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('issued')) ?>">Issued<span class="sort-arrow<?= $sort==='issued' ? ' active' : '' ?>"><?= $sort==='issued' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('expires')) ?>">Expires<span class="sort-arrow<?= $sort==='expires' ? ' active' : '' ?>"><?= $sort==='expires' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th style="width:120px">Actions</th>
     </tr></thead>
     <tbody>

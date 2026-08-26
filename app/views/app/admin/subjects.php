@@ -27,11 +27,11 @@
   <?php $sSortUrl = fn($col) => url('admin/subjects?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('name')) ?>">Subject<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('code')) ?>">Code<?php if($sort==='code'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('department')) ?>">Department<?php if($sort==='department'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('name')) ?>">Subject<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('code')) ?>">Code<span class="sort-arrow<?= $sort==='code' ? ' active' : '' ?>"><?= $sort==='code' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('department')) ?>">Department<span class="sort-arrow<?= $sort==='department' ? ' active' : '' ?>"><?= $sort==='department' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th>Actions</th>
     </tr></thead>
     <tbody>

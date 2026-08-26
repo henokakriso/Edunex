@@ -48,11 +48,11 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
   <!-- Header -->
   <?php $sortUrl = fn($col, $curSort, $curDir) => url('admin/schools?' . http_build_query(array_filter(array_merge(['q'=>$q,'type'=>$type,'status'=>$status], ['sort'=>$col, 'dir'=> $curSort===$col && $curDir==='asc' ? 'desc' : 'asc']), fn($x)=>$x!==''))); ?>
   <div class="schools-list-head">
-    <div class="sl-col sl-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">School<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="sl-col sl-col-type"><a class="ajax-nav sort-link" href="<?= e($sortUrl('type',$sort,$dir)) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="sl-col sl-col-city"><a class="ajax-nav sort-link" href="<?= e($sortUrl('city',$sort,$dir)) ?>">City<?php if($sort==='city'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="sl-col sl-col-users"><a class="ajax-nav sort-link" href="<?= e($sortUrl('users',$sort,$dir)) ?>">Users<?php if($sort==='users'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="sl-col sl-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="sl-col sl-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">School<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="sl-col sl-col-type"><a class="ajax-nav sort-link" href="<?= e($sortUrl('type',$sort,$dir)) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="sl-col sl-col-city"><a class="ajax-nav sort-link" href="<?= e($sortUrl('city',$sort,$dir)) ?>">City<span class="sort-arrow<?= $sort==='city' ? ' active' : '' ?>"><?= $sort==='city' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="sl-col sl-col-users"><a class="ajax-nav sort-link" href="<?= e($sortUrl('users',$sort,$dir)) ?>">Users<span class="sort-arrow<?= $sort==='users' ? ' active' : '' ?>"><?= $sort==='users' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
+    <div class="sl-col sl-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
     <div class="sl-col sl-col-actions">Actions</div>
   </div>
 

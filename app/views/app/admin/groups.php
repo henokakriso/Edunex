@@ -25,11 +25,11 @@
   <?php $gSortUrl = fn($col) => url('admin/groups?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('name')) ?>">Class<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('grade')) ?>">Grade<?php if($sort==='grade'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('section')) ?>">Section<?php if($sort==='section'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('students')) ?>">Students<?php if($sort==='students'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('name')) ?>">Class<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('grade')) ?>">Grade<span class="sort-arrow<?= $sort==='grade' ? ' active' : '' ?>"><?= $sort==='grade' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('section')) ?>">Section<span class="sort-arrow<?= $sort==='section' ? ' active' : '' ?>"><?= $sort==='section' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('students')) ?>">Students<span class="sort-arrow<?= $sort==='students' ? ' active' : '' ?>"><?= $sort==='students' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th></th>
     </tr></thead>
     <tbody>

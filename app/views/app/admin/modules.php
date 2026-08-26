@@ -34,11 +34,11 @@
   <?php $mSortUrl = fn($col) => url('admin/modules?' . http_build_query(array_filter(['q'=>$q,'cat'=>$cat,'only'=>$only,'sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'], fn($x)=>$x!==''))); ?>
   <table class="table">
     <thead><tr>
-      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('name')) ?>">Module<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('category')) ?>">Category<?php if($sort==='category'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('level')) ?>">Level<?php if($sort==='level'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('installed_at')) ?>">Installed<?php if($sort==='installed_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-      <th style="width:140px"><a class="ajax-nav sort-link" href="<?= e($mSortUrl('enabled')) ?>">Status<?php if($sort==='enabled'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('name')) ?>">Module<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('category')) ?>">Category<span class="sort-arrow<?= $sort==='category' ? ' active' : '' ?>"><?= $sort==='category' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('level')) ?>">Level<span class="sort-arrow<?= $sort==='level' ? ' active' : '' ?>"><?= $sort==='level' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('installed_at')) ?>">Installed<span class="sort-arrow<?= $sort==='installed_at' ? ' active' : '' ?>"><?= $sort==='installed_at' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      <th style="width:140px"><a class="ajax-nav sort-link" href="<?= e($mSortUrl('enabled')) ?>">Status<span class="sort-arrow<?= $sort==='enabled' ? ' active' : '' ?>"><?= $sort==='enabled' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th style="width:110px">Action</th>
     </tr></thead>
     <tbody>

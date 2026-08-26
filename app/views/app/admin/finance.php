@@ -16,10 +16,10 @@
     <?php $fSortUrl = fn($col) => url('admin/finance?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
     <table class="table">
       <thead><tr>
-        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('name')) ?>">Institution<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('level')) ?>">Level<?php if($sort==='level'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('paid_courses')) ?>">Paid courses<?php if($sort==='paid_courses'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('revenue')) ?>">Estimated revenue<?php if($sort==='revenue'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('name')) ?>">Institution<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('level')) ?>">Level<span class="sort-arrow<?= $sort==='level' ? ' active' : '' ?>"><?= $sort==='level' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('paid_courses')) ?>">Paid courses<span class="sort-arrow<?= $sort==='paid_courses' ? ' active' : '' ?>"><?= $sort==='paid_courses' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($fSortUrl('revenue')) ?>">Estimated revenue<span class="sort-arrow<?= $sort==='revenue' ? ' active' : '' ?>"><?= $sort==='revenue' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       </tr></thead>
       <tbody>
         <?php foreach ($rows as $r): ?>

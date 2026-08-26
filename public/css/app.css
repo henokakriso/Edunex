@@ -820,7 +820,9 @@ kbd { font-family: inherit; }
 /* Sort links */
 .sort-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .sort-link:hover { text-decoration: none !important; color: var(--accent); }
-.sort-arrow { font-size: 9px; color: var(--accent); margin-left: 2px; }
+.sort-arrow { font-size: 9px; color: var(--text-faint); opacity: .4; margin-left: 2px; transition: opacity .15s; }
+.sort-link:hover .sort-arrow { opacity: .6; }
+.sort-arrow.active { color: var(--accent); opacity: 1; }
 
 /* Column dividers */
 .ul-col { display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; overflow: hidden; text-align: left; border-right: 1px solid var(--border); }

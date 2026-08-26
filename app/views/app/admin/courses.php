@@ -24,12 +24,12 @@
   <div class="table-wrap">
     <table class="table">
       <thead><tr>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('name')) ?>">Course<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('teacher')) ?>">Teacher<?php if($sort==='teacher'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('students')) ?>">Students<?php if($sort==='students'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('lessons')) ?>">Lessons<?php if($sort==='lessons'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
-        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('name')) ?>">Course<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('teacher')) ?>">Teacher<span class="sort-arrow<?= $sort==='teacher' ? ' active' : '' ?>"><?= $sort==='teacher' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('students')) ?>">Students<span class="sort-arrow<?= $sort==='students' ? ' active' : '' ?>"><?= $sort==='students' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('lessons')) ?>">Lessons<span class="sort-arrow<?= $sort==='lessons' ? ' active' : '' ?>"><?= $sort==='lessons' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
         <th>Actions</th>
       </tr></thead>
       <tbody>
