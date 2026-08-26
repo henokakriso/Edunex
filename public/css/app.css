@@ -848,6 +848,34 @@ kbd { font-family: inherit; }
   .ul-col-actions { grid-column: 1 / -1; }
 }
 
+/* Schools list layout */
+.schools-list-head {
+  display: grid; grid-template-columns: 1fr 110px 140px 80px 90px 120px;
+  align-items: center; gap: 0;
+  padding: 10px 0; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
+}
+.school-list-row {
+  display: grid; grid-template-columns: 1fr 110px 140px 80px 90px 120px;
+  align-items: center; gap: 0;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  cursor: pointer;
+}
+.school-list-row:last-child { border-bottom: none; }
+.school-list-row:hover { background: var(--bg-hover); box-shadow: 0 2px 12px rgba(0,0,0,.08); transform: translateY(-1px); }
+.school-list-row .row-act { display: flex; gap: 6px; align-items: center; justify-content: center; }
+.sl-col { display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; overflow: hidden; text-align: left; border-right: 1px solid var(--border); }
+.sl-col:first-child { padding-left: 16px; }
+.sl-col:last-child { border-right: none; padding-right: 8px; }
+.sl-col-school { min-width: 0; }
+.sl-col-type { justify-content: center; text-align: center; }
+.sl-col-city { white-space: nowrap; }
+.sl-col-users { justify-content: center; text-align: center; }
+.sl-col-status { justify-content: center; text-align: center; }
+.sl-col-actions { justify-content: flex-end; border-right: none; }
+
 /* Bulk actions bar */
 .bulk-bar {
   display: none; align-items: center; gap: 10px; margin-bottom: 14px;
