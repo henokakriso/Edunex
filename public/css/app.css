@@ -252,6 +252,24 @@ textarea.input { min-height: 96px; resize: vertical; }
 
 /* ---------- Tables ---------- */
 .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+table.table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--bg-elev); }
+table.table th {
+  text-align: left; padding: 11px 14px; font-size: 11.5px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-faint); font-weight: 700;
+  background: var(--bg-soft); border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+table.table th:last-child { border-right: none; }
+table.table td {
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border); vertical-align: middle;
+}
+table.table td:last-child { border-right: none; }
+table.table tr:last-child td { border-bottom: none; }
+table.table tr { transition: background var(--transition), box-shadow var(--transition); }
+table.table tr:hover td { background: var(--bg-hover); box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+table.table .mono { font-family: var(--font-mono, monospace); }
+table.table .muted { color: var(--text-faint); }
 table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--bg-elev); }
 table.data th {
   text-align: left; padding: 11px 14px; font-size: 11.5px; text-transform: uppercase;
