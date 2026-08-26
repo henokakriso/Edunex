@@ -817,6 +817,11 @@ kbd { font-family: inherit; }
 .user-list-row .chk { padding: 2px; }
 .user-list-row .row-act { display: flex; gap: 6px; align-items: center; justify-content: center; }
 
+/* Sort links */
+.sort-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.sort-link:hover { text-decoration: none !important; color: var(--accent); }
+.sort-arrow { font-size: 9px; color: var(--accent); margin-left: 2px; }
+
 /* Column dividers */
 .ul-col { display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; overflow: hidden; text-align: left; border-right: 1px solid var(--border); }
 .ul-col:first-child { padding-left: 8px; }

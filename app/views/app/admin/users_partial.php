@@ -69,14 +69,15 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
 <!-- Users list -->
 <div class="card" style="padding:0;overflow:visible">
   <!-- Table header -->
+  <?php $sortUrl = fn($col, $curSort, $curDir) => url('admin/users?' . http_build_query(array_merge(array_filter(['role'=>$role,'status'=>$status,'q'=>$q,'page'=>$page], fn($x)=>$x!==''), ['sort'=>$col, 'dir'=> $curSort===$col && $curDir==='asc' ? 'desc' : 'asc']))); ?>
   <div class="users-list-head">
     <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
-    <div class="ul-col ul-col-user">User</div>
-    <div class="ul-col ul-col-role">Role</div>
-    <div class="ul-col ul-col-id">ID</div>
-    <div class="ul-col ul-col-school">School</div>
-    <div class="ul-col ul-col-status">Status</div>
-    <div class="ul-col ul-col-joined">Joined</div>
+    <div class="ul-col ul-col-user"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">User<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-role"><a class="ajax-nav sort-link" href="<?= e($sortUrl('role',$sort,$dir)) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-id"><a class="ajax-nav sort-link" href="<?= e($sortUrl('id',$sort,$dir)) ?>">ID<?php if($sort==='id'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('school',$sort,$dir)) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-joined"><a class="ajax-nav sort-link" href="<?= e($sortUrl('created_at',$sort,$dir)) ?>">Joined<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-actions">Actions</div>
   </div>
 

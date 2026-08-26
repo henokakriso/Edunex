@@ -164,7 +164,7 @@ class Ctl_users {
         $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 25;
-        $sortMap = ['name' => 'us.first_name', 'role' => 'us.role', 'school' => 's.name', 'status' => 'us.status', 'created_at' => 'us.created_at'];
+        $sortMap = ['name' => 'us.first_name', 'role' => 'us.role', 'school' => 's.name', 'status' => 'us.status', 'created_at' => 'us.created_at', 'id' => 'us.id'];
         if (!isset($sortMap[$sort])) $sort = 'created_at';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', us.id DESC';
 
@@ -388,7 +388,7 @@ class Ctl_schools {
         $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 10;
-        $sortMap = ['name' => 's.name', 'type' => 's.type', 'status' => 's.status', 'created_at' => 's.created_at', 'users' => 'total_users'];
+        $sortMap = ['name' => 's.name', 'type' => 's.type', 'status' => 's.status', 'created_at' => 's.created_at', 'users' => 'total_users', 'city' => 's.city'];
         if (!isset($sortMap[$sort])) $sort = 'name';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', s.id DESC';
 
