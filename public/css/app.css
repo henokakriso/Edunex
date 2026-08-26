@@ -103,8 +103,8 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 
 a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-a.card:hover, a.list-row:hover, a.stat-card:hover, a.chip:hover { text-decoration: none; }
+a:hover { text-decoration: none; }
+a.card:hover, a.list-row:hover, a.stat-card:hover, a.chip:hover, .nav-item:hover, .dropdown-item:hover { text-decoration: none; }
 
 img { max-width: 100%; }
 
