@@ -29,9 +29,18 @@
 </form>
 
 <div class="card">
+  <?php $rSortUrl = fn($col) => url('admin/reports?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='desc' ? 'asc' : 'desc'])); ?>
   <h3 class="card-title" style="margin-top:0"><?= icon('folder') ?> Generated reports</h3>
   <table class="table">
-    <thead><tr><th>Title</th><th>Type</th><th>School</th><th>By</th><th>Format</th><th>Created</th><th></th></tr></thead>
+    <thead><tr>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('title')) ?>">Title<?php if($sort==='title'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('type')) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('by')) ?>">By<?php if($sort==='by'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th>Format</th>
+      <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('created_at')) ?>">Created<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th></th>
+    </tr></thead>
     <tbody>
       <?php foreach ($reports as $r): ?>
         <tr>

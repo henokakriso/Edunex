@@ -11,8 +11,15 @@
 </div>
 
 <div class="card pad-0">
+  <?php $oSortUrl = fn($col) => url('admin/override?' . http_build_query(array_filter(['q'=>$q,'sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'], fn($x)=>$x!==''))); ?>
   <table class="table">
-    <thead><tr><th>User</th><th>Role</th><th>School</th><th>Status</th><th style="width:430px">Emergency actions</th></tr></thead>
+    <thead><tr>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('user')) ?>">User<?php if($sort==='user'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('role')) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th style="width:430px">Emergency actions</th>
+    </tr></thead>
     <tbody>
       <?php foreach ($rows as $r): ?>
         <tr>

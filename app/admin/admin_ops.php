@@ -130,6 +130,11 @@ class Ctl_logs {
         $action = trim($_GET['action'] ?? '');
         $q = trim($_GET['q'] ?? '');
         $days = (int)($_GET['days'] ?? 0);
+        $sort = $_GET['sort'] ?? 'created_at';
+        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $sortMap = ['created_at' => 'l.created_at', 'user' => 'us.last_name', 'school' => 'sc.name', 'action' => 'l.action'];
+        if (!isset($sortMap[$sort])) $sort = 'created_at';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', l.id DESC';
         $export = $_GET['export'] ?? '';
         $sql = "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name, us.email, sc.name AS school_name
                  FROM activity_logs l
@@ -140,7 +145,7 @@ class Ctl_logs {
         if ($action) { $sql .= " AND l.action = ?"; $args[] = $action; }
         if ($q !== '') { $sql .= " AND (l.detail LIKE ? OR l.user_agent LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; }
         if ($days > 0) { $sql .= " AND l.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)"; $args[] = $days; }
-        $sql .= " ORDER BY l.created_at DESC LIMIT 500";
+        $sql .= " ORDER BY $orderBy LIMIT 500";
         $logs = Database::all($sql, $args);
         $actions = Database::all("SELECT action, COUNT(*) AS n FROM activity_logs GROUP BY action ORDER BY n DESC LIMIT 25");
 
@@ -227,7 +232,7 @@ class Ctl_logs {
                 redirect('admin/logs');
             }
         }
-        Router::render('app/admin/logs', ['title' => 'Activity Logs', 'logs' => $logs, 'actions' => $actions, 'action' => $action, 'q' => $q, 'days' => $days]);
+        Router::render('app/admin/logs', ['title' => 'Activity Logs', 'logs' => $logs, 'actions' => $actions, 'action' => $action, 'q' => $q, 'days' => $days, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -276,10 +281,15 @@ class Ctl_analytics {
 class Ctl_reports {
     public function run(): void {
         $u = require_role('ministry');
+        $sort = $_GET['sort'] ?? 'created_at';
+        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $sortMap = ['title' => 'r.title', 'type' => 'r.type', 'school' => 's.name', 'by' => 'us.last_name', 'created_at' => 'r.created_at'];
+        if (!isset($sortMap[$sort])) $sort = 'created_at';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', r.id DESC';
         $reports = Database::all(
             "SELECT r.*, s.name AS school_name, CONCAT(us.first_name, ' ', us.last_name) AS user_name
              FROM reports r JOIN schools s ON s.id = r.school_id JOIN users us ON us.id = r.user_id
-             ORDER BY r.created_at DESC LIMIT 100");
+             ORDER BY $orderBy LIMIT 100");
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -299,7 +309,7 @@ class Ctl_reports {
                 redirect('reports/index&download=' . $rid);
             }
         }
-        Router::render('app/admin/reports', ['title' => 'Reports', 'reports' => $reports, 'schools' => $schools]);
+        Router::render('app/admin/reports', ['title' => 'Reports', 'reports' => $reports, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 
     private function buildReport(string $type, int $schoolId): array {
@@ -465,8 +475,13 @@ class Ctl_announcements {
 class Ctl_library {
     public function run(): void {
         $u = require_role('ministry');
+        $sort = $_GET['sort'] ?? 'created_at';
+        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $sortMap = ['title' => 'i.title', 'type' => 'i.type', 'school' => 's.name', 'downloads' => 'i.downloads', 'status' => 'i.status', 'created_at' => 'i.created_at'];
+        if (!isset($sortMap[$sort])) $sort = 'created_at';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', i.id DESC';
         $df = demo_filter('i');
-        $items = Database::all("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE 1=1 $df ORDER BY i.created_at DESC LIMIT 150");
+        $items = Database::all("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE 1=1 $df ORDER BY $orderBy LIMIT 150");
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -492,7 +507,7 @@ class Ctl_library {
                 redirect('admin/library');
             }
         }
-        Router::render('app/admin/library', ['title' => 'Library', 'items' => $items, 'schools' => $schools]);
+        Router::render('app/admin/library', ['title' => 'Library', 'items' => $items, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -945,7 +960,12 @@ class Ctl_modules {
         if ($q !== '') { $where .= " AND (module_key LIKE ? OR name LIKE ? OR description LIKE ?)"; array_push($args, "%$q%", "%$q%", "%$q%"); }
         if (in_array($cat, ['core', 'education', 'portal', 'service'], true)) { $where .= " AND category = ?"; $args[] = $cat; }
         if (in_array($only, ['on', 'off'], true)) { $where .= $only === 'on' ? " AND enabled = 1" : " AND enabled = 0"; }
-        $modules = Database::all("SELECT * FROM modules WHERE $where ORDER BY is_core DESC, category, name", $args);
+        $sort = $_GET['sort'] ?? 'name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['name' => 'name', 'category' => 'category', 'level' => 'education_type', 'installed_at' => 'installed_at', 'enabled' => 'enabled'];
+        if (!isset($sortMap[$sort])) $sort = 'name';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', id ASC';
+        $modules = Database::all("SELECT * FROM modules WHERE $where ORDER BY is_core DESC, $orderBy", $args);
         $cats = Database::all("SELECT category, COUNT(*) c FROM modules GROUP BY category");
         $counts = [
             'all' => (int)Database::scalar("SELECT COUNT(*) FROM modules", [], 0),
@@ -960,7 +980,7 @@ class Ctl_modules {
             Router::render('app/admin/modules_levels', ['title' => 'Modules by Level', 'rows' => $rows, 'counts' => $counts]);
             return;
         }
-        Router::render('app/admin/modules', ['title' => 'Modules', 'modules' => $modules, 'cats' => $cats, 'counts' => $counts, 'q' => $q, 'cat' => $cat, 'only' => $only]);
+        Router::render('app/admin/modules', ['title' => 'Modules', 'modules' => $modules, 'cats' => $cats, 'counts' => $counts, 'q' => $q, 'cat' => $cat, 'only' => $only, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -1100,6 +1120,11 @@ class Ctl_override {
             redirect('admin/override');
         }
         $q = trim((string)($_GET['q'] ?? ''));
+        $sort = $_GET['sort'] ?? 'last_name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['user' => 'u.last_name', 'role' => 'u.role', 'school' => 'sc.name', 'status' => 'u.status', 'last_name' => 'u.last_name'];
+        if (!isset($sortMap[$sort])) $sort = 'last_name';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', u.id ASC';
         $rows = [];
         if ($q !== '') {
             $like = '%' . $q . '%';
@@ -1108,15 +1133,15 @@ class Ctl_override {
                         sc.name AS school_name
                  FROM users u LEFT JOIN schools sc ON sc.id = u.school_id
                  WHERE u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?
-                 ORDER BY u.last_name LIMIT 30", [$like, $like, $like]);
+                 ORDER BY $orderBy LIMIT 30", [$like, $like, $like]);
         } else {
             $rows = Database::all(
                 "SELECT u.id, u.role, u.first_name, u.last_name, u.email, u.status, sc.name AS school_name
                  FROM users u LEFT JOIN schools sc ON sc.id = u.school_id
                  WHERE u.role IN ('regional','principal','registrar','dean','teacher','student')
-                 ORDER BY u.status, u.last_name LIMIT 30");
+                 ORDER BY $orderBy LIMIT 30");
         }
-        Router::render('app/admin/override', ['title' => 'Emergency Override', 'rows' => $rows, 'q' => $q]);
+        Router::render('app/admin/override', ['title' => 'Emergency Override', 'rows' => $rows, 'q' => $q, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -1124,6 +1149,10 @@ class Ctl_override {
 class Ctl_finance {
     public function run(): void {
         require_role('ministry');
+        $sort = $_GET['sort'] ?? 'name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['name' => 'name', 'level' => 'level', 'paid_courses' => 'paid_courses', 'revenue' => 'revenue'];
+        if (!isset($sortMap[$sort])) $sort = 'name';
         $rows = [];
         $schools = Database::all("SELECT id, name, education_level FROM schools ORDER BY name");
         foreach ($schools as $sc) {
@@ -1139,8 +1168,10 @@ class Ctl_finance {
                 'paid_courses' => $paidCourses, 'revenue' => round((float)$revenue, 2),
             ];
         }
+        $sortCol = $sortMap[$sort];
+        usort($rows, fn($a, $b) => $dir === 'asc' ? ($a[$sortCol] <=> $b[$sortCol]) : ($b[$sortCol] <=> $a[$sortCol]));
         $notEnabled = array_filter($schools, fn($s) => !module_active((int)$s['id'], 'finance'));
-        Router::render('app/admin/finance', ['title' => 'Financial Summary', 'rows' => $rows, 'notEnabled' => $notEnabled]);
+        Router::render('app/admin/finance', ['title' => 'Financial Summary', 'rows' => $rows, 'notEnabled' => $notEnabled, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -1183,10 +1214,15 @@ class Ctl_licenses {
                 redirect('admin/licenses');
             }
         }
+        $sort = $_GET['sort'] ?? 'created_at';
+        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $sortMap = ['institution' => 'l.institution', 'type' => 'l.type', 'seats' => 'l.seats', 'issued' => 'l.issued_at', 'expires' => 'l.expires_at', 'status' => 'l.status', 'created_at' => 'l.created_at'];
+        if (!isset($sortMap[$sort])) $sort = 'created_at';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', l.id DESC';
         $rows = Database::all(
             "SELECT l.*, sc.name AS school_name FROM licenses l LEFT JOIN schools sc ON sc.id = l.school_id
-             ORDER BY l.created_at DESC LIMIT 200");
+             ORDER BY $orderBy LIMIT 200");
         $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
-        Router::render('app/admin/licenses', ['title' => 'Licenses', 'rows' => $rows, 'schools' => $schools]);
+        Router::render('app/admin/licenses', ['title' => 'Licenses', 'rows' => $rows, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 }

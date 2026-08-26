@@ -9,8 +9,18 @@
 </div>
 
 <div class="table-wrap">
+  <?php $liSortUrl = fn($col) => url('admin/licenses?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
-    <thead><tr><th>License key</th><th>Institution</th><th>Type</th><th>Seats</th><th>Issued</th><th>Expires</th><th>Status</th><th style="width:120px">Actions</th></tr></thead>
+    <thead><tr>
+      <th>License key</th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('institution')) ?>">Institution<?php if($sort==='institution'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('type')) ?>">Type<?php if($sort==='type'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('seats')) ?>">Seats<?php if($sort==='seats'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('issued')) ?>">Issued<?php if($sort==='issued'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('expires')) ?>">Expires<?php if($sort==='expires'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th style="width:120px">Actions</th>
+    </tr></thead>
     <tbody>
       <?php foreach ($rows as $l): ?>
         <tr>

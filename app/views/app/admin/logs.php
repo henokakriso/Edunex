@@ -61,14 +61,15 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
 </div>
 
 <div class="card">
+  <?php $lSortUrl = fn($col) => url('admin/logs?' . http_build_query(array_filter(['action'=>$action,'q'=>$q,'days'=>$days,'sort'=>$col, 'dir'=> $sort===$col && $dir==='desc' ? 'asc' : 'desc'], fn($x)=>$x!==''))); ?>
   <div class="table-wrap">
     <table class="table" style="table-layout:auto">
       <thead><tr style="text-align:center">
         <th style="width:36px">#</th>
-        <th style="min-width:140px;padding-left:16px">When</th>
-        <th style="min-width:160px;padding-left:16px">User</th>
-        <th style="min-width:180px;padding-left:16px">School</th>
-        <th style="min-width:100px">Action</th>
+        <th style="min-width:140px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('created_at')) ?>">When<?php if($sort==='created_at'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th style="min-width:160px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('user')) ?>">User<?php if($sort==='user'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th style="min-width:180px;padding-left:16px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th style="min-width:100px"><a class="ajax-nav sort-link" href="<?= e($lSortUrl('action')) ?>">Action<?php if($sort==='action'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
         <th style="min-width:200px">Detail</th>
       </tr></thead>
       <tbody>
