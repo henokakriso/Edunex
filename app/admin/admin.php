@@ -587,8 +587,13 @@ class Ctl_school {
 class Ctl_departments {
     public function run(): void {
         $u = require_role('ministry');
+        $sort = $_GET['sort'] ?? 'name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['name' => 'd.name', 'school' => 's.name', 'members' => 'members', 'status' => 'd.status'];
+        if (!isset($sortMap[$sort])) $sort = 'name';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', d.id DESC';
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $depts = Database::all("SELECT d.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.department_id = d.id) AS members FROM departments d JOIN schools s ON s.id = d.school_id ORDER BY d.status = 'archived', d.name");
+        $depts = Database::all("SELECT d.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.department_id = d.id) AS members FROM departments d JOIN schools s ON s.id = d.school_id ORDER BY $orderBy");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_dept'])) {
@@ -629,7 +634,7 @@ class Ctl_departments {
                 redirect('admin/departments');
             }
         }
-        Router::render('app/admin/departments', ['title' => 'Departments', 'depts' => $depts, 'schools' => $schools]);
+        Router::render('app/admin/departments', ['title' => 'Departments', 'depts' => $depts, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -677,9 +682,14 @@ class Ctl_department {
 class Ctl_subjects {
     public function run(): void {
         $u = require_role('ministry');
+        $sort = $_GET['sort'] ?? 'name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['name' => 's.name', 'code' => 's.code', 'school' => 'sc.name', 'department' => 'd.name', 'status' => 's.status'];
+        if (!isset($sortMap[$sort])) $sort = 'name';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', s.id DESC';
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $depts = Database::all("SELECT id, name, school_id FROM departments WHERE status = 'active' ORDER BY name");
-        $subjects = Database::all("SELECT s.*, sc.name AS school_name, d.name AS dept_name FROM subjects s JOIN schools sc ON sc.id = s.school_id LEFT JOIN departments d ON d.id = s.department_id ORDER BY s.status = 'archived', s.name");
+        $subjects = Database::all("SELECT s.*, sc.name AS school_name, d.name AS dept_name FROM subjects s JOIN schools sc ON sc.id = s.school_id LEFT JOIN departments d ON d.id = s.department_id ORDER BY $orderBy");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_subject'])) {
@@ -719,7 +729,7 @@ class Ctl_subjects {
                 redirect('admin/subjects');
             }
         }
-        Router::render('app/admin/subjects', ['title' => 'Subjects', 'subjects' => $subjects, 'schools' => $schools, 'depts' => $depts]);
+        Router::render('app/admin/subjects', ['title' => 'Subjects', 'subjects' => $subjects, 'schools' => $schools, 'depts' => $depts, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -727,8 +737,13 @@ class Ctl_subjects {
 class Ctl_groups {
     public function run(): void {
         $u = require_role('ministry');
+        $sort = $_GET['sort'] ?? 'name';
+        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+        $sortMap = ['name' => 'g.name', 'school' => 's.name', 'grade' => 'g.grade', 'section' => 'g.section', 'students' => 'members'];
+        if (!isset($sortMap[$sort])) $sort = 'name';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', g.id DESC';
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $groups = Database::all("SELECT g.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.group_id = g.id) AS members FROM student_groups g JOIN schools s ON s.id = g.school_id ORDER BY g.name");
+        $groups = Database::all("SELECT g.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.group_id = g.id) AS members FROM student_groups g JOIN schools s ON s.id = g.school_id ORDER BY $orderBy");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_group'])) {
@@ -745,7 +760,7 @@ class Ctl_groups {
                 redirect('admin/groups');
             }
         }
-        Router::render('app/admin/groups', ['title' => 'Classes', 'groups' => $groups, 'schools' => $schools]);
+        Router::render('app/admin/groups', ['title' => 'Classes', 'groups' => $groups, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 
@@ -792,12 +807,17 @@ class Ctl_courses {
     public function run(): void {
         $u = require_role('ministry');
         $schoolId = (int)($_GET['school'] ?? 0);
+        $sort = $_GET['sort'] ?? 'created_at';
+        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $sortMap = ['name' => 'c.name', 'school' => 's.name', 'teacher' => 'u.last_name', 'students' => 'students', 'lessons' => 'lessons', 'status' => 'c.status', 'created_at' => 'c.created_at'];
+        if (!isset($sortMap[$sort])) $sort = 'created_at';
+        $orderBy = $sortMap[$sort] . ' ' . $dir . ', c.id DESC';
         $courses = Database::all(
             "SELECT c.*, s.name AS school_name, u.first_name AS tfirst, u.last_name AS tlast,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons
              FROM courses c JOIN schools s ON s.id = c.school_id JOIN users u ON u.id = c.teacher_id
-             WHERE 1=1" . ($schoolId ? " AND c.school_id = ?" : "") . " ORDER BY c.created_at DESC", $schoolId ? [$schoolId] : []);
+             WHERE 1=1" . ($schoolId ? " AND c.school_id = ?" : "") . " ORDER BY $orderBy", $schoolId ? [$schoolId] : []);
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
@@ -824,7 +844,7 @@ class Ctl_courses {
                 redirect('admin/courses');
             }
         }
-        Router::render('app/admin/courses', ['title' => 'All Courses', 'courses' => $courses, 'schools' => $schools, 'schoolId' => $schoolId]);
+        Router::render('app/admin/courses', ['title' => 'All Courses', 'courses' => $courses, 'schools' => $schools, 'schoolId' => $schoolId, 'sort' => $sort, 'dir' => $dir]);
     }
 }
 

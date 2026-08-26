@@ -22,8 +22,16 @@
 </form>
 
 <div class="card">
+  <?php $gSortUrl = fn($col) => url('admin/groups?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
-    <thead><tr><th>Class</th><th>School</th><th>Grade</th><th>Section</th><th>Students</th><th></th></tr></thead>
+    <thead><tr>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('name')) ?>">Class<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('grade')) ?>">Grade<?php if($sort==='grade'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('section')) ?>">Section<?php if($sort==='section'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('students')) ?>">Students<?php if($sort==='students'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th></th>
+    </tr></thead>
     <tbody>
       <?php foreach ($groups as $g): ?>
         <tr>

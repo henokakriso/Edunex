@@ -21,8 +21,16 @@
 </form>
 
 <div class="card">
+  <?php $dSortUrl = fn($col) => url('admin/departments?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
-    <thead><tr><th>Department</th><th>School</th><th>Head</th><th>Members</th><th>Status</th><th>Actions</th></tr></thead>
+    <thead><tr>
+      <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('name')) ?>">Department<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th>Head</th>
+      <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('members')) ?>">Members<?php if($sort==='members'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+      <th>Actions</th>
+    </tr></thead>
     <tbody>
       <?php foreach ($depts as $d): ?>
         <tr class="<?= $d['status'] === 'archived' ? 'row-muted' : '' ?>">

@@ -20,9 +20,18 @@
 </div>
 
 <div class="card">
+  <?php $cSortUrl = fn($col) => url('admin/courses?' . http_build_query(array_filter(['school'=>$schoolId ?: '','sort'=>$col, 'dir'=> $sort===$col && $dir==='desc' ? 'asc' : 'desc'], fn($x)=>$x!==''))); ?>
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>Course</th><th>School</th><th>Teacher</th><th>Students</th><th>Lessons</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('name')) ?>">Course<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('school')) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('teacher')) ?>">Teacher<?php if($sort==='teacher'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('students')) ?>">Students<?php if($sort==='students'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('lessons')) ?>">Lessons<?php if($sort==='lessons'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('status')) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></th>
+        <th>Actions</th>
+      </tr></thead>
       <tbody>
         <?php foreach ($courses as $c): ?>
           <tr>
