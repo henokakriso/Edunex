@@ -74,6 +74,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
     <div class="ul-col ul-col-user"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">User<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-role"><a class="ajax-nav sort-link" href="<?= e($sortUrl('role',$sort,$dir)) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
+    <div class="ul-col ul-col-number"><a class="ajax-nav sort-link" href="<?= e($sortUrl('number',$sort,$dir)) ?>">Number<?php if($sort==='number'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-id"><a class="ajax-nav sort-link" href="<?= e($sortUrl('id',$sort,$dir)) ?>">ID<?php if($sort==='id'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('school',$sort,$dir)) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
@@ -105,7 +106,8 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
         </div>
       </div>
       <div class="ul-col ul-col-role"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
-      <div class="ul-col ul-col-id small mono">#<?= (int)$us['id'] ?></div>
+      <div class="ul-col ul-col-number small mono ellipsis" title="<?= e($us['student_id'] ?? '') ?>"><?= e($us['student_id'] ?: '—') ?></div>
+      <div class="ul-col ul-col-id small mono">#<?= str_pad((int)$us['id'], 6, '0', STR_PAD_LEFT) ?></div>
       <div class="ul-col ul-col-school small ellipsis"><?= e($us['school_name']) ?></div>
       <div class="ul-col ul-col-status"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
       <div class="ul-col ul-col-joined small faint"><?= e(date('M j, Y', strtotime($us['created_at']))) ?></div>

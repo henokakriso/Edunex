@@ -799,14 +799,14 @@ kbd { font-family: inherit; }
 
 /* Users list layout */
 .users-list-head {
-  display: grid; grid-template-columns: 36px 260px 160px 60px 300px 100px 120px 130px;
+  display: grid; grid-template-columns: 36px 260px 140px 160px 80px 260px 100px 100px 120px;
   align-items: center; gap: 0;
   padding: 10px 0; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
   border-bottom: 1px solid var(--border);
 }
 .user-list-row {
-  display: grid; grid-template-columns: 36px 260px 160px 60px 300px 100px 120px 130px;
+  display: grid; grid-template-columns: 36px 260px 140px 160px 80px 260px 100px 100px 120px;
   align-items: center; gap: 0;
   padding: 12px 0; border-bottom: 1px solid var(--border);
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
@@ -830,6 +830,7 @@ kbd { font-family: inherit; }
 .ul-col-user { justify-content: flex-start; text-align: left; }
 .ul-col-role { justify-content: flex-start; text-align: left; }
 .ul-col-id { justify-content: flex-start; text-align: left; }
+.ul-col-number { justify-content: flex-start; text-align: left; }
 .ul-col-school { justify-content: flex-start; text-align: left; }
 .ul-col-status { justify-content: flex-start; text-align: left; }
 .ul-col-joined { justify-content: flex-start; text-align: left; }
@@ -846,11 +847,12 @@ kbd { font-family: inherit; }
   .ul-col-chk { grid-column: 1; }
   .ul-col-user { grid-column: 2; }
   .ul-col-role { grid-column: 1; }
-  .ul-col-id { grid-column: 2; }
-  .ul-col-school { grid-column: 1 / -1; }
-  .ul-col-status { grid-column: 1; }
-  .ul-col-joined { grid-column: 2; }
-  .ul-col-actions { grid-column: 1 / -1; }
+  .ul-col-number { grid-column: 2; }
+  .ul-col-id { grid-column: 1; }
+  .ul-col-school { grid-column: 2; }
+  .ul-col-status { grid-column: 1 / -1; }
+  .ul-col-joined { grid-column: 1; }
+  .ul-col-actions { grid-column: 2; }
 }
 
 /* Schools list layout */
