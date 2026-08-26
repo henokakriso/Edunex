@@ -34,6 +34,7 @@
   <?php $mSortUrl = fn($col) => url('admin/modules?' . http_build_query(array_filter(['q'=>$q,'cat'=>$cat,'only'=>$only,'sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'], fn($x)=>$x!==''))); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('name')) ?>">Module<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('category')) ?>">Category<span class="sort-arrow<?= $sort==='category' ? ' active' : '' ?>"><?= $sort==='category' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($mSortUrl('level')) ?>">Level<span class="sort-arrow<?= $sort==='level' ? ' active' : '' ?>"><?= $sort==='level' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -42,8 +43,9 @@
       <th style="width:110px">Action</th>
     </tr></thead>
     <tbody>
-      <?php foreach ($modules as $m): ?>
+      <?php $i = 0; foreach ($modules as $m): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td>
             <b><?= $m['is_core'] ? icon('shield-check') . ' ' : '' ?><?= e($m['name']) ?></b>
             <p class="tiny faint"><?= e($m['module_key']) ?><?= $m['is_core'] ? ' · core' : '' ?></p>
@@ -68,8 +70,8 @@
             <?php endif; ?>
           </td>
         </tr>
-      <?php endforeach; ?>
-      <?php if (!$modules): ?><tr><td colspan="6" class="muted">No modules match your filters.</td></tr><?php endif; ?>
+      <?php $i++; endforeach; ?>
+      <?php if (!$modules): ?><tr><td colspan="7" class="muted">No modules match your filters.</td></tr><?php endif; ?>
     </tbody>
   </table>
 </div>

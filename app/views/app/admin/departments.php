@@ -24,6 +24,7 @@
   <?php $dSortUrl = fn($col) => url('admin/departments?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('name')) ?>">Department<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($dSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th>Head</th>
@@ -32,8 +33,9 @@
       <th>Actions</th>
     </tr></thead>
     <tbody>
-      <?php foreach ($depts as $d): ?>
+      <?php $i = 0; foreach ($depts as $d): ?>
         <tr class="<?= $d['status'] === 'archived' ? 'row-muted' : '' ?>">
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><a href="<?= e(url('admin/department&id=' . $d['id'])) ?>"><b class="small"><?= e($d['name']) ?></b></a></td>
           <td class="small"><?= e($d['school_name']) ?></td>
           <td class="small"><?= e($d['head']) ?: '—' ?></td>
@@ -54,7 +56,7 @@
               </div>
             </td>
         </tr>
-      <?php endforeach; ?>
+      <?php $i++; endforeach; ?>
     </tbody>
   </table>
   <?php if (!$depts): ?><p class="muted small" style="padding:12px">No departments yet.</p><?php endif; ?>

@@ -25,6 +25,7 @@
   <?php $gSortUrl = fn($col) => url('admin/groups?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('name')) ?>">Class<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($gSortUrl('grade')) ?>">Grade<span class="sort-arrow<?= $sort==='grade' ? ' active' : '' ?>"><?= $sort==='grade' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -33,8 +34,9 @@
       <th></th>
     </tr></thead>
     <tbody>
-      <?php foreach ($groups as $g): ?>
+      <?php $i = 0; foreach ($groups as $g): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><b class="small"><?= e($g['name']) ?></b></td>
           <td class="small"><?= e($g['school_name']) ?></td>
           <td class="small"><?= e($g['grade']) ?: '—' ?></td>
@@ -47,7 +49,7 @@
             </form>
           </td>
         </tr>
-      <?php endforeach; ?>
+      <?php $i++; endforeach; ?>
     </tbody>
   </table>
   <?php if (!$groups): ?><p class="muted small" style="padding:12px">No classes yet.</p><?php endif; ?>

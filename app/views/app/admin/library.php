@@ -35,6 +35,7 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
   <?php $lbSortUrl = fn($col) => url('admin/library?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='desc' ? 'asc' : 'desc'])); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('title')) ?>">Item<span class="sort-arrow<?= $sort==='title' ? ' active' : '' ?>"><?= $sort==='title' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($lbSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -43,8 +44,9 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
       <th></th>
     </tr></thead>
     <tbody>
-      <?php foreach ($items as $it): ?>
+      <?php $i = 0; foreach ($items as $it): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td>
             <div class="flex gap-8" style="align-items:center">
               <span style="font-size:1.2rem"><?= $typeIcons[$it['type']] ?? icon('file') ?></span>
@@ -65,7 +67,7 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
             </div>
           </td>
         </tr>
-      <?php endforeach; ?>
+      <?php $i++; endforeach; ?>
     </tbody>
   </table>
   <?php if (!$items): ?><p class="muted small" style="padding:12px">Library is empty.</p><?php endif; ?>

@@ -33,6 +33,7 @@
   <h3 class="card-title" style="margin-top:0"><?= icon('folder') ?> Generated reports</h3>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('title')) ?>">Title<span class="sort-arrow<?= $sort==='title' ? ' active' : '' ?>"><?= $sort==='title' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($rSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -42,8 +43,9 @@
       <th></th>
     </tr></thead>
     <tbody>
-      <?php foreach ($reports as $r): ?>
+      <?php $i = 0; foreach ($reports as $r): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><b class="small"><?= e($r['title']) ?></b></td>
           <td><span class="badge badge-muted"><?= e($r['type']) ?></span></td>
           <td class="small"><?= e($r['school_name']) ?></td>
@@ -52,7 +54,7 @@
           <td class="small faint"><?= e(date('M j, H:i', strtotime($r['created_at']))) ?></td>
           <td><a class="btn btn-sm" href="<?= e(url('file?p=' . $r['file_path'] . '&dl=1')) ?>">⬇ Download</a></td>
         </tr>
-      <?php endforeach; ?>
+      <?php $i++; endforeach; ?>
     </tbody>
   </table>
   <?php if (!$reports): ?><p class="muted small" style="padding:12px">No reports generated yet.</p><?php endif; ?>

@@ -27,6 +27,7 @@
   <?php $sSortUrl = fn($col) => url('admin/subjects?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('name')) ?>">Subject<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('code')) ?>">Code<span class="sort-arrow<?= $sort==='code' ? ' active' : '' ?>"><?= $sort==='code' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($sSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -35,8 +36,9 @@
       <th>Actions</th>
     </tr></thead>
     <tbody>
-      <?php foreach ($subjects as $s): ?>
+      <?php $i = 0; foreach ($subjects as $s): ?>
         <tr class="<?= $s['status'] === 'archived' ? 'row-muted' : '' ?>">
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><b class="small"><?= e($s['name']) ?></b></td>
           <td class="small mono"><?= e($s['code']) ?: '—' ?></td>
           <td class="small"><?= e($s['school_name']) ?></td>
@@ -54,7 +56,7 @@
               </div>
             </td>
         </tr>
-      <?php endforeach; ?>
+      <?php $i++; endforeach; ?>
     </tbody>
   </table>
   <?php if (!$subjects): ?><p class="muted small" style="padding:12px">No subjects yet.</p><?php endif; ?>

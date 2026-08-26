@@ -12,6 +12,7 @@
   <?php $liSortUrl = fn($col) => url('admin/licenses?' . http_build_query(['sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'])); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th>License key</th>
       <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('institution')) ?>">Institution<span class="sort-arrow<?= $sort==='institution' ? ' active' : '' ?>"><?= $sort==='institution' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($liSortUrl('type')) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -22,8 +23,9 @@
       <th style="width:120px">Actions</th>
     </tr></thead>
     <tbody>
-      <?php foreach ($rows as $l): ?>
+      <?php $i = 0; foreach ($rows as $l): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><code style="font-size:.85em"><?= e($l['license_key']) ?></code></td>
           <td><?= e($l['institution'] ?: '—') ?><?= $l['school_name'] ? '<p class="tiny faint">' . e($l['school_name']) . '</p>' : '' ?></td>
           <td><span class="badge"><?= e($l['type']) ?></span></td>
@@ -44,8 +46,8 @@
             </div>
           </td>
         </tr>
-      <?php endforeach; ?>
-      <?php if (!$rows): ?><tr><td colspan="8" class="muted">No licenses issued yet.</td></tr><?php endif; ?>
+      <?php $i++; endforeach; ?>
+      <?php if (!$rows): ?><tr><td colspan="9" class="muted">No licenses issued yet.</td></tr><?php endif; ?>
     </tbody>
   </table>
 </div>

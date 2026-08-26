@@ -14,6 +14,7 @@
   <?php $oSortUrl = fn($col) => url('admin/override?' . http_build_query(array_filter(['q'=>$q,'sort'=>$col, 'dir'=> $sort===$col && $dir==='asc' ? 'desc' : 'asc'], fn($x)=>$x!==''))); ?>
   <table class="table">
     <thead><tr>
+      <th class="col-num">#</th>
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('user')) ?>">User<span class="sort-arrow<?= $sort==='user' ? ' active' : '' ?>"><?= $sort==='user' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('role')) ?>">Role<span class="sort-arrow<?= $sort==='role' ? ' active' : '' ?>"><?= $sort==='role' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -21,8 +22,9 @@
       <th style="width:430px">Emergency actions</th>
     </tr></thead>
     <tbody>
-      <?php foreach ($rows as $r): ?>
+      <?php $i = 0; foreach ($rows as $r): ?>
         <tr>
+          <td class="col-num"><?= $i + 1 ?></td>
           <td><b><?= e($r['first_name'] . ' ' . $r['last_name']) ?></b><div class="tiny faint"><?= e($r['email']) ?></div></td>
           <td><span class="badge badge-info"><?= e($r['role']) ?></span></td>
           <td class="small"><?= e($r['school_name'] ?: '—') ?></td>
@@ -53,8 +55,8 @@
             </div>
           </td>
         </tr>
-      <?php endforeach; ?>
-      <?php if (!$rows): ?><tr><td colspan="5" class="muted">No users found.</td></tr><?php endif; ?>
+      <?php $i++; endforeach; ?>
+      <?php if (!$rows): ?><tr><td colspan="6" class="muted">No users found.</td></tr><?php endif; ?>
     </tbody>
   </table>
 </div>

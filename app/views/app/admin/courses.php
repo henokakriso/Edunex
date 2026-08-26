@@ -24,6 +24,7 @@
   <div class="table-wrap">
     <table class="table">
       <thead><tr>
+        <th class="col-num">#</th>
         <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('name')) ?>">Course<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
         <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
         <th><a class="ajax-nav sort-link" href="<?= e($cSortUrl('teacher')) ?>">Teacher<span class="sort-arrow<?= $sort==='teacher' ? ' active' : '' ?>"><?= $sort==='teacher' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
@@ -33,8 +34,9 @@
         <th>Actions</th>
       </tr></thead>
       <tbody>
-        <?php foreach ($courses as $c): ?>
+        <?php $i = 0; foreach ($courses as $c): ?>
           <tr>
+            <td class="col-num"><?= $i + 1 ?></td>
             <td><b class="small"><?= e($c['title']) ?></b><?= $c['code'] ? '<br><span class="tiny faint mono">' . e($c['code']) . '</span>' : '' ?></td>
             <td class="small"><?= e($c['school_name']) ?></td>
             <td class="small"><?= e($c['tfirst'] . ' ' . $c['tlast']) ?></td>
@@ -57,7 +59,7 @@
               </div>
             </td>
           </tr>
-        <?php endforeach; ?>
+        <?php $i++; endforeach; ?>
       </tbody>
     </table>
   </div>
