@@ -212,14 +212,30 @@ class Ctl_users {
                 $email = trim($_POST['email'] ?? '');
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { flash('danger', 'Valid email required.'); redirect('admin/users' . $suffix); }
                 if (Database::one("SELECT id FROM users WHERE email = ?", [$email])) { flash('danger', 'Email already in use.'); redirect('admin/users' . $suffix); }
+
+                $allowed = match($u['role']) {
+                    'ministry' => ['regional'],
+                    'regional' => array_merge(['zonal','woreda','principal','teacher','student','parent'],
+                        Database::scalar("SELECT education_level FROM schools WHERE id = ?", [(int)$u['school_id']]) === 'university'
+                            ? ['registrar','dean','vice_dean','hod','lecturer','bursar','student_affairs','librarian'] : []),
+                    'zonal'    => ['woreda','principal','teacher','student','parent'],
+                    'woreda'   => ['principal','teacher','student','parent'],
+                    'principal'=> array_merge(['teacher','student','parent'],
+                        Database::scalar("SELECT education_level FROM schools WHERE id = ?", [(int)$u['school_id']]) === 'university'
+                            ? ['registrar','dean','vice_dean','hod','lecturer','bursar','student_affairs','librarian'] : []),
+                    'registrar'=> ['student'],
+                    default    => [],
+                };
+                if (!in_array($role2, $allowed, true)) {
+                    flash('danger', 'You do not have permission to create this role.'); redirect('admin/users' . $suffix);
+                }
+
                 $schoolId = (int)($_POST['school_id'] ?? 0);
                 if (!$schoolId) $schoolId = (int)$u['school_id'];
                 if (!$schoolId && in_array($role2, ['principal', 'teacher', 'student', 'parent'], true)) {
                     flash('danger', 'Select the school for this account.'); redirect('admin/users' . $suffix);
                 }
-                if ($role2 === 'principal' && $u['school_id'] !== null) {
-                    flash('danger', 'Only the Super Admin can create directors.'); redirect('admin/users' . $suffix);
-                }
+
                 $data = [
                     'school_id' => $schoolId, 'role' => $role2,
                     'first_name' => trim($_POST['first_name']), 'last_name' => trim($_POST['last_name']),
@@ -231,7 +247,9 @@ class Ctl_users {
                     $data['student_id'] = generate_student_id((int)$schoolId);
                     $data['group_id'] = (int)($_POST['group_id'] ?? 0) ?: null;
                 }
-                if ($role2 === 'teacher') $data['department_id'] = (int)($_POST['department_id'] ?? 0) ?: null;
+                if (in_array($role2, ['teacher', 'lecturer', 'hod'], true)) {
+                    $data['department_id'] = (int)($_POST['department_id'] ?? 0) ?: null;
+                }
                 Database::insert('users', $data);
                 $newUserId = Database::insertId();
                 if ($role2 === 'student') {
@@ -292,6 +310,7 @@ class Ctl_users {
             'schools' => $schools, 'groups' => $groups, 'depts' => $depts,
             'stats' => $stats, 'roleCounts' => $roleCounts,
             'sort' => $sort, 'dir' => $dir, 'page' => $page, 'pages' => $pages, 'total' => $total, 'pager' => $pager,
+            'creatorRole' => $u['role'], 'creatorSchoolId' => $u['school_id'],
         ]);
     }
 }
