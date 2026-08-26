@@ -257,11 +257,12 @@ table.table th {
   text-align: center; padding: 11px 14px; font-size: 11.5px; text-transform: uppercase;
   letter-spacing: .06em; color: var(--text-faint); font-weight: 700;
   background: var(--bg-soft); border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border); cursor: default; transition: background .15s, color .15s;
+  border-right: 1px solid var(--border); transition: background .15s, color .15s;
 }
 table.table th:last-child { border-right: none; }
+table.table th:has(a) { cursor: pointer; }
 table.table th:hover { background: var(--bg-hover); color: var(--text); }
-table.table th a { color: inherit; text-decoration: none; }
+table.table th a { color: inherit; text-decoration: none; display: block; width: 100%; }
 table.table td {
   padding: 12px 14px; border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border); vertical-align: middle;
