@@ -164,7 +164,7 @@ class Ctl_users {
         $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 25;
-        $sortMap = ['name' => 'us.first_name', 'role' => 'us.role', 'number' => 'us.student_id', 'school' => 's.name', 'status' => 'us.status', 'created_at' => 'us.created_at', 'id' => 'us.id'];
+        $sortMap = ['name' => 'us.first_name', 'role' => 'us.role', 'school' => 's.name', 'status' => 'us.status', 'created_at' => 'us.created_at', 'id' => 'us.id'];
         if (!isset($sortMap[$sort])) $sort = 'created_at';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', us.id DESC';
 
@@ -309,7 +309,7 @@ class Ctl_users {
             'title' => 'Users', 'users' => $users, 'role' => $role, 'q' => $q, 'status' => $status,
             'schools' => $schools, 'groups' => $groups, 'depts' => $depts,
             'stats' => $stats, 'roleCounts' => $roleCounts,
-            'sort' => $sort, 'dir' => $dir, 'page' => $page, 'pages' => $pages, 'total' => $total, 'pager' => $pager,
+            'sort' => $sort, 'dir' => $dir, 'page' => $page, 'pages' => $pages, 'total' => $total, 'pager' => $pager, 'perPage' => $perPage,
             'creatorRole' => $u['role'], 'creatorSchoolId' => $u['school_id'],
         ]);
     }

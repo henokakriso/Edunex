@@ -72,9 +72,9 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   <?php $sortUrl = fn($col, $curSort, $curDir) => url('admin/users?' . http_build_query(array_merge(array_filter(['role'=>$role,'status'=>$status,'q'=>$q,'page'=>$page], fn($x)=>$x!==''), ['sort'=>$col, 'dir'=> $curSort===$col && $curDir==='asc' ? 'desc' : 'asc']))); ?>
   <div class="users-list-head">
     <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" id="chk-all"><span></span></label></div>
+    <div class="ul-col ul-col-number">#</div>
     <div class="ul-col ul-col-user"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">User<?php if($sort==='name'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-role"><a class="ajax-nav sort-link" href="<?= e($sortUrl('role',$sort,$dir)) ?>">Role<?php if($sort==='role'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
-    <div class="ul-col ul-col-number"><a class="ajax-nav sort-link" href="<?= e($sortUrl('number',$sort,$dir)) ?>">Number<?php if($sort==='number'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-id"><a class="ajax-nav sort-link" href="<?= e($sortUrl('id',$sort,$dir)) ?>">ID<?php if($sort==='id'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('school',$sort,$dir)) ?>">School<?php if($sort==='school'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
     <div class="ul-col ul-col-status"><a class="ajax-nav sort-link" href="<?= e($sortUrl('status',$sort,$dir)) ?>">Status<?php if($sort==='status'): ?><span class="sort-arrow"><?= $dir==='asc'?'&#9650;':'&#9660;' ?></span><?php endif; ?></a></div>
@@ -82,7 +82,8 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
     <div class="ul-col ul-col-actions">Actions</div>
   </div>
 
-  <?php foreach ($users as $us):
+  <?php $i = 0; foreach ($users as $us):
+    $rowNum = ($page - 1) * $perPage + $i + 1;
     $protected = (int)$us['id'] === 1 || (int)$us['id'] === (int)$__u['id'];
     $initials = e(mb_substr($us['first_name'], 0, 1) . mb_substr($us['last_name'], 0, 1));
     $row = [
@@ -96,6 +97,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   ?>
     <div class="user-list-row" data-user='<?= e(json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'>
       <div class="ul-col ul-col-chk"><label class="chk"><input type="checkbox" class="row-chk" value="<?= (int)$us['id'] ?>" <?= $protected ? 'disabled' : '' ?>><span></span></label></div>
+      <div class="ul-col ul-col-number small mono muted"><?= $rowNum ?></div>
       <div class="ul-col ul-col-user">
         <div class="flex gap-10" style="align-items:center">
           <div class="avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $initials ?></div>
@@ -106,7 +108,6 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
         </div>
       </div>
       <div class="ul-col ul-col-role"><span class="badge <?= $roleCls[$us['role']] ?? 'badge-muted' ?>"><?= $roleIco[$us['role']] ?? '' ?> <?= e(ucfirst($us['role'])) ?></span></div>
-      <div class="ul-col ul-col-number small mono ellipsis" title="<?= e($us['student_id'] ?? '') ?>"><?= e($us['student_id'] ?: '—') ?></div>
       <div class="ul-col ul-col-id small mono">#<?= str_pad((int)$us['id'], 6, '0', STR_PAD_LEFT) ?></div>
       <div class="ul-col ul-col-school small ellipsis"><?= e($us['school_name']) ?></div>
       <div class="ul-col ul-col-status"><span class="badge <?= $statusCls[$us['status']] ?? 'badge-muted' ?>"><?= e($us['status']) ?></span></div>
@@ -127,7 +128,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
         </div>
       </div>
     </div>
-  <?php endforeach; ?>
+  <?php $i++; endforeach; ?>
 
   <?php if (!$users): ?>
     <div class="empty" style="padding:34px"><span class="empty-ico"><?= icon('search') ?></span><b>No users found</b><p class="tiny faint">Try a different search, role or status filter.</p></div>
