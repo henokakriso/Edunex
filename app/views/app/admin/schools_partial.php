@@ -10,7 +10,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
     <p class="sub"><?= number_format($total) ?> school<?= $total === 1 ? '' : 's' ?><?= $pages > 1 ? ' · page ' . $page . ' of ' . $pages : '' ?></p>
   </div>
   <?php if (in_array($__u['role'], ['zonal', 'woreda', 'principal', 'regional', 'ministry'])): ?>
-  <button class="btn btn-primary" data-open-modal="new-school-modal">+ Request new university</button>
+  <button class="btn btn-primary" data-open-modal="new-school-modal">+ <?= $__u['role'] === 'ministry' ? 'Create University' : 'Request New University' ?></button>
   <?php endif; ?>
 </div>
 

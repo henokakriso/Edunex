@@ -498,12 +498,20 @@ class Ctl_schools {
                     'school_id_number' => $schoolIdNum,
                     'subscription_plan' => 'free',
                     'enabled_modules' => json_encode($_POST['modules'] ?? []),
-                    'status' => 'pending',
-                    'approval_status' => 'pending',
+                    'status' => $u['role'] === 'ministry' ? 'active' : 'pending',
+                    'approval_status' => $u['role'] === 'ministry' ? 'ministry_approved' : 'pending',
+                    'approved_by' => $u['role'] === 'ministry' ? (int)$u['id'] : null,
+                    'approved_at' => $u['role'] === 'ministry' ? date('Y-m-d H:i:s') : null,
                 ];
                 $newSchoolId = Database::insert('schools', $data);
-                log_activity('school', "Requested new university: {$name} ({$schoolIdNum})", (int)$u['id']);
-                flash('success', "University request submitted! School ID: {$schoolIdNum} · Tenant: {$tenantId}. Awaiting regional approval.");
+                if ($u['role'] === 'ministry') {
+                    ensure_school_modules((int)$newSchoolId);
+                    log_activity('school', "Created university: {$name} ({$schoolIdNum})", (int)$u['id']);
+                    flash('success', "University created and activated! School ID: {$schoolIdNum} · Tenant: {$tenantId}.");
+                } else {
+                    log_activity('school', "Requested new university: {$name} ({$schoolIdNum})", (int)$u['id']);
+                    flash('success', "University request submitted! School ID: {$schoolIdNum} · Tenant: {$tenantId}. Awaiting regional approval.");
+                }
                 redirect('admin/schools' . $suffix);
             }
             if (($sid = (int)($_POST['update_school'] ?? 0))) {
