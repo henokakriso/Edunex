@@ -432,22 +432,78 @@ class Ctl_schools {
             csrf_verify();
             $suffix = $baseQuery ? '&' . http_build_query($baseQuery) : '';
             if (isset($_POST['create_school'])) {
+                $name = trim($_POST['name'] ?? '');
+                $code = strtoupper(trim($_POST['code'] ?? ''));
+                if (!$name) { flash('danger', 'School name required.'); redirect('admin/schools' . $suffix); }
+
+                // Auto-generate code if blank
+                if (!$code) {
+                    $words = preg_split('/\s+/', $name);
+                    $code = '';
+                    foreach ($words as $w) { $code .= mb_strtoupper(mb_substr($w, 0, 1)); if (mb_strlen($code) >= 3) break; }
+                    if (mb_strlen($code) < 3) $code = mb_strtoupper(mb_substr(preg_replace('/[^a-zA-Z]/', '', $name), 0, 3));
+                    if (mb_strlen($code) < 3) $code = 'SCH';
+                    // Ensure unique
+                    $base = $code; $n = 1;
+                    while (Database::one("SELECT id FROM schools WHERE code = ?", [$code])) { $code = $base . ($n++); }
+                } elseif (Database::one("SELECT id FROM schools WHERE code = ?", [$code])) {
+                    flash('danger', 'School code already exists.'); redirect('admin/schools' . $suffix);
+                }
+
+                // Auto-generate School ID number
+                $yr = date('Y');
+                $seq = (int)Database::scalar("SELECT COUNT(*)+1 FROM schools WHERE YEAR(created_at) = ?", [$yr], 1);
+                $schoolIdNum = sprintf('SCH-%s-%06d', $yr, $seq);
+
+                // Auto-generate Tenant ID
+                $tenantId = 'TNT-' . strtoupper(bin2hex(random_bytes(4)));
+
                 $data = [
-                    'name' => trim($_POST['name']), 'code' => strtoupper(trim($_POST['code'])),
-                    'type' => 'university', 'address' => trim($_POST['address'] ?? ''),
-                    'city' => trim($_POST['city'] ?? ''), 'phone' => trim($_POST['phone'] ?? ''),
-                    'email' => trim($_POST['email'] ?? ''),
-                    'education_level' => 'university',
+                    'name' => $name, 'code' => $code,
+                    'type' => 'university',
+                    'school_type' => $_POST['school_type'] ?? 'public',
+                    'education_level' => $_POST['education_level'] ?? 'university',
+                    'school_description' => trim($_POST['school_description'] ?? ''),
+                    'established_year' => (int)($_POST['established_year'] ?? 0) ?: null,
+                    'region' => trim($_POST['region'] ?? ''),
                     'zone_id' => (int)($_POST['zone_id'] ?? 0) ?: null,
                     'woreda_id' => (int)($_POST['woreda_id'] ?? 0) ?: null,
+                    'kebele' => trim($_POST['kebele'] ?? ''),
+                    'city' => trim($_POST['city'] ?? ''),
+                    'street_address' => trim($_POST['street_address'] ?? ''),
+                    'address' => trim($_POST['address'] ?? ''),
+                    'gps_lat' => $_POST['gps_lat'] ?: null,
+                    'gps_lng' => $_POST['gps_lng'] ?: null,
+                    'phone' => trim($_POST['phone'] ?? ''),
+                    'alt_phone' => trim($_POST['alt_phone'] ?? ''),
+                    'email' => trim($_POST['email'] ?? ''),
+                    'website' => trim($_POST['website'] ?? ''),
+                    'emergency_contact' => trim($_POST['emergency_contact'] ?? ''),
+                    'postal_address' => trim($_POST['postal_address'] ?? ''),
+                    'director_name' => trim($_POST['director_name'] ?? ''),
+                    'director_phone' => trim($_POST['director_phone'] ?? ''),
+                    'director_email' => trim($_POST['director_email'] ?? ''),
+                    'admin_name' => trim($_POST['admin_name'] ?? ''),
+                    'admin_phone' => trim($_POST['admin_phone'] ?? ''),
+                    'academic_year' => trim($_POST['academic_year'] ?? ''),
+                    'grade_levels' => trim($_POST['grade_levels'] ?? ''),
+                    'sections' => trim($_POST['sections'] ?? ''),
+                    'max_capacity' => (int)($_POST['max_capacity'] ?? 0) ?: null,
+                    'teaching_language' => trim($_POST['teaching_language'] ?? 'Amharic'),
+                    'second_language' => trim($_POST['second_language'] ?? ''),
+                    'grading_system' => trim($_POST['grading_system'] ?? 'percentage'),
+                    'attendance_system' => trim($_POST['attendance_system'] ?? 'daily'),
+                    'school_calendar' => trim($_POST['school_calendar'] ?? 'ethiopian'),
+                    'tenant_id' => $tenantId,
+                    'school_id_number' => $schoolIdNum,
+                    'subscription_plan' => 'free',
+                    'enabled_modules' => json_encode($_POST['modules'] ?? []),
                     'status' => 'pending',
                     'approval_status' => 'pending',
                 ];
-                if (!$data['name'] || !$data['code']) { flash('danger', 'Name and code required.'); redirect('admin/schools' . $suffix); }
-                if (Database::one("SELECT id FROM schools WHERE code = ?", [$data['code']])) { flash('danger', 'School code already exists.'); redirect('admin/schools' . $suffix); }
                 $newSchoolId = Database::insert('schools', $data);
-                log_activity('school', "Requested new university: {$data['name']}", (int)$u['id']);
-                flash('success', 'University request submitted. Awaiting regional approval.');
+                log_activity('school', "Requested new university: {$name} ({$schoolIdNum})", (int)$u['id']);
+                flash('success', "University request submitted! School ID: {$schoolIdNum} · Tenant: {$tenantId}. Awaiting regional approval.");
                 redirect('admin/schools' . $suffix);
             }
             if (($sid = (int)($_POST['update_school'] ?? 0))) {

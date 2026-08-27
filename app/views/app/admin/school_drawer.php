@@ -5,8 +5,8 @@ $typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'col
   <div class="drawer-avatar" style="font-size:1.5rem"><?= $typeIco[$school['type']] ?? icon('school') ?></div>
   <div class="min-0 flex-1">
     <b class="drawer-name"><?= e($school['name']) ?></b>
-    <p class="tiny faint ellipsis"><?= e($school['code']) ?> · <?= e(ucfirst($school['type'])) ?></p>
-    <div class="flex gap-6" style="margin-top:7px">
+    <p class="tiny faint ellipsis"><?= e($school['code']) ?> · <?= e(ucfirst($school['type'])) ?> · <?= e($school['school_type'] ?? 'public') ?></p>
+    <div class="flex gap-6" style="margin-top:7px;flex-wrap:wrap">
       <span class="badge <?= $school['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($school['status']) ?></span>
       <?php
         $approvalBadge = match($school['approval_status'] ?? 'pending') {
@@ -26,6 +26,7 @@ $typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'col
       ?>
       <span class="badge <?= $approvalBadge ?>"><?= $approvalLabel ?></span>
       <span class="badge badge-accent"><?= e($school['city'] ?: 'No city') ?></span>
+      <?php if (!empty($school['region'])): ?><span class="badge badge-accent"><?= e($school['region']) ?></span><?php endif; ?>
     </div>
   </div>
 </div>
@@ -108,9 +109,36 @@ $typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'col
 </div>
 
 <div class="drawer-section">
+  <h4>School Info</h4>
+  <div class="drawer-row"><span class="lbl"><?= icon('hash') ?> School ID</span><span class="val small mono"><?= e($school['school_id_number'] ?: '—') ?></span></div>
+  <div class="drawer-row"><span class="lbl"><?= icon('hash') ?> Tenant ID</span><span class="val small mono"><?= e($school['tenant_id'] ?: '—') ?></span></div>
+  <div class="drawer-row"><span class="lbl"><?= icon('pin') ?> Region</span><span class="val"><?= e($school['region'] ?: '—') ?></span></div>
+  <div class="drawer-row"><span class="lbl"><?= icon('map') ?> Zone</span><span class="val"><?= e($school['zone_id'] ?: '—') ?></span></div>
+  <div class="drawer-row"><span class="lbl"><?= icon('building') ?> Education Level</span><span class="val"><?= e(ucfirst(str_replace('-', ' ', $school['education_level'] ?? ''))) ?></span></div>
+  <?php if (!empty($school['established_year'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('calendar') ?> Established</span><span class="val"><?= (int)$school['established_year'] ?></span></div>
+  <?php endif; ?>
+  <?php if (!empty($school['director_name'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('user') ?> Director</span><span class="val"><?= e($school['director_name']) ?></span></div>
+  <?php endif; ?>
+  <?php if (!empty($school['teaching_language'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('globe') ?> Language</span><span class="val"><?= e($school['teaching_language']) ?></span></div>
+  <?php endif; ?>
+  <?php if (!empty($school['academic_year'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('calendar') ?> Academic Year</span><span class="val"><?= e($school['academic_year']) ?> (E.C.)</span></div>
+  <?php endif; ?>
+</div>
+
+<div class="drawer-section">
   <h4>Contact</h4>
   <div class="drawer-row"><span class="lbl"><?= icon('phone') ?> Phone</span><span class="val"><?= e($school['phone'] ?: '—') ?></span></div>
+  <?php if (!empty($school['alt_phone'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('phone') ?> Alt Phone</span><span class="val"><?= e($school['alt_phone']) ?></span></div>
+  <?php endif; ?>
   <div class="drawer-row"><span class="lbl"><?= icon('mail') ?> Email</span><span class="val"><?= e($school['email'] ?: '—') ?></span></div>
+  <?php if (!empty($school['website'])): ?>
+    <div class="drawer-row"><span class="lbl"><?= icon('globe') ?> Website</span><span class="val"><?= e($school['website']) ?></span></div>
+  <?php endif; ?>
   <div class="drawer-row"><span class="lbl"><?= icon('pin') ?> Address</span><span class="val"><?= e($school['address'] ?: '—') ?></span></div>
   <div class="drawer-row"><span class="lbl"><?= icon('calendar') ?> Created</span><span class="val"><?= e(date('M j, Y', strtotime($school['created_at']))) ?></span></div>
 </div>
