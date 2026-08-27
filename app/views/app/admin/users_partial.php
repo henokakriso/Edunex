@@ -14,7 +14,9 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   </div>
   <div class="flex gap-10">
     <a class="btn btn-ghost" href="<?= e(url('admin/import')) ?>"><?= icon('download') ?> Import</a>
+    <?php if (in_array($__u['role'], ['ministry','regional','zonal','woreda','principal','registrar'])): ?>
     <button class="btn btn-primary" data-open-modal="new-user-modal">+ New user</button>
+    <?php endif; ?>
   </div>
 </div>
 

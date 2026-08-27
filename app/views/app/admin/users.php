@@ -1,5 +1,36 @@
 <?php /* Admin users — page shell (static parts) */
 $isUni = $creatorSchoolId && (Database::scalar("SELECT education_level FROM schools WHERE id = ?", [(int)$creatorSchoolId]) === 'university');
+
+// Scope-based school list: regional/zonal/woreda admins only see schools in their scope
+$scopeSchools = $schools;
+if ($creatorRole === 'regional') {
+    // Regional admin sees schools in their zone's woredas, or all if no specific scope
+    $zoneId = (int)($__u['zone_id'] ?? 0);
+    if ($zoneId) {
+        $wIds = array_column(Database::all("SELECT id FROM woredas WHERE zone_id = ?", [$zoneId]), 'id');
+        if ($wIds) {
+            $placeholders = implode(',', array_fill(0, count($wIds), '?'));
+            $scopeSchools = Database::all("SELECT id, name FROM schools WHERE woreda_id IN ($placeholders) ORDER BY name", $wIds);
+        }
+    }
+} elseif ($creatorRole === 'zonal') {
+    $zoneId = (int)($__u['zone_id'] ?? 0);
+    if ($zoneId) {
+        $wIds = array_column(Database::all("SELECT id FROM woredas WHERE zone_id = ?", [$zoneId]), 'id');
+        if ($wIds) {
+            $placeholders = implode(',', array_fill(0, count($wIds), '?'));
+            $scopeSchools = Database::all("SELECT id, name FROM schools WHERE woreda_id IN ($placeholders) ORDER BY name", $wIds);
+        }
+    }
+} elseif ($creatorRole === 'woreda') {
+    $woredaId = (int)($__u['woreda_id'] ?? 0);
+    if ($woredaId) {
+        $scopeSchools = Database::all("SELECT id, name FROM schools WHERE woreda_id = ? ORDER BY name", [$woredaId]);
+    }
+}
+
+// University staff roles
+$uniStaff = ['registrar','dean','vice_dean','hod','lecturer','bursar','student_affairs','librarian'];
 ?>
 <div id="users-root" class="list-root">
 <?php include __DIR__ . '/users_partial.php'; ?>
@@ -20,8 +51,10 @@ $isUni = $creatorSchoolId && (Database::scalar("SELECT education_level FROM scho
       <div class="flex-col"><label class="small faint">Role *</label>
         <select class="input" name="role" id="nu-role">
           <?php if ($creatorRole === 'ministry'): ?>
+            <!-- Ministry → can create Admin (regional) only -->
             <option value="regional">Regional Admin</option>
           <?php elseif ($creatorRole === 'regional'): ?>
+            <!-- Regional → can create Zonal/Woreda/Principal + school staff -->
             <option value="zonal">Zonal Admin</option>
             <option value="woreda">Woreda Admin</option>
             <option value="principal">Principal / Director</option>
@@ -29,48 +62,45 @@ $isUni = $creatorSchoolId && (Database::scalar("SELECT education_level FROM scho
             <option value="student">Student</option>
             <option value="parent">Parent</option>
             <?php if ($isUni): ?>
-              <option value="registrar">Registrar</option>
-              <option value="dean">Dean</option>
-              <option value="vice_dean">Vice Dean</option>
-              <option value="hod">Head of Department</option>
-              <option value="lecturer">Lecturer</option>
-              <option value="bursar">Bursar</option>
-              <option value="student_affairs">Student Affairs</option>
-              <option value="librarian">Librarian</option>
+              <?php foreach ($uniStaff as $sr): ?><option value="<?= $sr ?>"><?= ucfirst(str_replace('_', ' ', $sr)) ?></option><?php endforeach; ?>
             <?php endif; ?>
           <?php elseif ($creatorRole === 'zonal'): ?>
+            <!-- Zonal → can create Woreda/Principal + school staff -->
             <option value="woreda">Woreda Admin</option>
             <option value="principal">Principal / Director</option>
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           <?php elseif ($creatorRole === 'woreda'): ?>
+            <!-- Woreda → can create Principal + school staff -->
             <option value="principal">Principal / Director</option>
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           <?php elseif ($creatorRole === 'principal'): ?>
+            <!-- Principal → can create school staff only -->
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
             <option value="parent">Parent</option>
             <?php if ($isUni): ?>
-              <option value="registrar">Registrar</option>
-              <option value="dean">Dean</option>
-              <option value="vice_dean">Vice Dean</option>
-              <option value="hod">Head of Department</option>
-              <option value="lecturer">Lecturer</option>
-              <option value="bursar">Bursar</option>
-              <option value="student_affairs">Student Affairs</option>
-              <option value="librarian">Librarian</option>
+              <?php foreach ($uniStaff as $sr): ?><option value="<?= $sr ?>"><?= ucfirst(str_replace('_', ' ', $sr)) ?></option><?php endforeach; ?>
             <?php endif; ?>
           <?php elseif ($creatorRole === 'registrar'): ?>
+            <!-- Registrar → can create students only -->
             <option value="student">Student</option>
           <?php endif; ?>
+          <!-- Teacher, Parent, Student, Director: no options — button hidden -->
         </select>
       </div>
       <div class="flex-col"><label class="small faint">School *</label>
-        <?php if (in_array($creatorRole, ['regional','zonal','woreda'])): ?>
-          <select class="input" name="school_id" required><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
+        <?php if (in_array($creatorRole, ['ministry','regional','zonal','woreda'])): ?>
+          <select class="input" name="school_id" id="nu-school" required>
+            <?php if (empty($scopeSchools)): ?>
+              <option value="">— No schools in your scope —</option>
+            <?php else: ?>
+              <?php foreach ($scopeSchools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?>
+            <?php endif; ?>
+          </select>
         <?php else: ?>
           <input type="hidden" name="school_id" value="<?= (int)($u['school_id'] ?? 0) ?>">
           <input class="input" value="<?= e($u['school_name'] ?? '') ?>" disabled>

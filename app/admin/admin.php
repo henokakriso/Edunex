@@ -213,6 +213,7 @@ class Ctl_users {
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { flash('danger', 'Valid email required.'); redirect('admin/users' . $suffix); }
                 if (Database::one("SELECT id FROM users WHERE email = ?", [$email])) { flash('danger', 'Email already in use.'); redirect('admin/users' . $suffix); }
 
+                // Strict role hierarchy enforcement
                 $allowed = match($u['role']) {
                     'ministry' => ['regional'],
                     'regional' => array_merge(['zonal','woreda','principal','teacher','student','parent'],
@@ -224,7 +225,7 @@ class Ctl_users {
                         Database::scalar("SELECT education_level FROM schools WHERE id = ?", [(int)$u['school_id']]) === 'university'
                             ? ['registrar','dean','vice_dean','hod','lecturer','bursar','student_affairs','librarian'] : []),
                     'registrar'=> ['student'],
-                    default    => [],
+                    default    => [], // teacher, parent, student, dean, etc. cannot create users
                 };
                 if (!in_array($role2, $allowed, true)) {
                     flash('danger', 'You do not have permission to create this role.'); redirect('admin/users' . $suffix);
@@ -234,6 +235,28 @@ class Ctl_users {
                 if (!$schoolId) $schoolId = (int)$u['school_id'];
                 if (!$schoolId && in_array($role2, ['principal', 'teacher', 'student', 'parent'], true)) {
                     flash('danger', 'Select the school for this account.'); redirect('admin/users' . $suffix);
+                }
+
+                // Scope enforcement: regional/zonal/woreda admins can only create in their scope
+                if (in_array($u['role'], ['regional','zonal','woreda']) && $schoolId) {
+                    $school = Database::one("SELECT zone_id, woreda_id FROM schools WHERE id = ?", [$schoolId]);
+                    if ($school) {
+                        if ($u['role'] === 'woreda' && (int)$school['woreda_id'] !== (int)$u['woreda_id']) {
+                            flash('danger', 'You can only create users in schools within your woreda.'); redirect('admin/users' . $suffix);
+                        }
+                        if ($u['role'] === 'zonal') {
+                            $myWoredas = array_column(Database::all("SELECT id FROM woredas WHERE zone_id = ?", [(int)$u['zone_id']]), 'id');
+                            if (!in_array((int)$school['woreda_id'], $myWoredas)) {
+                                flash('danger', 'You can only create users in schools within your zone.'); redirect('admin/users' . $suffix);
+                            }
+                        }
+                        if ($u['role'] === 'regional') {
+                            $myZones = array_column(Database::all("SELECT id FROM zones WHERE region_admin_id = ?", [(int)$u['id']]), 'id');
+                            if (!empty($myZones) && !in_array((int)$school['zone_id'], $myZones)) {
+                                flash('danger', 'You can only create users in schools within your region.'); redirect('admin/users' . $suffix);
+                            }
+                        }
+                    }
                 }
 
                 $data = [
@@ -435,6 +458,21 @@ class Ctl_schools {
                 $name = trim($_POST['name'] ?? '');
                 $code = strtoupper(trim($_POST['code'] ?? ''));
                 if (!$name) { flash('danger', 'School name required.'); redirect('admin/schools' . $suffix); }
+
+                // Scope enforcement: non-ministry admins can only create in their scope
+                if (in_array($u['role'], ['zonal','woreda'])) {
+                    $schoolZone = (int)($_POST['zone_id'] ?? 0);
+                    $schoolWoreda = (int)($_POST['woreda_id'] ?? 0);
+                    if ($u['role'] === 'woreda' && $schoolWoreda && $schoolWoreda !== (int)$u['woreda_id']) {
+                        flash('danger', 'You can only create schools in your woreda.'); redirect('admin/schools' . $suffix);
+                    }
+                    if ($u['role'] === 'zonal') {
+                        $myWoredas = array_column(Database::all("SELECT id FROM woredas WHERE zone_id = ?", [(int)$u['zone_id']]), 'id');
+                        if ($schoolWoreda && !in_array($schoolWoreda, $myWoredas)) {
+                            flash('danger', 'You can only create schools in your zone.'); redirect('admin/schools' . $suffix);
+                        }
+                    }
+                }
 
                 // Auto-generate code if blank
                 if (!$code) {
