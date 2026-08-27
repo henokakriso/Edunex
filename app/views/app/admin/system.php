@@ -11,10 +11,11 @@
   <div class="card">
     <h3 class="card-title" style="margin-top:0"><?= icon('monitor') ?> Environment</h3>
     <table class="table">
+      <thead><tr><th class="col-num">#</th><th>Setting</th><th>Value</th></tr></thead>
       <tbody>
-        <?php foreach ($info as $k => $v): ?>
-          <tr><td class="small faint"><?= e($k) ?></td><td class="small"><b><?= e((string)$v) ?></b></td></tr>
-        <?php endforeach; ?>
+        <?php $i = 0; foreach ($info as $k => $v): ?>
+          <tr><td class="col-num"><?= $i + 1 ?></td><td class="small faint"><?= e($k) ?></td><td class="small"><b><?= e((string)$v) ?></b></td></tr>
+        <?php $i++; endforeach; ?>
       </tbody>
     </table>
   </div>

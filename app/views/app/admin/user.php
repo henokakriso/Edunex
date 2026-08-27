@@ -65,9 +65,10 @@
         <?php else: ?><p class="muted small">No graded exams yet.</p><?php endif; ?>
         <?php if ($grades): ?>
           <div class="table-wrap" style="margin-top:10px">
-            <table class="table"><thead><tr><th>Exam</th><th>Course</th><th>Score</th><th>When</th></tr></thead><tbody>
-              <?php foreach (array_slice($grades, 0, 10) as $g): ?>
+            <table class="table"><thead><tr><th class="col-num">#</th><th>Exam</th><th>Course</th><th>Score</th><th>When</th></tr></thead><tbody>
+              <?php $i = 0; foreach (array_slice($grades, 0, 10) as $g): ?>
                 <tr>
+                  <td class="col-num"><?= $i + 1 ?></td>
                   <td class="small"><?= e($g['exam_title']) ?></td>
                   <td class="small faint"><?= e(mb_strimwidth($g['course_title'], 0, 20, '…')) ?></td>
                   <td class="small">
@@ -76,7 +77,7 @@
                   </td>
                   <td class="tiny faint"><?= e(date('M j, Y', strtotime($g['submitted_at']))) ?></td>
                 </tr>
-              <?php endforeach; ?>
+              <?php $i++; endforeach; ?>
             </tbody></table>
           </div>
         <?php endif; ?>
