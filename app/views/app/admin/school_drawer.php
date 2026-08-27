@@ -8,6 +8,23 @@ $typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'col
     <p class="tiny faint ellipsis"><?= e($school['code']) ?> · <?= e(ucfirst($school['type'])) ?></p>
     <div class="flex gap-6" style="margin-top:7px">
       <span class="badge <?= $school['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($school['status']) ?></span>
+      <?php
+        $approvalBadge = match($school['approval_status'] ?? 'pending') {
+          'pending' => 'badge-warning',
+          'regional_approved' => 'badge-accent',
+          'ministry_approved' => 'badge-success',
+          'rejected' => 'badge-danger',
+          default => 'badge-warning',
+        };
+        $approvalLabel = match($school['approval_status'] ?? 'pending') {
+          'pending' => 'Awaiting approval',
+          'regional_approved' => 'Regionally approved',
+          'ministry_approved' => 'Fully approved',
+          'rejected' => 'Rejected',
+          default => 'Pending',
+        };
+      ?>
+      <span class="badge <?= $approvalBadge ?>"><?= $approvalLabel ?></span>
       <span class="badge badge-accent"><?= e($school['city'] ?: 'No city') ?></span>
     </div>
   </div>
@@ -26,6 +43,21 @@ $typeIco = ['school' => icon('school'), 'university' => icon('graduation'), 'col
 
 <div class="drawer-actions">
   <a class="drawer-action primary" href="<?= e(url('admin/school&id=' . $school['id'])) ?>"><?= icon('eye') ?> Full profile</a>
+  <?php if (($school['approval_status'] ?? 'pending') === 'pending' && in_array($__u['role'], ['regional', 'ministry'])): ?>
+    <form method="post" style="display:inline"><input type="hidden" name="approve_school_regional" value="<?= (int)$school['id'] ?>"><?= csrf_field() ?>
+      <button class="drawer-action" style="background:var(--success);color:#fff;border:none;cursor:pointer"><?= icon('check') ?> Regional approve</button>
+    </form>
+  <?php endif; ?>
+  <?php if (($school['approval_status'] ?? '') === 'regional_approved' && $__u['role'] === 'ministry'): ?>
+    <form method="post" style="display:inline"><input type="hidden" name="approve_school_ministry" value="<?= (int)$school['id'] ?>"><?= csrf_field() ?>
+      <button class="drawer-action" style="background:var(--success);color:#fff;border:none;cursor:pointer"><?= icon('check') ?> Ministry approve & activate</button>
+    </form>
+  <?php endif; ?>
+  <?php if (in_array($school['approval_status'] ?? 'pending', ['pending', 'regional_approved']) && in_array($__u['role'], ['regional', 'ministry'])): ?>
+    <form method="post" style="display:inline"><input type="hidden" name="reject_school" value="<?= (int)$school['id'] ?>"><?= csrf_field() ?>
+      <button class="drawer-action" style="background:var(--danger);color:#fff;border:none;cursor:pointer" onclick="return confirm('Reject this school?')"><?= icon('x') ?> Reject</button>
+    </form>
+  <?php endif; ?>
 </div>
 
 <div class="drawer-section">

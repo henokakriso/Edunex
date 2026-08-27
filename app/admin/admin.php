@@ -397,6 +397,8 @@ class Ctl_schools {
         if ($q !== '') { $where .= " AND (s.name LIKE ? OR s.code LIKE ? OR s.city LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }
         if (in_array($type, ['school', 'university', 'college', 'training', 'other'], true)) { $where .= " AND s.type = ?"; $args[] = $type; }
         if (in_array($status, ['active', 'suspended'], true)) { $where .= " AND s.status = ?"; $args[] = $status; }
+        $approval = $_GET['approval'] ?? '';
+        if (in_array($approval, ['pending', 'regional_approved', 'ministry_approved', 'rejected'], true)) { $where .= " AND s.approval_status = ?"; $args[] = $approval; }
 
         $countSql = "SELECT COUNT(*) FROM schools s WHERE $where";
         $total = (int)Database::scalar($countSql, $args, 0);
@@ -432,19 +434,20 @@ class Ctl_schools {
             if (isset($_POST['create_school'])) {
                 $data = [
                     'name' => trim($_POST['name']), 'code' => strtoupper(trim($_POST['code'])),
-                    'type' => $_POST['type'] ?? 'school', 'address' => trim($_POST['address'] ?? ''),
+                    'type' => 'university', 'address' => trim($_POST['address'] ?? ''),
                     'city' => trim($_POST['city'] ?? ''), 'phone' => trim($_POST['phone'] ?? ''),
                     'email' => trim($_POST['email'] ?? ''),
-                    'education_level' => in_array($_POST['education_level'] ?? 'secondary', ['kg', 'primary', 'secondary', 'preparatory', 'university', 'college', 'training', 'other'], true) ? $_POST['education_level'] : 'secondary',
+                    'education_level' => 'university',
                     'zone_id' => (int)($_POST['zone_id'] ?? 0) ?: null,
                     'woreda_id' => (int)($_POST['woreda_id'] ?? 0) ?: null,
+                    'status' => 'pending',
+                    'approval_status' => 'pending',
                 ];
                 if (!$data['name'] || !$data['code']) { flash('danger', 'Name and code required.'); redirect('admin/schools' . $suffix); }
                 if (Database::one("SELECT id FROM schools WHERE code = ?", [$data['code']])) { flash('danger', 'School code already exists.'); redirect('admin/schools' . $suffix); }
                 $newSchoolId = Database::insert('schools', $data);
-                ensure_school_modules((int)$newSchoolId);
-                log_activity('school', "Created school {$data['name']}", (int)$u['id']);
-                flash('success', 'School created. Default modules for its level were installed automatically.');
+                log_activity('school', "Requested new university: {$data['name']}", (int)$u['id']);
+                flash('success', 'University request submitted. Awaiting regional approval.');
                 redirect('admin/schools' . $suffix);
             }
             if (($sid = (int)($_POST['update_school'] ?? 0))) {
@@ -470,10 +473,52 @@ class Ctl_schools {
                 }
                 redirect('admin/schools' . $suffix);
             }
+            if (($sid = (int)($_POST['approve_school_regional'] ?? 0))) {
+                $target = Database::one("SELECT id, name, approval_status FROM schools WHERE id = ?", [$sid]);
+                if ($target && $target['approval_status'] === 'pending') {
+                    Database::update('schools', [
+                        'approval_status' => 'regional_approved',
+                        'approved_by' => (int)$u['id'],
+                        'approved_at' => date('Y-m-d H:i:s'),
+                    ], 'id = ?', [$sid]);
+                    log_activity('school', "Regionally approved: {$target['name']}", (int)$u['id']);
+                    flash('success', "Approved {$target['name']} at regional level. Awaiting ministry approval.");
+                }
+                redirect('admin/schools' . $suffix);
+            }
+            if (($sid = (int)($_POST['approve_school_ministry'] ?? 0))) {
+                $target = Database::one("SELECT id, name, approval_status FROM schools WHERE id = ?", [$sid]);
+                if ($target && $target['approval_status'] === 'regional_approved') {
+                    Database::update('schools', [
+                        'approval_status' => 'ministry_approved',
+                        'status' => 'active',
+                        'approved_by' => (int)$u['id'],
+                        'approved_at' => date('Y-m-d H:i:s'),
+                    ], 'id = ?', [$sid]);
+                    ensure_school_modules($sid);
+                    log_activity('school', "Ministry approved & activated: {$target['name']}", (int)$u['id']);
+                    flash('success', "{$target['name']} approved and activated.");
+                }
+                redirect('admin/schools' . $suffix);
+            }
+            if (($sid = (int)($_POST['reject_school'] ?? 0))) {
+                $target = Database::one("SELECT id, name FROM schools WHERE id = ?", [$sid]);
+                if ($target) {
+                    Database::update('schools', [
+                        'approval_status' => 'rejected',
+                        'status' => 'suspended',
+                        'approved_by' => (int)$u['id'],
+                        'approved_at' => date('Y-m-d H:i:s'),
+                    ], 'id = ?', [$sid]);
+                    log_activity('school', "Rejected: {$target['name']}", (int)$u['id']);
+                    flash('danger', "{$target['name']} rejected.");
+                }
+                redirect('admin/schools' . $suffix);
+            }
         }
         $isPartial = ($_GET['partial'] ?? '') === '1';
         Router::render($isPartial ? 'app/admin/schools_partial' : 'app/admin/schools', [
-            'title' => 'Schools', 'schools' => $schools, 'q' => $q, 'type' => $type, 'status' => $status,
+            'title' => 'Schools', 'schools' => $schools, 'q' => $q, 'type' => $type, 'status' => $status, 'approval' => $approval,
             'stats' => $stats, 'typeCounts' => $typeCounts,
             'sort' => $sort, 'dir' => $dir, 'page' => $page, 'pages' => $pages, 'total' => $total, 'pager' => $pager,
         ]);

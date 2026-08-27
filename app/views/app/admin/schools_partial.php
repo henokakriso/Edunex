@@ -9,7 +9,9 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
     <h1><?= icon('school') ?> Schools</h1>
     <p class="sub"><?= number_format($total) ?> school<?= $total === 1 ? '' : 's' ?><?= $pages > 1 ? ' · page ' . $page . ' of ' . $pages : '' ?></p>
   </div>
-  <button class="btn btn-primary" data-open-modal="new-school-modal">+ New school</button>
+  <?php if (in_array($__u['role'], ['zonal', 'woreda', 'principal', 'regional', 'ministry'])): ?>
+  <button class="btn btn-primary" data-open-modal="new-school-modal">+ Request new university</button>
+  <?php endif; ?>
 </div>
 
 <!-- Stats -->
@@ -30,6 +32,15 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
         <option value="">All statuses</option>
         <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Active</option>
         <option value="suspended" <?= $status === 'suspended' ? 'selected' : '' ?>>Suspended</option>
+      </select>
+    </div>
+    <div class="flex-col"><label class="small faint">Approval</label>
+      <select class="input" name="approval" onchange="this.form.submit()">
+        <option value="">All approvals</option>
+        <option value="pending" <?= ($approval ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
+        <option value="regional_approved" <?= ($approval ?? '') === 'regional_approved' ? 'selected' : '' ?>>Regionally approved</option>
+        <option value="ministry_approved" <?= ($approval ?? '') === 'ministry_approved' ? 'selected' : '' ?>>Fully approved</option>
+        <option value="rejected" <?= ($approval ?? '') === 'rejected' ? 'selected' : '' ?>>Rejected</option>
       </select>
     </div>
     <button class="btn"><?= icon('search') ?> Search</button>
@@ -80,7 +91,15 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
       <div class="sl-col sl-col-type small"><?= e(ucfirst($s['type'])) ?></div>
       <div class="sl-col sl-col-city small"><?= e($s['city'] ?: '—') ?></div>
       <div class="sl-col sl-col-users small mono"><?= number_format((int)$s['total_users']) ?></div>
-      <div class="sl-col sl-col-status"><span class="badge <?= $s['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($s['status']) ?></span></div>
+      <div class="sl-col sl-col-status">
+        <span class="badge <?= $s['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($s['status']) ?></span>
+        <?php
+          $as = $s['approval_status'] ?? 'pending';
+          $ac = match($as) { 'pending' => 'badge-warning', 'regional_approved' => 'badge-accent', 'ministry_approved' => 'badge-success', 'rejected' => 'badge-danger', default => 'badge-warning' };
+          $al = match($as) { 'pending' => 'Pending', 'regional_approved' => 'Regional OK', 'ministry_approved' => 'Approved', 'rejected' => 'Rejected', default => 'Pending' };
+        ?>
+        <span class="badge <?= $ac ?>" style="font-size:9px;margin-top:3px;display:inline-block"><?= $al ?></span>
+      </div>
       <div class="sl-col sl-col-actions">
         <div class="row-act" style="justify-content:flex-end">
           <a class="icon-btn" title="View profile" href="<?= e(url('admin/school&id=' . $s['id'])) ?>"><?= icon('eye') ?></a>
