@@ -261,17 +261,71 @@ class Ctl_users {
 
                 $data = [
                     'school_id' => $schoolId, 'role' => $role2,
-                    'first_name' => trim($_POST['first_name']), 'last_name' => trim($_POST['last_name']),
-                    'email' => $email, 'phone' => trim($_POST['phone'] ?? ''),
+                    'first_name' => trim($_POST['first_name']),
+                    'middle_name' => trim($_POST['middle_name'] ?? ''),
+                    'last_name' => trim($_POST['last_name']),
+                    'gender' => trim($_POST['gender'] ?? ''),
+                    'birth_date' => $_POST['birth_date'] ?: null,
+                    'email' => $email,
+                    'phone' => trim($_POST['phone'] ?? ''),
+                    'alt_phone' => trim($_POST['alt_phone'] ?? ''),
+                    'national_id' => trim($_POST['national_id'] ?? ''),
+                    'fayda_id' => trim($_POST['national_id'] ?? ''),
+                    'address' => trim($_POST['address'] ?? ''),
+                    'kebele' => trim($_POST['kebele'] ?? ''),
+                    'region' => trim($_POST['region'] ?? ''),
+                    'emergency_contact' => trim($_POST['emergency_contact'] ?? ''),
                     'password_hash' => password_hash($_POST['password'] ?? random_password(), PASSWORD_BCRYPT),
-                    'status' => 'active',
+                    'status' => trim($_POST['status'] ?? 'active'),
+                    'username' => trim($_POST['username'] ?? ''),
                 ];
+
+                // Admin-specific fields
+                if ($role2 === 'regional') {
+                    $data['admin_type'] = trim($_POST['admin_type'] ?? '');
+                    $data['assigned_region'] = trim($_POST['assigned_region'] ?? '');
+                    $data['assigned_zone'] = trim($_POST['assigned_zone'] ?? '');
+                    $data['assigned_woreda'] = trim($_POST['assigned_woreda'] ?? '');
+                    $data['start_date'] = $_POST['start_date'] ?: null;
+                    $data['end_date'] = $_POST['end_date'] ?: null;
+                    $data['twofa_required'] = (int)($_POST['twofa_required'] ?? 0);
+                }
+
+                // Student-specific fields
                 if ($role2 === 'student') {
                     $data['student_id'] = generate_student_id((int)$schoolId);
                     $data['group_id'] = (int)($_POST['group_id'] ?? 0) ?: null;
+                    $data['birth_cert_number'] = trim($_POST['birth_cert_number'] ?? '');
+                    $data['student_type'] = trim($_POST['student_type'] ?? 'regular');
+                    $data['previous_school'] = trim($_POST['previous_school'] ?? '');
+                    $data['previous_grade'] = trim($_POST['previous_grade'] ?? '');
+                    $data['enrollment_date'] = $_POST['enrollment_date'] ?: date('Y-m-d');
+                    $data['disability_support'] = (int)($_POST['disability_support'] ?? 0);
+                    $data['special_needs'] = trim($_POST['special_needs'] ?? '');
+                    $data['language'] = trim($_POST['language'] ?? 'amharic');
+                    // Store parent info
+                    $data['parent_id'] = null; // Will be linked later
                 }
-                if (in_array($role2, ['teacher', 'lecturer', 'hod'], true)) {
+
+                // Parent-specific fields
+                if ($role2 === 'parent') {
+                    $data['relationship'] = trim($_POST['relationship'] ?? '');
+                    $data['linked_student_ids'] = trim($_POST['linked_student_ids'] ?? '');
+                }
+
+                // Teacher/Staff fields
+                if (in_array($role2, ['teacher','lecturer','hod','principal','registrar','dean','vice_dean','bursar','student_affairs','librarian'], true)) {
                     $data['department_id'] = (int)($_POST['department_id'] ?? 0) ?: null;
+                    $data['qualification'] = trim($_POST['qualification'] ?? '');
+                    $data['specialization'] = trim($_POST['specialization'] ?? '');
+                    $data['certification'] = trim($_POST['certification'] ?? '');
+                    $data['experience_years'] = (int)($_POST['experience_years'] ?? 0) ?: null;
+                    $data['employment_type'] = trim($_POST['employment_type'] ?? '');
+                    $data['hire_date'] = $_POST['hire_date'] ?: null;
+                    $data['position'] = trim($_POST['position'] ?? '');
+                    $data['grade_levels'] = trim($_POST['grade_levels'] ?? '');
+                    $data['sections'] = trim($_POST['sections'] ?? '');
+                    $data['employee_id'] = trim($_POST['employee_id'] ?? '');
                 }
                 Database::insert('users', $data);
                 $newUserId = Database::insertId();
