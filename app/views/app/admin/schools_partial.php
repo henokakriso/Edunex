@@ -48,6 +48,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
   <!-- Header -->
   <?php $sortUrl = fn($col, $curSort, $curDir) => url('admin/schools?' . http_build_query(array_filter(array_merge(['q'=>$q,'type'=>$type,'status'=>$status], ['sort'=>$col, 'dir'=> $curSort===$col && $curDir==='asc' ? 'desc' : 'asc']), fn($x)=>$x!==''))); ?>
   <div class="schools-list-head">
+    <div class="sl-col sl-col-number">#</div>
     <div class="sl-col sl-col-school"><a class="ajax-nav sort-link" href="<?= e($sortUrl('name',$sort,$dir)) ?>">School<span class="sort-arrow<?= $sort==='name' ? ' active' : '' ?>"><?= $sort==='name' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
     <div class="sl-col sl-col-type"><a class="ajax-nav sort-link" href="<?= e($sortUrl('type',$sort,$dir)) ?>">Type<span class="sort-arrow<?= $sort==='type' ? ' active' : '' ?>"><?= $sort==='type' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
     <div class="sl-col sl-col-city"><a class="ajax-nav sort-link" href="<?= e($sortUrl('city',$sort,$dir)) ?>">City<span class="sort-arrow<?= $sort==='city' ? ' active' : '' ?>"><?= $sort==='city' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></div>
@@ -56,7 +57,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
     <div class="sl-col sl-col-actions">Actions</div>
   </div>
 
-  <?php foreach ($schools as $s):
+  <?php $i = 0; foreach ($schools as $s):
     $row = [
         'id' => (int)$s['id'], 'name' => $s['name'], 'code' => $s['code'], 'type' => $s['type'],
         'city' => $s['city'] ?? '', 'phone' => $s['phone'] ?? '', 'email' => $s['email'] ?? '',
@@ -66,6 +67,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
     ];
   ?>
     <div class="school-list-row" data-drawer-url="<?= e(url('admin/school&id=' . $s['id'] . '&partial=1')) ?>">
+      <div class="sl-col sl-col-number small mono muted"><?= $i + 1 ?></div>
       <div class="sl-col sl-col-school">
         <div class="flex gap-10" style="align-items:center">
           <div class="avatar school-avatar" style="width:34px;height:34px;font-size:.72rem;flex-shrink:0"><?= $typeIco[$s['type']] ?? icon('school') ?></div>
@@ -93,7 +95,7 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
         </div>
       </div>
     </div>
-  <?php endforeach; ?>
+  <?php $i++; endforeach; ?>
 
   <?php if (!$schools): ?>
     <div class="empty" style="padding:34px"><span class="empty-ico"><?= icon('school') ?></span><b>No schools found</b><p class="tiny faint">Try a different search, type or status filter.</p></div>

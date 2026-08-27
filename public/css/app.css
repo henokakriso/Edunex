@@ -827,6 +827,10 @@ kbd { font-family: inherit; }
   text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
   border-bottom: 1px solid var(--border);
 }
+.users-list-head .ul-col { text-align: center; justify-content: center; cursor: default; transition: background .15s, color .15s; border-radius: 6px; }
+.users-list-head .ul-col:hover { background: var(--bg-hover); color: var(--text); }
+.users-list-head .ul-col a { display: block; width: 100%; text-align: center; }
+.users-list-head .ul-col-chk, .users-list-head .ul-col-number, .users-list-head .ul-col-actions { cursor: default; }
 .user-list-row {
   display: grid; grid-template-columns: 36px 50px 260px 140px 80px 260px 100px 100px 120px;
   align-items: center; gap: 0;
@@ -881,14 +885,18 @@ kbd { font-family: inherit; }
 
 /* Schools list layout */
 .schools-list-head {
-  display: grid; grid-template-columns: 1fr 110px 140px 80px 90px 120px;
+  display: grid; grid-template-columns: 40px 1fr 110px 140px 80px 90px 120px;
   align-items: center; gap: 0;
   padding: 10px 0; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint);
   border-bottom: 1px solid var(--border);
 }
+.schools-list-head .sl-col { text-align: center; justify-content: center; cursor: default; transition: background .15s, color .15s; border-radius: 6px; }
+.schools-list-head .sl-col:hover { background: var(--bg-hover); color: var(--text); }
+.schools-list-head .sl-col a { display: block; width: 100%; text-align: center; }
+.schools-list-head .sl-col-actions { cursor: default; }
 .school-list-row {
-  display: grid; grid-template-columns: 1fr 110px 140px 80px 90px 120px;
+  display: grid; grid-template-columns: 40px 1fr 110px 140px 80px 90px 120px;
   align-items: center; gap: 0;
   padding: 12px 0; border-bottom: 1px solid var(--border);
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
@@ -900,6 +908,7 @@ kbd { font-family: inherit; }
 .sl-col { display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; overflow: hidden; text-align: left; border-right: 1px solid var(--border); }
 .sl-col:first-child { padding-left: 16px; }
 .sl-col:last-child { border-right: none; padding-right: 8px; }
+.sl-col-number { justify-content: center; text-align: center; font-family: var(--font-mono, monospace); min-width: 40px; }
 .sl-col-school { min-width: 0; }
 .sl-col-type { justify-content: center; text-align: center; }
 .sl-col-city { white-space: nowrap; }
