@@ -1,0 +1,19 @@
+"EDUNEX LMS — Academic Performance — Aug 28, 2026"
+"Document ID",EDU-2026-000047
+Generated,"Aug 28, 2026 3:34 PM"
+"Report Type","Academic performance"
+Format,CSV
+Website,www.henockakriso.com
+License,"ARWE-PL Licensed 2026"
+
+Region,Institution,Course,Enrolled,"Avg Progress","Completion Rate",Completed,"In Progress"
+"Addis Ababa","Addis Ababa International School","Physics Foundations",1,0.0,0.0,0,1
+"Addis Ababa","Addis Ababa International School","Mathematics 101",1,50.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Calculus II",2,57.5,0.0,0,2
+"South Ethiopia","Hawassa Preparatory School","Digital Logic Design",1,35.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Database Systems",1,40.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Software Engineering",1,55.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Operating Systems",1,80.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","English for Academic Purpose",1,30.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Introduction to Computer Science",1,65.0,0.0,0,1
+"South Ethiopia","Hawassa Preparatory School","Data Structures",1,25.0,0.0,0,1

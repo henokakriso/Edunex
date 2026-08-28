@@ -49,7 +49,7 @@ $currentYear = (int)date('Y');
     <h3 class="card-title" style="margin-top:0"><?= icon('list') ?> Report Type <span class="tiny faint" style="font-weight:400;margin-left:6px">Select one or more</span></h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px">
       <?php foreach ($reportTypes as $key => [$name, $desc]): ?>
-        <label class="rpt-type" onclick="toggleType(this,'<?= $key ?>')">
+        <label class="rpt-type" onclick="toggleType(event, this, '<?= $key ?>')">
           <input type="checkbox" name="report_types[]" value="<?= $key ?>">
           <span class="rpt-dot"></span>
           <div><div class="rpt-name"><?= $name ?></div><div class="rpt-desc"><?= $desc ?></div></div>
@@ -161,7 +161,8 @@ $currentYear = (int)date('Y');
 <?php endif; ?>
 
 <script>
-function toggleType(el, val) {
+function toggleType(e, el, val) {
+  e.preventDefault();
   const cb = el.querySelector('input[type=checkbox]');
   cb.checked = !cb.checked;
   el.classList.toggle('selected', cb.checked);
