@@ -281,64 +281,220 @@ class Ctl_analytics {
 class Ctl_reports {
     public function run(): void {
         $u = require_role('ministry');
-        $sort = $_GET['sort'] ?? 'created_at';
-        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
-        $sortMap = ['title' => 'r.title', 'type' => 'r.type', 'school' => 's.name', 'by' => 'us.last_name', 'created_at' => 'r.created_at'];
-        if (!isset($sortMap[$sort])) $sort = 'created_at';
-        $orderBy = $sortMap[$sort] . ' ' . $dir . ', r.id DESC';
-        $reports = Database::all(
-            "SELECT r.*, s.name AS school_name, CONCAT(us.first_name, ' ', us.last_name) AS user_name
-             FROM reports r JOIN schools s ON s.id = r.school_id JOIN users us ON us.id = r.user_id
-             ORDER BY $orderBy LIMIT 100");
+        if (isset($_GET['action']) && $_GET['action'] === 'view') { $this->view(); return; }
         $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
+        $regions = Database::all("SELECT DISTINCT region FROM schools WHERE region IS NOT NULL AND region != '' ORDER BY region");
+        $zones = Database::all("SELECT DISTINCT z.name AS zone_name, r.name AS region_name FROM zones z JOIN regions r ON r.id = z.region_id ORDER BY r.name, z.name");
+        $semesters = Database::all("SELECT DISTINCT name, sort_order FROM semesters ORDER BY sort_order");
+        $reportType = $_POST['report_type'] ?? '';
+        $reportTypes = $_POST['report_types'] ?? [];
+        $reports = Database::all(
+            "SELECT r.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name
+             FROM reports r JOIN users us ON us.id = r.user_id
+             ORDER BY r.created_at DESC LIMIT 50");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (isset($_POST['generate'])) {
-                $type = $_POST['type'] ?? 'system';
-                $schoolId = (int)$_POST['school_id'] ?? 0;
-                $title = trim($_POST['title'] ?? '') ?: ucfirst($type) . ' report';
-                $data = $this->buildReport($type, $schoolId);
-                $file = $this->renderCsv($title, $data, $type);
-                $rid = Database::insert('reports', [
-                    'school_id' => $schoolId ?: Database::scalar("SELECT id FROM schools ORDER BY id LIMIT 1", [], 1),
-                    'user_id' => $u['id'], 'type' => $type, 'title' => $title,
-                    'format' => 'csv', 'file_path' => $file, 'filters' => json_encode(['school' => $schoolId]),
-                ]);
-                log_activity('report', "Generated report: $title", (int)$u['id']);
-                flash('success', 'Report generated.');
-                redirect('reports/index&download=' . $rid);
+            if (isset($_POST['generate']) && !empty($reportTypes)) {
+                $filters = [
+                    'region' => trim($_POST['region'] ?? ''),
+                    'zone' => trim($_POST['zone'] ?? ''),
+                    'school_id' => (int)($_POST['school_id'] ?? 0),
+                    'education_level' => trim($_POST['education_level'] ?? ''),
+                    'year' => trim($_POST['year'] ?? ''),
+                    'semester' => trim($_POST['semester'] ?? ''),
+                    'date_from' => $_POST['date_from'] ?? '',
+                    'date_to' => $_POST['date_to'] ?? '',
+                ];
+                $format = $_POST['format'] ?? 'csv';
+                $generated = 0;
+                foreach ($reportTypes as $reportType) {
+                    $reportType = trim($reportType);
+                    if (!$reportType) continue;
+                    [$headers, $rows] = $this->buildReport($reportType, $filters);
+                    $title = trim($_POST['title'] ?: '');
+                    $typeNames = [
+                        'education_performance' => 'Education Performance', 'enrollment_stats' => 'Enrollment Statistics',
+                        'academic_performance' => 'Academic Performance', 'attendance_participation' => 'Attendance & Participation',
+                        'national_exam' => 'National Exam Performance', 'school_performance' => 'School Performance',
+                        'teacher_workforce' => 'Teacher Workforce Statistics', 'course_curriculum' => 'Course & Curriculum Analytics',
+                        'learning_activity' => 'Learning Activity', 'student_progress' => 'Student Progress',
+                        'regional_education' => 'Regional Education', 'institution_stats' => 'Institution Statistics',
+                        'digital_platform' => 'Digital Platform Usage', 'compliance' => 'Compliance',
+                        'annual_education' => 'Annual Education', 'system_activity' => 'System Activity',
+                    ];
+                    $label = $typeNames[$reportType] ?? ucfirst(str_replace('_', ' ', $reportType));
+                    $reportTitle = $title ?: ($label . ' Report — ' . date('M j, Y'));
+                    if (count($reportTypes) > 1) $reportTitle = $label . ' — ' . ($title ?: date('M j, Y'));
+                    $file = $this->renderReport($reportTitle, $headers, $rows, $reportType, $format);
+                    Database::insert('reports', [
+                        'school_id' => $filters['school_id'] ?: Database::scalar("SELECT id FROM schools ORDER BY id LIMIT 1", [], 1),
+                        'user_id' => $u['id'], 'type' => $reportType, 'title' => $reportTitle,
+                        'format' => $format, 'file_path' => $file, 'filters' => json_encode($filters),
+                        'data_json' => json_encode(['headers' => $headers, 'rows' => array_values($rows)]),
+                    ]);
+                    log_activity('report', "Generated: $reportTitle", (int)$u['id']);
+                    $generated++;
+                }
+                flash('success', "$generated report(s) generated successfully.");
+                redirect('admin/reports');
             }
         }
-        Router::render('app/admin/reports', ['title' => 'Reports', 'reports' => $reports, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
+        Router::render('app/admin/reports', [
+            'title' => 'Reports', 'reports' => $reports, 'schools' => $schools,
+            'regions' => $regions, 'zones' => $zones, 'semesters' => $semesters,
+            'reportType' => $reportType,
+        ]);
     }
 
-    private function buildReport(string $type, int $schoolId): array {
-        $args = [];
-        $where = '';
-        if ($schoolId > 0) {
-            $where = 'WHERE school_id = ?';
-            $args[] = $schoolId;
-        }
+    private function buildReport(string $type, array $f): array {
+        $schoolWhere = $f['school_id'] > 0 ? " AND s.id = {$f['school_id']}" : '';
+        $regionWhere = $f['region'] !== '' ? " AND s.region = '" . addslashes($f['region']) . "'" : '';
+        $zoneWhere = $f['zone'] !== '' ? " AND z.name = '" . addslashes($f['zone']) . "'" : '';
+        $levelWhere = ($f['education_level'] ?? '') !== '' ? " AND s.education_level = '" . addslashes($f['education_level']) . "'" : '';
+        $dateFrom = $f['date_from'] !== '' ? " AND u.created_at >= '{$f['date_from']}'" : '';
+        $dateTo = $f['date_to'] !== '' ? " AND u.created_at <= '{$f['date_to']} 23:59:59'" : '';
+
         return match ($type) {
-            'student' => Database::all("SELECT id, first_name, last_name, email, student_id, status FROM users WHERE role = 'student' $where ORDER BY last_name", $args),
-            'teacher' => Database::all("SELECT id, first_name, last_name, email, status FROM users WHERE role = 'teacher' $where ORDER BY last_name", $args),
-            'course' => Database::all("SELECT c.id, c.title, c.code, c.status, c.level, (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students FROM courses c $where ORDER BY c.title", $args),
-            'attendance' => Database::all("SELECT at.date, at.status, us.student_id, CONCAT(us.first_name, ' ', us.last_name) AS student, c.title AS course FROM attendance at JOIN users us ON us.id = at.student_id JOIN courses c ON c.id = at.course_id $where ORDER BY at.date DESC LIMIT 2000", $args),
-            default => Database::all("SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 500"),
+            'enrollment_stats' => [
+                ['Region', 'Zone', 'Institution', 'Total Students', 'Male', 'Female', 'Active', 'Inactive', 'New Enrollment'],
+                Database::all("SELECT s.region AS Region, COALESCE(z.name,'—') AS Zone, s.name AS Institution,
+                    COUNT(*) AS `Total Students`, SUM(u.gender='m') AS Male, SUM(u.gender='f') AS Female,
+                    SUM(u.enrollment_status='active') AS Active, SUM(u.enrollment_status='inactive') AS Inactive,
+                    SUM(CASE WHEN u.created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY) THEN 1 ELSE 0 END) AS `New Enrollment`
+                    FROM users u JOIN schools s ON s.id = u.school_id LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE u.role = 'student' $schoolWhere $regionWhere $zoneWhere $levelWhere $dateFrom $dateTo
+                    GROUP BY s.id ORDER BY s.region, s.name"),
+            ],
+            'teacher_workforce' => [
+                ['Region', 'Institution', 'Teachers', 'Active', 'On Leave', 'Avg Experience', 'Student/Teacher Ratio'],
+                Database::all("SELECT s.region AS Region, s.name AS Institution,
+                    COUNT(*) AS Teachers, SUM(u.status='active') AS Active,
+                    SUM(u.status='suspended') AS `On Leave`,
+                    ROUND(AVG(u.experience_years),1) AS `Avg Experience`,
+                    ROUND(COUNT(*) / GREATEST((SELECT COUNT(*) FROM users u2 WHERE u2.role='student' AND u2.school_id=s.id),1),1) AS `Student/Teacher Ratio`
+                    FROM users u JOIN schools s ON s.id = u.school_id LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE u.role IN ('teacher','lecturer') $schoolWhere $regionWhere $zoneWhere $levelWhere $dateFrom $dateTo
+                    GROUP BY s.id ORDER BY s.region, s.name"),
+            ],
+            'academic_performance' => [
+                ['Region', 'Institution', 'Course', 'Enrolled', 'Avg Progress', 'Completion Rate', 'Completed', 'In Progress'],
+                Database::all("SELECT s.region AS Region, s.name AS Institution, c.title AS Course,
+                    COUNT(ce.id) AS Enrolled, ROUND(AVG(ce.progress),1) AS `Avg Progress`,
+                    ROUND(SUM(CASE WHEN ce.completed = 1 THEN 1 ELSE 0 END)/GREATEST(COUNT(ce.id),1)*100,1) AS `Completion Rate`,
+                    SUM(ce.completed = 1) AS Completed, SUM(ce.completed = 0) AS `In Progress`
+                    FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id JOIN schools s ON s.id = c.school_id LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE 1=1 $schoolWhere $regionWhere $zoneWhere $levelWhere
+                    GROUP BY c.id ORDER BY s.region, s.name"),
+            ],
+            'school_performance' => [
+                ['Region', 'Zone', 'Institution', 'Type', 'Students', 'Teachers', 'Courses', 'Avg Progress'],
+                Database::all("SELECT s.region AS Region, COALESCE(z.name,'—') AS Zone, s.name AS Institution, s.type AS Type,
+                    (SELECT COUNT(*) FROM users u WHERE u.role='student' AND u.school_id=s.id) AS Students,
+                    (SELECT COUNT(*) FROM users u WHERE u.role IN ('teacher','lecturer') AND u.school_id=s.id) AS Teachers,
+                    (SELECT COUNT(*) FROM courses c WHERE c.school_id=s.id) AS Courses,
+                    (SELECT ROUND(AVG(ce.progress),1) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE c.school_id=s.id) AS `Avg Progress`
+                    FROM schools s LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE s.status = 'active' $schoolWhere $regionWhere $zoneWhere $levelWhere
+                    ORDER BY s.region, s.name"),
+            ],
+            'course_curriculum' => [
+                ['Region', 'Institution', 'Course', 'Status', 'Enrolled', 'Completed', 'Completion Rate'],
+                Database::all("SELECT s.region AS Region, s.name AS Institution, c.title AS Course, c.status AS Status,
+                    COUNT(ce.id) AS Enrolled,
+                    SUM(CASE WHEN ce.completed = 1 THEN 1 ELSE 0 END) AS Completed,
+                    ROUND(SUM(CASE WHEN ce.completed = 1 THEN 1 ELSE 0 END)/GREATEST(COUNT(ce.id),1)*100,1) AS `Completion Rate`
+                    FROM courses c JOIN schools s ON s.id = c.school_id LEFT JOIN course_enrollments ce ON ce.course_id = c.id LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE 1=1 $schoolWhere $regionWhere $zoneWhere $levelWhere
+                    GROUP BY c.id ORDER BY s.region, s.name"),
+            ],
+            'student_progress' => [
+                ['Region', 'Institution', 'Total Students', 'Active', 'Completed', 'Transferred', 'Withdrawn', 'Retention Rate'],
+                Database::all("SELECT s.region AS Region, s.name AS Institution,
+                    COUNT(*) AS `Total Students`, SUM(enrollment_status='active') AS Active,
+                    SUM(enrollment_status='active') AS Completed,
+                    0 AS Transferred, 0 AS Withdrawn,
+                    ROUND(SUM(enrollment_status='active')/GREATEST(COUNT(*),1)*100,1) AS `Retention Rate`
+                    FROM users u JOIN schools s ON s.id = u.school_id LEFT JOIN zones z ON z.id = s.zone_id
+                    WHERE u.role = 'student' $schoolWhere $regionWhere $zoneWhere $levelWhere $dateFrom $dateTo
+                    GROUP BY s.id ORDER BY s.region, s.name"),
+            ],
+            'regional_education' => [
+                ['Region', 'Schools', 'Students', 'Teachers', 'Courses', 'Avg Progress'],
+                Database::all("SELECT s.region AS Region,
+                    COUNT(DISTINCT s.id) AS Schools,
+                    SUM(CASE WHEN u.role='student' THEN 1 ELSE 0 END) AS Students,
+                    SUM(CASE WHEN u.role IN ('teacher','lecturer') THEN 1 ELSE 0 END) AS Teachers,
+                    (SELECT COUNT(*) FROM courses c WHERE c.school_id IN (SELECT s2.id FROM schools s2 WHERE s2.region=s.region)) AS Courses,
+                    (SELECT ROUND(AVG(ce.progress),1) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id JOIN schools s3 ON s3.id=c.school_id WHERE s3.region=s.region) AS `Avg Progress`
+                    FROM schools s LEFT JOIN users u ON u.school_id = s.id
+                    WHERE s.status = 'active' AND s.region IS NOT NULL
+                    GROUP BY s.region ORDER BY s.region"),
+            ],
+            'institution_stats' => [
+                ['Metric', 'Value'],
+                [
+                    ['Total Institutions', Database::scalar("SELECT COUNT(*) FROM schools WHERE status='active'")],
+                    ['Universities', Database::scalar("SELECT COUNT(*) FROM schools WHERE type='university' AND status='active'")],
+                    ['Schools (K-12)', Database::scalar("SELECT COUNT(*) FROM schools WHERE type='school' AND status='active'")],
+                    ['Total Students', Database::scalar("SELECT COUNT(*) FROM users WHERE role='student'")],
+                    ['Total Teachers', Database::scalar("SELECT COUNT(*) FROM users WHERE role IN ('teacher','lecturer')")],
+                    ['Total Courses', Database::scalar("SELECT COUNT(*) FROM courses")],
+                    ['Active Regions', Database::scalar("SELECT COUNT(DISTINCT region) FROM schools WHERE region IS NOT NULL")],
+                ],
+            ],
+            'digital_platform' => [
+                ['Metric', 'Value'],
+                [
+                    ['Total Users', Database::scalar("SELECT COUNT(*) FROM users WHERE role != 'guest'")],
+                    ['Active Users (30d)', Database::scalar("SELECT COUNT(*) FROM users WHERE last_login >= DATE_SUB(NOW(), INTERVAL 30 DAY)")],
+                    ['Total Logins (30d)', Database::scalar("SELECT COUNT(*) FROM activity_logs WHERE action='auth.login' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")],
+                    ['Messages Sent', Database::scalar("SELECT COUNT(*) FROM messages")],
+                    ['Assignments Created', Database::scalar("SELECT COUNT(*) FROM assignments")],
+                    ['Exams Taken', Database::scalar("SELECT COUNT(*) FROM exam_attempts")],
+                    ['Library Downloads', Database::scalar("SELECT COALESCE(SUM(downloads),0) FROM library_items")],
+                ],
+            ],
+            'system_activity' => [
+                ['Action', 'Detail', 'User', 'Date'],
+                Database::all("SELECT al.action AS Action, al.detail AS Detail,
+                    CONCAT(u.first_name,' ',u.last_name) AS User, al.created_at AS Date
+                    FROM activity_logs al LEFT JOIN users u ON u.id = al.user_id
+                    ORDER BY al.created_at DESC LIMIT 500"),
+            ],
+            default => [
+                ['Region', 'Institution', 'Students', 'Teachers', 'Status'],
+                Database::all("SELECT s.region AS Region, s.name AS Institution,
+                    (SELECT COUNT(*) FROM users u WHERE u.role='student' AND u.school_id=s.id) AS Students,
+                    (SELECT COUNT(*) FROM users u WHERE u.role IN ('teacher','lecturer') AND u.school_id=s.id) AS Teachers,
+                    s.status AS Status
+                    FROM schools s WHERE s.status='active' $schoolWhere $regionWhere $levelWhere ORDER BY s.region, s.name"),
+            ],
         };
     }
 
-    private function renderCsv(string $title, array $rows, string $type): string {
+    private function renderReport(string $title, array $headers, array $rows, string $type, string $format): string {
         $dir = STORAGE_PATH . '/reports';
         if (!is_dir($dir)) @mkdir($dir, 0775, true);
         $file = 'reports/' . $type . '_' . date('Ymd_His') . '.csv';
-        $fp = fopen(STORAGE_PATH . '/' . $file, 'w');
-        if ($rows) {
-            fputcsv($fp, array_keys($rows[0]));
-            foreach ($rows as $r) fputcsv($fp, array_values($r));
+        $absPath = STORAGE_PATH . '/' . $file;
+        $fp = fopen($absPath, 'w');
+        fputcsv($fp, $headers);
+        foreach ($rows as $r) {
+            if (is_array($r) && count($r) === count($headers)) fputcsv($fp, array_values($r));
         }
         fclose($fp);
         return $file;
+    }
+
+    public function view(): void {
+        $u = require_role('ministry');
+        $id = (int)($_GET['id'] ?? 0);
+        $report = Database::one("SELECT r.*, CONCAT(us.first_name,' ',us.last_name) AS user_name FROM reports r JOIN users us ON us.id=r.user_id WHERE r.id=?", [$id]);
+        if (!$report) { flash('danger', 'Report not found'); redirect('admin/reports'); }
+        $data = json_decode($report['data_json'] ?? '{}', true);
+        $headers = $data['headers'] ?? [];
+        $rows = $data['rows'] ?? [];
+        include __DIR__ . '/../views/app/admin/report_view.php';
     }
 }
 
@@ -430,35 +586,52 @@ class Ctl_announcements {
         $anns = Database::all(
             "SELECT a.*, CONCAT(us.first_name, ' ', us.last_name) AS author_name, s.name AS school_name, c.title AS course_title
              FROM announcements a
-             JOIN schools s ON s.id = a.school_id JOIN users us ON us.id = a.author_id
+             LEFT JOIN schools s ON s.id = a.school_id JOIN users us ON us.id = a.author_id
              LEFT JOIN courses c ON c.id = a.course_id
              WHERE 1=1 $df
              ORDER BY a.pinned DESC, a.created_at DESC LIMIT 100");
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
         $courses = Database::all("SELECT id, title FROM courses WHERE status = 'published'");
+        $regions = Database::all("SELECT DISTINCT region FROM schools WHERE region IS NOT NULL AND region != '' ORDER BY region");
+        $zones = Database::all("SELECT DISTINCT z.name AS zone_name, r.name AS region_name FROM zones z JOIN regions r ON r.id = z.region_id ORDER BY r.name, z.name");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_ann'])) {
+                $targetRegion = trim($_POST['target_region'] ?? '');
+                $targetZone = trim($_POST['target_zone'] ?? '');
+                $hasScope = $targetRegion !== '' || $targetZone !== '';
                 $data = [
-                    'school_id' => (int)$_POST['school_id'], 'author_id' => $u['id'],
+                    'school_id' => 1, 'author_id' => $u['id'],
                     'title' => trim($_POST['title']), 'content' => trim($_POST['content']),
                     'audience' => $_POST['audience'] ?? 'all', 'pinned' => !empty($_POST['pinned']) ? 1 : 0,
                     'course_id' => ((int)($_POST['course_id'] ?? 0)) ?: null,
+                    'target_region' => $targetRegion ?: null,
+                    'target_zone' => $targetZone ?: null,
+                    'approval_status' => $hasScope ? 'pending' : 'none',
                 ];
                 if ($data['title'] === '' || $data['content'] === '') { flash('danger', 'Title and content required.'); redirect('admin/announcements'); }
                 $aid = Database::insert('announcements', $data);
                 $roleMap = ['all' => null, 'students' => 'student', 'teachers' => 'teacher', 'parents' => 'parent', 'course' => null];
                 $role = $roleMap[$data['audience']] ?? null;
-                if ($data['audience'] === 'course' && $data['course_id']) {
-                    $targets = Database::all("SELECT user_id FROM course_enrollments WHERE course_id = ?", [$data['course_id']]);
+                if ($hasScope) {
+                    if ($targetZone) {
+                        $targets = Database::all("SELECT u.id FROM users u JOIN schools s ON s.id = u.school_id JOIN zones z ON z.id = s.zone_id WHERE z.name = ? AND u.role != 'guest'" . ($role ? " AND u.role = '$role'" : ''), [$targetZone]);
+                    } elseif ($targetRegion) {
+                        $targets = Database::all("SELECT u.id FROM users u JOIN schools s ON s.id = u.school_id WHERE s.region = ? AND u.role != 'guest'" . ($role ? " AND u.role = '$role'" : ''), [$targetRegion]);
+                    } else {
+                        $targets = [];
+                    }
+                } elseif ($data['audience'] === 'course' && $data['course_id']) {
+                    $targets = Database::all("SELECT user_id AS id FROM course_enrollments WHERE course_id = ?", [$data['course_id']]);
                 } else {
                     $targets = $role ? Database::all("SELECT id FROM users WHERE role = ?", [$role]) : Database::all("SELECT id FROM users WHERE role != 'guest'");
                 }
-                foreach ($targets as $t) {
-                    notify((int)$t['id'], 'announcement', $data['title'], mb_strimwidth($data['content'], 0, 120, '…'), 'communication/announcement&id=' . $aid);
+                if (!$hasScope) {
+                    foreach ($targets as $t) {
+                        notify((int)$t['id'], 'announcement', $data['title'], mb_strimwidth($data['content'], 0, 120, '…'), 'communication/announcement&id=' . $aid);
+                    }
                 }
-                log_activity('announcement', 'Posted: ' . $data['title'], (int)$u['id']);
-                flash('success', 'Announcement posted to ' . count($targets) . ' users.');
+                log_activity('announcement', 'Posted: ' . $data['title'] . ($hasScope ? " (pending regional approval for " . ($targetZone ?: $targetRegion) . ")" : ''), (int)$u['id']);
+                flash('success', $hasScope ? 'Announcement sent for regional approval — will be delivered once approved.' : 'Announcement posted to ' . count($targets) . ' users.');
                 redirect('admin/announcements');
             }
             if (($del = (int)($_POST['delete_ann'] ?? 0))) {
@@ -467,7 +640,7 @@ class Ctl_announcements {
                 redirect('admin/announcements');
             }
         }
-        Router::render('app/admin/announcements', ['title' => 'Announcements', 'anns' => $anns, 'schools' => $schools, 'courses' => $courses]);
+        Router::render('app/admin/announcements', ['title' => 'Announcements', 'anns' => $anns, 'courses' => $courses, 'regions' => $regions, 'zones' => $zones]);
     }
 }
 
@@ -528,7 +701,7 @@ class Ctl_transfers {
              FROM transfer_codes c LEFT JOIN schools s ON s.id = c.school_id
              LEFT JOIN users us ON us.id = c.student_id
              ORDER BY c.created_at DESC LIMIT 100");
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
+        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active' AND type IN ('university','college')");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_code'])) {

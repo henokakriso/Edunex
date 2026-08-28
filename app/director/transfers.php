@@ -10,11 +10,17 @@ class Ctl_transfers {
     public function run(): void {
         $u = require_role('principal');
         $sid = (int)$u['school_id'];
+        $schoolType = Database::scalar("SELECT type FROM schools WHERE id = ?", [$sid], 'school');
+        $isHigherEd = in_array($schoolType, ['university', 'college'], true);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
 
             if (isset($_POST['issue_code'])) {
+                if ($isHigherEd) {
+                    flash('danger', 'University transfers are managed by the Ministry. Directors cannot issue transfer codes for higher education institutions.');
+                    redirect('director/transfers');
+                }
                 $st = (int)($_POST['student'] ?? 0);
                 $student = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND role = 'student' AND school_id = ?", [$st, $sid]);
                 if (!$student) {
@@ -87,6 +93,7 @@ class Ctl_transfers {
         Router::render('app/director/transfers', [
             'title' => 'Transfers & Data Copy', 'students' => $students,
             'incoming' => $incoming, 'outgoing' => $outgoing, 'codes' => $codes,
+            'isHigherEd' => $isHigherEd,
         ]);
     }
 }

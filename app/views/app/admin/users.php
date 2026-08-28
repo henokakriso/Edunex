@@ -21,7 +21,7 @@ if ($creatorRole === 'regional') {
 }
 
 $uniStaff = ['registrar','dean','vice_dean','hod','lecturer','bursar','student_affairs','librarian'];
-$regions = ['Addis Ababa','Afar','Amhara','Benishangul-Gumuz','Dire Dawa','Gambela','Harari','Oromia','Sidama','SNNPR','Somali','Tigray','South West Ethiopia People\'s Region'];
+$regions = array_column(Database::all("SELECT name FROM regions WHERE status = 'active' ORDER BY name"), 'name');
 ?>
 <div id="users-root" class="list-root">
 <?php include __DIR__ . '/users_partial.php'; ?>
@@ -141,8 +141,12 @@ $regions = ['Addis Ababa','Afar','Amhara','Benishangul-Gumuz','Dire Dawa','Gambe
           <div class="flex-col"><label class="small faint">Assigned Region *</label>
             <select class="input" name="assigned_region" required style="padding:10px 14px"><option value="">— Select —</option><?php foreach ($regions as $rg): ?><option value="<?= e($rg) ?>"><?= e($rg) ?></option><?php endforeach; ?></select>
           </div>
-          <div class="flex-col"><label class="small faint">Assigned Zone</label><input class="input" name="assigned_zone" style="padding:10px 14px"></div>
-          <div class="flex-col"><label class="small faint">Assigned Woreda</label><input class="input" name="assigned_woreda" style="padding:10px 14px"></div>
+          <div class="flex-col"><label class="small faint">Assigned Zone</label>
+            <select class="input" name="assigned_zone" id="nu-assigned-zone" style="padding:10px 14px"><option value="">— Select Region first —</option></select>
+          </div>
+          <div class="flex-col"><label class="small faint">Assigned Woreda</label>
+            <select class="input" name="assigned_woreda" id="nu-assigned-woreda" style="padding:10px 14px"><option value="">— Select Zone first —</option></select>
+          </div>
           <div class="flex-col"><label class="small faint">Start Date</label><input class="input" name="start_date" type="date" style="padding:10px 14px"></div>
           <div class="flex-col"><label class="small faint">End Date</label><input class="input" name="end_date" type="date" style="padding:10px 14px"></div>
         </div>
@@ -301,5 +305,39 @@ $regions = ['Addis Ababa','Afar','Amhara','Benishangul-Gumuz','Dire Dawa','Gambe
 
   roleSel.addEventListener('change', updateForm);
   updateForm();
+
+  // --- Cascading Region → Zone → Woreda ---
+  var regionSel = document.querySelector('[name="assigned_region"]');
+  var zoneSel = document.getElementById('nu-assigned-zone');
+  var woredaSel = document.getElementById('nu-assigned-woreda');
+  if (regionSel && zoneSel && woredaSel) {
+    regionSel.addEventListener('change', function(){
+      var rid = this.value;
+      zoneSel.innerHTML = '<option value="">Loading...</option>';
+      woredaSel.innerHTML = '<option value="">— Select Zone first —</option>';
+      if (!rid) { zoneSel.innerHTML = '<option value="">— Select Region first —</option>'; return; }
+      fetch('api/geo?action=zones&region_name=' + encodeURIComponent(rid))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          zoneSel.innerHTML = '<option value="">— Select Zone —</option>';
+          (d.zones||[]).forEach(function(z){
+            zoneSel.innerHTML += '<option value="' + z.id + '">' + z.name + '</option>';
+          });
+        });
+    });
+    zoneSel.addEventListener('change', function(){
+      var zid = this.value;
+      woredaSel.innerHTML = '<option value="">Loading...</option>';
+      if (!zid) { woredaSel.innerHTML = '<option value="">— Select Zone first —</option>'; return; }
+      fetch('api/geo?action=woredas&zone_id=' + encodeURIComponent(zid))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          woredaSel.innerHTML = '<option value="">— Select Woreda —</option>';
+          (d.woredas||[]).forEach(function(w){
+            woredaSel.innerHTML += '<option value="' + w.id + '">' + w.name + '</option>';
+          });
+        });
+    });
+  }
 })();
 </script>

@@ -300,11 +300,10 @@ table.data tr:hover td { background: var(--bg-hover); }
 .sidebar .brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px; }
 .brand-logo {
   width: 36px; height: 36px; border-radius: 11px;
-  background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-weight: 800; font-size: 17px; flex-shrink: 0;
+  object-fit: contain; flex-shrink: 0;
   box-shadow: 0 3px 12px rgba(13,148,136,.4);
 }
+[data-theme="dark"] .brand-logo { filter: brightness(0) invert(1); }
 .brand-name { font-weight: 800; font-size: 17px; letter-spacing: -.02em; }
 .brand-sub { font-size: 10.5px; color: var(--text-faint); margin-top: -3px; }
 
@@ -752,9 +751,14 @@ kbd { font-family: inherit; }
 .popup-item.text-danger { color: var(--danger); }
 
 /* Modal dialog (centered overlay) */
-.modal-dialog { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, .45); }
+.modal-dialog { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); background: rgba(15, 23, 42, .4); }
 .modal-dialog.open { display: flex; animation: fadeIn .18s ease; }
-.modal-box { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); animation: pop .22s cubic-bezier(.2,.9,.3,1.2); }
+.modal-box { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.08); animation: pop .22s cubic-bezier(.2,.9,.3,1.2); }
+.modal-box .modal-head { padding: 20px 24px 0; }
+.modal-box .modal-head h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+.modal-box .modal-head p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+.modal-box .modal-body { padding: 20px 24px; }
+.modal-box .modal-foot { padding: 0 24px 20px; display: flex; gap: 8px; justify-content: flex-end; }
 
 /* Stat boxes (ledger / dashboards) */
 .stat-box { padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-elev); display: flex; flex-direction: column; gap: 6px; }

@@ -1,54 +1,105 @@
 <?php /* Admin announcements view */
-$audCls = ['all' => 'badge-accent', 'students' => 'badge-success', 'teachers' => 'badge-warning', 'parents' => 'badge-muted', 'course' => 'badge-danger'];
+$asBadge = ['none'=>'badge-muted','pending'=>'badge-warning','approved'=>'badge-success','rejected'=>'badge-danger'];
 ?>
+<style>
+.ann-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;background:var(--bg-elev);transition:border-color .15s,box-shadow .15s;cursor:default}
+.ann-row:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border));box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.ann-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.ann-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
+.ann-content{font-size:12.5px;color:var(--text-secondary);margin-top:3px;line-height:1.5}
+.ann-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px}
+.ann-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+</style>
+
 <div class="page-head">
   <div>
     <h1><?= icon('megaphone') ?> Announcements</h1>
-    <p class="sub">Broadcast to everyone or a group</p>
+    <p class="sub">Broadcast globally, to a region, or a zone — regional admins approve targeted announcements</p>
   </div>
   <button class="btn btn-primary" onclick="document.getElementById('new-ann').style.display='block';this.style.display='none'">+ New announcement</button>
 </div>
 
 <form method="post" class="card" id="new-ann" style="display:none;margin-bottom:18px">
   <?= csrf_field() ?>
-  <h3 class="card-title"><?= icon('megaphone') ?> Post announcement</h3>
+  <h3 class="card-title"><?= icon('megaphone') ?> New announcement</h3>
   <div class="grid2">
-    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="School closed on Friday"></div>
-    <div class="flex-col"><label class="small faint">Audience</label>
-      <select class="input" name="audience" onchange="document.getElementById('course-pick').style.display=this.value==='course'?'':'none'">
-        <option value="all">Everyone</option><option value="students">Students</option>
-        <option value="teachers">Teachers</option><option value="parents">Parents</option><option value="course">Course members</option>
+    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Announcement title"></div>
+    <div class="flex-col" id="course-wrap" style="display:none"><label class="small faint">Course</label>
+      <select class="input" name="course_id"><option value="0">— Select course —</option><?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach; ?></select>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:12px">
+    <div class="flex-col"><label class="small faint">Target Region <span class="tiny faint">(optional — requires regional approval)</span></label>
+      <select class="input" name="target_region" id="ann-region" onchange="onTargetChange()">
+        <option value="">— All regions —</option>
+        <?php foreach ($regions as $r): ?><option value="<?= e($r['region']) ?>"><?= e($r['region']) ?></option><?php endforeach; ?>
       </select>
     </div>
-    <div class="flex-col" id="course-pick" style="display:none"><label class="small faint">Course</label>
-      <select class="input" name="course_id"><option value="0">— Select —</option><?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach; ?></select>
+    <div class="flex-col"><label class="small faint">Target Zone <span class="tiny faint">(optional — requires zonal approval)</span></label>
+      <select class="input" name="target_zone" id="ann-zone" onchange="onTargetChange()">
+        <option value="">— All zones —</option>
+        <?php foreach ($zones as $z): ?>
+          <option value="<?= e($z['zone_name']) ?>" data-region="<?= e($z['region_name']) ?>"><?= e($z['zone_name']) ?> (<?= e($z['region_name']) ?>)</option>
+        <?php endforeach; ?>
+      </select>
     </div>
-    <div class="flex-col"><label class="small faint">School</label>
-      <select class="input" name="school_id"><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
-    </div>
-    <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Content *</label><textarea class="input" name="content" rows="4" required></textarea></div>
-    <div class="flex-col"><label class="small faint">Pin to top</label><input type="checkbox" name="pinned" value="1"></div>
   </div>
-  <button class="btn btn-success" name="create_ann" value="1"><?= icon('megaphone') ?> Post</button>
+
+  <div class="flex-col" style="margin-top:12px">
+    <label class="small faint">Content *</label>
+    <textarea class="input" name="content" rows="5" required placeholder="Write your announcement..."></textarea>
+  </div>
+  <input type="hidden" name="audience" id="ann-audience" value="all">
+  <div style="display:flex;align-items:center;gap:16px;margin-top:12px">
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" name="pinned" value="1"> Pin to top</label>
+    <button class="btn btn-success" name="create_ann" value="1"><?= icon('megaphone') ?> Post</button>
+  </div>
 </form>
 
-<div class="flex-col gap-16">
-  <?php foreach ($anns as $a): ?>
-    <div class="card" style="<?= $a['pinned'] ? 'border-left:4px solid var(--accent)' : '' ?>">
-      <div class="flex-between" style="flex-wrap:wrap;gap:10px">
-        <div>
-          <b><?= e($a['title']) ?></b>
-          <?php if ($a['pinned']): ?><span class="badge badge-accent"><?= icon('pin') ?> Pinned</span><?php endif; ?>
-          <span class="badge <?= $audCls[$a['audience']] ?? 'badge-muted' ?>"><?= e($a['audience']) ?></span>
-          <p class="small" style="margin-top:6px"><?= e($a['content']) ?></p>
-          <p class="tiny faint" style="margin-top:6px">by <?= e($a['author_name']) ?> · <?= e($a['school_name']) ?><?= $a['course_title'] ? ' · ' . e($a['course_title']) : '' ?> · <?= e(time_ago($a['created_at'])) ?></p>
+<div class="card" style="padding:0">
+  <div style="padding:18px 20px;border-bottom:1px solid var(--border)">
+    <h3 style="font-size:15px;font-weight:700;margin:0"><?= icon('megaphone') ?> Recent announcements (<?= count($anns) ?>)</h3>
+  </div>
+  <?php if ($anns): ?>
+    <div style="padding:8px 12px">
+      <?php foreach ($anns as $a): ?>
+        <div class="ann-row" tabindex="0">
+          <div style="flex:1;min-width:0">
+            <div class="ann-title"><?= e($a['title']) ?></div>
+            <div class="ann-content"><?= e(mb_strimwidth($a['content'], 0, 160, '…')) ?></div>
+            <div class="ann-meta">
+              <?php if ($a['pinned']): ?><span class="badge badge-accent" style="font-size:10px">PINNED</span><?php endif; ?>
+              <?php if ($a['target_region']): ?><span class="badge badge-info" style="font-size:10px"><?= icon('map') ?> <?= e($a['target_region']) ?></span><?php endif; ?>
+              <?php if ($a['target_zone']): ?><span class="badge badge-info" style="font-size:10px"><?= icon('pin') ?> <?= e($a['target_zone']) ?></span><?php endif; ?>
+              <?php if ($a['approval_status'] !== 'none'): ?><span class="badge <?= $asBadge[$a['approval_status']] ?? 'badge-muted' ?>" style="font-size:10px"><?= e(ucfirst($a['approval_status'])) ?></span><?php endif; ?>
+              <?php if ($a['audience'] !== 'all'): ?><span class="badge badge-muted" style="font-size:10px"><?= e(ucfirst($a['audience'])) ?></span><?php endif; ?>
+              <span class="tiny faint"><b><?= e($a['author_name']) ?></b> · <?= e(date('M j, g:i A', strtotime($a['created_at']))) ?></span>
+            </div>
+          </div>
+          <div class="ann-actions">
+            <form method="post" class="inline" data-confirm="Delete this announcement?">
+              <?= csrf_field() ?><input type="hidden" name="delete_ann" value="<?= (int)$a['id'] ?>">
+              <button class="btn btn-sm btn-ghost" style="font-size:11px;color:var(--danger)"><?= icon('trash') ?></button>
+            </form>
+          </div>
         </div>
-        <form method="post" class="inline" data-confirm="Delete this announcement?">
-          <?= csrf_field() ?><input type="hidden" name="delete_ann" value="<?= (int)$a['id'] ?>">
-          <button class="btn btn-sm btn-danger"><?= icon('trash') ?></button>
-        </form>
-      </div>
+      <?php endforeach; ?>
     </div>
-  <?php endforeach; ?>
-  <?php if (!$anns): ?><div class="alert alert-info">No announcements yet.</div><?php endif; ?>
+  <?php else: ?>
+    <div style="padding:40px;text-align:center;color:var(--muted);font-size:13px">No announcements yet.</div>
+  <?php endif; ?>
 </div>
+
+<script>
+function onTargetChange(){
+  const r=document.getElementById('ann-region').value;
+  const z=document.getElementById('ann-zone').value;
+  const hasScope=r!==''||z!=='';
+  document.getElementById('ann-audience').value=hasScope?'all':'all';
+  document.getElementById('course-wrap').style.display='none';
+  const zoneOpts=document.getElementById('ann-zone').querySelectorAll('option[data-region]');
+  zoneOpts.forEach(o=>{o.style.display=!r||o.dataset.region===r?'':'none'});
+  if(r&&document.getElementById('ann-zone').value)document.getElementById('ann-zone').value='';
+}
+</script>

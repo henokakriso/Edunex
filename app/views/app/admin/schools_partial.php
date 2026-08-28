@@ -92,13 +92,17 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
       <div class="sl-col sl-col-city small"><?= e($s['city'] ?: '—') ?></div>
       <div class="sl-col sl-col-users small mono"><?= number_format((int)$s['total_users']) ?></div>
       <div class="sl-col sl-col-status">
-        <span class="badge <?= $s['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($s['status']) ?></span>
         <?php
           $as = $s['approval_status'] ?? 'pending';
-          $ac = match($as) { 'pending' => 'badge-warning', 'regional_approved' => 'badge-accent', 'ministry_approved' => 'badge-success', 'rejected' => 'badge-danger', default => 'badge-warning' };
-          $al = match($as) { 'pending' => 'Pending', 'regional_approved' => 'Regional OK', 'ministry_approved' => 'Approved', 'rejected' => 'Rejected', default => 'Pending' };
+          $ss = $s['status'] ?? 'active';
+          if ($ss === 'suspended') { $bc = 'badge-danger'; $bl = 'Suspended'; }
+          elseif ($as === 'rejected') { $bc = 'badge-danger'; $bl = 'Rejected'; }
+          elseif ($ss === 'active' && $as === 'ministry_approved') { $bc = 'badge-success'; $bl = 'Active'; }
+          elseif ($as === 'regional_approved') { $bc = 'badge-accent'; $bl = 'Regional OK'; }
+          elseif ($as === 'pending') { $bc = 'badge-warning'; $bl = 'Pending'; }
+          else { $bc = 'badge-success'; $bl = 'Active'; }
         ?>
-        <span class="badge <?= $ac ?>" style="font-size:9px;margin-top:3px;display:inline-block"><?= $al ?></span>
+        <span class="badge <?= $bc ?>"><?= $bl ?></span>
       </div>
       <div class="sl-col sl-col-actions">
         <div class="row-act" style="justify-content:flex-end">

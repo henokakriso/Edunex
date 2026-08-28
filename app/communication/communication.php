@@ -228,13 +228,16 @@ class Ctl_announcements {
         $dfAn = demo_filter('a');
         $anns = Database::all(
             "SELECT a.*, CONCAT(us.first_name, ' ', us.last_name) AS author_name, s.name AS school_name, c.title AS course_title
-             FROM announcements a JOIN users us ON us.id = a.author_id JOIN schools s ON s.id = a.school_id
+             FROM announcements a JOIN users us ON us.id = a.author_id LEFT JOIN schools s ON s.id = a.school_id
              LEFT JOIN courses c ON c.id = a.course_id
              WHERE (a.audience = 'all' OR a.audience = ?)
-               AND (a.school_id = ? OR a.course_id IN (SELECT course_id FROM course_enrollments WHERE user_id = ?))
+               AND (a.approval_status = 'none' OR a.approval_status = 'approved')
+               AND (a.school_id = ? OR a.course_id IN (SELECT course_id FROM course_enrollments WHERE user_id = ?)
+                    OR (a.target_region IS NOT NULL AND a.target_region = (SELECT region FROM schools WHERE id = ? LIMIT 1))
+                    OR (a.target_zone IS NOT NULL AND a.target_zone IN (SELECT z.name FROM zones z JOIN schools sc ON sc.zone_id = z.id WHERE sc.id = ?)))
                $dfAn
              ORDER BY a.pinned DESC, a.created_at DESC LIMIT 60",
-            [$u['role'], my_school_id(), $uid]);
+            [$u['role'], my_school_id(), $uid, my_school_id(), my_school_id()]);
         Router::render('app/communication/announcements', ['title' => 'Announcements', 'anns' => $anns]);
     }
 }

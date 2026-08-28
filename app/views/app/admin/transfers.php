@@ -3,7 +3,7 @@
 <div class="page-head">
   <div>
     <h1><?= icon('refresh') ?> Transfers & Referrals</h1>
-    <p class="sub">School-to-school transfers and referral codes</p>
+    <p class="sub">University-to-university transfers and referral codes — Ministry managed</p>
   </div>
   <button class="btn btn-primary" onclick="document.getElementById('new-code').style.display='block';this.style.display='none'">+ Generate code</button>
 </div>
@@ -12,7 +12,7 @@
   <?= csrf_field() ?>
   <h3 class="card-title"><?= icon('ticket') ?> New referral/transfer code</h3>
   <div class="grid2">
-    <div class="flex-col"><label class="small faint">Issuing school</label>
+    <div class="flex-col"><label class="small faint">Issuing university</label>
       <select class="input" name="school_id"><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
     </div>
     <div class="flex-col"><label class="small faint">Purpose</label>

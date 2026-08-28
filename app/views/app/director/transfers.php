@@ -83,17 +83,32 @@ foreach (array_merge($incoming, $outgoing) as $r) {
 
 <!-- Stats — jump to section -->
 <div class="grid grid-4" style="margin-bottom:20px">
+  <?php if (!$isHigherEd): ?>
   <a class="card tstat-card" href="#codes" style="text-decoration:none"><span class="stat-ico"><?= icon('key') ?></span>
     <div class="stat-text"><b><?= count($codes) ?></b><span>Codes issued</span></div></a>
   <a class="card tstat-card" href="#codes" style="text-decoration:none"><span class="stat-ico"><?= icon('clock') ?></span>
     <div class="stat-text"><b><?= (int)$unusedAll ?></b><span>Unused codes</span></div></a>
+  <?php endif; ?>
   <a class="card tstat-card" href="#incoming" style="text-decoration:none"><span class="stat-ico"><?= icon('download') ?></span>
     <div class="stat-text"><b><?= (int)$pendingIn ?></b><span>Incoming pending</span></div></a>
   <a class="card tstat-card" href="#outgoing" style="text-decoration:none"><span class="stat-ico"><?= icon('send') ?></span>
     <div class="stat-text"><b><?= (int)$outAll ?></b><span>Outgoing transfers</span></div></a>
 </div>
 
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+<?php if ($isHigherEd): ?>
+<div class="card" style="padding:20px;margin-bottom:18px;border-left:3px solid var(--accent)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:18px"><?= icon('info') ?></span>
+    <div>
+      <b style="font-size:13px">University Transfers</b>
+      <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Transfer codes for higher education institutions are issued and managed by the Ministry of Education. Contact the ministry for transfer authorizations.</p>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
+<div class="grid" style="grid-template-columns:<?= $isHigherEd ? '1fr' : '1fr 1fr' ?>;gap:18px;align-items:start">
+  <?php if (!$isHigherEd): ?>
   <!-- Issue transfer code -->
   <div class="card" id="codes" style="scroll-margin-top:20px">
     <div class="sec-head"><span class="sec-ico"><?= icon('upload') ?></span><h3>Issue transfer code</h3></div>
@@ -146,6 +161,7 @@ foreach (array_merge($incoming, $outgoing) as $r) {
       </div>
     <?php endif; ?>
   </div>
+  <?php endif; ?>
 
   <!-- Incoming transfers -->
   <div class="card" id="incoming" style="scroll-margin-top:20px">

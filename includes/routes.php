@@ -73,7 +73,7 @@ Router::page('director/analytics', 'director/analytics.php', 'principal');
 
 Router::page('teacher/reports', 'teacher/reports.php', ['teacher', 'lecturer']);
 Router::page('teacher/analytics', 'teacher/analytics.php', ['teacher', 'lecturer']);
-Router::page('teacher/library', 'teacher/library.php', ['teacher', 'lecturer']);
+Router::page('teacher/library', 'teacher/library.php', ['teacher', 'lecturer', 'librarian', 'dean', 'hod']);
 Router::page('teacher/forum', 'teacher/forum.php', ['teacher', 'lecturer']);
 
 /* ---- Admin ---- */
@@ -88,6 +88,8 @@ Router::page('admin/department', 'admin/department.php', 'ministry');
 Router::page('admin/subjects', 'admin/subjects.php', 'ministry');
 Router::page('admin/groups', 'admin/groups.php', 'ministry');
 Router::page('admin/years', 'admin/years.php', 'ministry');
+Router::page('admin/calendar', 'admin/calendar.php', 'ministry');
+Router::page('admin/holidays', 'admin/holidays.php', 'ministry');
 Router::page('admin/courses', 'admin/courses.php', 'ministry');
 Router::page('admin/roles', 'admin/roles.php', 'ministry');
 Router::page('admin/settings', 'admin/settings.php', 'ministry');
@@ -111,6 +113,7 @@ Router::page('admin/override', 'admin/override.php', 'ministry');
 Router::page('admin/override-exit', 'admin/override.php', '*');
 Router::page('admin/finance', 'admin/finance.php', 'ministry');
 Router::page('admin/licenses', 'admin/licenses.php', 'ministry');
+Router::page('admin/regions', 'admin/regions.php', 'ministry');
 
 /* ---- Regional Admin ---- */
 Router::page('regional/dashboard', 'regional/regional.php', 'regional');
@@ -290,6 +293,7 @@ Router::page('api/courses', 'api/courses.php', '*');
 Router::page('api/calendar', 'api/calendar.php', '*');
 Router::page('api/library', 'api/library.php', '*');
 Router::page('api/gamification', 'api/gamification.php', '*');
+Router::page('api/geo', 'api/geo.php', '*');
 Router::page('api/transfers', 'api/transfers.php', '*');
 Router::page('api/reports', 'api/reports.php', '*');
 Router::page('api/backups', 'api/backups.php', '*');

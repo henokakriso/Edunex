@@ -1,5 +1,5 @@
 <?php /* Admin schools — page shell (static parts) */
-$regions = ['Addis Ababa','Afar','Amhara','Benishangul-Gumuz','Dire Dawa','Gambela','Harari','Oromia','Sidama','SNNPR','Somali','Tigray','South West Ethiopia People\'s Region'];
+$regions = array_column(Database::all("SELECT name FROM regions WHERE status = 'active' ORDER BY name"), 'name');
 $zones = Database::all("SELECT id, name FROM zones ORDER BY name");
 $woredas = Database::all("SELECT id, name FROM woredas ORDER BY name");
 $__role = $__u['role'] ?? '';
@@ -77,21 +77,19 @@ $isMinistry = $__role === 'ministry';
       <h4 style="margin:0 0 16px;font-size:14px;color:var(--text)"><?= icon('map-pin') ?> Location</h4>
       <div class="grid2" style="gap:16px">
         <div class="flex-col"><label class="small faint" style="margin-bottom:5px">Region *</label>
-          <select class="input" name="region" required style="padding:10px 14px">
+          <select class="input" name="region" id="sw-region" required style="padding:10px 14px">
             <option value="">— Select Region —</option>
             <?php foreach ($regions as $rg): ?><option value="<?= e($rg) ?>"><?= e($rg) ?></option><?php endforeach; ?>
           </select>
         </div>
         <div class="flex-col"><label class="small faint" style="margin-bottom:5px">Zone</label>
-          <select class="input" name="zone_id" style="padding:10px 14px">
-            <option value="">— None —</option>
-            <?php foreach ($zones as $z): ?><option value="<?= (int)$z['id'] ?>"><?= e($z['name']) ?></option><?php endforeach; ?>
+          <select class="input" name="zone_id" id="sw-zone" style="padding:10px 14px">
+            <option value="">— Select Region first —</option>
           </select>
         </div>
         <div class="flex-col"><label class="small faint" style="margin-bottom:5px">Woreda</label>
-          <select class="input" name="woreda_id" style="padding:10px 14px">
-            <option value="">— None —</option>
-            <?php foreach ($woredas as $w): ?><option value="<?= (int)$w['id'] ?>"><?= e($w['name']) ?></option><?php endforeach; ?>
+          <select class="input" name="woreda_id" id="sw-woreda" style="padding:10px 14px">
+            <option value="">— Select Zone first —</option>
           </select>
         </div>
         <div class="flex-col"><label class="small faint" style="margin-bottom:5px">Kebele</label><input class="input" name="kebele" placeholder="e.g. Kebele 01" style="padding:10px 14px"></div>
@@ -345,5 +343,42 @@ $isMinistry = $__role === 'ministry';
   });
   const modal = document.getElementById('new-school-modal');
   if (modal) observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+  // --- Cascading Region → Zone → Woreda for school wizard ---
+  var swRegion = document.getElementById('sw-region');
+  var swZone = document.getElementById('sw-zone');
+  var swWoreda = document.getElementById('sw-woreda');
+  if (swRegion && swZone && swWoreda) {
+    swRegion.addEventListener('change', function(){
+      var regionName = this.value;
+      swZone.innerHTML = '<option value="">Loading...</option>';
+      swWoreda.innerHTML = '<option value="">— Select Zone first —</option>';
+      if (!regionName) { swZone.innerHTML = '<option value="">— Select Region first —</option>'; return; }
+      // Find region_id by name from the DB via API (use name lookup)
+      fetch('api/geo?action=zones&region_name=' + encodeURIComponent(regionName))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          swZone.innerHTML = '<option value="">— Select Zone —</option>';
+          (d.zones||[]).forEach(function(z){
+            swZone.innerHTML += '<option value="' + z.id + '">' + z.name + '</option>';
+          });
+        })
+        .catch(function(){ swZone.innerHTML = '<option value="">— Error loading zones —</option>'; });
+    });
+    swZone.addEventListener('change', function(){
+      var zid = this.value;
+      swWoreda.innerHTML = '<option value="">Loading...</option>';
+      if (!zid) { swWoreda.innerHTML = '<option value="">— Select Zone first —</option>'; return; }
+      fetch('api/geo?action=woredas&zone_id=' + encodeURIComponent(zid))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          swWoreda.innerHTML = '<option value="">— Select Woreda —</option>';
+          (d.woredas||[]).forEach(function(w){
+            swWoreda.innerHTML += '<option value="' + w.id + '">' + w.name + '</option>';
+          });
+        })
+        .catch(function(){ swWoreda.innerHTML = '<option value="">— Error loading woredas —</option>'; });
+    });
+  }
 })();
 </script>

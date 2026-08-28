@@ -269,8 +269,37 @@ class Ctl_regional {
         $uid = (int)$u['id'];
         $idList = RegionalScope::idList($uid);
         $schools = RegionalScope::schools($uid);
+        $myRegion = Database::scalar("SELECT region FROM schools WHERE admin_id = ? AND region IS NOT NULL AND region != '' LIMIT 1", [$uid]);
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
+            if (isset($_POST['approve_ann']) || isset($_POST['reject_ann'])) {
+                $annId = (int)($_POST['approve_ann'] ?? $_POST['reject_ann'] ?? 0);
+                $action = isset($_POST['approve_ann']) ? 'approved' : 'rejected';
+                $ann = Database::one("SELECT * FROM announcements WHERE id = ? AND approval_status = 'pending'", [$annId]);
+                if ($ann) {
+                    Database::update('announcements', [
+                        'approval_status' => $action, 'approved_by' => $uid, 'approved_at' => date('Y-m-d H:i:s')
+                    ], 'id = ?', [$annId]);
+                    if ($action === 'approved') {
+                        $scope = $ann['target_zone'] ?: $ann['target_region'];
+                        if ($ann['target_zone']) {
+                            $targets = Database::all("SELECT u.id FROM users u JOIN schools s ON s.id = u.school_id JOIN zones z ON z.id = s.zone_id WHERE z.name = ? AND u.role != 'guest'", [$ann['target_zone']]);
+                        } else {
+                            $targets = Database::all("SELECT u.id FROM users u JOIN schools s ON s.id = u.school_id WHERE s.region = ? AND u.role != 'guest'", [$ann['target_region']]);
+                        }
+                        foreach ($targets as $t) {
+                            notify((int)$t['id'], 'announcement', $ann['title'], mb_strimwidth($ann['content'], 0, 120, '…'), 'communication/announcement&id=' . $annId);
+                        }
+                        log_activity('announcement.approve', "Approved announcement #{$annId} for $scope", $uid);
+                        flash('success', 'Announcement approved and delivered to ' . count($targets) . ' users in ' . e($scope) . '.');
+                    } else {
+                        log_activity('announcement.reject', "Rejected announcement #{$annId}", $uid);
+                        flash('success', 'Announcement rejected.');
+                    }
+                }
+                redirect('regional/announcements');
+            }
             $schoolId = (int)($_POST['school_id'] ?? 0);
             RegionalScope::requireSchool($uid, $schoolId);
             $title = trim((string)$_POST['title']);
@@ -292,10 +321,19 @@ class Ctl_regional {
             flash('success', 'Announcement published to ' . count($targets) . ' users.');
             redirect('regional/announcements');
         }
+
+        $pending = [];
+        if ($myRegion) {
+            $pending = Database::all(
+                "SELECT a.*, CONCAT(us.first_name, ' ', us.last_name) AS author_name
+                 FROM announcements a JOIN users us ON us.id = a.author_id
+                 WHERE a.approval_status = 'pending' AND (a.target_region = ? OR a.target_zone IN (SELECT z.name FROM zones z JOIN regions r ON r.id = z.region_id WHERE r.name = ?))
+                 ORDER BY a.created_at DESC", [$myRegion, $myRegion]);
+        }
         $rows = Database::all(
-            "SELECT a.*, sc.name AS school_name FROM announcements a JOIN schools sc ON sc.id = a.school_id
+            "SELECT a.*, sc.name AS school_name, CONCAT(us.first_name, ' ', us.last_name) AS author_name FROM announcements a JOIN schools sc ON sc.id = a.school_id JOIN users us ON us.id = a.author_id
              WHERE a.school_id IN ($idList) ORDER BY a.created_at DESC LIMIT 30", []);
-        Router::render('app/regional/announcements', ['title' => 'Announcements', 'rows' => $rows, 'schools' => $schools]);
+        Router::render('app/regional/announcements', ['title' => 'Announcements', 'rows' => $rows, 'schools' => $schools, 'pending' => $pending, 'myRegion' => $myRegion]);
     }
 
     private function backups(array $u): void {

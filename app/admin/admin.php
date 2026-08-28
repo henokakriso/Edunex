@@ -788,54 +788,81 @@ class Ctl_school {
 class Ctl_departments {
     public function run(): void {
         $u = require_role('ministry');
+        $schoolId = (int)($_GET['school'] ?? 0);
+        $region = trim($_GET['region'] ?? '');
+        $zone = trim($_GET['zone'] ?? '');
+        $type = trim($_GET['type'] ?? '');
         $sort = $_GET['sort'] ?? 'name';
         $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
-        $sortMap = ['name' => 'd.name', 'school' => 's.name', 'members' => 'members', 'status' => 'd.status'];
+        $sortMap = ['name' => 'd.name', 'members' => 'members', 'status' => 'd.status'];
         if (!isset($sortMap[$sort])) $sort = 'name';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', d.id DESC';
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $depts = Database::all("SELECT d.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.department_id = d.id) AS members FROM departments d JOIN schools s ON s.id = d.school_id ORDER BY $orderBy");
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            csrf_verify();
-            if (isset($_POST['create_dept'])) {
-                $school_id = (int)$_POST['school_id'];
-                $name = trim($_POST['name']);
-                if (!$school_id || !$name) { flash('danger', 'School and name required.'); redirect('admin/departments'); }
-                Database::insert('departments', [
-                    'school_id' => $school_id, 'name' => $name,
-                    'head' => trim($_POST['head'] ?? ''),
-                ]);
-                log_activity('department', "Created department $name", (int)$u['id']);
-                flash('success', 'Department created.');
-                redirect('admin/departments');
-            }
-            if (($did = (int)($_POST['update_dept'] ?? 0))) {
-                Database::update('departments', [
-                    'school_id' => (int)$_POST['school_id'], 'name' => trim($_POST['name']),
-                    'head' => trim($_POST['head'] ?? ''),
-                ], 'id = ?', [$did]);
-                log_activity('department', "Updated department #$did", (int)$u['id']);
-                flash('success', 'Department updated.');
-                redirect('admin/departments');
-            }
-            if (($did = (int)($_POST['archive_dept'] ?? 0))) {
-                Database::update('departments', ['status' => 'archived'], 'id = ?', [$did]);
-                flash('success', 'Department archived.');
-                redirect('admin/departments');
-            }
-            if (($did = (int)($_POST['restore_dept'] ?? 0))) {
-                Database::update('departments', ['status' => 'active'], 'id = ?', [$did]);
-                flash('success', 'Department restored.');
-                redirect('admin/departments');
-            }
-            if (($did = (int)($_POST['delete_dept'] ?? 0))) {
-                Database::delete('departments', 'id = ?', [$did]);
-                log_activity('department', "Deleted department #$did", (int)$u['id']);
-                flash('success', 'Department deleted.');
-                redirect('admin/departments');
+        $schools = Database::all("SELECT id, name, type, region, zone_id FROM schools WHERE status = 'active' ORDER BY type, region, name");
+
+        // Filter schools by region/zone/type
+        $filteredSchools = $schools;
+        if ($region) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['region'] ?: 'Other') === $region));
+        if ($zone) {
+            // Match by zone name via zones table join
+            $zoneIds = array_column(Database::all("SELECT id FROM zones WHERE name = ?", [$zone]), 'id');
+            if ($zoneIds) {
+                $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => in_array((int)($s['zone_id'] ?? 0), $zoneIds)));
+            } else {
+                $filteredSchools = [];
             }
         }
-        Router::render('app/admin/departments', ['title' => 'Departments', 'depts' => $depts, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
+        if ($type) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['type'] ?: 'school') === $type));
+
+        // Build school IDs for query
+        $schoolIds = array_column($filteredSchools, 'id');
+        $hasFilter = $schoolId || $region || $zone || $type;
+
+        $where = "1=1";
+        $args = [];
+        if (!$hasFilter) {
+            // No filter selected — show empty with prompt message
+            $where .= " AND 1=0";
+        } elseif ($schoolId) {
+            $where .= " AND d.school_id = ?";
+            $args[] = $schoolId;
+        } elseif ($schoolIds) {
+            $placeholders = implode(',', array_fill(0, count($schoolIds), '?'));
+            $where .= " AND d.school_id IN ($placeholders)";
+            $args = array_merge($args, $schoolIds);
+        } else {
+            $where .= " AND 1=0";
+        }
+
+        $depts = Database::all("SELECT d.*, s.name AS school_name, s.type AS school_type, s.region AS school_region, (SELECT COUNT(*) FROM users us WHERE us.department_id = d.id) AS members FROM departments d JOIN schools s ON s.id = d.school_id WHERE $where ORDER BY $orderBy", $args);
+
+        // Unique regions
+        $regions = array_values(array_unique(array_map(fn($s) => $s['region'] ?: 'Other', $schools)));
+        sort($regions);
+
+        // Zones for selected region
+        $allZones = [];
+        if ($region) {
+            $regionObj = Database::one("SELECT id FROM regions WHERE name = ?", [$region]);
+            if ($regionObj) {
+                $allZones = array_column(Database::all("SELECT name FROM zones WHERE region_id = ? ORDER BY name", [(int)$regionObj['id']]), 'name');
+            }
+        }
+
+        // Types for selected region/zone
+        $typesForDropdown = $types;
+        if ($region || $zone) {
+            $typesForDropdown = array_values(array_unique(array_map(fn($s) => $s['type'] ?: 'school', $filteredSchools)));
+            usort($typesForDropdown, fn($a, $b) => array_search($a, ['university','college','school','training','other']) - array_search($b, ['university','college','school','training','other']));
+        }
+
+        $pager = fn(int $p): string => url('admin/departments?' . http_build_query(array_filter(['region' => $region, 'zone' => $zone, 'type' => $type, 'school' => $schoolId ?: '', 'sort' => $sort, 'dir' => $dir, 'page' => $p], fn($x) => $x !== '')));
+
+        Router::render('app/admin/departments', [
+            'title' => 'Departments', 'depts' => $depts, 'schools' => $schools,
+            'schoolId' => $schoolId, 'region' => $region, 'zone' => $zone, 'type' => $type,
+            'regions' => $regions, 'allZones' => $allZones, 'types' => $typesForDropdown,
+            'sort' => $sort, 'dir' => $dir, 'pager' => $pager,
+        ]);
     }
 }
 
@@ -883,14 +910,67 @@ class Ctl_department {
 class Ctl_subjects {
     public function run(): void {
         $u = require_role('ministry');
+        $region = trim($_GET['region'] ?? '');
+        $zone = trim($_GET['zone'] ?? '');
+        $type = trim($_GET['type'] ?? '');
+        $schoolId = (int)($_GET['school'] ?? 0);
+        $deptId = (int)($_GET['dept'] ?? 0);
         $sort = $_GET['sort'] ?? 'name';
         $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
         $sortMap = ['name' => 's.name', 'code' => 's.code', 'school' => 'sc.name', 'department' => 'd.name', 'status' => 's.status'];
         if (!isset($sortMap[$sort])) $sort = 'name';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', s.id DESC';
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $depts = Database::all("SELECT id, name, school_id FROM departments WHERE status = 'active' ORDER BY name");
-        $subjects = Database::all("SELECT s.*, sc.name AS school_name, d.name AS dept_name FROM subjects s JOIN schools sc ON sc.id = s.school_id LEFT JOIN departments d ON d.id = s.department_id ORDER BY $orderBy");
+
+        $schools = Database::all("SELECT id, name, type, region, zone_id FROM schools WHERE status = 'active' ORDER BY type, region, name");
+
+        // Cascade filters
+        $filteredSchools = $schools;
+        if ($region) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['region'] ?: 'Other') === $region));
+        if ($zone) {
+            $zoneIds = array_column(Database::all("SELECT id FROM zones WHERE name = ?", [$zone]), 'id');
+            $filteredSchools = $zoneIds ? array_values(array_filter($filteredSchools, fn($s) => in_array((int)($s['zone_id'] ?? 0), $zoneIds))) : [];
+        }
+        if ($type) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['type'] ?: 'school') === $type));
+        if ($schoolId) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => (int)$s['id'] === $schoolId));
+
+        $schoolIds = array_column($filteredSchools, 'id');
+        $hasFilter = $region || $zone || $type || $schoolId || $deptId;
+
+        // Departments for selected school(s)
+        $filteredDepts = Database::all("SELECT id, name, school_id FROM departments WHERE status = 'active'" . ($schoolIds ? " AND school_id IN (" . implode(',', array_fill(0, count($schoolIds), '?')) . ")" : "") . " ORDER BY name", $schoolIds);
+        if ($deptId) $filteredDepts = array_values(array_filter($filteredDepts, fn($d) => (int)$d['id'] === $deptId));
+
+        // Build query
+        $where = "1=1";
+        $args = [];
+        if (!$hasFilter) {
+            $where .= " AND 1=0";
+        } elseif ($deptId) {
+            $where .= " AND s.department_id = ?";
+            $args[] = $deptId;
+        } elseif ($schoolIds) {
+            $placeholders = implode(',', array_fill(0, count($schoolIds), '?'));
+            $where .= " AND s.school_id IN ($placeholders)";
+            $args = array_merge($args, $schoolIds);
+        } else {
+            $where .= " AND 1=0";
+        }
+
+        $subjects = Database::all("SELECT s.*, sc.name AS school_name, d.name AS dept_name FROM subjects s JOIN schools sc ON sc.id = s.school_id LEFT JOIN departments d ON d.id = s.department_id WHERE $where ORDER BY $orderBy", $args);
+
+        // Filter dropdowns
+        $regions = array_values(array_unique(array_map(fn($s) => $s['region'] ?: 'Other', $schools)));
+        sort($regions);
+        $allZones = [];
+        if ($region) {
+            $regionObj = Database::one("SELECT id FROM regions WHERE name = ?", [$region]);
+            if ($regionObj) $allZones = array_column(Database::all("SELECT name FROM zones WHERE region_id = ? ORDER BY name", [(int)$regionObj['id']]), 'name');
+        }
+        $types = array_values(array_unique(array_map(fn($s) => $s['type'] ?: 'school', $filteredSchools)));
+        usort($types, fn($a, $b) => array_search($a, ['university','college','school','training','other']) - array_search($b, ['university','college','school','training','other']));
+
+        $pager = fn(int $p): string => url('admin/subjects?' . http_build_query(array_filter(['region'=>$region,'zone'=>$zone,'type'=>$type,'school'=>$schoolId,'dept'=>$deptId,'sort'=>$sort,'dir'=>$dir,'page'=>$p], fn($x) => $x !== '')));
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             if (isset($_POST['create_subject'])) {
@@ -930,7 +1010,15 @@ class Ctl_subjects {
                 redirect('admin/subjects');
             }
         }
-        Router::render('app/admin/subjects', ['title' => 'Subjects', 'subjects' => $subjects, 'schools' => $schools, 'depts' => $depts, 'sort' => $sort, 'dir' => $dir]);
+
+        Router::render('app/admin/subjects', [
+            'title' => 'Subjects', 'subjects' => $subjects, 'schools' => $schools,
+            'depts' => $filteredDepts, 'allDepts' => $filteredDepts,
+            'region' => $region, 'zone' => $zone, 'type' => $type,
+            'schoolId' => $schoolId, 'deptId' => $deptId,
+            'regions' => $regions, 'allZones' => $allZones, 'types' => $types,
+            'sort' => $sort, 'dir' => $dir, 'pager' => $pager,
+        ]);
     }
 }
 
@@ -938,30 +1026,61 @@ class Ctl_subjects {
 class Ctl_groups {
     public function run(): void {
         $u = require_role('ministry');
+        $region = trim($_GET['region'] ?? '');
+        $zone = trim($_GET['zone'] ?? '');
+        $type = trim($_GET['type'] ?? '');
+        $schoolId = (int)($_GET['school'] ?? 0);
         $sort = $_GET['sort'] ?? 'name';
         $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
         $sortMap = ['name' => 'g.name', 'school' => 's.name', 'grade' => 'g.grade', 'section' => 'g.section', 'students' => 'members'];
         if (!isset($sortMap[$sort])) $sort = 'name';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', g.id DESC';
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $groups = Database::all("SELECT g.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.group_id = g.id) AS members FROM student_groups g JOIN schools s ON s.id = g.school_id ORDER BY $orderBy");
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            csrf_verify();
-            if (isset($_POST['create_group'])) {
-                Database::insert('student_groups', [
-                    'school_id' => (int)$_POST['school_id'], 'name' => trim($_POST['name']),
-                    'grade' => trim($_POST['grade'] ?? ''), 'section' => trim($_POST['section'] ?? ''),
-                ]);
-                flash('success', 'Class created.');
-                redirect('admin/groups');
-            }
-            if (($gid = (int)($_POST['delete_group'] ?? 0))) {
-                Database::delete('student_groups', 'id = ?', [$gid]);
-                flash('success', 'Class deleted.');
-                redirect('admin/groups');
-            }
+
+        $schools = Database::all("SELECT id, name, type, region, zone_id FROM schools WHERE status = 'active' ORDER BY type, region, name");
+        $filteredSchools = $schools;
+        if ($region) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['region'] ?: 'Other') === $region));
+        if ($zone) {
+            $zoneIds = array_column(Database::all("SELECT id FROM zones WHERE name = ?", [$zone]), 'id');
+            $filteredSchools = $zoneIds ? array_values(array_filter($filteredSchools, fn($s) => in_array((int)($s['zone_id'] ?? 0), $zoneIds))) : [];
         }
-        Router::render('app/admin/groups', ['title' => 'Classes', 'groups' => $groups, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
+        if ($type) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['type'] ?: 'school') === $type));
+        if ($schoolId) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => (int)$s['id'] === $schoolId));
+
+        $schoolIds = array_column($filteredSchools, 'id');
+        $hasFilter = $region || $zone || $type || $schoolId;
+
+        $where = "1=1";
+        $args = [];
+        if (!$hasFilter) {
+            $where .= " AND 1=0";
+        } elseif ($schoolIds) {
+            $placeholders = implode(',', array_fill(0, count($schoolIds), '?'));
+            $where .= " AND g.school_id IN ($placeholders)";
+            $args = array_merge($args, $schoolIds);
+        } else {
+            $where .= " AND 1=0";
+        }
+
+        $groups = Database::all("SELECT g.*, s.name AS school_name, (SELECT COUNT(*) FROM users us WHERE us.group_id = g.id) AS members FROM student_groups g JOIN schools s ON s.id = g.school_id WHERE $where ORDER BY $orderBy", $args);
+
+        $regions = array_values(array_unique(array_map(fn($s) => $s['region'] ?: 'Other', $schools)));
+        sort($regions);
+        $allZones = [];
+        if ($region) {
+            $regionObj = Database::one("SELECT id FROM regions WHERE name = ?", [$region]);
+            if ($regionObj) $allZones = array_column(Database::all("SELECT name FROM zones WHERE region_id = ? ORDER BY name", [(int)$regionObj['id']]), 'name');
+        }
+        $types = array_values(array_unique(array_map(fn($s) => $s['type'] ?: 'school', $filteredSchools)));
+        usort($types, fn($a, $b) => array_search($a, ['university','college','school','training','other']) - array_search($b, ['university','college','school','training','other']));
+
+        $pager = fn(int $p): string => url('admin/groups?' . http_build_query(array_filter(['region'=>$region,'zone'=>$zone,'type'=>$type,'school'=>$schoolId,'sort'=>$sort,'dir'=>$dir,'page'=>$p], fn($x) => $x !== '')));
+
+        Router::render('app/admin/groups', [
+            'title' => 'Classes', 'groups' => $groups, 'schools' => $schools,
+            'region' => $region, 'zone' => $zone, 'type' => $type, 'schoolId' => $schoolId,
+            'regions' => $regions, 'allZones' => $allZones, 'types' => $types,
+            'sort' => $sort, 'dir' => $dir, 'pager' => $pager,
+        ]);
     }
 }
 
@@ -969,37 +1088,172 @@ class Ctl_groups {
 class Ctl_years {
     public function run(): void {
         $u = require_role('ministry');
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
-        $years = Database::all("SELECT y.*, s.name AS school_name FROM academic_years y JOIN schools s ON s.id = y.school_id ORDER BY y.start_date DESC");
-        foreach ($years as &$y) {
-            $y['semesters'] = Database::all("SELECT * FROM semesters WHERE year_id = ? ORDER BY start_date", [$y['id']]);
+        $schools = Database::all("SELECT id, name, type FROM schools WHERE status = 'active' ORDER BY type, name");
+
+        // Shared calendars
+        $sharedYears = Database::all("SELECT y.*, 'Shared' AS school_name FROM academic_years y WHERE y.is_shared = 1 ORDER BY y.education_level, y.start_date DESC");
+        foreach ($sharedYears as &$y) {
+            $y['semesters'] = Database::all("SELECT * FROM semesters WHERE year_id = ? ORDER BY sort_order, start_date", [$y['id']]);
+            $y['applied_count'] = Database::one("SELECT COUNT(*) AS c FROM academic_years WHERE education_level = ? AND is_shared = 0 AND name = ?", [$y['education_level'], $y['name']])['c'] ?? 0;
         }
+
+        // Individual calendars
+        $individualYears = Database::all("SELECT y.*, s.name AS school_name FROM academic_years y JOIN schools s ON s.id = y.school_id WHERE y.is_shared = 0 ORDER BY y.start_date DESC");
+        foreach ($individualYears as &$y) {
+            $y['semesters'] = Database::all("SELECT * FROM semesters WHERE year_id = ? ORDER BY sort_order, start_date", [$y['id']]);
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
+
             if (isset($_POST['create_year'])) {
-                Database::insert('academic_years', [
-                    'school_id' => (int)$_POST['school_id'], 'name' => trim($_POST['name']),
+                $isShared = isset($_POST['is_shared']) ? 1 : 0;
+                $eduLevel = $_POST['education_level'] ?? 'school';
+                $yearId = Database::insert('academic_years', [
+                    'school_id' => null,
+                    'name' => trim($_POST['name']),
+                    'education_level' => $eduLevel, 'is_shared' => $isShared,
+                    'ethiopian_year' => trim($_POST['ethiopian_year'] ?? ''),
                     'start_date' => $_POST['start_date'] ?: null, 'end_date' => $_POST['end_date'] ?: null,
+                    'ethiopian_start' => trim($_POST['ethiopian_start'] ?? ''),
+                    'ethiopian_end' => trim($_POST['ethiopian_end'] ?? ''),
+                    'description' => trim($_POST['description'] ?? ''),
+                    'status' => $_POST['status'] ?? 'active',
+                    'num_semesters' => (int)($_POST['num_semesters'] ?? 2),
+                    'primary_calendar' => $_POST['primary_calendar'] ?? 'ethiopian',
+                    'weekend_days' => trim($_POST['weekend_days'] ?? 'fri,sat'),
+                    'working_days_per_week' => (int)($_POST['working_days_per_week'] ?? 5),
+                    'school_days_target' => (int)($_POST['school_days_target'] ?: 0) ?: null,
                 ]);
-                flash('success', 'Academic year created.');
+                for ($i = 1; $i <= (int)($_POST['num_semesters'] ?? 2); $i++) {
+                    Database::insert('semesters', [
+                        'year_id' => $yearId, 'name' => trim($_POST["semester_{$i}_name"] ?? '') ?: "Semester $i",
+                        'start_date' => $_POST["semester_{$i}_start"] ?: null,
+                        'end_date' => $_POST["semester_{$i}_end"] ?: null,
+                        'sort_order' => $i,
+                    ]);
+                }
+                log_activity('academic_year', "Created " . ($isShared ? "shared $eduLevel" : "individual") . " calendar: " . trim($_POST['name']), (int)$u['id']);
+                flash('success', $isShared ? "Shared calendar created for all {$eduLevel}s." : 'Academic year created.');
                 redirect('admin/years');
             }
+
+            if (isset($_POST['apply_shared'])) {
+                $shared = Database::one("SELECT * FROM academic_years WHERE id = ?", [(int)$_POST['apply_shared']]);
+                if ($shared) {
+                    $levelSchools = $shared['education_level'] === 'university'
+                        ? Database::all("SELECT id, name FROM schools WHERE type = 'university' AND status = 'active'")
+                        : Database::all("SELECT id, name FROM schools WHERE type != 'university' AND status = 'active'");
+                    $applied = 0;
+                    foreach ($levelSchools as $s) {
+                        $exists = Database::one("SELECT id FROM academic_years WHERE school_id = ? AND name = ? AND is_shared = 0", [(int)$s['id'], $shared['name']]);
+                        if (!$exists) {
+                            $newId = Database::insert('academic_years', [
+                                'school_id' => (int)$s['id'], 'name' => $shared['name'],
+                                'education_level' => $shared['education_level'], 'is_shared' => 0,
+                                'ethiopian_year' => $shared['ethiopian_year'],
+                                'start_date' => $shared['start_date'], 'end_date' => $shared['end_date'],
+                                'ethiopian_start' => $shared['ethiopian_start'], 'ethiopian_end' => $shared['ethiopian_end'],
+                                'status' => $shared['status'], 'num_semesters' => $shared['num_semesters'],
+                                'primary_calendar' => $shared['primary_calendar'],
+                                'weekend_days' => $shared['weekend_days'],
+                                'working_days_per_week' => $shared['working_days_per_week'],
+                                'school_days_target' => $shared['school_days_target'],
+                            ]);
+                            $sems = Database::all("SELECT * FROM semesters WHERE year_id = ?", [$shared['id']]);
+                            foreach ($sems as $sem) {
+                                Database::insert('semesters', [
+                                    'year_id' => $newId, 'name' => $sem['name'],
+                                    'start_date' => $sem['start_date'], 'end_date' => $sem['end_date'],
+                                    'sort_order' => $sem['sort_order'],
+                                ]);
+                            }
+                            $applied++;
+                        }
+                    }
+                    log_activity('academic_year', "Applied shared calendar to $applied " . $shared['education_level'] . "s", (int)$u['id']);
+                    flash('success', "Applied to $applied schools.");
+                }
+                redirect('admin/years');
+            }
+
             if (isset($_POST['set_current'])) {
-                Database::run("UPDATE academic_years SET is_current = 0");
-                Database::update('academic_years', ['is_current' => 1], 'id = ?', [(int)$_POST['set_current']]);
+                $yr = Database::one("SELECT school_id, education_level, is_shared FROM academic_years WHERE id = ?", [(int)$_POST['set_current']]);
+                if ($yr) {
+                    if ($yr['is_shared']) {
+                        Database::run("UPDATE academic_years SET is_current = 0 WHERE education_level = ? AND is_shared = 1", [$yr['education_level']]);
+                    } else {
+                        Database::run("UPDATE academic_years SET is_current = 0 WHERE school_id = ?", [(int)$yr['school_id']]);
+                    }
+                    Database::update('academic_years', ['is_current' => 1], 'id = ?', [(int)$_POST['set_current']]);
+                }
                 flash('success', 'Current year updated.');
                 redirect('admin/years');
             }
+
+            if (isset($_POST['set_status'])) {
+                Database::update('academic_years', ['status' => $_POST['status']], 'id = ?', [(int)$_POST['set_status']]);
+                flash('success', 'Status updated.');
+                redirect('admin/years');
+            }
+
+            if (isset($_POST['update_year'])) {
+                $uid = (int)$_POST['update_year'];
+                Database::update('academic_years', [
+                    'school_id' => (int)$_POST['school_id'], 'name' => trim($_POST['name']),
+                    'ethiopian_year' => trim($_POST['ethiopian_year'] ?? ''),
+                    'start_date' => $_POST['start_date'] ?: null, 'end_date' => $_POST['end_date'] ?: null,
+                    'ethiopian_start' => trim($_POST['ethiopian_start'] ?? ''),
+                    'ethiopian_end' => trim($_POST['ethiopian_end'] ?? ''),
+                    'description' => trim($_POST['description'] ?? ''),
+                    'status' => $_POST['status'] ?? 'draft',
+                    'num_semesters' => (int)($_POST['num_semesters'] ?? 2),
+                    'primary_calendar' => $_POST['primary_calendar'] ?? 'ethiopian',
+                    'weekend_days' => trim($_POST['weekend_days'] ?? 'fri,sat'),
+                    'working_days_per_week' => (int)($_POST['working_days_per_week'] ?? 5),
+                ], 'id = ?', [$uid]);
+                flash('success', 'Academic year updated.');
+                redirect('admin/years');
+            }
+
+            if (($uid = (int)($_POST['delete_year'] ?? 0))) {
+                Database::run("DELETE FROM semesters WHERE year_id = ?", [$uid]);
+                Database::delete('academic_years', 'id = ?', [$uid]);
+                flash('success', 'Academic year deleted.');
+                redirect('admin/years');
+            }
+
             if (isset($_POST['create_semester'])) {
                 Database::insert('semesters', [
                     'year_id' => (int)$_POST['year_id'], 'name' => trim($_POST['name']),
                     'start_date' => $_POST['start_date'] ?: null, 'end_date' => $_POST['end_date'] ?: null,
+                    'sort_order' => (int)($_POST['sort_order'] ?? 0),
                 ]);
                 flash('success', 'Semester added.');
                 redirect('admin/years');
             }
+
+            if (isset($_POST['update_semester'])) {
+                Database::update('semesters', [
+                    'name' => trim($_POST['name']),
+                    'start_date' => $_POST['start_date'] ?: null,
+                    'end_date' => $_POST['end_date'] ?: null,
+                ], 'id = ?', [(int)$_POST['update_semester']]);
+                flash('success', 'Semester updated.');
+                redirect('admin/years');
+            }
+
+            if (($sid = (int)($_POST['delete_semester'] ?? 0))) {
+                Database::delete('semesters', 'id = ?', [$sid]);
+                flash('success', 'Semester deleted.');
+                redirect('admin/years');
+            }
         }
-        Router::render('app/admin/years', ['title' => 'Academic Years', 'years' => $years, 'schools' => $schools]);
+
+        Router::render('app/admin/years', [
+            'title' => 'Academic Years', 'schools' => $schools,
+            'sharedYears' => $sharedYears, 'individualYears' => $individualYears,
+        ]);
     }
 }
 
@@ -1007,45 +1261,233 @@ class Ctl_years {
 class Ctl_courses {
     public function run(): void {
         $u = require_role('ministry');
+        $region = trim($_GET['region'] ?? '');
+        $zone = trim($_GET['zone'] ?? '');
+        $type = trim($_GET['type'] ?? '');
         $schoolId = (int)($_GET['school'] ?? 0);
         $sort = $_GET['sort'] ?? 'created_at';
         $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
-        $sortMap = ['name' => 'c.name', 'school' => 's.name', 'teacher' => 'u.last_name', 'students' => 'students', 'lessons' => 'lessons', 'status' => 'c.status', 'created_at' => 'c.created_at'];
+        $sortMap = ['name' => 'c.title', 'school' => 's.name', 'teacher' => 'u.last_name', 'students' => 'students', 'lessons' => 'lessons', 'status' => 'c.status', 'created_at' => 'c.created_at'];
         if (!isset($sortMap[$sort])) $sort = 'created_at';
         $orderBy = $sortMap[$sort] . ' ' . $dir . ', c.id DESC';
+
+        $schools = Database::all("SELECT id, name, type, region, zone_id FROM schools WHERE status = 'active' ORDER BY type, region, name");
+        $filteredSchools = $schools;
+        if ($region) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['region'] ?: 'Other') === $region));
+        if ($zone) {
+            $zoneIds = array_column(Database::all("SELECT id FROM zones WHERE name = ?", [$zone]), 'id');
+            $filteredSchools = $zoneIds ? array_values(array_filter($filteredSchools, fn($s) => in_array((int)($s['zone_id'] ?? 0), $zoneIds))) : [];
+        }
+        if ($type) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['type'] ?: 'school') === $type));
+        if ($schoolId) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => (int)$s['id'] === $schoolId));
+
+        $schoolIds = array_column($filteredSchools, 'id');
+        $hasFilter = $region || $zone || $type || $schoolId;
+
+        $where = "1=1";
+        $args = [];
+        if (!$hasFilter) {
+            $where .= " AND 1=0";
+        } elseif ($schoolIds) {
+            $placeholders = implode(',', array_fill(0, count($schoolIds), '?'));
+            $where .= " AND c.school_id IN ($placeholders)";
+            $args = array_merge($args, $schoolIds);
+        } else {
+            $where .= " AND 1=0";
+        }
+
         $courses = Database::all(
             "SELECT c.*, s.name AS school_name, u.first_name AS tfirst, u.last_name AS tlast,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons
              FROM courses c JOIN schools s ON s.id = c.school_id JOIN users u ON u.id = c.teacher_id
-             WHERE 1=1" . ($schoolId ? " AND c.school_id = ?" : "") . " ORDER BY $orderBy", $schoolId ? [$schoolId] : []);
-        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active'");
+             WHERE $where ORDER BY $orderBy", $args);
+
+        $regions = array_values(array_unique(array_map(fn($s) => $s['region'] ?: 'Other', $schools)));
+        sort($regions);
+        $allZones = [];
+        if ($region) {
+            $regionObj = Database::one("SELECT id FROM regions WHERE name = ?", [$region]);
+            if ($regionObj) $allZones = array_column(Database::all("SELECT name FROM zones WHERE region_id = ? ORDER BY name", [(int)$regionObj['id']]), 'name');
+        }
+        $types = array_values(array_unique(array_map(fn($s) => $s['type'] ?: 'school', $filteredSchools)));
+        usort($types, fn($a, $b) => array_search($a, ['university','college','school','training','other']) - array_search($b, ['university','college','school','training','other']));
+
+        $pager = fn(int $p): string => url('admin/courses?' . http_build_query(array_filter(['region'=>$region,'zone'=>$zone,'type'=>$type,'school'=>$schoolId,'sort'=>$sort,'dir'=>$dir,'page'=>$p], fn($x) => $x !== '')));
+
+        Router::render('app/admin/courses', [
+            'title' => 'All Courses', 'courses' => $courses, 'schools' => $schools,
+            'region' => $region, 'zone' => $zone, 'type' => $type, 'schoolId' => $schoolId,
+            'regions' => $regions, 'allZones' => $allZones, 'types' => $types,
+            'sort' => $sort, 'dir' => $dir, 'pager' => $pager,
+        ]);
+    }
+}
+
+/* =============== ADMIN: calendar events =============== */
+class Ctl_calendar {
+    public function run(): void {
+        $u = require_role('ministry');
+        $region = trim($_GET['region'] ?? '');
+        $schoolId = (int)($_GET['school'] ?? 0);
+        $yearId = (int)($_GET['year'] ?? 0);
+        $type = trim($_GET['type'] ?? '');
+        $status = trim($_GET['status'] ?? '');
+        $month = (int)($_GET['month'] ?? date('n'));
+        $year = (int)($_GET['year_filter'] ?? date('Y'));
+
+        $schools = Database::all("SELECT id, name, type, region FROM schools WHERE status = 'active' ORDER BY name");
+        $years = Database::all("SELECT id, name, school_id, status FROM academic_years ORDER BY start_date DESC");
+        $events = Database::all("SELECT e.*, s.name AS school_name FROM calendar_events e LEFT JOIN schools s ON s.id = e.school_id ORDER BY e.gregorian_start DESC LIMIT 200");
+
+        $eventTypeLabels = [
+            'academic'=>'Academic','examination'=>'Examination','registration'=>'Registration',
+            'holiday'=>'Holiday','national_celebration'=>'National Celebration','memorial_day'=>'Memorial Day',
+            'religious'=>'Religious Holiday','ministry'=>'Ministry Event','regional'=>'Regional Event',
+            'school'=>'School Event','training'=>'Training','competition'=>'Competition',
+            'cultural'=>'Cultural Event','sports'=>'Sports Event','parent'=>'Parent Event',
+            'teacher'=>'Teacher Event','other'=>'Other',
+        ];
+        $statusColors = ['draft'=>'badge-muted','pending_approval'=>'badge-warning','approved'=>'badge-accent','published'=>'badge-success','cancelled'=>'badge-danger'];
+        $scopeIcons = ['national'=>'&#127987;','regional'=>'&#127963;','zonal'=>'&#127970;','woreda'=>'&#127966;','school'=>'&#127979;'];
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (($cid = (int)($_POST['archive_course'] ?? 0))) {
-                Database::update('courses', ['status' => 'archived'], 'id = ?', [$cid]);
-                flash('success', 'Course archived.');
-                redirect('admin/courses');
+            if (isset($_POST['create_event'])) {
+                $evId = Database::insert('calendar_events', [
+                    'academic_year_id' => (int)($_POST['academic_year_id'] ?: 0) ?: null,
+                    'semester_id' => (int)($_POST['semester_id'] ?: 0) ?: null,
+                    'school_id' => (int)($_POST['school_id'] ?: 0) ?: null,
+                    'title' => trim($_POST['title']),
+                    'title_am' => trim($_POST['title_am'] ?? ''),
+                    'title_om' => trim($_POST['title_om'] ?? ''),
+                    'description' => trim($_POST['description'] ?? ''),
+                    'event_type' => $_POST['event_type'] ?? 'other',
+                    'category' => $_POST['category'] ?? 'school',
+                    'priority' => $_POST['priority'] ?? 'normal',
+                    'ethiopian_date' => trim($_POST['ethiopian_date'] ?? ''),
+                    'gregorian_start' => $_POST['gregorian_start'],
+                    'gregorian_end' => $_POST['gregorian_end'] ?: null,
+                    'start_time' => $_POST['start_time'] ?: null,
+                    'end_time' => $_POST['end_time'] ?: null,
+                    'all_day' => isset($_POST['all_day']) ? 1 : 0,
+                    'scope_type' => $_POST['scope_type'] ?? 'national',
+                    'scope_id' => (int)($_POST['scope_id'] ?: 0) ?: null,
+                    'issuing_authority' => $_POST['issuing_authority'] ?? 'school',
+                    'authority_name' => trim($_POST['authority_name'] ?? ''),
+                    'directive_number' => trim($_POST['directive_number'] ?? ''),
+                    'school_closed' => isset($_POST['school_closed']) ? 1 : 0,
+                    'teaching_suspended' => isset($_POST['teaching_suspended']) ? 1 : 0,
+                    'examination_suspended' => isset($_POST['examination_suspended']) ? 1 : 0,
+                    'attendance_required' => isset($_POST['attendance_required']) ? 1 : 0,
+                    'is_academic_day' => isset($_POST['is_academic_day']) ? 1 : 0,
+                    'makeup_day_required' => isset($_POST['makeup_day_required']) ? 1 : 0,
+                    'affects_academic_days' => isset($_POST['affects_academic_days']) ? 1 : 0,
+                    'affects_semester' => isset($_POST['affects_semester']) ? 1 : 0,
+                    'status' => $_POST['event_status'] ?? 'draft',
+                    'created_by' => (int)$u['id'],
+                ]);
+                log_activity('calendar_event', "Created event " . trim($_POST['title']), (int)$u['id']);
+                flash('success', 'Calendar event created.');
+                redirect('admin/calendar');
             }
-            if (($cid = (int)($_POST['publish_course'] ?? 0))) {
-                Database::update('courses', ['status' => 'published'], 'id = ?', [$cid]);
-                log_activity('course', "Published course #$cid", (int)$u['id']);
-                flash('success', 'Course published.');
-                redirect('admin/courses');
+            if (isset($_POST['approve_event'])) {
+                Database::update('calendar_events', [
+                    'status' => 'approved', 'approved_by' => (int)$u['id'], 'approved_at' => date('Y-m-d H:i:s')
+                ], 'id = ?', [(int)$_POST['approve_event']]);
+                flash('success', 'Event approved.');
+                redirect('admin/calendar');
             }
-            if (($cid = (int)($_POST['restore_course'] ?? 0))) {
-                Database::update('courses', ['status' => 'draft'], 'id = ?', [$cid]);
-                log_activity('course', "Restored course #$cid", (int)$u['id']);
-                flash('success', 'Course restored to drafts.');
-                redirect('admin/courses');
+            if (isset($_POST['publish_event'])) {
+                Database::update('calendar_events', [
+                    'status' => 'published', 'published_at' => date('Y-m-d H:i:s')
+                ], 'id = ?', [(int)$_POST['publish_event']]);
+                flash('success', 'Event published.');
+                redirect('admin/calendar');
             }
-            if (($cid = (int)($_POST['delete_course'] ?? 0))) {
-                Database::delete('courses', 'id = ?', [$cid]);
-                flash('success', 'Course deleted.');
-                redirect('admin/courses');
+            if (isset($_POST['cancel_event'])) {
+                Database::update('calendar_events', ['status' => 'cancelled'], 'id = ?', [(int)$_POST['cancel_event']]);
+                flash('success', 'Event cancelled.');
+                redirect('admin/calendar');
+            }
+            if (($eid = (int)($_POST['delete_event'] ?? 0))) {
+                Database::delete('calendar_events', 'id = ?', [$eid]);
+                flash('success', 'Event deleted.');
+                redirect('admin/calendar');
             }
         }
-        Router::render('app/admin/courses', ['title' => 'All Courses', 'courses' => $courses, 'schools' => $schools, 'schoolId' => $schoolId, 'sort' => $sort, 'dir' => $dir]);
+
+        Router::render('app/admin/calendar', [
+            'title' => 'Academic Calendar', 'events' => $events, 'schools' => $schools,
+            'years' => $years, 'eventTypeLabels' => $eventTypeLabels,
+            'statusColors' => $statusColors, 'scopeIcons' => $scopeIcons,
+            'region' => $region, 'schoolId' => $schoolId, 'yearId' => $yearId,
+            'type' => $type, 'status' => $status, 'month' => $month, 'year' => $year,
+        ]);
+    }
+}
+
+/* =============== ADMIN: holidays =============== */
+class Ctl_holidays {
+    public function run(): void {
+        $u = require_role('ministry');
+        $holidays = Database::all("SELECT e.*, s.name AS school_name FROM calendar_events e LEFT JOIN schools s ON s.id = e.school_id WHERE e.event_type IN ('holiday','national_celebration','memorial_day','religious') ORDER BY e.gregorian_start DESC");
+        $years = Database::all("SELECT id, name FROM academic_years ORDER BY start_date DESC");
+        $schools = Database::all("SELECT id, name FROM schools WHERE status = 'active' ORDER BY name");
+
+        $statusColors = ['draft'=>'badge-muted','pending_approval'=>'badge-warning','approved'=>'badge-accent','published'=>'badge-success','cancelled'=>'badge-danger'];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            csrf_verify();
+            if (isset($_POST['create_holiday'])) {
+                Database::insert('calendar_events', [
+                    'academic_year_id' => (int)($_POST['academic_year_id'] ?: 0) ?: null,
+                    'school_id' => (int)($_POST['school_id'] ?: 0) ?: null,
+                    'title' => trim($_POST['title']),
+                    'title_am' => trim($_POST['title_am'] ?? ''),
+                    'title_om' => trim($_POST['title_om'] ?? ''),
+                    'description' => trim($_POST['description'] ?? ''),
+                    'event_type' => $_POST['event_type'] ?? 'holiday',
+                    'category' => $_POST['category'] ?? 'national',
+                    'priority' => 'high',
+                    'ethiopian_date' => trim($_POST['ethiopian_date'] ?? ''),
+                    'gregorian_start' => $_POST['gregorian_start'],
+                    'gregorian_end' => $_POST['gregorian_end'] ?: null,
+                    'all_day' => 1,
+                    'scope_type' => $_POST['scope_type'] ?? 'national',
+                    'issuing_authority' => $_POST['issuing_authority'] ?? 'federal',
+                    'authority_name' => trim($_POST['authority_name'] ?? ''),
+                    'directive_number' => trim($_POST['directive_number'] ?? ''),
+                    'school_closed' => 1,
+                    'teaching_suspended' => 1,
+                    'is_academic_day' => 0,
+                    'status' => $_POST['event_status'] ?? 'draft',
+                    'created_by' => (int)$u['id'],
+                ]);
+                log_activity('holiday', "Created holiday " . trim($_POST['title']), (int)$u['id']);
+                flash('success', 'Holiday created.');
+                redirect('admin/holidays');
+            }
+            if (isset($_POST['approve_event'])) {
+                Database::update('calendar_events', [
+                    'status' => 'approved', 'approved_by' => (int)$u['id'], 'approved_at' => date('Y-m-d H:i:s')
+                ], 'id = ?', [(int)$_POST['approve_event']]);
+                flash('success', 'Holiday approved.');
+                redirect('admin/holidays');
+            }
+            if (isset($_POST['publish_event'])) {
+                Database::update('calendar_events', [
+                    'status' => 'published', 'published_at' => date('Y-m-d H:i:s')
+                ], 'id = ?', [(int)$_POST['publish_event']]);
+                flash('success', 'Holiday published.');
+                redirect('admin/holidays');
+            }
+        }
+
+        Router::render('app/admin/holidays', [
+            'title' => 'Holidays & Observances', 'holidays' => $holidays,
+            'years' => $years, 'schools' => $schools, 'statusColors' => $statusColors,
+        ]);
     }
 }
 

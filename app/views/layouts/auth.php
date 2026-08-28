@@ -21,7 +21,7 @@
   <div class="auth-bg">
     <div class="auth-card">
       <div class="flex-col gap-8 text-center" style="margin-bottom:26px">
-        <span class="brand-logo" style="width:52px;height:52px;font-size:26px;margin:0 auto">E</span>
+        <img class="brand-logo" src="<?= url('public/images/logo-black.jpeg') ?>" alt="Edunex" style="width:52px;height:52px;margin:0 auto">
         <div>
           <h1 style="font-size:24px">
             <?= e($title ?? APP_NAME) ?>

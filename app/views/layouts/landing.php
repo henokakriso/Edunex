@@ -13,7 +13,7 @@
 
     <nav class="landing-nav">
       <a href="<?= url('index.php?r=landing') ?>" class="flex gap-8" style="text-decoration:none;color:var(--text)">
-        <span class="brand-logo">E</span>
+        <img class="brand-logo" src="<?= url('public/images/logo-black.jpeg') ?>" alt="Edunex">
         <span class="brand-name">Edunex</span>
       </a>
       <div class="flex gap-16 small" style="margin-left:auto">
@@ -38,7 +38,7 @@
       <div class="flex-between flex-wrap">
         <div>
           <div class="flex gap-8" style="margin-bottom:10px">
-            <span class="brand-logo" style="width:30px;height:30px;font-size:14px">E</span>
+            <img class="brand-logo" src="<?= url('public/images/logo-black.jpeg') ?>" alt="Edunex" style="width:30px;height:30px">
             <b>Edunex</b>
           </div>
           <p class="small faint">AI-Powered Ethiopian Learning Platform — for students, teachers and schools.</p>

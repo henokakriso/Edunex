@@ -10,7 +10,6 @@ $cards = [
   ['Courses', $stats['courses'], icon('graduation'), 'admin/courses'],
   ['Subjects', $stats['subjects'], icon('search'), 'admin/subjects'],
   ['Departments', $stats['departments'], icon('folder'), 'admin/departments'],
-  ['Library Items', $stats['library'], icon('books'), 'admin/library'],
   ['Exams', $stats['exams'], icon('note'), 'admin/courses'],
   ['Announcements', $stats['announcements'], icon('megaphone'), 'admin/announcements'],
   ['Messages', $stats['messages'], icon('chat'), 'messages'],

@@ -15,11 +15,13 @@ $__nav = [
     ['subjects', 'Subjects', 'admin/subjects', icon('books')],
     ['groups', 'Classes', 'admin/groups', icon('tag')],
     ['courses', 'Courses', 'admin/courses', icon('graduation')],
-    ['years', 'Years & Semesters', 'admin/years', icon('calendar')],
+    ['ACADEMIC CALENDAR'],
+    ['years', 'Academic Years', 'admin/years', icon('calendar')],
+    ['calendar', 'Calendar Events', 'admin/calendar', icon('calendar-range')],
+    ['holidays', 'Holidays & Observances', 'admin/holidays', icon('sunset')],
     ['transfers', 'Transfers', 'admin/transfers', icon('refresh')],
     ['OPERATIONS'],
     ['announcements', 'Announcements', 'admin/announcements', icon('megaphone')],
-    ['library', 'Library', 'admin/library', icon('university')],
     ['reports', 'Reports', 'admin/reports', icon('trend-up')],
     ['analytics', 'Analytics', 'admin/analytics', icon('chart-bar')],
     ['badges', 'Badges & Achievements', 'admin/badges', icon('medal')],
@@ -32,6 +34,7 @@ $__nav = [
     ['settings', 'Settings', 'admin/settings', icon('gear')],
     ['ledger', 'Integrity Ledger', 'admin/ledger', icon('chain')],
     ['NATIONAL'],
+    ['regions', 'Regions & Zones', 'admin/regions', icon('map')],
     ['ai_reports', 'AI Reports', 'admin/ai-reports', icon('robot')],
     ['finance', 'Finance Summary', 'admin/finance', icon('banknote')],
     ['override', 'Emergency Override', 'admin/override', icon('shield')],
@@ -104,6 +107,7 @@ $__nav = [
     ['courses', 'Course Approval', 'dean/courses', icon('exam')],
     ['teachers', 'Teachers', 'dean/teachers', icon('users')],
     ['analytics', 'Analytics', 'dean/analytics', icon('chart-bar')],
+    ['library', 'Library', 'teacher/library', icon('university')],
     ['UNIVERSITY'],
     ['university_programs', 'Programs', 'university/programs', icon('book')],
     ['university_theses', 'Theses', 'university/theses', icon('book')],
@@ -124,6 +128,7 @@ $__nav = [
     ['courses', 'Courses', 'dept_head/courses', icon('exam')],
     ['theses', 'Theses', 'dept_head/theses', icon('book')],
     ['analytics', 'Analytics', 'dept_head/analytics', icon('chart-bar')],
+    ['library', 'Library', 'teacher/library', icon('university')],
     ['UNIVERSITY'],
     ['university_theses', 'Theses', 'university/theses', icon('book')],
     ['clearance_manage', 'Clearance', 'university/clearance/manage', icon('check-circle')],
@@ -144,7 +149,7 @@ $__nav = [
   'librarian' => [
     ['dash', 'Dashboard', 'dashboard', icon('home')],
     ['LIBRARY'],
-    ['library', 'Library', 'library', icon('university')],
+    ['library', 'Library', 'teacher/library', icon('university')],
     ['clearance_manage', 'Clearance (Library)', 'university/clearance/manage', icon('check-circle')],
   ],
   'lecturer' => [
@@ -156,6 +161,7 @@ $__nav = [
     ['grades', 'Grade', 'teacher/grade', icon('grades')],
     ['students', 'Students', 'teacher/students', icon('users')],
     ['analytics', 'Analytics', 'teacher/analytics', icon('chart-bar')],
+    ['library', 'Library', 'teacher/library', icon('university')],
   ],
   'principal' => [
     ['dash', 'Dashboard', 'director/dashboard', icon('home')],
@@ -255,11 +261,19 @@ if (($__u['role'] ?? '') === 'teacher' && Database::scalar("SELECT COUNT(*) FROM
     array_splice($__nav['teacher'], ($__i === false ? 7 : $__i + 1), 0, [['homeroom', 'Homeroom', 'teacher/homeroom', icon('school')]]);
 }
 
-/* Director: only show faculties for university/college schools */
+/* Director: only show faculties + transfers for university/college schools */
 if (($__u['role'] ?? '') === 'principal') {
     $__schoolType = Database::scalar("SELECT type FROM schools WHERE id = ?", [$__u['school_id'] ?? 0], 'school');
     if (!in_array($__schoolType, ['university', 'college'], true)) {
-        $__nav['principal'] = array_values(array_filter($__nav['principal'], fn($i) => count($i) === 1 || $i[2] !== 'director/faculties'));
+        $__nav['principal'] = array_values(array_filter($__nav['principal'], fn($i) => count($i) === 1 || !in_array($i[2], ['director/faculties', 'director/transfers'])));
+    }
+}
+
+/* Student: only show transfers for university/college schools */
+if (($__u['role'] ?? '') === 'student') {
+    $__schoolType = Database::scalar("SELECT type FROM schools WHERE id = ?", [$__u['school_id'] ?? 0], 'school');
+    if (!in_array($__schoolType, ['university', 'college'], true)) {
+        $__nav['student'] = array_values(array_filter($__nav['student'], fn($i) => count($i) === 1 || $i[2] !== 'transfers'));
     }
 }
 
@@ -291,7 +305,7 @@ $__icons = [
     <!-- ======================= SIDEBAR ======================= -->
     <aside class="sidebar">
       <div class="brand">
-        <span class="brand-logo">E</span>
+        <img class="brand-logo" src="<?= url('public/images/logo-black.jpeg') ?>" alt="Edunex">
         <div>
           <div class="brand-name">Edunex<?php if (is_demo_mode()): ?> <span style="display:inline-block;font-size:0.55em;background:var(--warning,#f59e0b);color:#000;padding:1px 5px;border-radius:4px;vertical-align:middle;cursor:help" title="DEMO mode active — sample data shown. Switch to Normal mode in Settings.">DEMO</span><?php endif; ?></div>
           <div class="brand-sub"><?= e(setting('site_name', 'Learning')) ?> · <?= e($__u['school_name'] ?? '') ?></div>
