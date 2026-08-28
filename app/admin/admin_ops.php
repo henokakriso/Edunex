@@ -305,7 +305,7 @@ class Ctl_reports {
                     'date_from' => $_POST['date_from'] ?? '',
                     'date_to' => $_POST['date_to'] ?? '',
                 ];
-                $format = $_POST['format'] ?? 'csv';
+                $format = 'pdf';
                 $generated = 0;
                 foreach ($reportTypes as $reportType) {
                     $reportType = trim($reportType);

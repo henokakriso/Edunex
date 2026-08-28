@@ -31,35 +31,56 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
 .rv-toolbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
 .rv-btn{
   display:inline-flex;align-items:center;gap:7px;
-  padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;
-  border:none;cursor:pointer;transition:all .18s ease;
+  padding:10px 24px;border-radius:14px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:all .2s ease;
   text-decoration:none;line-height:1.1;white-space:nowrap;
 }
 .rv-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Back */
 .rv-btn--back{
-  background:var(--bg-elev);color:var(--text-secondary);border:1px solid var(--border);
+  background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  color:var(--text-secondary);border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
-.rv-btn--back:hover{background:var(--bg);color:var(--text);border-color:var(--text-secondary)}
+.rv-btn--back:hover{background:rgba(255,255,255,.7);color:var(--text)}
+[data-theme="dark"] .rv-btn--back{background:rgba(30,41,59,.5);border-color:rgba(255,255,255,.08)}
+[data-theme="dark"] .rv-btn--back:hover{background:rgba(30,41,59,.7)}
 /* Download */
 .rv-btn--dl{
   background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;
-  box-shadow:0 2px 8px rgba(99,102,241,.30);
+  box-shadow:0 4px 16px rgba(99,102,241,.35);
 }
-.rv-btn--dl:hover{box-shadow:0 4px 14px rgba(99,102,241,.45);transform:translateY(-1px)}
-.rv-btn--dl:active{transform:translateY(0);box-shadow:0 1px 4px rgba(99,102,241,.25)}
+.rv-btn--dl:hover{box-shadow:0 6px 24px rgba(99,102,241,.5);transform:translateY(-1px)}
+.rv-btn--dl:active{transform:translateY(0);box-shadow:0 2px 8px rgba(99,102,241,.3)}
 /* Print */
 .rv-btn--print{
-  background:var(--bg-elev);color:var(--accent);border:1px solid rgba(99,102,241,.25);
+  background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  color:var(--accent);border:1px solid rgba(99,102,241,.2);
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
 .rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:var(--accent)}
+[data-theme="dark"] .rv-btn--print{background:rgba(30,41,59,.5);border-color:rgba(99,102,241,.15)}
 .rv-btn svg{width:16px;height:16px;flex-shrink:0}
 
-/* ── Paper ─────────────────────────────────────────── */
+/* ── Paper (Apple glassmorphism) ──────────────────── */
 .report-paper{
   position:relative;overflow:hidden;
-  background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:20px;
   padding:36px 40px 28px;margin-bottom:20px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,.06),
+    inset 0 1px 0 rgba(255,255,255,.7);
+}
+[data-theme="dark"] .report-paper{
+  background:rgba(30,41,59,.55);
+  border-color:rgba(255,255,255,.08);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.06);
 }
 
 /* ── Watermark (screen only) ───────────────────────── */
@@ -80,9 +101,10 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
 /* ── Header ────────────────────────────────────────── */
 .rp-header{
   position:relative;z-index:1;
-  text-align:center;border-bottom:2px solid var(--border);
+  text-align:center;border-bottom:1px solid rgba(0,0,0,.06);
   padding-bottom:20px;margin-bottom:22px;
 }
+[data-theme="dark"] .rp-header{border-bottom-color:rgba(255,255,255,.06)}
 .rp-header .logos-row{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
   margin-bottom:8px;
@@ -105,31 +127,38 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
 .rp-meta .meta-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:.5}
 
 /* ── Table ─────────────────────────────────────────── */
-.report-paper table{position:relative;z-index:1;width:100%;border-collapse:collapse;font-size:12.5px}
+.report-paper table{position:relative;z-index:1;width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
 .report-paper thead th{
-  background:var(--accent-soft);color:var(--accent);font-weight:600;
-  text-align:left;padding:9px 12px;border-bottom:2px solid var(--accent);white-space:nowrap;
+  background:rgba(99,102,241,.08);color:var(--accent);font-weight:600;
+  text-align:left;padding:10px 14px;border-bottom:2px solid rgba(99,102,241,.2);white-space:nowrap;
 }
-.report-paper tbody td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.report-paper tbody td{padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.04);color:var(--text)}
+.report-paper tbody tr{transition:background .15s}
 .report-paper tbody tr:hover{background:rgba(99,102,241,.04)}
-.report-paper tbody tr:nth-child(even){background:rgba(99,102,241,.025)}
+.report-paper tbody tr:nth-child(even){background:rgba(99,102,241,.02)}
+[data-theme="dark"] .report-paper tbody td{border-bottom-color:rgba(255,255,255,.04)}
+[data-theme="dark"] .report-paper thead th{background:rgba(99,102,241,.12);border-bottom-color:rgba(99,102,241,.15)}
 
 /* ── Footer ────────────────────────────────────────── */
 .rp-footer{
   position:relative;z-index:1;
-  border-top:2px solid var(--border);padding-top:14px;margin-top:22px;
+  border-top:1px solid rgba(0,0,0,.06);padding-top:14px;margin-top:22px;
   display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);
 }
+[data-theme="dark"] .rp-footer{border-top-color:rgba(255,255,255,.06)}
 
 /* ── Print overrides ───────────────────────────────── */
 @media print{
   .rv-toolbar,.no-print{display:none!important}
-  .report-paper{border:none;padding:0;margin:0;box-shadow:none;border-radius:0}
+  .report-paper{
+    background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    border:none!important;border-radius:0!important;padding:0!important;margin:0!important;
+    box-shadow:none!important;
+  }
   body{background:#fff!important;color:#000!important}
   .report-paper thead th{background:#e5e7eb!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .report-paper tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .rv-watermark{opacity:.03!important}
-  .rp-header .edunex-logo{filter:none!important}
 }
 </style>
 
@@ -180,8 +209,6 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
       <span>Generated: <strong><?= e(date('M j, Y g:i A', strtotime($report['created_at']))) ?></strong></span>
       <span class="meta-dot"></span>
       <span>By: <strong><?= e($report['user_name']) ?></strong></span>
-      <span class="meta-dot"></span>
-      <span>Format: <strong><?= strtoupper(e($report['format'])) ?></strong></span>
     </div>
 
     <!-- Data table -->

@@ -122,13 +122,6 @@ $currentYear = (int)date('Y');
         <label class="small faint">Date To</label>
         <input class="input" type="date" name="date_to">
       </div>
-      <div class="flex-col">
-        <label class="small faint">Format</label>
-        <select class="input" name="format">
-          <option value="csv">CSV</option>
-          <option value="pdf">PDF</option>
-        </select>
-      </div>
     </div>
     <div class="flex-col" style="margin-top:14px;max-width:400px">
       <label class="small faint">Title (optional)</label>
