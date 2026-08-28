@@ -475,8 +475,7 @@ class Ctl_reports {
     private function renderReport(string $title, array $headers, array $rows, string $type, string $format): string {
         $dir = STORAGE_PATH . '/reports';
         if (!is_dir($dir)) @mkdir($dir, 0775, true);
-        $ext = $format === 'pdf' ? 'pdf' : 'csv';
-        $file = 'reports/' . $type . '_' . date('Ymd_His') . '.' . $ext;
+        $file = 'reports/' . $type . '_' . date('Ymd_His') . '.csv';
         $absPath = STORAGE_PATH . '/' . $file;
         $fp = fopen($absPath, 'w');
         // Header info block
