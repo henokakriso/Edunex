@@ -240,39 +240,75 @@ class Ctl_logs {
 class Ctl_analytics {
     public function run(): void {
         $u = require_role('ministry');
-        $range = $_GET['range'] ?? '30';
-        $days = (int)$range;
+
+        /* ── KPI Counts ── */
+        $totAdmins    = (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role IN ('ministry','regional','zonal','woreda')", [], 0);
+        $activeAdmins = (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role IN ('ministry','regional','zonal','woreda') AND status='active'", [], 0);
+        $totSchools   = (int)Database::scalar("SELECT COUNT(*) FROM schools", [], 0);
+        $activeSchools= (int)Database::scalar("SELECT COUNT(*) FROM schools WHERE status='active'", [], 0);
+        $totStudents  = (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role='student'", [], 0);
+        $newStudents  = (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role='student' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [], 0);
+        $totTeachers  = (int)Database::scalar("SELECT COUNT(*) FROM users WHERE role IN ('teacher','lecturer')", [], 0);
+        $activeTeachers=(int)Database::scalar("SELECT COUNT(*) FROM users WHERE role IN ('teacher','lecturer') AND status='active'", [], 0);
+        $totCourses   = (int)Database::scalar("SELECT COUNT(*) FROM courses", [], 0);
+        $activeCourses= (int)Database::scalar("SELECT COUNT(*) FROM courses WHERE status='published'", [], 0);
+
+        /* ── Alerts ── */
+        $inactiveSchools = (int)Database::scalar("SELECT COUNT(*) FROM schools WHERE status != 'active'", [], 0);
+        $pendingVerif    = (int)Database::scalar("SELECT COUNT(*) FROM schools WHERE approval_status IN ('pending','regional_approved')", [], 0);
+
+        /* ── Regional breakdown ── */
+        $regions = Database::all(
+            "SELECT s.region, COUNT(s.id) AS schools,
+                    SUM(s.status='active') AS active_schools,
+                    (SELECT COUNT(*) FROM users u WHERE u.school_id IN (SELECT id FROM schools ss WHERE ss.region=s.region) AND u.role='student') AS students,
+                    (SELECT COUNT(*) FROM users u WHERE u.school_id IN (SELECT id FROM schools ss WHERE ss.region=s.region) AND u.role IN ('teacher','lecturer')) AS teachers
+             FROM schools s WHERE s.region IS NOT NULL AND s.region != '' GROUP BY s.region ORDER BY students DESC");
+
+        /* ── Admin performance (regional/zonal/woreda admins) ── */
+        $admins = Database::all(
+            "SELECT u.id, CONCAT(u.first_name,' ',u.last_name) AS name, u.role, u.region,
+                    (SELECT COUNT(*) FROM schools s WHERE s.region=u.region OR s.zone_id IN (SELECT id FROM zones WHERE region_id IN (SELECT id FROM regions WHERE name=u.region))) AS schools_assigned,
+                    u.status, DATE_FORMAT(u.last_login,'%Y-%m-%d %H:%i') AS last_login
+             FROM users u WHERE u.role IN ('regional','zonal','woreda') ORDER BY u.role, name");
+
+        /* ── Tasks / Activity ── */
+        $totalTasks   = (int)Database::scalar("SELECT COUNT(*) FROM activity_logs", [], 0);
+        $recentTasks  = (int)Database::scalar("SELECT COUNT(*) FROM activity_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [], 0);
+        $logins30     = (int)Database::scalar("SELECT COUNT(*) FROM login_history WHERE status='success' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [], 0);
+        $failedLogins = (int)Database::scalar("SELECT COUNT(*) FROM login_history WHERE status='failed' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [], 0);
+
+        /* ── Academic ── */
+        $avgProgress = Database::scalar("SELECT ROUND(AVG(progress),1) FROM course_enrollments", [], 0);
+        $completions = (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments WHERE completed=1", [], 0);
+        $enrollments = (int)Database::scalar("SELECT COUNT(*) FROM course_enrollments", [], 0);
+        $passRate    = Database::scalar("SELECT ROUND(SUM(CASE WHEN score/NULLIF(total_points,0)>=0.5 THEN 1 ELSE 0 END)/GREATEST(COUNT(*),1)*100,1) FROM exam_attempts WHERE status IN ('submitted','graded')", [], 0);
+
+        /* ── Login series for chart ── */
+        $days = 30;
         $loginSeries = [];
         for ($i = $days - 1; $i >= 0; $i--) {
             $d = date('Y-m-d', strtotime("-$i days"));
             $loginSeries[] = [
                 'date' => $d,
-                'logins' => (int)Database::scalar("SELECT COUNT(*) FROM login_history WHERE status = 'success' AND DATE(created_at) = ?", [$d], 0),
-                'signups' => (int)Database::scalar("SELECT COUNT(*) FROM users WHERE DATE(created_at) = ?", [$d], 0),
+                'logins' => (int)Database::scalar("SELECT COUNT(*) FROM login_history WHERE status='success' AND DATE(created_at)=?", [$d], 0),
             ];
         }
-        $byRole = Database::all("SELECT role, COUNT(*) AS n FROM users GROUP BY role");
-        $topCourses = Database::all(
-            "SELECT c.title, COUNT(ce.id) AS students, c.status FROM courses c
-             LEFT JOIN course_enrollments ce ON ce.course_id = c.id
-             GROUP BY c.id ORDER BY students DESC LIMIT 10");
-        $activityByDay = Database::all("SELECT DATE(created_at) AS d, COUNT(*) AS n FROM activity_logs GROUP BY DATE(created_at) ORDER BY d DESC LIMIT 7");
-        $attSeries = [];
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $d = date('Y-m-d', strtotime("-$i days"));
-            $attSeries[] = ['date' => $d, 'present' => (int)Database::scalar("SELECT COUNT(*) FROM attendance WHERE date = ? AND status = 'present'", [$d], 0)];
-        }
-        $examStats = Database::all(
-            "SELECT c.title, COUNT(DISTINCT at2.id) AS attempts,
-                    ROUND(AVG(at2.score / NULLIF(at2.total_points, 0)) * 100, 1) AS avg_pct
-             FROM exam_attempts at2 JOIN exams e ON e.id = at2.exam_id JOIN courses c ON c.id = e.course_id
-             WHERE at2.status IN ('submitted','graded') GROUP BY c.id ORDER BY attempts DESC LIMIT 10");
-        $bySchool = Database::all(
-            "SELECT s.name, COUNT(us.id) AS users FROM schools s LEFT JOIN users us ON us.school_id = s.id GROUP BY s.id ORDER BY users DESC LIMIT 8");
+
         Router::render('app/admin/analytics', [
-            'title' => 'Analytics', 'days' => $days, 'loginSeries' => $loginSeries,
-            'byRole' => $byRole, 'topCourses' => $topCourses, 'activityByDay' => $activityByDay,
-            'attSeries' => $attSeries, 'examStats' => $examStats, 'bySchool' => $bySchool,
+            'title' => 'National Education Command Center',
+            'totAdmins' => $totAdmins, 'activeAdmins' => $activeAdmins,
+            'totSchools' => $totSchools, 'activeSchools' => $activeSchools,
+            'totStudents' => $totStudents, 'newStudents' => $newStudents,
+            'totTeachers' => $totTeachers, 'activeTeachers' => $activeTeachers,
+            'totCourses' => $totCourses, 'activeCourses' => $activeCourses,
+            'inactiveSchools' => $inactiveSchools, 'pendingVerif' => $pendingVerif,
+            'regions' => $regions, 'admins' => $admins,
+            'totalTasks' => $totalTasks, 'recentTasks' => $recentTasks,
+            'logins30' => $logins30, 'failedLogins' => $failedLogins,
+            'avgProgress' => $avgProgress, 'completions' => $completions,
+            'enrollments' => $enrollments, 'passRate' => $passRate,
+            'loginSeries' => $loginSeries, 'days' => $days,
         ]);
     }
 }
