@@ -475,10 +475,22 @@ class Ctl_reports {
     private function renderReport(string $title, array $headers, array $rows, string $type, string $format): string {
         $dir = STORAGE_PATH . '/reports';
         if (!is_dir($dir)) @mkdir($dir, 0775, true);
-        $file = 'reports/' . $type . '_' . date('Ymd_His') . '.csv';
+        $ext = $format === 'pdf' ? 'pdf' : 'csv';
+        $file = 'reports/' . $type . '_' . date('Ymd_His') . '.' . $ext;
         $absPath = STORAGE_PATH . '/' . $file;
         $fp = fopen($absPath, 'w');
+        // Header info block
+        fputcsv($fp, ['EDUNEX LMS — ' . $title]);
+        fputcsv($fp, ['Document ID', 'EDU-' . date('Y') . '-' . str_pad(Database::scalar("SELECT id FROM reports ORDER BY id DESC LIMIT 1", [], 0) + 1, 6, '0', STR_PAD_LEFT)]);
+        fputcsv($fp, ['Generated', date('M j, Y g:i A')]);
+        fputcsv($fp, ['Report Type', ucfirst(str_replace('_', ' ', $type))]);
+        fputcsv($fp, ['Format', strtoupper($format)]);
+        fputcsv($fp, ['Website', 'www.henockakriso.com']);
+        fputcsv($fp, ['License', 'ARWE-PL Licensed ' . date('Y')]);
+        fputcsv($fp, []); // blank line separator
+        // Column headers
         fputcsv($fp, $headers);
+        // Data rows
         foreach ($rows as $r) {
             if (is_array($r) && count($r) === count($headers)) fputcsv($fp, array_values($r));
         }

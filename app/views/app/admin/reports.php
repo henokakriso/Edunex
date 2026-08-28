@@ -29,9 +29,9 @@ $currentYear = (int)date('Y');
 .rpt-type .rpt-dot{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .rpt-type.selected .rpt-dot{border-color:var(--accent);background:var(--accent)}
 .rpt-type.selected .rpt-dot::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
-.rpt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg-elev);transition:border-color .15s,box-shadow .15s}
+.rpt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg-elev);transition:border-color .15s,box-shadow .15s;text-decoration:none;color:inherit}
 .rpt-row:hover{border-color:color-mix(in srgb,var(--accent) 30%,var(--border));box-shadow:0 2px 8px rgba(0,0,0,.03)}
-.rpt-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.rpt-row:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12);outline:none}
 </style>
 
 <div class="page-head">
@@ -147,7 +147,7 @@ $currentYear = (int)date('Y');
 <div class="card" style="margin-top:24px">
   <h3 class="card-title" style="margin-top:0"><?= icon('folder') ?> Generated Reports</h3>
   <?php foreach ($reports as $r): ?>
-    <div class="rpt-row" tabindex="0">
+    <a class="rpt-row" href="<?= e(url('admin/reports&action=view&id=' . $r['id'])) ?>">
       <div style="flex:1;min-width:0">
         <div style="font-size:13.5px;font-weight:600;color:var(--text)"><?= e($r['title']) ?></div>
         <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">
@@ -155,15 +155,16 @@ $currentYear = (int)date('Y');
           <?= e(date('M j, Y g:i A', strtotime($r['created_at']))) ?> · <?= e($r['user_name']) ?>
         </div>
       </div>
-      <a class="btn btn-sm btn-primary" href="<?= e(url('admin/reports&action=view&id=' . $r['id'])) ?>" style="flex-shrink:0">View</a>
-    </div>
+    </a>
   <?php endforeach; ?>
 </div>
 <?php endif; ?>
 
 <script>
 function toggleType(el, val) {
-  el.classList.toggle('selected');
+  const cb = el.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  el.classList.toggle('selected', cb.checked);
   const checked = document.querySelectorAll('.rpt-type.selected').length;
   const btn = document.getElementById('btn-generate');
   const hint = document.getElementById('rpt-hint');
