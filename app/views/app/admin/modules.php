@@ -81,34 +81,71 @@ if ($view === 'detail' && !empty($mod)): ?>
     <!-- Scope -->
     <div class="card" style="margin-bottom:16px">
       <h3 class="card-title" style="margin-top:0"><?= icon('globe') ?> Activation Scope</h3>
+      <p class="small faint" style="margin-bottom:12px">Control where this module is available. Lower-level scopes inherit from higher levels.</p>
       <form method="post">
         <?= csrf_field() ?><input type="hidden" name="module_key" value="<?= e($mod['module_key']) ?>">
-        <div class="flex gap-12" style="margin-bottom:14px">
-          <?php foreach (['all' => 'All Organizations', 'regional' => 'Regional', 'selective' => 'Selected Organizations'] as $sv => $sl): ?>
-            <label class="flex gap-4" style="align-items:center;cursor:pointer">
-              <input type="radio" name="scope_type" value="<?= $sv ?>" <?= $mod['scope_type'] === $sv ? 'checked' : '' ?> onchange="toggleScopeSelect(this)">
-              <span class="small"><?= $sl ?></span>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px">
+          <?php foreach ([
+            'all' => ['National', 'Available everywhere'],
+            'regional' => ['Regional', 'By region, zone, or woreda'],
+            'selective' => ['School-level', 'Specific schools only'],
+          ] as $sv => [$sl, $desc]): ?>
+            <label style="display:flex;gap:10px;padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" class="scope-option <?= $mod['scope_type'] === $sv ? 'active' : '' ?>">
+              <input type="radio" name="scope_type" value="<?= $sv ?>" <?= $mod['scope_type'] === $sv ? 'checked' : '' ?> onchange="toggleScopeType(this)" style="margin-top:2px">
+              <div><div class="small" style="font-weight:600"><?= $sl ?></div><div class="tiny faint"><?= $desc ?></div></div>
             </label>
           <?php endforeach; ?>
         </div>
-        <div id="scope-selectors" style="display:<?= $mod['scope_type'] !== 'all' ? 'block' : 'none' ?>;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+        <div id="scope-selectors" style="display:<?= $mod['scope_type'] !== 'all' ? 'block' : 'none' ?>">
+          <!-- Region / Zone / Woreda -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
             <div>
-              <label class="tiny faint" style="display:block;margin-bottom:4px">Regions</label>
-              <?php foreach ($regions as $r): ?>
-                <label class="flex gap-4 small" style="padding:3px 0"><input type="checkbox" name="scopes[]" value="region:<?= $r['id'] ?>" <?= in_array((int)$r['id'], $scopeMap['region'] ?? []) ? 'checked' : '' ?>> <?= e($r['name']) ?></label>
-              <?php endforeach; ?>
+              <div class="small" style="font-weight:600;margin-bottom:6px"><?= icon('map') ?> Regions</div>
+              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px">
+                <?php foreach ($regions as $r): ?>
+                  <label class="flex gap-4 small" style="padding:4px 0;cursor:pointer"><input type="checkbox" name="scopes[]" value="region:<?= $r['id'] ?>" <?= in_array((int)$r['id'], $scopeMap['region'] ?? []) ? 'checked' : '' ?>> <?= e($r['name']) ?></label>
+                <?php endforeach; ?>
+              </div>
             </div>
             <div>
-              <label class="tiny faint" style="display:block;margin-bottom:4px">Zones</label>
-              <?php foreach ($zones as $z): ?>
-                <label class="flex gap-4 small" style="padding:3px 0"><input type="checkbox" name="scopes[]" value="zone:<?= $z['id'] ?>" <?= in_array((int)$z['id'], $scopeMap['zone'] ?? []) ? 'checked' : '' ?>> <?= e($z['name']) ?> <span class="faint">(<?= e($z['region_name']) ?>)</span></label>
+              <div class="small" style="font-weight:600;margin-bottom:6px"><?= icon('map-pin') ?> Zones</div>
+              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px">
+                <?php foreach ($zones as $z): ?>
+                  <label class="flex gap-4 small" style="padding:4px 0;cursor:pointer"><input type="checkbox" name="scopes[]" value="zone:<?= $z['id'] ?>" <?= in_array((int)$z['id'], $scopeMap['zone'] ?? []) ? 'checked' : '' ?>> <?= e($z['name']) ?> <span class="faint">(<?= e($z['region_name']) ?>)</span></label>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <!-- Woreda -->
+          <div style="margin-bottom:14px">
+            <div class="small" style="font-weight:600;margin-bottom:6px"><?= icon('map-pin') ?> Woredas</div>
+            <div style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
+              <?php foreach ($woredas as $w): ?>
+                <label class="flex gap-4 small" style="padding:4px 0;cursor:pointer"><input type="checkbox" name="scopes[]" value="woreda:<?= $w['id'] ?>" <?= in_array((int)$w['id'], $scopeMap['woreda'] ?? []) ? 'checked' : '' ?>> <?= e($w['name']) ?> <span class="faint">(<?= e($w['zone_name']) ?>)</span></label>
+              <?php endforeach; ?>
+            </div>
+          </div>
+
+          <!-- Schools -->
+          <div>
+            <div class="flex-between" style="margin-bottom:6px">
+              <div class="small" style="font-weight:600"><?= icon('school') ?> Schools</div>
+              <input type="text" class="input" id="school-search" placeholder="Search schools…" oninput="filterSchools()" style="width:200px;padding:5px 10px;font-size:12px">
+            </div>
+            <div id="school-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
+              <?php foreach ($schools as $s): ?>
+                <label class="flex gap-4 small school-item" style="padding:4px 0;cursor:pointer" data-name="<?= strtolower(e($s['name'])) ?>"><input type="checkbox" name="scopes[]" value="school:<?= $s['id'] ?>" <?= in_array((int)$s['id'], $scopeMap['school'] ?? []) ? 'checked' : '' ?>> <?= e($s['name']) ?></label>
               <?php endforeach; ?>
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" name="save_scope" value="1" style="margin-top:12px"><?= icon('check') ?> Save Scope</button>
-        <a href="<?= e(url('admin/modules')) ?>" class="btn btn-ghost" style="margin-top:12px;margin-left:6px">Cancel</a>
+
+        <div style="margin-top:14px">
+          <button class="btn btn-primary" name="save_scope" value="1"><?= icon('check') ?> Save Scope</button>
+          <a href="<?= e(url('admin/modules')) ?>" class="btn btn-ghost" style="margin-left:6px">Cancel</a>
+        </div>
       </form>
     </div>
   </div>
@@ -261,7 +298,19 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
 <?php endif; ?>
 
 <script>
-function toggleScopeSelect(radio) {
+function toggleScopeType(radio) {
   document.getElementById('scope-selectors').style.display = radio.value === 'all' ? 'none' : 'block';
+  document.querySelectorAll('.scope-option').forEach(el => el.style.borderColor = 'var(--border)');
+  radio.closest('.scope-option').style.borderColor = 'var(--accent)';
 }
+function filterSchools() {
+  var q = document.getElementById('school-search').value.toLowerCase();
+  document.querySelectorAll('.school-item').forEach(el => {
+    el.style.display = el.dataset.name.includes(q) ? '' : 'none';
+  });
+}
+// Init active scope border
+document.querySelectorAll('input[name=scope_type]:checked').forEach(el => {
+  el.closest('.scope-option').style.borderColor = 'var(--accent)';
+});
 </script>
