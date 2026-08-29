@@ -117,23 +117,29 @@ h4 { font-size: 1rem; }
 /* ---------- Focus indicators (Apple Liquid Glass Morphism) ---------- */
 :focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1) !important;
-  transition: box-shadow .18s ease !important;
+  border-color: rgba(13,148,136,.5) !important;
+  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1) !important;
+  transition: box-shadow .18s ease, border-color .18s ease !important;
 }
 a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, .tab:focus-visible, .icon-btn:focus-visible {
   outline: none !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 16px rgba(13,148,136,.12) !important;
 }
 .input:focus-visible, .select:focus-visible, textarea.input:focus-visible {
   outline: none !important;
-  border-color: var(--accent) !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1) !important;
 }
 .icon-btn:focus-visible {
   outline: none !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 16px rgba(13,148,136,.12) !important;
 }
-.chk:focus-within { box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25) !important; }
+.chk:focus-within {
+  border-color: rgba(13,148,136,.5) !important;
+  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25) !important;
+}
 
 /* ---------- Buttons ---------- */
 .btn {
@@ -197,8 +203,8 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, 
   outline: none;
 }
 .input:focus, .select:focus, textarea.input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1);
+  border-color: rgba(13,148,136,.5) !important;
+  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1) !important;
 }
 .select {
   appearance: none;
@@ -352,7 +358,7 @@ table.data tr:hover td { background: var(--bg-hover); }
   color: var(--text-faint);
   transition: all var(--transition);
 }
-.search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1); }
+.search-box:focus-within { border-color: rgba(13,148,136,.5); box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1); }
 .search-box input { background: none; border: none; outline: none; color: var(--text); flex: 1; font-size: 13.5px; font-family: inherit; }
 .search-box kbd {
   font-size: 10px; background: var(--bg-hover); border: 1px solid var(--border);
@@ -1493,26 +1499,30 @@ html[data-theme="light"] {
 /* ─── Focus Indicators — Apple Liquid Glass Morphism ─── */
 :focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1) !important;
+  border-color: rgba(13,148,136,.5) !important;
+  box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1) !important;
 }
 
 a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, .icon-btn:focus-visible {
   outline: none !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 16px rgba(13,148,136,.12) !important;
 }
 
 .input:focus-visible, .select:focus-visible, textarea.input:focus-visible {
   outline: none !important;
-  border-color: var(--accent) !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 14px rgba(13,148,136,.1) !important;
 }
 
 .icon-btn:focus-visible {
   outline: none !important;
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25), 0 0 16px rgba(13,148,136,.12) !important;
 }
 
 .chk:focus-within {
+  border-color: rgba(13,148,136,.5) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.5), 0 0 0 4px rgba(13,148,136,.12), inset 0 1px 1px rgba(255,255,255,.25) !important;
 }
 
