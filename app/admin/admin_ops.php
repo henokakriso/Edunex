@@ -1198,61 +1198,121 @@ class Ctl_admin_badges {
 /* =============== ADMIN: module registry =============== */
 class Ctl_modules {
     public function run(): void {
-        require_role('ministry');
-        $mode = $_GET['view'] ?? '';
+        $u = require_role('ministry');
         $q = trim($_GET['q'] ?? '');
-        $cat = $_GET['cat'] ?? '';
+        $group = $_GET['group'] ?? '';
         $only = $_GET['only'] ?? '';
+        $view = $_GET['view'] ?? 'registry';
+        $detailKey = $_GET['key'] ?? '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             $key = trim($_POST['module_key'] ?? '');
-            $mod = Database::one("SELECT id, module_key, is_core FROM modules WHERE module_key = ?", [$key]);
+            $mod = Database::one("SELECT id, module_key, is_core, name FROM modules WHERE module_key = ?", [$key]);
             if (!$mod) { flash('danger', 'Module not found.'); redirect('admin/modules'); }
+
+            // Toggle enable/disable
             if (isset($_POST['toggle'])) {
                 $new = ((int)$_POST['toggle'] === 1) ? 1 : 0;
                 if ($new === 0 && (int)$mod['is_core'] === 1) {
-                    flash('danger', 'Core modules cannot be disabled.');
-                } else {
-                    Database::update('modules', ['enabled' => $new], 'id = ?', [(int)$mod['id']]);
-                    log_activity('module', ($new ? 'Enabled' : 'Disabled') . ' module: ' . $mod['module_key'], (int)me()['id']);
-                    flash('success', 'Module ' . ($new ? 'enabled' : 'disabled') . '.');
+                    flash('danger', 'Core modules cannot be disabled — they are required by Edunex.');
+                    redirect('admin/modules');
                 }
-                redirect('admin/modules' . ($_GET['view'] ?? '') ? '?view=' . $_GET['view'] : '');
-            }
-            if (isset($_POST['install'])) {
-                Database::update('modules', ['enabled' => 1, 'installed_at' => date('Y-m-d H:i:s')], 'id = ?', [(int)$mod['id']]);
-                log_activity('module', 'Installed module: ' . $mod['module_key'], (int)me()['id']);
-                flash('success', 'Module installed.');
+                if ($new === 0) {
+                    $deps = Database::all("SELECT module_key, name FROM modules WHERE JSON_CONTAINS(dependencies, ?)", ['"' . $mod['module_key'] . '"']);
+                    if ($deps) {
+                        $list = implode(', ', array_map(fn($d) => e($d['name']), $deps));
+                        flash('danger', 'Cannot disable <b>' . e($mod['name']) . '</b> — these modules depend on it: ' . $list);
+                        redirect('admin/modules');
+                    }
+                }
+                Database::update('modules', ['enabled' => $new], 'id = ?', [(int)$mod['id']]);
+                log_activity('module', ($new ? 'Enabled' : 'Disabled') . ' module: ' . $mod['module_key'], (int)$u['id']);
+                flash('success', '<b>' . e($mod['name']) . '</b> ' . ($new ? 'enabled' : 'disabled') . '.');
                 redirect('admin/modules');
+            }
+
+            // Save config
+            if (isset($_POST['save_config'])) {
+                $config = $_POST['config'] ?? [];
+                $json = json_encode($config, JSON_UNESCAPED_UNICODE);
+                Database::update('modules', ['config_json' => $json], 'id = ?', [(int)$mod['id']]);
+                log_activity('module', 'Updated config for module: ' . $mod['module_key'], (int)$u['id']);
+                flash('success', 'Configuration saved for <b>' . e($mod['name']) . '</b>.');
+                redirect('admin/modules?view=detail&key=' . $key);
+            }
+
+            // Save scope
+            if (isset($_POST['save_scope'])) {
+                $scopeType = $_POST['scope_type'] ?? 'all';
+                Database::update('modules', ['scope_type' => $scopeType], 'id = ?', [(int)$mod['id']]);
+                if ($scopeType !== 'all') {
+                    Database::delete('module_scopes', 'module_key = ?', [$key]);
+                    $scopes = $_POST['scopes'] ?? [];
+                    foreach ($scopes as $s) {
+                        $parts = explode(':', $s);
+                        if (count($parts) === 2) {
+                            Database::run("INSERT IGNORE INTO module_scopes (module_key, scope_type, scope_id) VALUES (?, ?, ?)",
+                                [$key, $parts[0], (int)$parts[1]]);
+                        }
+                    }
+                } else {
+                    Database::delete('module_scopes', 'module_key = ?', [$key]);
+                }
+                log_activity('module', 'Updated scope for module: ' . $mod['module_key'] . ' (' . $scopeType . ')', (int)$u['id']);
+                flash('success', 'Scope updated for <b>' . e($mod['name']) . '</b>.');
+                redirect('admin/modules?view=detail&key=' . $key);
             }
         }
 
-        $where = "1=1"; $args = [];
-        if ($q !== '') { $where .= " AND (module_key LIKE ? OR name LIKE ? OR description LIKE ?)"; array_push($args, "%$q%", "%$q%", "%$q%"); }
-        if (in_array($cat, ['core', 'education', 'portal', 'service'], true)) { $where .= " AND category = ?"; $args[] = $cat; }
-        if (in_array($only, ['on', 'off'], true)) { $where .= $only === 'on' ? " AND enabled = 1" : " AND enabled = 0"; }
-        $sort = $_GET['sort'] ?? 'name';
-        $dir = strtolower($_GET['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
-        $sortMap = ['name' => 'name', 'category' => 'category', 'level' => 'education_type', 'installed_at' => 'installed_at', 'enabled' => 'enabled'];
-        if (!isset($sortMap[$sort])) $sort = 'name';
-        $orderBy = $sortMap[$sort] . ' ' . $dir . ', id ASC';
-        $modules = Database::all("SELECT * FROM modules WHERE $where ORDER BY is_core DESC, $orderBy", $args);
-        $cats = Database::all("SELECT category, COUNT(*) c FROM modules GROUP BY category");
-        $counts = [
-            'all' => (int)Database::scalar("SELECT COUNT(*) FROM modules", [], 0),
-            'on' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE enabled = 1", [], 0),
-            'off' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE enabled = 0", [], 0),
-        ];
-        $mode = $_GET['view'] ?? '';
-        if ($mode === 'levels') {
-            $rows = Database::all(
-                "SELECT m.education_type, m.name, m.module_key, m.enabled FROM modules m
-                 WHERE m.education_type != 'all' AND m.education_type != '' ORDER BY m.education_type, m.name");
-            Router::render('app/admin/modules_levels', ['title' => 'Modules by Level', 'rows' => $rows, 'counts' => $counts]);
+        // Detail view
+        if ($view === 'detail' && $detailKey) {
+            $mod = Database::one("SELECT * FROM modules WHERE module_key = ?", [$detailKey]);
+            if (!$mod) { flash('danger', 'Module not found.'); redirect('admin/modules'); }
+            $deps = json_decode($mod['dependencies'] ?? '[]', true) ?: [];
+            $depModules = [];
+            foreach ($deps as $dk) {
+                $d = Database::one("SELECT module_key, name, enabled FROM modules WHERE module_key = ?", [$dk]);
+                if ($d) $depModules[] = $d;
+            }
+            $dependents = Database::all("SELECT module_key, name, enabled FROM modules WHERE JSON_CONTAINS(dependencies, ?)", ['"' . $key . '"']);
+            $scopes = Database::all("SELECT * FROM module_scopes WHERE module_key = ?", [$detailKey]);
+            $regions = Database::all("SELECT id, name FROM regions ORDER BY name");
+            $zones = Database::all("SELECT z.id, z.name, r.name AS region_name FROM zones z JOIN regions r ON r.id=z.region_id ORDER BY r.name, z.name");
+            $woredas = Database::all("SELECT w.id, w.name, z.name AS zone_name FROM woredas w JOIN zones z ON z.id=w.zone_id ORDER BY z.name, w.name LIMIT 500");
+            $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
+            Router::render('app/admin/modules', [
+                'title' => 'Module: ' . e($mod['name']),
+                'modules' => [], 'counts' => $this->counts(), 'q' => '', 'group' => '', 'only' => '',
+                'view' => 'detail', 'mod' => $mod, 'depModules' => $depModules, 'dependents' => $dependents,
+                'scopes' => $scopes, 'regions' => $regions, 'zones' => $zones, 'woredas' => $woredas, 'schools' => $schools,
+            ]);
             return;
         }
-        Router::render('app/admin/modules', ['title' => 'Modules', 'modules' => $modules, 'cats' => $cats, 'counts' => $counts, 'q' => $q, 'cat' => $cat, 'only' => $only, 'sort' => $sort, 'dir' => $dir]);
+
+        // List view
+        $where = "1=1"; $args = [];
+        if ($q !== '') { $where .= " AND (module_key LIKE ? OR name LIKE ? OR description LIKE ?)"; array_push($args, "%$q%", "%$q%", "%$q%"); }
+        if (in_array($group, ['core','standard','optional','advanced'], true)) { $where .= " AND mod_group = ?"; $args[] = $group; }
+        if ($only === 'on') $where .= " AND enabled = 1";
+        if ($only === 'off') $where .= " AND enabled = 0";
+        $modules = Database::all("SELECT * FROM modules WHERE $where ORDER BY sort_order ASC, id ASC", $args);
+        Router::render('app/admin/modules', [
+            'title' => 'Modules', 'modules' => $modules, 'counts' => $this->counts(),
+            'q' => $q, 'group' => $group, 'only' => $only, 'view' => 'registry',
+        ]);
+    }
+
+    private function counts(): array {
+        return [
+            'all' => (int)Database::scalar("SELECT COUNT(*) FROM modules"),
+            'on' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE enabled = 1"),
+            'off' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE enabled = 0"),
+            'core' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE mod_group = 'core'"),
+            'standard' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE mod_group = 'standard'"),
+            'optional' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE mod_group = 'optional'"),
+            'advanced' => (int)Database::scalar("SELECT COUNT(*) FROM modules WHERE mod_group = 'advanced'"),
+        ];
     }
 }
 
