@@ -311,11 +311,15 @@ class Ctl_analytics {
 
         /* ── Regional breakdown ── */
         $regions = Database::all(
-            "SELECT s.region, COUNT(s.id) AS schools,
+            "SELECT r.name AS region,
+                    COUNT(s.id) AS schools,
                     SUM(s.status='active') AS active_schools,
-                    (SELECT COUNT(*) FROM users u WHERE u.school_id IN (SELECT id FROM schools ss WHERE ss.region=s.region) AND u.role='student') AS students,
-                    (SELECT COUNT(*) FROM users u WHERE u.school_id IN (SELECT id FROM schools ss WHERE ss.region=s.region) AND u.role IN ('teacher','lecturer')) AS teachers
-             FROM schools s WHERE s.region IS NOT NULL AND s.region != '' GROUP BY s.region ORDER BY students DESC");
+                    (SELECT COUNT(*) FROM users u JOIN schools us ON us.id=u.school_id WHERE us.region=r.name AND u.role='student') AS students,
+                    (SELECT COUNT(*) FROM users u JOIN schools us ON us.id=u.school_id WHERE us.region=r.name AND u.role IN ('teacher','lecturer')) AS teachers
+             FROM regions r
+             LEFT JOIN schools s ON s.region = r.name
+             GROUP BY r.id, r.name
+             ORDER BY schools DESC, r.name");
 
         /* ── Admin performance (regional/zonal/woreda admins) ── */
         $admins = Database::all(

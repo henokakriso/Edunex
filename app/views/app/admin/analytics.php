@@ -49,10 +49,26 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .score-row .sr-weight{font-size:11px;color:var(--text-secondary);width:40px;text-align:right}
 .score-row .sr-val{font-size:13px;font-weight:700;width:30px;text-align:right;font-variant-numeric:tabular-nums}
 /* Geographic */
-.geo-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg-elev);transition:all .15s}
-.geo-row:hover{border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
-.geo-row .geo-name{font-size:13px;font-weight:600;color:var(--text);width:120px}
-.geo-row .geo-stat{font-size:12px;color:var(--text-secondary);width:80px;text-align:right;font-variant-numeric:tabular-nums}
+.geo-map-wrap{position:relative;background:var(--bg-elev);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.geo-map-svg{width:100%;height:auto;display:block}
+.geo-map-svg path{fill:var(--border);stroke:var(--bg);stroke-width:1.2;transition:fill .2s}
+.geo-map-svg path:hover{fill:var(--accent);opacity:.7}
+.geo-label{position:absolute;pointer-events:none;text-align:center;transform:translate(-50%,-50%);z-index:2}
+.geo-label .gl-name{font-size:9px;font-weight:700;color:var(--text);white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.15)}
+.geo-label .gl-stats{font-size:8px;color:var(--text-secondary);white-space:nowrap;line-height:1.3}
+.geo-label .gl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin:0 auto 2px;box-shadow:0 0 8px rgba(99,102,241,.5)}
+.geo-legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.geo-legend span{font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+.geo-legend span::before{content:'';width:10px;height:10px;border-radius:3px}
+.geo-legend .gl-schools::before{background:#6366f1}
+.geo-legend .gl-students::before{background:#22c55e}
+.geo-legend .gl-teachers::before{background:#f59e0b}
+.geo-legend .gl-active::before{background:#10b981}
+.geo-geo-table{margin-top:16px}
+.geo-geo-table table{width:100%;border-collapse:collapse;font-size:12px}
+.geo-geo-table th{text-align:left;padding:8px 12px;background:var(--bg);font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.geo-geo-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
+.geo-geo-table tr:hover td{background:color-mix(in srgb,var(--accent) 3%,var(--bg))}
 </style>
 
 <!-- ═══════════════ PAGE HEAD ═══════════════ -->
@@ -290,20 +306,118 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 
 <!-- ═══════════════ 8. GEOGRAPHIC ANALYTICS ═══════════════ -->
 <?php if ($regions): ?>
+<?php
+  // Region label positions (x%, y%) on the Ethiopia SVG — approximate centroids
+  $regionPos = [
+    'Tigray'            => [48, 14],
+    'Afar'              => [68, 24],
+    'Amhara'            => [42, 28],
+    'Addis Ababa'       => [40, 48],
+    'Dire Dawa'         => [72, 38],
+    'Harari'            => [74, 38],
+    'Oromia'            => [50, 52],
+    'SNNPR'             => [40, 62],
+    'Sidama'            => [52, 64],
+    'South West Ethiopia'=> [30, 58],
+    'South Ethiopia'    => [38, 68],
+    'Central Ethiopia'  => [44, 56],
+    'Benishangul-Gumuz'=> [24, 38],
+    'Gambela'           => [18, 50],
+    'Somali'            => [78, 50],
+    'Contested'         => [55, 40],
+  ];
+  $maxStudents = max(array_map(fn($r) => (int)$r['students'], $regions));
+?>
 <div class="cmd-section">
   <div class="section-head">
     <h2><?= icon('map') ?> Geographic Analytics</h2>
     <div class="section-line"></div>
   </div>
-  <div class="card">
-    <?php foreach ($regions as $rg): ?>
-    <div class="geo-row">
-      <span class="geo-name"><?= e($rg['region']) ?></span>
-      <span class="geo-stat"><?= number_format($rg['schools']) ?> schools</span>
-      <span class="geo-stat"><?= number_format($rg['students']) ?> students</span>
-      <span class="geo-stat"><?= number_format($rg['teachers']) ?> teachers</span>
+
+  <!-- Ethiopia SVG Map with data labels -->
+  <div class="geo-map-wrap card" style="padding:0;overflow:hidden">
+    <div style="position:relative">
+      <svg class="geo-map-svg" viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ethGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".15"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity=".05"/>
+          </linearGradient>
+          <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity=".08"/></filter>
+        </defs>
+        <!-- Ethiopia simplified outline -->
+        <path d="M165 18 L185 12 L210 15 L230 10 L260 18 L285 25 L310 20 L330 30
+                 L340 55 L350 80 L360 110 L355 140 L348 165 L340 190
+                 L355 210 L365 235 L370 260 L368 285 L360 310
+                 L345 330 L330 350 L310 365 L290 375 L270 385
+                 L250 395 L230 405 L210 415 L190 420 L175 430
+                 L160 445 L140 455 L120 460 L100 450 L85 435
+                 L70 415 L60 395 L50 370 L45 345 L40 320
+                 L38 295 L42 270 L50 245 L55 220 L52 195
+                 L48 170 L50 145 L55 120 L62 95 L70 75
+                 L80 55 L95 38 L115 25 L135 20 L150 18 Z"
+              fill="url(#ethGrad)" stroke="var(--border)" stroke-width="1.5" filter="url(#shadow)"/>
+      </svg>
+
+      <!-- Data labels positioned over regions -->
+      <?php foreach ($regions as $rg):
+        $name = $rg['region'];
+        $pos = $regionPos[$name] ?? null;
+        if (!$pos) continue;
+        $schools = (int)$rg['schools'];
+        $students = (int)$rg['students'];
+        $teachers = (int)$rg['teachers'];
+        $active = (int)$rg['active_schools'];
+        $intensity = $maxStudents > 0 ? $students / $maxStudents : 0;
+      ?>
+      <div class="geo-label" style="left:<?= $pos[0] ?>%;top:<?= $pos[1] ?>%">
+        <div class="gl-dot" style="width:<?= 6 + round($intensity * 10) ?>px;height:<?= 6 + round($intensity * 10) ?>px;background:rgba(99,102,241,<?= 0.4 + $intensity * 0.6 ?>)"></div>
+        <div class="gl-name"><?= e($name) ?></div>
+        <div class="gl-stats">
+          <?= number_format($students) ?> students<br>
+          <?= number_format($schools) ?> schools · <?= number_format($teachers) ?> teachers
+        </div>
+      </div>
+      <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
+
+    <div class="geo-legend">
+      <span class="gl-schools">Schools</span>
+      <span class="gl-students">Students</span>
+      <span class="gl-teachers">Teachers</span>
+      <span class="gl-active">Active Schools</span>
+    </div>
+  </div>
+
+  <!-- Data table -->
+  <div class="geo-geo-table" style="margin-top:16px">
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Region</th><th style="text-align:right">Schools</th><th style="text-align:right">Active</th>
+          <th style="text-align:right">Students</th><th style="text-align:right">Teachers</th>
+          <th style="text-align:right">Student:Teacher</th><th style="text-align:right">Active %</th>
+        </tr></thead>
+        <tbody>
+        <?php foreach ($regions as $rg):
+          $s = (int)$rg['schools']; $a = (int)$rg['active_schools'];
+          $st = (int)$rg['students']; $t = (int)$rg['teachers'];
+          $ratio = $t > 0 ? round($st / $t, 1) : '—';
+          $pct = $s > 0 ? round($a / $s * 100, 1) : 0;
+        ?>
+          <tr>
+            <td><b><?= e($rg['region']) ?></b></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><?= number_format($s) ?></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><?= number_format($a) ?></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><?= number_format($st) ?></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><?= number_format($t) ?></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><?= $ratio ?></td>
+            <td style="text-align:right"><span class="badge <?= ($pct > 80 ? 'badge-success' : ($pct > 50 ? 'badge-warning' : 'badge-danger')) ?>"><?= $pct ?>%</span></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 <?php endif; ?>
