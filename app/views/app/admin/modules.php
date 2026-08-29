@@ -108,6 +108,7 @@ if ($view === 'detail' && !empty($mod)): ?>
           </div>
         </div>
         <button class="btn btn-primary" name="save_scope" value="1" style="margin-top:12px"><?= icon('check') ?> Save Scope</button>
+        <a href="<?= e(url('admin/modules')) ?>" class="btn btn-ghost" style="margin-top:12px;margin-left:6px">Cancel</a>
       </form>
     </div>
   </div>
@@ -139,6 +140,7 @@ if ($view === 'detail' && !empty($mod)): ?>
           <p class="small muted">No configurable options</p>
         <?php endif; ?>
         <button class="btn btn-primary" name="save_config" value="1"><?= icon('check') ?> Save Configuration</button>
+        <a href="<?= e(url('admin/modules')) ?>" class="btn btn-ghost" style="margin-left:6px">Cancel</a>
       </form>
     </div>
   </div>
