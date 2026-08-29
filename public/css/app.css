@@ -1407,16 +1407,8 @@ html[data-theme="light"] {
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-right: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 1px 0 0 var(--glass-border);
-}
-
-.sidebar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--glass-highlight) 0%, transparent 40%);
-  pointer-events: none;
-  border-radius: inherit;
+  box-shadow: 1px 0 0 var(--glass-border);
+  color: var(--text) !important;
 }
 
 /* ─── Nav Items — Glass Liquid States ─── */
@@ -1424,22 +1416,22 @@ html[data-theme="light"] {
   position: relative;
   border: 1px solid transparent !important;
   transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+  color: var(--text-dim) !important;
 }
 
 .nav-item:hover {
   background: var(--glass-nav-hover) !important;
   border-color: var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 2px 8px rgba(0,0,0,.06);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  color: var(--text) !important;
 }
 
 .nav-item.active {
   background: var(--glass-nav-active) !important;
   border-color: rgba(13,148,136,.2) !important;
-  box-shadow: var(--glass-inset), 0 2px 12px var(--glass-glow), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 12px var(--glass-glow);
+  color: var(--accent) !important;
+  font-weight: 600;
 }
 
 .nav-item.active::before {
@@ -1455,7 +1447,7 @@ html[data-theme="light"] {
 .nav-item:focus-visible {
   outline: none !important;
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 2px var(--glass-focus), 0 0 16px var(--glass-glow), var(--glass-inset) !important;
+  box-shadow: 0 0 0 2px var(--glass-focus), 0 0 16px var(--glass-glow) !important;
 }
 
 /* ─── Cards — Liquid Glass ─── */
@@ -1464,21 +1456,14 @@ html[data-theme="light"] {
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 2px 12px var(--glass-shadow), 0 0 0 1px var(--glass-border);
+  box-shadow: 0 2px 12px var(--glass-shadow);
   transition: all .25s cubic-bezier(.4,0,.2,1);
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--glass-highlight) 0%, transparent 50%);
-  pointer-events: none;
+  color: var(--text) !important;
+  position: relative;
 }
 
 .card:hover {
-  box-shadow: var(--glass-inset), 0 8px 32px var(--glass-shadow), 0 0 0 1px var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
   transform: translateY(-1px);
 }
 
@@ -1487,59 +1472,48 @@ html[data-theme="light"] {
   position: relative;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  color: var(--text) !important;
 }
-
-.btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 50%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .2s;
-}
-
-.btn:hover::after { opacity: 1; }
 
 .btn-primary {
-  box-shadow: 0 2px 12px rgba(13,148,136,.35), var(--glass-inset), inset 0 1px 0 rgba(255,255,255,.15) !important;
+  box-shadow: 0 2px 12px rgba(13,148,136,.35), inset 0 1px 0 rgba(255,255,255,.15) !important;
+  color: #fff !important;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 4px 20px rgba(13,148,136,.45), var(--glass-inset), inset 0 1px 0 rgba(255,255,255,.2) !important;
+  box-shadow: 0 4px 20px rgba(13,148,136,.45), inset 0 1px 0 rgba(255,255,255,.2) !important;
 }
 
 .btn:focus-visible {
   outline: none !important;
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 20px var(--glass-glow), var(--glass-inset) !important;
+  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 20px var(--glass-glow) !important;
 }
 
 /* ─── Focus Indicators — Liquid Glass Glow ─── */
 :focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 16px var(--glass-glow) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--glass-glow) !important;
 }
 
 a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, .icon-btn:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 20px var(--glass-glow), 0 0 0 6px var(--glass-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 16px var(--glass-glow), 0 0 0 5px var(--glass-focus) !important;
 }
 
 .input:focus-visible, .select:focus-visible, textarea.input:focus-visible {
   outline: none !important;
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 16px var(--glass-glow), var(--glass-inset) !important;
+  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 12px var(--glass-glow) !important;
 }
 
 .icon-btn:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 16px var(--glass-glow), 0 0 0 6px var(--glass-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--glass-glow), 0 0 0 5px var(--glass-focus) !important;
 }
 
 .chk:focus-within {
-  box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--glass-glow) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 10px var(--glass-glow) !important;
 }
 
 /* ─── Topbar — Liquid Glass ─── */
@@ -1548,26 +1522,18 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-bottom: 1px solid var(--glass-border);
-}
-
-.topbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--glass-inset);
-  pointer-events: none;
+  color: var(--text) !important;
 }
 
 .topbar-icon {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-dim) !important;
 }
 
 .topbar-icon:hover {
   background: var(--glass-nav-hover) !important;
-  box-shadow: 0 2px 8px var(--glass-shadow);
+  color: var(--text) !important;
 }
 
 /* ─── Modals — Liquid Glass ─── */
@@ -1582,16 +1548,8 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 24px 80px rgba(0,0,0,.35), 0 0 0 1px var(--glass-border);
-}
-
-.modal::before, .modal-box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--glass-highlight) 0%, transparent 40%);
-  pointer-events: none;
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+  color: var(--text) !important;
 }
 
 .modal-dialog {
@@ -1605,7 +1563,7 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 16px 48px var(--glass-shadow);
+  box-shadow: 0 16px 48px var(--glass-shadow);
 }
 
 .dropdown-item:hover {
@@ -1618,7 +1576,8 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
   backdrop-filter: blur(24px) saturate(150%);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 8px 32px var(--glass-shadow);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+  color: var(--text) !important;
 }
 
 /* ─── Tables — Liquid Glass ─── */
@@ -1636,37 +1595,58 @@ table.table th {
   background: var(--glass-bg) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  color: var(--text-dim) !important;
+}
+
+table.table td {
+  color: var(--text) !important;
 }
 
 table.table tr:hover td {
   background: var(--glass-nav-hover) !important;
-  box-shadow: var(--glass-inset);
+}
+
+table.data {
+  background: var(--glass-card) !important;
+}
+
+table.data th {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-dim) !important;
+}
+
+table.data td {
+  color: var(--text) !important;
+}
+
+table.data tr:hover td {
+  background: var(--glass-nav-hover) !important;
 }
 
 /* ─── Inputs — Liquid Glass ─── */
 .input, .select, textarea.input {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  color: var(--text) !important;
 }
 
 .input:focus, .select:focus, textarea.input:focus {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 16px var(--glass-glow), var(--glass-inset) !important;
+  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 12px var(--glass-glow) !important;
 }
 
 /* ─── Search Box — Liquid Glass ─── */
 .search-box {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  color: var(--text) !important;
 }
 
 .search-box:focus-within {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 16px var(--glass-glow), var(--glass-inset) !important;
+  box-shadow: 0 0 0 3px var(--glass-focus), 0 0 12px var(--glass-glow) !important;
 }
 
 /* ─── Badges — Liquid Glass ─── */
@@ -1680,11 +1660,16 @@ table.table tr:hover td {
   position: relative;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  color: var(--text-dim) !important;
+}
+
+.tab:hover {
+  color: var(--text) !important;
 }
 
 .tab:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 16px var(--glass-glow), 0 0 0 6px var(--glass-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--glass-glow) !important;
 }
 
 /* ─── Chips — Liquid Glass ─── */
@@ -1692,11 +1677,16 @@ table.table tr:hover td {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
+  color: var(--text-dim) !important;
+}
+
+.chip:hover {
+  color: var(--text) !important;
 }
 
 .chip:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--glass-glow) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 0 10px var(--glass-glow) !important;
 }
 
 /* ─── Stat Cards — Liquid Glass ─── */
@@ -1705,7 +1695,8 @@ table.table tr:hover td {
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-inset), 0 2px 12px var(--glass-shadow);
+  box-shadow: 0 2px 12px var(--glass-shadow);
+  color: var(--text) !important;
 }
 
 /* ─── Empty State — Liquid Glass ─── */
@@ -1714,6 +1705,7 @@ table.table tr:hover td {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px dashed var(--glass-border) !important;
+  color: var(--text) !important;
 }
 
 /* ─── Profile Drawer — Liquid Glass ─── */
@@ -1722,6 +1714,7 @@ table.table tr:hover td {
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-right: 1px solid var(--glass-border) !important;
+  color: var(--text) !important;
 }
 
 /* ─── Scrollbar — Liquid Glass ─── */
@@ -1742,7 +1735,7 @@ table.table tr:hover td {
     -webkit-backdrop-filter: blur(40px) saturate(180%);
   }
   .sidebar.open {
-    box-shadow: var(--glass-inset), 8px 0 40px var(--glass-shadow) !important;
+    box-shadow: 8px 0 40px var(--glass-shadow) !important;
   }
 }
 
