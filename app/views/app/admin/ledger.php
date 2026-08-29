@@ -1,23 +1,13 @@
 <?php /* Integrity Ledger — tamper-evident hash chain with C-backed cryptography */
-$hashShort = fn($h) => '<code class="mono tiny">' . e(substr($h, 0, 8)) . '…' . e(substr($h, -6)) . '</code>';
 $actionBadge = ['INSERT' => 'success', 'UPDATE' => 'warning', 'DELETE' => 'danger'];
+$ledgerSortUrl = fn($col) => url('admin/ledger?' . http_build_query(array_merge($_GET, ['sort'=>$col, 'dir'=> ($_GET['sort'] ?? '')===$col && ($_GET['dir'] ?? 'desc')==='asc' ? 'desc' : 'asc'])));
+$sort = $_GET['sort'] ?? 'id';
+$dir = $_GET['dir'] ?? 'desc';
 ?>
 <style>
-.ledger-chain{display:flex;flex-direction:column;gap:2px;position:relative}
-.ledger-chain::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--c-success),var(--c-primary),var(--c-amber))}
-.ledger-entry{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;padding:10px 0}
-.ledger-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--c-success);background:var(--c-bg);margin-top:6px;z-index:1}
-.ledger-dot.broken{border-color:var(--c-danger);background:var(--c-danger);box-shadow:0 0 8px var(--c-danger)}
-.ledger-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:12px 14px;transition:border-color .2s}
-.ledger-card:hover{border-color:var(--c-primary)}
-.ledger-card .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
-.ledger-card .data{font-size:.8em;color:var(--c-text-muted);max-height:60px;overflow:hidden;text-overflow:ellipsis}
-.hash-full{font-family:ui-monospace,monospace;font-size:.72em;color:var(--c-text-muted);word-break:break-all;line-height:1.4}
 .stat-ring{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;border:3px solid var(--c-success);margin:0 auto}
 .stat-ring.broken{border-color:var(--c-danger);animation:pulse-danger 1.5s infinite}
 @keyframes pulse-danger{0%,100%{box-shadow:0 0 0 0 rgba(255,50,50,.3)}50%{box-shadow:0 0 20px 4px rgba(255,50,50,.4)}}
-.chain-verify-anim{display:inline-block;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
 .filter-bar .flex-col{min-width:120px}
 </style>
@@ -134,55 +124,60 @@ $actionBadge = ['INSERT' => 'success', 'UPDATE' => 'warning', 'DELETE' => 'dange
 </form>
 
 <!-- Chain entries -->
-<div class="card" style="padding:16px 18px">
-  <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:12px">
-    <strong>Chain History</strong>
-    <span class="tiny faint"><?= number_format($total) ?> total entries</span>
-  </div>
-
+<div class="table-wrap">
   <?php if (!$entries): ?>
     <div class="muted" style="text-align:center;padding:40px">
       <?= icon('chain') ?>
       <p>No ledger entries yet. Records will appear here as they are written.</p>
     </div>
   <?php else: ?>
-    <div class="ledger-chain">
-      <?php foreach ($entries as $i => $e): ?>
-        <div class="ledger-entry">
-          <div class="ledger-dot"></div>
-          <div class="ledger-card">
-            <div class="meta">
-              <span class="badge badge-<?= $actionBadge[$e['action']] ?? 'primary' ?>"><?= $e['action'] ?></span>
-              <strong><?= e(ucwords(str_replace('_', ' ', $e['table_name']))) ?></strong>
-              <span class="tiny faint">#<?= $e['record_id'] ?></span>
-              <?php if ($e['user_name']): ?>
-                <span class="tiny faint">by <?= e($e['user_name']) ?></span>
+    <table class="table">
+      <thead><tr>
+        <th class="col-num">#</th>
+        <th><a class="ajax-nav sort-link" href="<?= e($ledgerSortUrl('action')) ?>">Action<span class="sort-arrow<?= $sort==='action' ? ' active' : '' ?>"><?= $sort==='action' && $dir==='asc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th><a class="ajax-nav sort-link" href="<?= e($ledgerSortUrl('table_name')) ?>">Table<span class="sort-arrow<?= $sort==='table_name' ? ' active' : '' ?>"><?= $sort==='table_name' && $dir==='asc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+        <th>Record</th>
+        <th>Data</th>
+        <th>Hash Chain</th>
+        <th>User</th>
+        <th>IP</th>
+        <th><a class="ajax-nav sort-link" href="<?= e($ledgerSortUrl('recorded_at')) ?>">Time<span class="sort-arrow<?= $sort==='recorded_at' ? ' active' : '' ?>"><?= $sort==='recorded_at' && $dir==='asc' ? '&#9660;' : '&#9650;' ?></span></a></th>
+      </tr></thead>
+      <tbody>
+        <?php foreach ($entries as $e): ?>
+          <tr>
+            <td class="col-num"><?= $e['id'] ?></td>
+            <td><span class="badge badge-<?= $actionBadge[$e['action']] ?? 'primary' ?>"><?= $e['action'] ?></span></td>
+            <td><strong><?= e(ucwords(str_replace('_', ' ', $e['table_name']))) ?></strong></td>
+            <td class="col-num">#<?= $e['record_id'] ?></td>
+            <td>
+              <?php if ($e['data_json'] && $e['data_json'] !== '{}'): ?>
+                <code class="tiny" style="word-break:break-all"><?= e(mb_substr($e['data_json'], 0, 80)) ?><?= mb_strlen($e['data_json']) > 80 ? '…' : '' ?></code>
+              <?php else: ?>
+                <span class="faint tiny">—</span>
               <?php endif; ?>
-              <span class="tiny faint" style="margin-left:auto"><?= e($e['recorded_at']) ?></span>
-            </div>
-            <div class="hash-full">
-              <span class="tiny faint">prev:</span> <?= $hashShort($e['prev_hash']) ?>
-              <span style="margin:0 6px;color:var(--c-primary)">→</span>
-              <span class="tiny faint">hash:</span> <?= $hashShort($e['record_hash']) ?>
-              <?php if ($e['hmac_hash']): ?>
-                <span style="margin:0 6px;color:var(--c-primary)">→</span>
-                <span class="tiny faint">hmac:</span> <?= $hashShort($e['hmac_hash']) ?>
-              <?php endif; ?>
-            </div>
-            <?php if ($e['data_json'] && $e['data_json'] !== '{}'): ?>
-              <div class="data" style="margin-top:4px"><code><?= e(mb_substr($e['data_json'], 0, 120)) ?><?= mb_strlen($e['data_json']) > 120 ? '…' : '' ?></code></div>
-            <?php endif; ?>
-            <?php if ($e['ip_address']): ?>
-              <div class="tiny faint" style="margin-top:2px">IP: <?= e($e['ip_address']) ?></div>
-            <?php endif; ?>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    </div>
+            </td>
+            <td>
+              <code class="tiny mono" style="word-break:break-all">
+                <span class="faint">prev:</span> <?= e(substr($e['prev_hash'], 0, 8)) ?>…<?= e(substr($e['prev_hash'], -4)) ?>
+                <span style="color:var(--c-primary);margin:0 2px">→</span>
+                <span class="faint">hash:</span> <?= e(substr($e['record_hash'], 0, 8)) ?>…<?= e(substr($e['record_hash'], -4)) ?>
+                <?php if ($e['hmac_hash']): ?>
+                  <span style="color:var(--c-primary);margin:0 2px">→</span>
+                  <span class="faint">hmac:</span> <?= e(substr($e['hmac_hash'], 0, 8)) ?>…<?= e(substr($e['hmac_hash'], -4)) ?>
+                <?php endif; ?>
+              </code>
+            </td>
+            <td class="small faint"><?= e($e['user_name'] ?? '—') ?></td>
+            <td class="small faint"><?= e($e['ip_address'] ?? '—') ?></td>
+            <td class="small faint"><?= e($e['recorded_at']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
 
-    <!-- Pagination -->
     <?php if ($pages > 1): ?>
-      <div class="flex" style="justify-content:center;gap:6px;margin-top:16px">
+      <div class="flex" style="justify-content:center;gap:6px;padding:14px 0">
         <?php for ($p = max(1, $page - 3); $p <= min($pages, $page + 3); $p++): ?>
           <?php $qp = array_merge($_GET, ['r' => 'admin/ledger', 'page' => $p]); ?>
           <a href="<?= e(url('admin/ledger&' . http_build_query($qp))) ?>" class="btn btn-sm <?= $p === $page ? 'btn-primary' : 'btn-ghost' ?>"><?= $p ?></a>
