@@ -70,20 +70,28 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
 </div>
 
 <!-- New Region Modal -->
-<div class="modal" id="new-region-modal">
-  <div class="modal-content" style="max-width:500px">
-    <div class="flex-between" style="margin-bottom:16px"><h2>New Region</h2><button class="btn btn-ghost" data-close-modal><?= icon('x') ?></button></div>
-    <form method="post">
-      <?= csrf_field() ?>
-      <input type="hidden" name="create_region" value="1">
-      <div class="form-group"><label class="form-label">Region Name *</label><input class="input" name="name" required placeholder="e.g. Oromia"></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Code</label><input class="input" name="code" placeholder="e.g. ET04"></div>
-        <div class="form-group"><label class="form-label">Latitude</label><input class="input" name="lat" type="number" step="0.001" placeholder="7.525"></div>
-        <div class="form-group"><label class="form-label">Longitude</label><input class="input" name="lng" type="number" step="0.001" placeholder="40.766"></div>
-      </div>
-      <div style="margin-top:16px;text-align:right"><button class="btn btn-primary" type="submit">Create Region</button></div>
-    </form>
+<div class="modal-backdrop" id="new-region-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <h3>New Region</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
+    </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_region" value="1">
+        <div class="form-group"><label class="form-label">Region Name *</label><input class="input" name="name" required placeholder="e.g. Oromia"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Code</label><input class="input" name="code" placeholder="e.g. ET04"></div>
+          <div class="form-group"><label class="form-label">Latitude</label><input class="input" name="lat" type="number" step="0.001" placeholder="7.525"></div>
+          <div class="form-group"><label class="form-label">Longitude</label><input class="input" name="lng" type="number" step="0.001" placeholder="40.766"></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit">Create Region</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -140,21 +148,29 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
 </div>
 
 <!-- New Zone Modal -->
-<div class="modal" id="new-zone-modal">
-  <div class="modal-content" style="max-width:500px">
-    <div class="flex-between" style="margin-bottom:16px"><h2>New Zone</h2><button class="btn btn-ghost" data-close-modal><?= icon('x') ?></button></div>
-    <form method="post">
-      <?= csrf_field() ?>
-      <input type="hidden" name="create_zone" value="1">
-      <div class="form-group"><label class="form-label">Zone Name *</label><input class="input" name="name" required placeholder="e.g. Jimma"></div>
-      <div class="form-group"><label class="form-label">Region *</label>
-        <select class="input" name="region_id" required>
-          <option value="">Select region</option>
-          <?php foreach ($regions as $r): ?><option value="<?= $r['id'] ?>"><?= e($r['name']) ?></option><?php endforeach; ?>
-        </select>
-      </div>
-      <div style="margin-top:16px;text-align:right"><button class="btn btn-primary" type="submit">Create Zone</button></div>
-    </form>
+<div class="modal-backdrop" id="new-zone-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <h3>New Zone</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
+    </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_zone" value="1">
+        <div class="form-group"><label class="form-label">Zone Name *</label><input class="input" name="name" required placeholder="e.g. Jimma"></div>
+        <div class="form-group"><label class="form-label">Region *</label>
+          <select class="input" name="region_id" required>
+            <option value="">Select region</option>
+            <?php foreach ($regions as $r): ?><option value="<?= $r['id'] ?>"><?= e($r['name']) ?></option><?php endforeach; ?>
+          </select>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit">Create Zone</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -212,21 +228,29 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
 </div>
 
 <!-- New Woreda Modal -->
-<div class="modal" id="new-woreda-modal">
-  <div class="modal-content" style="max-width:500px">
-    <div class="flex-between" style="margin-bottom:16px"><h2>New Woreda</h2><button class="btn btn-ghost" data-close-modal><?= icon('x') ?></button></div>
-    <form method="post">
-      <?= csrf_field() ?>
-      <input type="hidden" name="create_woreda" value="1">
-      <div class="form-group"><label class="form-label">Woreda Name *</label><input class="input" name="name" required placeholder="e.g. Arba Minch"></div>
-      <div class="form-group"><label class="form-label">Zone *</label>
-        <select class="input" name="zone_id" required>
-          <option value="">Select zone</option>
-          <?php foreach ($zones as $z): ?><option value="<?= $z['id'] ?>"><?= e($z['region_name'] . ' → ' . $z['name']) ?></option><?php endforeach; ?>
-        </select>
-      </div>
-      <div style="margin-top:16px;text-align:right"><button class="btn btn-primary" type="submit">Create Woreda</button></div>
-    </form>
+<div class="modal-backdrop" id="new-woreda-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <h3>New Woreda</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
+    </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_woreda" value="1">
+        <div class="form-group"><label class="form-label">Woreda Name *</label><input class="input" name="name" required placeholder="e.g. Arba Minch"></div>
+        <div class="form-group"><label class="form-label">Zone *</label>
+          <select class="input" name="zone_id" required>
+            <option value="">Select zone</option>
+            <?php foreach ($zones as $z): ?><option value="<?= $z['id'] ?>"><?= e($z['region_name'] . ' → ' . $z['name']) ?></option><?php endforeach; ?>
+          </select>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit">Create Woreda</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 <?php endif; ?>
