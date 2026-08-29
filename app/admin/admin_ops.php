@@ -173,51 +173,102 @@ class Ctl_logs {
                 exit;
             }
 
-            // PDF viewer
+            // PDF viewer — matches report_view.php glassmorphism style
             $title = 'Edunex Activity Logs';
+            $logoBlack = url('public/images/logo-black.jpeg');
+            $ministryLogo = url('public/images/ministry-logo.png');
+            $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
+            $docId = 'EDU-' . date('Y') . '-' . str_pad(Database::scalar("SELECT COUNT(*) FROM activity_logs", [], 0), 6, '0', STR_PAD_LEFT);
             echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' . e($title) . '</title>';
             echo '<style>';
-            echo '*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f5;color:#222}';
-            echo '.viewer-bar{position:sticky;top:0;z-index:100;background:#1a1a2e;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}';
-            echo '.viewer-bar h1{font-size:15px;font-weight:600}.viewer-bar .btns{display:flex;gap:10px}';
-            echo '.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}';
-            echo '.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}';
-            echo '.report{max-width:1100px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}';
-            echo '.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee}';
-            echo '.report-header h2{font-size:20px;margin-bottom:4px}.report-header .meta{color:#666;font-size:12px}';
-            echo '.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}';
-            echo 'table{width:100%;border-collapse:collapse;table-layout:auto;min-width:600px}';
-            echo 'th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #eee;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}';
-            echo 'th{background:#f8f9fa;font-weight:600;color:#444;position:sticky;top:0;z-index:2;white-space:nowrap}';
-            echo '.row-num{color:#999;width:36px;text-align:center;max-width:36px}';
-            echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#e8e8e8}';
-            echo '.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}';
-            echo '.footer a{color:#4361ee;text-decoration:none}';
-            echo '@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}.table-wrap{overflow:visible}table{min-width:0}th,td{white-space:normal;word-break:break-word}}';
+            echo '*{box-sizing:border-box;margin:0;padding:0}';
+            echo 'body{font-family:system-ui,-apple-system,sans-serif;background:#f0f2f5;color:var(--text,#1e293b)}';
+            echo '[data-theme="dark"] body{background:#0f172a;color:#e2e8f0}';
+            // Toolbar
+            echo '.rv-toolbar{display:flex;gap:12px;align-items:center;padding:14px 24px;flex-wrap:wrap}';
+            echo '.rv-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 24px;border-radius:14px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s ease;text-decoration:none;line-height:1.1;white-space:nowrap}';
+            echo '.rv-btn:focus-visible{outline:2px solid #6366f1;outline-offset:2px}';
+            echo '.rv-btn--back{background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#64748b;border:1px solid rgba(255,255,255,.5);box-shadow:0 2px 8px rgba(0,0,0,.04)}';
+            echo '.rv-btn--back:hover{background:rgba(255,255,255,.7);color:#1e293b}';
+            echo '.rv-btn--dl{background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.35)}';
+            echo '.rv-btn--dl:hover{box-shadow:0 6px 24px rgba(99,102,241,.5);transform:translateY(-1px)}';
+            echo '.rv-btn--print{background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#6366f1;border:1px solid rgba(99,102,241,.2);box-shadow:0 2px 8px rgba(0,0,0,.04)}';
+            echo '.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:#6366f1}';
+            echo '.rv-btn svg{width:16px;height:16px;flex-shrink:0}';
+            // Paper
+            echo '.report-paper{position:relative;overflow:hidden;max-width:1100px;margin:0 auto 24px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:36px 40px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}';
+            echo '[data-theme="dark"] .report-paper{background:rgba(30,41,59,.55);border-color:rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)}';
+            // Watermark
+            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;opacity:.05;z-index:0;-webkit-user-select:none;user-select:none}';
+            echo '.rv-watermark .wm-logo{height:120px;object-fit:contain;opacity:.7}';
+            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:#64748b;margin-top:6px}';
+            // Header
+            echo '.rp-header{position:relative;z-index:1;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);padding-bottom:20px;margin-bottom:22px}';
+            echo '.rp-header .logos-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:8px}';
+            echo '.rp-header .flag-wrap{justify-self:start}.rp-header .text-center{text-align:center;padding:0 20px}.rp-header .ministry-wrap{justify-self:end}';
+            echo '.rp-header .logo-img{height:60px;object-fit:contain}.rp-header .flag-img{height:50px;border-radius:4px;object-fit:cover}';
+            echo '.rp-header h2{margin:0 0 4px;font-size:1.05rem;text-transform:uppercase;letter-spacing:.6px}';
+            echo '.rp-header .rp-sub{font-size:13px;color:#64748b;font-weight:500;margin-top:10px}';
+            // Meta
+            echo '.rp-meta{position:relative;z-index:1;display:flex;gap:28px;font-size:12px;color:#64748b;margin-bottom:18px;flex-wrap:wrap}';
+            echo '.rp-meta .meta-dot{width:4px;height:4px;border-radius:50%;background:#6366f1;opacity:.5}';
+            // Table
+            echo '.report-paper table{position:relative;z-index:1;width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}';
+            echo '.report-paper thead th{background:rgba(99,102,241,.08);color:#6366f1;font-weight:600;text-align:left;padding:10px 14px;border-bottom:2px solid rgba(99,102,241,.2);white-space:nowrap}';
+            echo '.report-paper tbody td{padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.04);color:#1e293b}';
+            echo '.report-paper tbody tr{transition:background .15s}';
+            echo '.report-paper tbody tr:hover{background:rgba(99,102,241,.04)}';
+            echo '.report-paper tbody tr:nth-child(even){background:rgba(99,102,241,.02)}';
+            // Footer
+            echo '.rp-footer{position:relative;z-index:1;border-top:1px solid rgba(0,0,0,.06);padding-top:14px;margin-top:22px;display:flex;justify-content:space-between;font-size:11px;color:#64748b}';
+            echo '.row-num{color:#94a3b8;width:36px;text-align:center}';
+            echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(99,102,241,.08);color:#6366f1}';
+            echo '@media print{.rv-toolbar{display:none!important}.report-paper{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:none!important;border-radius:0!important;padding:0!important;margin:0!important;box-shadow:none!important}body{background:#fff!important;color:#000!important}.report-paper thead th{background:#e5e7eb!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.report-paper tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.rv-watermark{opacity:.03!important}}';
             echo '</style></head><body>';
-            echo '<div class="viewer-bar"><h1>' . e($title) . '</h1>';
-            echo '<div class="btns"><button class="btn-secondary" onclick="history.back()">← Back</button>';
-            echo '<a href="javascript:window.print()">🖨 Print</a>';
-            echo '<a href="javascript:downloadPDF()">⬇ Download PDF</a>';
-            echo '<a href="' . e(url('admin/logs&' . http_build_query(array_filter(['action'=>$action,'q'=>$q,'days'=>$days,'export'=>'md'])))) . '">📄 Markdown</a>';
-            echo '</div></div>';
-            echo '<div class="report"><div class="report-header"><h2>' . e($title) . '</h2>';
-            echo '<p class="meta">Generated: ' . e($stamp) . ' · Filters: ' . e($filterStr) . ' · ' . count($logs) . ' records</p></div>';
-            echo '<div class="table-wrap"><table><thead><tr><th class="row-num">#</th><th>Time</th><th>User</th><th>School</th><th>Action</th><th>Detail</th></tr></thead><tbody>';
+            // Toolbar
+            echo '<div class="rv-toolbar">';
+            echo '<a class="rv-btn rv-btn--back" href="javascript:history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg> Back to Logs</a>';
+            echo '<button class="rv-btn rv-btn--dl" onclick="downloadPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF</button>';
+            echo '<button class="rv-btn rv-btn--print" onclick="window.print()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>';
+            echo '</div>';
+            // Paper
+            echo '<div class="report-paper" id="report-content">';
+            // Watermark
+            echo '<div class="rv-watermark"><img class="wm-logo" src="' . $logoBlack . '" alt=""><div class="wm-url">www.henokakriso.com</div></div>';
+            // Header
+            echo '<div class="rp-header"><div class="logos-row">';
+            echo '<div class="flag-wrap"><img class="logo-img flag-img" src="' . $ethiopianFlag . '" alt="Ethiopia"></div>';
+            echo '<div class="text-center"><h2>Federal Democratic Republic of Ethiopia</h2><div style="font-size:10px;color:#64748b;letter-spacing:.3px">Ministry of Education</div></div>';
+            echo '<div class="ministry-wrap"><img class="logo-img" src="' . $ministryLogo . '" alt="Ministry of Education"></div>';
+            echo '</div><div class="rp-sub">Activity Logs Report</div></div>';
+            // Meta
+            echo '<div class="rp-meta">';
+            echo '<span>Document: <strong>' . e($docId) . '</strong></span><span class="meta-dot"></span>';
+            echo '<span>Generated: <strong>' . e($stamp) . '</strong></span><span class="meta-dot"></span>';
+            echo '<span>Filters: <strong>' . e($filterStr) . '</strong></span><span class="meta-dot"></span>';
+            echo '<span>Records: <strong>' . count($logs) . '</strong></span>';
+            echo '</div>';
+            // Table
+            echo '<div style="overflow-x:auto"><table><thead><tr>';
+            echo '<th class="row-num">#</th><th>Time</th><th>User</th><th>School</th><th>Action</th><th>Detail</th>';
+            echo '</tr></thead><tbody>';
             $rn = 0;
             foreach ($logs as $l) {
                 $rn++;
                 echo '<tr><td class="row-num">' . $rn . '</td>';
                 echo '<td>' . e(date('M j, H:i:s', strtotime($l['created_at']))) . '</td>';
-                echo '<td><b>' . e($l['user_name'] ?? '—') . '</b><br><small style="color:#888">' . e($l['email'] ?? '') . '</small></td>';
+                echo '<td><b>' . e($l['user_name'] ?? '—') . '</b></td>';
                 echo '<td>' . e($l['school_name'] ?? '—') . '</td>';
                 echo '<td><span class="badge">' . e($l['action']) . '</span></td>';
                 echo '<td>' . e($l['detail']) . '</td></tr>';
             }
             echo '</tbody></table></div>';
-            echo '<div class="footer"><p><b>Henok Akriso</b> · henokakriso.com</p>';
-            echo '<p>All system is opensourced under <a href="https://github.com/henokakriso/Edunex" target="_blank">ARWE-PL License</a></p></div></div>';
-            echo '<script>function downloadPDF(){var opt={margin:[10,10],filename:"edunex_logs_' . date('Ymd_His') . '.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"}};if(typeof html2pdf!=="undefined"){html2pdf().set(opt).from(document.querySelector(".report")).save();}else{var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=function(){html2pdf().set(opt).from(document.querySelector(".report")).save();};document.head.appendChild(s);}}</script>';
+            // Footer
+            echo '<div class="rp-footer"><span>EDUNEX LMS · henockakriso.com · GitHub @henokakriso · ARWE-PL Licensed [' . date('Y') . ']</span><span>Page 1 of 1</span></div>';
+            echo '</div>';
+            // Script
+            echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>';
+            echo '<script>function downloadPDF(){html2pdf().set({margin:[12,12],filename:"edunex_logs_' . date('Ymd_His') . '.pdf",image:{type:"jpeg",quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"}}).from(document.getElementById("report-content")).save();}</script>';
             echo '</body></html>';
             exit;
         }
