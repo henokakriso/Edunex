@@ -199,10 +199,10 @@ class Ctl_logs {
             echo '.report-paper{position:relative;max-width:1100px;margin:0 auto 24px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:36px 40px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}';
             echo '[data-theme="dark"] .report-paper{background:rgba(30,41,59,.55);border-color:rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)}';
             // Watermark
-            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;z-index:1;-webkit-user-select:none;user-select:none;display:flex;flex-direction:column;align-items:center;gap:6px}';
-            echo '.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:.12;filter:grayscale(1)}';
-            echo '.rv-watermark .wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:rgba(30,41,59,.15);text-transform:uppercase}';
-            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:rgba(100,116,139,.15)}';
+            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;z-index:10;-webkit-user-select:none;user-select:none;display:flex;flex-direction:column;align-items:center;gap:6px}';
+            echo '.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:.18;filter:grayscale(1)}';
+            echo '.rv-watermark .wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:rgba(30,41,59,.2);text-transform:uppercase}';
+            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:rgba(100,116,139,.2)}';
             // Header
             echo '.rp-header{position:relative;z-index:1;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);padding-bottom:20px;margin-bottom:22px}';
             echo '.rp-header .logos-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:8px}';
