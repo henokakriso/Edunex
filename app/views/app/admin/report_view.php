@@ -88,15 +88,20 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
   position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%) rotate(-30deg);
   text-align:center;pointer-events:none;
-  opacity:.05;z-index:0;
+  opacity:.08;z-index:0;
   -webkit-user-select:none;user-select:none;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
 }
-.rv-watermark .wm-logo{height:120px;object-fit:contain;opacity:.7}
+.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:1;filter:grayscale(1)}
+.rv-watermark .wm-edunex{
+  font-size:36px;font-weight:900;letter-spacing:8px;
+  color:var(--text,#1e293b);opacity:1;text-transform:uppercase;
+}
 .rv-watermark .wm-url{
   font-size:14px;font-weight:500;letter-spacing:2px;
-  color:var(--text-secondary);margin-top:6px;
+  color:var(--text-secondary);opacity:1;
 }
-[data-theme="dark"] .rv-watermark .wm-logo{filter:brightness(10)}
+[data-theme="dark"] .rv-watermark .wm-logo{filter:brightness(10) grayscale(1)}
 
 /* ── Header ────────────────────────────────────────── */
 .rp-header{
@@ -186,7 +191,7 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
     <!-- Watermark -->
     <div class="rv-watermark">
       <img class="wm-logo" src="<?= $logoBlack ?>" alt="EDUNEX">
-      <div style="font-size:32px;font-weight:800;letter-spacing:6px;color:var(--text,#1e293b);opacity:.3">EDUNEX</div>
+      <div class="wm-edunex">EDUNEX</div>
       <div class="wm-url">www.henokakriso.com</div>
     </div>
 

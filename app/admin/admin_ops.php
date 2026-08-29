@@ -199,9 +199,10 @@ class Ctl_logs {
             echo '.report-paper{position:relative;overflow:hidden;max-width:1100px;margin:0 auto 24px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:36px 40px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}';
             echo '[data-theme="dark"] .report-paper{background:rgba(30,41,59,.55);border-color:rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)}';
             // Watermark
-            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;opacity:.05;z-index:0;-webkit-user-select:none;user-select:none}';
-            echo '.rv-watermark .wm-logo{height:120px;object-fit:contain;opacity:.7}';
-            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:#64748b;margin-top:6px}';
+            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;opacity:.08;z-index:0;-webkit-user-select:none;user-select:none;display:flex;flex-direction:column;align-items:center;gap:6px}';
+            echo '.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:1;filter:grayscale(1)}';
+            echo '.rv-watermark .wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:#1e293b;opacity:1;text-transform:uppercase}';
+            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:#64748b;opacity:1}';
             // Header
             echo '.rp-header{position:relative;z-index:1;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);padding-bottom:20px;margin-bottom:22px}';
             echo '.rp-header .logos-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:8px}';
@@ -234,7 +235,7 @@ class Ctl_logs {
             // Paper
             echo '<div class="report-paper" id="report-content">';
             // Watermark
-            echo '<div class="rv-watermark"><img class="wm-logo" src="' . $logoBlack . '" alt="EDUNEX"><div style="font-size:32px;font-weight:800;letter-spacing:6px;color:#1e293b;opacity:.3">EDUNEX</div><div class="wm-url">www.henokakriso.com</div></div>';
+            echo '<div class="rv-watermark"><img class="wm-logo" src="' . $logoBlack . '" alt="EDUNEX"><div class="wm-edunex">EDUNEX</div><div class="wm-url">www.henokakriso.com</div></div>';
             // Header
             echo '<div class="rp-header"><div class="logos-row">';
             echo '<div class="flag-wrap"><img class="logo-img flag-img" src="' . $ethiopianFlag . '" alt="Ethiopia"></div>';
