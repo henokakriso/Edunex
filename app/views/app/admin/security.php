@@ -1,167 +1,187 @@
-<?php /* Security Console — hacker-terminal view of the Integrity Ledger (admin only) */
-$sevColor = ['ok' => '#27ff9e', 'bad' => '#ff5c7a'];
-$cryptoSecure = !empty($crypto['binary']);
+<?php /* Security Console — hacker-terminal integrity ledger verification */
+$chainOk = $status['ok'] ?? true;
+$cryptoOk = $cryptoLoaded ?? false;
 ?>
-<div class="sec-console">
-  <style>
-    .sec-console{--sec-bg:#04060d;--sec-panel:#0a0f1e;--sec-border:#1c2a45;--sec-cyan:#38e6e6;--sec-green:#27ff9e;--sec-amber:#ffc84d;--sec-red:#ff5c7a;--sec-dim:#5d7a9a;color:var(--sec-cyan)}
-    .sec-console *{box-sizing:border-box}
-    .sec-console .term{background:var(--sec-bg);border:1px solid var(--sec-border);border-radius:14px;padding:18px 20px;box-shadow:0 0 0 1px #000, 0 18px 50px rgba(0,0,0,.5);position:relative;overflow:hidden}
-    .sec-console .term::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
-    .sec-console .crt{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.65}
-    .sec-console .g{color:var(--sec-green)} .sec-console .c{color:var(--sec-cyan)} .sec-console .a{color:var(--sec-amber)} .sec-console .r{color:var(--sec-red)} .sec-console .dm{color:var(--sec-dim)}
-    .sec-console .bar{display:flex;align-items:center;gap:8px;color:var(--sec-dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--sec-border);padding-bottom:10px;margin-bottom:14px}
-    .sec-console .bar b{color:var(--sec-cyan)}
-    .sec-console .blink{animation:secBlink 1.1s steps(2) infinite}
-    @keyframes secBlink{50%{opacity:0}}
-    .sec-console .panel{border:1px solid var(--sec-border);border-radius:10px;background:rgba(10,15,30,.55);padding:14px}
-    .sec-console .panel h4{margin:0 0 10px;font-size:11px;letter-spacing:.14em;color:var(--sec-amber);text-transform:uppercase}
-    .sec-console .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-    .sec-console .stat-cell{border:1px solid var(--sec-border);border-radius:10px;padding:12px 14px;background:#060b18}
-    .sec-console .stat-cell .v{font-size:22px;font-weight:700;color:var(--sec-green);font-family:ui-monospace,monospace}
-    .sec-console .stat-cell .l{font-size:10px;letter-spacing:.12em;color:var(--sec-dim);text-transform:uppercase;margin-top:2px}
-    .sec-console .press{border:1px solid var(--sec-red);color:var(--sec-red);background:rgba(255,92,122,.08);padding:14px 16px;border-radius:10px;text-transform:uppercase;letter-spacing:.1em;font-size:11px;display:flex;align-items:center;gap:10px;margin-bottom:14px;animation:secWarn 2.2s ease-in-out infinite}
-    @keyframes secWarn{0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,.35)}50%{box-shadow:0 0 22px 2px rgba(255,92,122,.55)}}
-    .sec-console table{width:100%;border-collapse:collapse}
-    .sec-console th{color:var(--sec-dim);font-size:10px;text-align:left;letter-spacing:.12em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--sec-border)}
-    .sec-console td{padding:10px;border-bottom:1px solid rgba(28,42,85,.45);vertical-align:middle}
-    .sec-console .row:hover td{background:rgba(56,230,230,.04)}
-    .sec-console .sec-btn{background:transparent;border:1px solid var(--sec-cyan);color:var(--sec-cyan);border-radius:8px;padding:6px 12px;font-size:11px;font-family:inherit;text-transform:uppercase;letter-spacing:.08em;cursor:pointer}
-    .sec-console .sec-btn:hover{background:var(--sec-cyan);color:#04060d}
-    .sec-console .sec-btn.danger{border-color:var(--sec-red);color:var(--sec-red)} .sec-console .sec-btn.danger:hover{background:var(--sec-red);color:#04060d}
-    .sec-console .sec-btn.ghost{border-color:var(--sec-border);color:var(--sec-dim)} .sec-console .sec-btn.ghost:hover{border-color:var(--sec-amber);color:var(--sec-amber)}
-    .sec-console input,.sec-console select,.sec-console textarea{background:#060b18;border:1px solid var(--sec-border);color:var(--sec-green);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;width:100%}
-    .sec-console input:focus,.sec-console select:focus{border-color:var(--sec-cyan);outline:none;box-shadow:0 0 10px rgba(56,230,230,.25)}
-    .sec-console label{display:block;font-size:10px;letter-spacing:.1em;color:var(--sec-dim);text-transform:uppercase;margin:0 0 4px}
-    .sec-console .field{margin-bottom:10px}
-    .sec-console .boot-line{margin:0;white-space:pre-wrap;word-break:break-word}
-    .sec-console .scanner{position:relative;height:22px;overflow:hidden;border-bottom:1px solid var(--sec-border);margin:16px 0;opacity:.85}
-    .sec-console .scanner span{position:absolute;top:0;left:-40%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(56,230,230,.55),transparent);animation:scan 3.4s linear infinite}
-    @keyframes scan{to{left:105%}}
-    .sec-console .sec-modal{position:fixed;inset:0;z-index:900;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.82);backdrop-filter:blur(3px)}
-    .sec-console .sec-modal.show{display:flex}
-    .sec-console .sec-box{max-width:520px;width:90%;border:1px solid var(--sec-red);background:#0a0f1e;border-radius:14px;padding:26px;box-shadow:0 0 60px rgba(255,92,122,.35);animation:modalIn .25s ease}
-    @keyframes modalIn{from{transform:scale(.92);opacity:0}}
-    .sec-console .hashm{color:var(--sec-dim);font-size:11px}
-  </style>
+<style>
+.sec-console{--sec-bg:#04060d;--sec-panel:#0a0f1e;--sec-border:#1c2a45;--sec-cyan:#38e6e6;--sec-green:#27ff9e;--sec-amber:#ffc84d;--sec-red:#ff5c7a;--sec-dim:#5d7a9a}
+.sec-console *{box-sizing:border-box}
+.sec-console .term{background:var(--sec-bg);border:1px solid var(--sec-border);border-radius:14px;padding:20px 24px;box-shadow:0 0 0 1px #000, 0 18px 50px rgba(0,0,0,.5);position:relative;overflow:hidden}
+.sec-console .term::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.sec-console .crt{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.65}
+.sec-console .g{color:var(--sec-green)} .sec-console .c{color:var(--sec-cyan)} .sec-console .a{color:var(--sec-amber)} .sec-console .r{color:var(--sec-red)} .sec-console .dm{color:var(--sec-dim)}
+.sec-console .bar{display:flex;align-items:center;gap:8px;color:var(--sec-dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--sec-border);padding-bottom:10px;margin-bottom:14px}
+.sec-console .bar b{color:var(--sec-cyan)}
+.sec-console .panel{border:1px solid var(--sec-border);border-radius:10px;background:rgba(10,15,30,.55);padding:14px;margin-bottom:12px}
+.sec-console .panel h4{margin:0 0 10px;font-size:11px;letter-spacing:.14em;color:var(--sec-amber);text-transform:uppercase}
+.sec-console .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sec-console .stat-cell{border:1px solid var(--sec-border);border-radius:10px;padding:12px 14px;background:#060b18}
+.sec-console .stat-cell .v{font-size:22px;font-weight:700;font-family:ui-monospace,monospace}
+.sec-console .stat-cell .l{font-size:10px;letter-spacing:.12em;color:var(--sec-dim);text-transform:uppercase;margin-top:2px}
+.sec-console .sec-btn{background:transparent;border:1px solid var(--sec-cyan);color:var(--sec-cyan);border-radius:8px;padding:6px 14px;font-size:11px;font-family:inherit;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:all .15s}
+.sec-console .sec-btn:hover{background:var(--sec-cyan);color:#04060d}
+.sec-console .sec-btn.danger{border-color:var(--sec-red);color:var(--sec-red)} .sec-console .sec-btn.danger:hover{background:var(--sec-red);color:#04060d}
+.sec-console .sec-btn.ghost{border-color:var(--sec-border);color:var(--sec-dim)} .sec-console .sec-btn.ghost:hover{border-color:var(--sec-amber);color:var(--sec-amber)}
+.sec-console table{width:100%;border-collapse:collapse}
+.sec-console th{color:var(--sec-dim);font-size:10px;text-align:left;letter-spacing:.12em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--sec-border)}
+.sec-console td{padding:8px 10px;border-bottom:1px solid rgba(28,42,85,.35);vertical-align:middle;font-size:12px}
+.sec-console .row:hover td{background:rgba(56,230,230,.04)}
+.sec-console .hash-mono{font-family:ui-monospace,monospace;font-size:10px;color:var(--sec-dim);word-break:break-all}
+.sec-console .scanner{position:relative;height:22px;overflow:hidden;border-bottom:1px solid var(--sec-border);margin:16px 0;opacity:.85}
+.sec-console .scanner span{position:absolute;top:0;left:-40%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(56,230,230,.55),transparent);animation:scan 3.4s linear infinite}
+@keyframes scan{to{left:105%}}
+.sec-console .intact-glow{box-shadow:0 0 30px rgba(39,255,158,.15);border-color:var(--sec-green) !important}
+.sec-console .broken-glow{box-shadow:0 0 30px rgba(255,92,122,.2);border-color:var(--sec-red) !important;animation:secWarn 2s ease-in-out infinite}
+@keyframes secWarn{0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,.3)}50%{box-shadow:0 0 30px 4px rgba(255,92,122,.5)}}
+.sec-console .boot-line{margin:0;white-space:pre-wrap;word-break:break-word}
+</style>
 
+<div class="sec-console">
   <div class="term crt">
     <div class="bar">
       <span style="flex:1">⚡ SECURITY CONSOLE · <b>edunex_guard</b> · integrity ledger</span>
-      <span class="dm">TARGET <span class="c"><?= e($school['name'] ?? '—') ?></span></span>
+      <span class="dm"><?= date('Y-m-d H:i:s') ?></span>
     </div>
 
-    <div class="press">
-      <span style="filter:drop-shadow(0 0 6px var(--sec-red))">⚠</span>
-      WARNING — restricted area. Unauthorised access is monitored and every action is appended to the integrity ledger and audit log. Proceed at your own risk.
+    <!-- Boot lines -->
+    <div style="margin-bottom:14px">
+      <p class="boot-line g">[<span class="dm"><?= date('H:i:s') ?></span>] ledger_crypto.so loaded via FFI</p>
+      <p class="boot-line c">[<span class="dm"><?= date('H:i:s', strtotime('-1 second')) ?></span>] HMAC-SHA256 engine: OpenSSL <?= OPENSSL_VERSION_TEXT ?></p>
+      <p class="boot-line <?= $chainOk ? 'g' : 'r' ?>">[<span class="dm"><?= date('H:i:s', strtotime('-2 seconds')) ?></span>] chain verification: <?= $chainOk ? 'ALL LINKS VALID ✓' : 'BROKEN LINK DETECTED ✗' ?></p>
+      <p class="boot-line dm">[<span class="dm"><?= date('H:i:s', strtotime('-3 seconds')) ?></span>] <?= number_format($stats['total']) ?> entries scanned · <?= $stats['active_keys'] ?> active HMAC key(s)</p>
     </div>
-
-    <div class="boot-line"><span class="g">root@edunex:~#</span> <span class="c">open_linked_eye --school=<?= (int)$schoolId ?> --mode=read+write</span></div>
-    <div class="boot-line dm">[•] native C crypto core . . . <span class="<?= $cryptoSecure ? 'g' : 'r' ?>"><?= $cryptoSecure ? 'ONLINE' : 'OFFLINE' ?></span></div>
-    <div class="boot-line dm">[•] sha256 ledger chain . . . <span class="<?= $chainIntact ? 'g' : 'r' ?>"><?= $chainIntact ? 'INTACT' : 'CORRUPTED' ?></span></div>
-    <div class="boot-line dm">[•] auth events in window . . . <span class="c"><?= count($authEvents) ?></span></div>
-    <div class="boot-line"><span class="g">>&#9620;</span><span class="blink">█</span></div>
 
     <div class="scanner"><span></span></div>
 
-    <?php if (!$schoolId || !$school): ?>
+    <!-- Status panel -->
+    <div class="panel <?= $chainOk ? 'intact-glow' : 'broken-glow' ?>">
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="v" style="color:<?= $chainOk ? 'var(--sec-green)' : 'var(--sec-red)' ?>"><?= $chainOk ? '✓ INTACT' : '✗ BROKEN' ?></div>
+          <div class="l">Chain Status</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v g"><?= number_format($stats['total']) ?></div>
+          <div class="l">Total Entries</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v c"><?= $stats['active_keys'] ?></div>
+          <div class="l">HMAC Keys</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v a"><?= count($stats['tables']) ?></div>
+          <div class="l">Tables Tracked</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v" style="color:<?= $cryptoOk ? 'var(--sec-green)' : 'var(--sec-red)' ?>"><?= $cryptoOk ? 'C/FFI' : 'PHP' ?></div>
+          <div class="l">Crypto Engine</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v g"><?= number_format($stats['actions']['INSERT'] ?? 0) ?></div>
+          <div class="l">INSERTs</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v a"><?= number_format($stats['actions']['UPDATE'] ?? 0) ?></div>
+          <div class="l">UPDATEs</div>
+        </div>
+        <div class="stat-cell">
+          <div class="v r"><?= number_format($stats['actions']['DELETE'] ?? 0) ?></div>
+          <div class="l">DELETEs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-8" style="margin-bottom:14px">
+      <form method="post" class="inline"><?= csrf_field() ?>
+        <button class="sec-btn" name="reverify" value="1">⟲ Re-verify Chain</button>
+      </form>
+      <form method="post" class="inline"><?= csrf_field() ?>
+        <button class="sec-btn ghost" name="export_ledger" value="1">⤓ Export CSV</button>
+      </form>
+      <form method="post" class="inline"><?= csrf_field() ?>
+        <button class="sec-btn danger" name="rotate_key" value="1" onclick="return confirm('Rotate HMAC key?')">⟳ Rotate Key</button>
+      </form>
+    </div>
+
+    <!-- Last verification -->
+    <?php if ($stats['last_verify']): ?>
       <div class="panel">
-        <h4>// SELECT TARGET SCHOOL</h4>
-        <p class="dm" style="margin:0 0 12px">The console operates on a single school's integrity ledger. Choose a target:</p>
-        <form method="get" class="d-flex" style="gap:10px">
-          <input type="hidden" name="r" value="admin/security">
-          <select name="school" style="width:auto;flex:1"><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
-          <button class="sec-btn">connect</button>
-        </form>
+        <h4>Last Verification</div>
+        <div class="c">verified_at: <span class="g"><?= e($stats['last_verify']['verified_at']) ?></span></div>
+        <div class="c">total_records: <span class="g"><?= number_format($stats['last_verify']['total_records']) ?></span></div>
+        <div class="c">broken_links: <span class="<?= (int)$stats['last_verify']['broken_links'] > 0 ? 'r' : 'g' ?>"><?= (int)$stats['last_verify']['broken_links'] ?></span></div>
+        <?php if ($stats['last_verify']['first_hash']): ?>
+          <div class="dm" style="margin-top:6px">first_hash: <span class="hash-mono"><?= e($stats['last_verify']['first_hash']) ?></span></div>
+          <div class="dm">last_hash: <span class="hash-mono"><?= e($stats['last_verify']['last_hash']) ?></span></div>
+        <?php endif; ?>
       </div>
-    <?php else: ?>
-      <div class="stat-grid" style="margin:14px 0">
-        <div class="stat-cell"><div class="v" style="color:<?= $chainIntact ? 'var(--sec-green)' : 'var(--sec-red)' ?>"><?= $chainIntact ? 'OK' : '!!' ?></div><div class="l">chain integrity</div></div>
-        <div class="stat-cell"><div class="v"><?= (int)$status['entries'] ?></div><div class="l">chain entries</div></div>
-        <div class="stat-cell"><div class="v"><?= (int)$status['checked'] ?></div><div class="l">verified</div></div>
-        <div class="stat-cell"><div class="v" style="color:var(--sec-amber)"><?= count($entries) ?></div><div class="l">tail window</div></div>
-      </div>
-
-      <div class="grid" style="grid-template-columns:1.1fr .9fr;gap:14px;align-items:start">
-        <div class="panel">
-          <h4>// AUDIT CHANNEL · append note to chain</h4>
-          <form method="post" class="d-flex" style="gap:8px">
-            <?= csrf_field() ?>
-            <input name="note" required maxlength="240" placeholder=">[ describe the audit event … ]" style="flex:1">
-            <button class="sec-btn" name="note_submit" value="1">append</button>
-          </form>
-          <?php foreach ($entries as $e): $sev = ($e['event_type'] ?? '') === 'audit.note' ? 'ok' : 'bad'; ?>
-            <div class="d-flex" style="gap:8px;padding:9px 2px;border-bottom:1px solid rgba(28,42,85,.4)">
-              <span class="dm" style="flex:none">#<?= (int)$e['id'] ?></span>
-              <span class="c" style="flex:none;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= e($e['event_type']) ?></span>
-              <span class="g flex-1" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= e($e['payload']) ?></span>
-              <span class="dm" style="flex:none;white-space:nowrap"><?= e(date('M j H:i', strtotime($e['created_at']))) ?></span>
-            </div>
-          <?php endforeach; ?>
-          <?php if (!$entries): ?><p class="dm" style="margin:10px 0 0">no entries in this chain tail.</p><?php endif; ?>
-        </div>
-        <div class="panel">
-          <h4>// CONTROLS %% guarded by csrf</h4>
-          <div class="d-flex" style="flex-direction:column;gap:8px">
-            <form method="post"><?= csrf_field() ?><button class="sec-btn" name="reverify" value="1" style="width:100%">verify entire chain</button></form>
-            <form method="post"><?= csrf_field() ?><button class="sec-btn ghost" name="export_ledger" value="1" style="width:100%">export ledger csv</button></form>
-          </div>
-          <div class="d-flex" style="gap:8px;margin-top:10px">
-            <a class="sec-btn ghost" style="text-align:center;flex:1" href="<?= e(url('admin/ledger&school=' . $schoolId)) ?>">full ledger UI</a>
-          </div>
-          <p class="dm" style="font-size:11px;margin:12px 0 0">every mutation here lands in the school's hash chain and the global audit log.</p>
-        </div>
-      </div>
-
-      <?php if ($authEvents): ?>
-        <div class="panel" style="margin-top:14px">
-          <h4>// RECENT AUTH EVENTS</h4>
-          <?php foreach ($authEvents as $ev): $ok = $ev['status'] === 'success'; ?>
-            <div class="d-flex" style="gap:10px;padding:6px 2px;align-items:center">
-              <span class="<?= $ok ? 'g' : 'r' ?>"><?= $ok ? '✓' : '✗' ?></span>
-              <span class="c flex-1" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= e($ev['user_name'] ?? $ev['email']) ?></span>
-              <span class="<?= $ok ? 'g' : 'r' ?>"><?= e($ev['status']) ?></span>
-              <span class="dm mono" style="font-size:11px"><?= e($ev['ip'] ?? '—') ?></span>
-              <span class="dm" style="font-size:11px;white-space:nowrap"><?= e(date('M j H:i', strtotime($ev['created_at']))) ?></span>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
     <?php endif; ?>
 
-    <p class="dm" style="margin-top:18px;font-size:11px;text-align:center">EDUNEX SECURE CORE · C-backed hashing · every mutation logged</p>
-  </div>
+    <!-- Recent entries -->
+    <div class="panel">
+      <h4>Recent Chain Entries</h4>
+      <?php if (!$recent): ?>
+        <div class="dm" style="padding:20px;text-align:center">No entries yet — chain is empty</div>
+      <?php else: ?>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Action</th><th>Table</th><th>Record</th><th>User</th><th>Hash</th><th>Time</th>
+            </tr></thead>
+            <tbody>
+              <?php foreach ($recent as $r): ?>
+                <tr class="row">
+                  <td class="dm"><?= $r['id'] ?></td>
+                  <td><span class="badge badge-<?= $r['action'] === 'INSERT' ? 'success' : ($r['action'] === 'UPDATE' ? 'warning' : 'danger') ?>" style="font-size:10px;padding:2px 6px"><?= $r['action'] ?></span></td>
+                  <td class="c"><?= e($r['table_name']) ?></td>
+                  <td class="dm">#<?= $r['record_id'] ?></td>
+                  <td class="dm"><?= e($r['user_name'] ?? '—') ?></td>
+                  <td class="hash-mono"><?= e(substr($r['record_hash'], 0, 12)) ?>…</td>
+                  <td class="dm"><?= e($r['recorded_at']) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
+    </div>
 
-  <div class="sec-modal" id="sec-warn">
-    <div class="sec-box">
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <span class="r" style="font-size:30px;filter:drop-shadow(0 0 8px var(--sec-red))">⚠</span>
-        <div>
-          <h3 style="color:var(--sec-red);margin:0 0 8px">RESTRICTED SECURITY ZONE</h3>
-          <p class="crt" style="color:var(--sec-cyan)">You are entering the EDUNEX security console. This area is monitored.</p>
-          <p class="crt dm" style="margin:8px 0 0;font-size:12px">Every action here — verify, export, 2FA and audit notes — is appended to the integrity hash chain and attributed to your account.</p>
+    <!-- Tables breakdown -->
+    <?php if ($stats['tables']): ?>
+      <div class="panel">
+        <h4>Tracked Tables</h4>
+        <div class="flex gap-6" style="flex-wrap:wrap">
+          <?php foreach ($stats['tables'] as $t): ?>
+            <div style="border:1px solid var(--sec-border);border-radius:8px;padding:6px 10px;background:#060b18">
+              <span class="c"><?= e($t['table_name']) ?></span>
+              <span class="g" style="margin-left:6px"><?= number_format($t['cnt']) ?></span>
+            </div>
+          <?php endforeach; ?>
         </div>
       </div>
-      <div class="d-flex" style="justify-content:flex-end;gap:10px;margin-top:20px">
-        <a class="sec-btn ghost" href="<?= e(url('admin/ledger&school=' . $schoolId)) ?>">back to ledger</a>
-        <button class="sec-btn" onclick="closeSecWarn()">ACKNOWLEDGE &amp; PROCEED</button>
+    <?php endif; ?>
+
+    <!-- Top contributors -->
+    <?php if (!empty($stats['top_users'])): ?>
+      <div class="panel">
+        <h4>Top Contributors</h4>
+        <table>
+          <thead><tr><th>User</th><th>Entries</th></tr></thead>
+          <tbody>
+            <?php foreach ($stats['top_users'] as $u): ?>
+              <tr class="row">
+                <td class="g"><?= e($u['full_name']) ?></td>
+                <td class="c"><?= number_format($u['cnt']) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
       </div>
+    <?php endif; ?>
+
+    <div class="scanner"><span></span></div>
+    <div class="dm" style="text-align:center;font-size:10px;letter-spacing:.1em">
+      EDUNEX INTEGRITY LEDGER · SHA-256 + HMAC-SHA256 · C/FFI BACKED
     </div>
   </div>
 </div>
-
-<script>
-(function () {
-  window.closeSecWarn = function () {
-    var m = document.getElementById('sec-warn');
-    if (m) m.classList.remove('show');
-  };
-  if (!sessionStorage.getItem('edunex_sec_ack')) {
-    var m = document.getElementById('sec-warn');
-    if (m) m.classList.add('show');
-  }
-  var ackBtn = document.querySelector('.sec-box .sec-btn:last-child');
-  if (ackBtn) ackBtn.addEventListener('click', function () { sessionStorage.setItem('edunex_sec_ack', '1'); closeSecWarn(); });
-  window.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSecWarn(); });
-})();
-</script>

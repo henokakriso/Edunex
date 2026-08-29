@@ -908,213 +908,111 @@ class Ctl_transfer {
 class Ctl_ledger {
     public function run(): void {
         $u = require_role('ministry', 'principal');
-        $schoolId = (int)($u['role'] === 'principal' ? $u['school_id'] : ($_GET['school'] ?? $u['school_id'] ?? 0));
-        $schoolId = (int)$schoolId;
-        if ($schoolId <= 0) {
-            $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
-            Router::render('app/admin/ledger', ['title' => 'Integrity Ledger', 'schoolId' => 0, 'schools' => $schools, 'status' => null, 'entries' => [], 'school' => null]);
-            return;
-        }
-        $school = Database::one("SELECT id, name FROM schools WHERE id = ?", [$schoolId]);
+        $schoolId = (int)($u['role'] === 'principal' ? $u['school_id'] : ($_GET['school'] ?? 0));
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (isset($_POST['enable_2fa'])) {
-                $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, email, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
-                if (!$staff) { flash('danger', 'Staff member not found.'); redirect('admin/ledger&school=' . $schoolId); }
-                // Re-issuing rotates the key, so refuse to clobber a key that's already enabled
-                // but whose file the recipient may not have downloaded yet.
-                if ((int)$staff['twofa_enabled'] === 1) {
-                    flash('danger', '2FA is already enabled for ' . $staff['first_name'] . '. Use the "Download key" link to fetch the activation file again.');
-                    redirect('admin/ledger&school=' . $schoolId);
-                }
-                $file = Auth::henaIssue($staffId);
-                // Persist the activation file so it can be re-downloaded without re-issuing.
-                $keysDir = STORAGE_PATH . '/keys';
-                if (!is_dir($keysDir)) @mkdir($keysDir, 0770, true);
-                $path = $keysDir . '/hena_' . $staffId . '.hena';
-                if (file_put_contents($path, $file) !== false) @chmod($path, 0600);
-                log_activity('ledger', "2FA enabled for {$staff['first_name']} {$staff['last_name']}", (int)$u['id']);
-                flash('success', 'USB 2FA activated for ' . $staff['first_name'] . ' ' . $staff['last_name'] . '. Download the one-time key below and hand it to them over a secure channel.');
-                redirect('admin/ledger&school=' . $schoolId . '&key=' . $staffId);
-            }
-            if (isset($_POST['download_2fa_key'])) {
-                $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, twofa_enabled FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
-                if (!$staff || (int)$staff['twofa_enabled'] !== 1) { flash('danger', 'Staff member has no active 2FA key.'); redirect('admin/ledger&school=' . $schoolId); }
-                $path = STORAGE_PATH . '/keys/hena_' . $staffId . '.hena';
-                if (!is_file($path)) {
-                    // File was never persisted (e.g. older version) — re-issue once.
-                    $file = Auth::henaIssue($staffId);
-                    $dir = STORAGE_PATH . '/keys';
-                    if (!is_dir($dir)) @mkdir($dir, 0770, true);
-                    if (file_put_contents($path, $file) !== false) @chmod($path, 0600);
-                }
-                $bytes = (string)file_get_contents($path);
-                header('Content-Type: text/plain');
-                header('Content-Disposition: attachment; filename="hena_' . $staff['first_name'] . '_' . $staffId . '.hena"');
-                header('Content-Length: ' . strlen($bytes));
-                echo $bytes;
-                exit;
-            }
-            if (isset($_POST['disable_2fa'])) {
-                $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
-                if ($staff) {
-                    Auth::henaReset($staffId);
-                    @unlink(STORAGE_PATH . '/keys/hena_' . $staffId . '.hena');
-                    log_activity('ledger', "2FA disabled for {$staff['first_name']} {$staff['last_name']}", (int)$u['id']);
-                    flash('success', '2FA disabled for ' . $staff['first_name'] . ' ' . $staff['last_name'] . '.');
-                } else flash('danger', 'Staff member not found.');
-                redirect('admin/ledger&school=' . $schoolId);
-            }
             if (isset($_POST['reverify'])) {
                 $res = Ledger::verify($schoolId);
-                log_activity('ledger', "Re-verified ledger for {$school['name']}: " . ($res['ok'] ? 'INTACT' : 'BROKEN at #' . $res['broken_at']), (int)$u['id']);
-                flash($res['ok'] ? 'success' : 'danger', 'Chain verification: ' . ($res['ok'] ? 'INTACT — all ' . $res['checked'] . ' entries valid.' : 'BROKEN at entry #' . $res['broken_at'] . '.'));
-                redirect('admin/ledger&school=' . $schoolId);
+                log_activity('ledger', "Re-verified chain: " . ($res['ok'] ? 'INTACT' : 'BROKEN at #' . $res['broken_at']), (int)$u['id']);
+                flash($res['ok'] ? 'success' : 'danger', 'Chain verification: ' . ($res['ok'] ? 'INTACT — all ' . $res['checked'] . ' entries verified.' : 'BROKEN at entry #' . $res['broken_at'] . '.'));
+                redirect('admin/ledger');
             }
             if (isset($_POST['export_ledger'])) {
-                $rows = Database::all(
-                    "SELECT l.id, l.event_type, l.entity_type, l.entity_id, CONCAT(us.first_name, ' ', us.last_name) AS actor, l.payload, l.prev_hash, l.record_hash, l.created_at
-                     FROM ledger l LEFT JOIN users us ON us.id = l.actor_id
-                     WHERE l.school_id = ? ORDER BY l.id ASC", [$schoolId]);
+                $filters = [
+                    'table' => $_GET['table'] ?? '',
+                    'action' => $_GET['action'] ?? '',
+                    'from' => $_GET['from'] ?? '',
+                    'to' => $_GET['to'] ?? '',
+                ];
+                $tmpFile = Ledger::export_csv($filters);
+                $file = 'reports/ledger_export_' . date('Ymd_His') . '.csv';
                 $dir = STORAGE_PATH . '/reports';
                 if (!is_dir($dir)) @mkdir($dir, 0775, true);
-                $file = 'reports/ledger_' . $schoolId . '_' . date('Ymd_His') . '.csv';
-                $fp = fopen(STORAGE_PATH . '/' . $file, 'w');
-                if ($rows) {
-                    fputcsv($fp, array_keys($rows[0]));
-                    foreach ($rows as $r) fputcsv($fp, array_values($r));
-                }
-                fclose($fp);
-                flash('success', 'Ledger exported.');
+                copy($tmpFile, STORAGE_PATH . '/' . $file);
+                @unlink($tmpFile);
+                flash('success', 'Ledger exported as CSV.');
                 redirect('file?p=' . $file . '&dl=1');
             }
+            if (isset($_POST['rotate_key'])) {
+                Ledger::rotate_key();
+                log_activity('ledger', 'HMAC key rotated', (int)$u['id']);
+                flash('success', 'HMAC signing key rotated. Previous chain entries remain valid.');
+                redirect('admin/ledger');
+            }
         }
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $filters = [
+            'table' => $_GET['table'] ?? '',
+            'action' => $_GET['action'] ?? '',
+            'from' => $_GET['from'] ?? '',
+            'to' => $_GET['to'] ?? '',
+        ];
+        $result = Ledger::entries($page, 50, $filters);
         $status = Ledger::status($schoolId);
-        $entries = Database::all(
-            "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS actor FROM ledger l
-             LEFT JOIN users us ON us.id = l.actor_id
-             WHERE l.school_id = ? ORDER BY l.id DESC LIMIT 100", [$schoolId]);
-        $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
-
-        // 2FA coverage for the ledger's staff (who can sign records)
-        $staff = Database::all(
-            "SELECT us.id, us.first_name, us.last_name, us.email, us.role, us.twofa_enabled, us.last_login
-             FROM users us WHERE us.school_id = ? AND us.role IN ('regional','principal','teacher')
-             ORDER BY us.role, us.last_name", [$schoolId]);
-        $staffTwofa = ['ok' => 0, 'total' => count($staff)];
-        foreach ($staff as $s) if ((int)$s['twofa_enabled'] === 1) $staffTwofa['ok']++;
-        $authEvents = Database::all(
-            "SELECT lh.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name, us.email
-             FROM login_history lh JOIN users us ON us.id = lh.user_id
-             WHERE us.school_id = ? ORDER BY lh.id DESC LIMIT 12", [$schoolId]);
-
-        $crypto = ['binary' => CWorker::available(), 'chain_verified' => (bool)$status['ok']];
+        $stats = Ledger::stats();
+        $cryptoLoaded = Ledger::ffi_available();
 
         Router::render('app/admin/ledger', [
-            'title' => 'Integrity Ledger', 'schoolId' => $schoolId, 'schools' => $schools,
-            'status' => $status, 'entries' => $entries, 'school' => $school,
-            'staff' => $staff, 'staffTwofa' => $staffTwofa, 'authEvents' => $authEvents,
-            'crypto' => $crypto, 'keyFileHint' => (int)($_GET['key'] ?? 0),
+            'title' => 'Integrity Ledger',
+            'entries' => $result['rows'],
+            'total' => $result['total'],
+            'page' => $result['page'],
+            'pages' => $result['pages'],
+            'filters' => $filters,
+            'status' => $status,
+            'stats' => $stats,
+            'cryptoLoaded' => $cryptoLoaded,
         ]);
     }
 }
 
-/* =============== ADMIN: security console (ledger-scoped) =============== */
+/* =============== ADMIN: security console =============== */
 class Ctl_security {
     public function run(): void {
         $u = require_role('ministry');
-        $schoolId = (int)($_GET['school'] ?? $u['school_id'] ?? 0);
-        if ($schoolId <= 0) {
-            $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
-            Router::render('app/admin/security', ['title' => 'Security Console', 'schoolId' => 0, 'schools' => $schools, 'status' => null, 'entries' => [], 'school' => null]);
-            return;
-        }
-        $school = Database::one("SELECT id, name FROM schools WHERE id = ?", [$schoolId]);
-        if (!$school) { flash('danger', 'School not found.'); redirect('admin/security'); }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            if (isset($_POST['note'])) {
-                $note = trim($_POST['note'] ?? '');
-                if ($note !== '') {
-                    Ledger::append($schoolId, (int)$u['id'], 'audit.note', 'security.console', 0, ['note' => $note]);
-                    log_activity('ledger', "Audit note on {$school['name']}: " . $note, (int)$u['id']);
-                    flash('success', 'Audit note appended to the chain.');
-                }
-                redirect('admin/security&school=' . $schoolId);
-            }
             if (isset($_POST['reverify'])) {
-                $res = Ledger::verify($schoolId);
-                log_activity('ledger', "Re-verified ledger for {$school['name']}: " . ($res['ok'] ? 'INTACT' : 'BROKEN at #' . $res['broken_at']), (int)$u['id']);
+                $res = Ledger::verify();
+                log_activity('ledger', "Security console re-verify: " . ($res['ok'] ? 'INTACT' : 'BROKEN at #' . $res['broken_at']), (int)$u['id']);
                 flash($res['ok'] ? 'success' : 'danger', 'Chain verification: ' . ($res['ok'] ? 'INTACT — all ' . $res['checked'] . ' entries valid.' : 'BROKEN at entry #' . $res['broken_at'] . '.'));
-                redirect('admin/security&school=' . $schoolId);
+                redirect('admin/security');
             }
             if (isset($_POST['export_ledger'])) {
-                $rows = Database::all(
-                    "SELECT l.id, l.event_type, l.entity_type, l.entity_id, CONCAT(us.first_name, ' ', us.last_name) AS actor, l.payload, l.prev_hash, l.record_hash, l.created_at
-                     FROM ledger l LEFT JOIN users us ON us.id = l.actor_id
-                     WHERE l.school_id = ? ORDER BY l.id ASC", [$schoolId]);
+                $tmpFile = Ledger::export_csv();
+                $file = 'reports/ledger_full_export_' . date('Ymd_His') . '.csv';
                 $dir = STORAGE_PATH . '/reports';
                 if (!is_dir($dir)) @mkdir($dir, 0775, true);
-                $file = 'reports/ledger_' . $schoolId . '_' . date('Ymd_His') . '.csv';
-                $fp = fopen(STORAGE_PATH . '/' . $file, 'w');
-                if ($rows) fputcsv($fp, array_keys($rows[0]));
-                foreach ($rows as $r) fputcsv($fp, array_values($r));
-                fclose($fp);
-                flash('success', 'Ledger exported.');
+                copy($tmpFile, STORAGE_PATH . '/' . $file);
+                @unlink($tmpFile);
+                flash('success', 'Full ledger exported as CSV.');
                 redirect('file?p=' . $file . '&dl=1');
             }
-            if (isset($_POST['enable_2fa'])) {
-                $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
-                if (!$staff) { flash('danger', 'Staff member not found.'); redirect('admin/security&school=' . $schoolId); }
-                if ((int)Database::scalar("SELECT twofa_enabled FROM users WHERE id = ?", [$staffId], 0) === 1) { flash('danger', '2FA already enabled for ' . $staff['first_name'] . '.'); redirect('admin/security&school=' . $schoolId); }
-                $file = Auth::henaIssue($staffId);
-                $keysDir = STORAGE_PATH . '/keys';
-                if (!is_dir($keysDir)) @mkdir($keysDir, 0770, true);
-                if (file_put_contents($keysDir . '/hena_' . $staffId . '.hena', $file) !== false) @chmod($keysDir . '/hena_' . $staffId . '.hena', 0600);
-                log_activity('ledger', "2FA enabled for {$staff['first_name']} {$staff['last_name']}", (int)$u['id']);
-                flash('success', 'USB 2FA activated for ' . $staff['first_name'] . ' ' . $staff['last_name'] . '.');
-                redirect('admin/security&school=' . $schoolId . '&key=' . $staffId);
-            }
-            if (isset($_POST['disable_2fa'])) {
-                $staffId = (int)($_POST['staff_id'] ?? 0);
-                $staff = Database::one("SELECT id, first_name, last_name FROM users WHERE id = ? AND school_id = ? AND role IN ('regional','principal','teacher')", [$staffId, $schoolId]);
-                if ($staff) {
-                    Auth::henaReset($staffId);
-                    @unlink(STORAGE_PATH . '/keys/hena_' . $staffId . '.hena');
-                    log_activity('ledger', "2FA disabled for {$staff['first_name']} {$staff['last_name']}", (int)$u['id']);
-                    flash('success', '2FA disabled.');
-                }
-                redirect('admin/security&school=' . $schoolId);
+            if (isset($_POST['rotate_key'])) {
+                Ledger::rotate_key();
+                log_activity('ledger', 'HMAC key rotated from Security Console', (int)$u['id']);
+                flash('success', 'HMAC signing key rotated.');
+                redirect('admin/security');
             }
         }
 
-        $status = Ledger::status($schoolId);
-        $entries = Database::all(
-            "SELECT l.*, CONCAT(us.first_name, ' ', us.last_name) AS actor FROM ledger l
-             LEFT JOIN users us ON us.id = l.actor_id
-             WHERE l.school_id = ? ORDER BY l.id DESC LIMIT 60", [$schoolId]);
-        $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
-        $authEvents = Database::all(
-            "SELECT lh.*, CONCAT(us.first_name, ' ', us.last_name) AS user_name, us.email
-             FROM login_history lh JOIN users us ON us.id = lh.user_id
-             WHERE us.school_id = ? ORDER BY lh.id DESC LIMIT 10", [$schoolId]);
-        try {
-            $crypto = CWorker::selfTest();
-        } catch (Throwable $e) {
-            $crypto = ['ok' => false, 'cwe' => [], 'error' => $e->getMessage()];
-        }
-        $crypto['binary'] = CWorker::available();
+        $status = Ledger::status();
+        $stats = Ledger::stats();
+        $recent = Database::all(
+            "SELECT l.*, CONCAT(u.first_name,' ',u.last_name) AS user_name FROM integrity_ledger l
+             LEFT JOIN users u ON u.id = l.user_id ORDER BY l.id DESC LIMIT 30"
+        );
+        $cryptoLoaded = Ledger::ffi_available();
 
         Router::render('app/admin/security', [
-            'title' => 'Security Console', 'schoolId' => $schoolId, 'schools' => $schools,
-            'status' => $status, 'entries' => $entries, 'school' => $school,
-            'authEvents' => $authEvents, 'crypto' => $crypto,
-            'chainIntact' => (bool)($status['ok'] ?? false), 'keyFileHint' => (int)($_GET['key'] ?? 0),
+            'title' => 'Security Console',
+            'status' => $status,
+            'stats' => $stats,
+            'recent' => $recent,
+            'cryptoLoaded' => $cryptoLoaded,
         ]);
     }
 }
