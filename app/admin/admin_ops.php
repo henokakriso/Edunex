@@ -196,13 +196,13 @@ class Ctl_logs {
             echo '.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:#6366f1}';
             echo '.rv-btn svg{width:16px;height:16px;flex-shrink:0}';
             // Paper
-            echo '.report-paper{position:relative;overflow:hidden;max-width:1100px;margin:0 auto 24px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:36px 40px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}';
+            echo '.report-paper{position:relative;max-width:1100px;margin:0 auto 24px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:36px 40px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}';
             echo '[data-theme="dark"] .report-paper{background:rgba(30,41,59,.55);border-color:rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)}';
             // Watermark
-            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;opacity:.08;z-index:0;-webkit-user-select:none;user-select:none;display:flex;flex-direction:column;align-items:center;gap:6px}';
-            echo '.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:1;filter:grayscale(1)}';
-            echo '.rv-watermark .wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:#1e293b;opacity:1;text-transform:uppercase}';
-            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:#64748b;opacity:1}';
+            echo '.rv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;z-index:1;-webkit-user-select:none;user-select:none;display:flex;flex-direction:column;align-items:center;gap:6px}';
+            echo '.rv-watermark .wm-logo{height:140px;object-fit:contain;opacity:.12;filter:grayscale(1)}';
+            echo '.rv-watermark .wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:rgba(30,41,59,.15);text-transform:uppercase}';
+            echo '.rv-watermark .wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:rgba(100,116,139,.15)}';
             // Header
             echo '.rp-header{position:relative;z-index:1;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);padding-bottom:20px;margin-bottom:22px}';
             echo '.rp-header .logos-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:8px}';
@@ -224,7 +224,7 @@ class Ctl_logs {
             echo '.rp-footer{position:relative;z-index:1;border-top:1px solid rgba(0,0,0,.06);padding-top:14px;margin-top:22px;display:flex;justify-content:space-between;font-size:11px;color:#64748b}';
             echo '.row-num{color:#94a3b8;width:36px;text-align:center}';
             echo '.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:rgba(99,102,241,.08);color:#6366f1}';
-            echo '@media print{.rv-toolbar{display:none!important}.report-paper{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:none!important;border-radius:0!important;padding:0!important;margin:0!important;box-shadow:none!important}body{background:#fff!important;color:#000!important}.report-paper thead th{background:#e5e7eb!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.report-paper tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.rv-watermark{opacity:.03!important}}';
+            echo '@media print{.rv-toolbar{display:none!important}.report-paper{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:none!important;border-radius:0!important;padding:0!important;margin:0!important;box-shadow:none!important}body{background:#fff!important;color:#000!important}.report-paper thead th{background:#e5e7eb!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.report-paper tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.rv-watermark .wm-logo{opacity:.08!important}.rv-watermark .wm-edunex{color:rgba(30,41,59,.1)!important}.rv-watermark .wm-url{color:rgba(100,116,139,.1)!important}}';
             echo '</style></head><body>';
             // Toolbar
             echo '<div class="rv-toolbar">';
