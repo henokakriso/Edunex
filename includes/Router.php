@@ -13,8 +13,8 @@ class Router {
     private static string $view = '';
 
     /** Register page route (GET+POST both hit it; controller checks method) */
-    public static function page(string $path, string $controllerFile, array|string $role = '*', ?string $perm = null): void {
-        self::$routes[$path] = ['file' => $controllerFile, 'role' => $role, 'perm' => $perm];
+    public static function page(string $path, string $controllerFile, array|string $role = '*', ?string $perm = null, ?string $license = null): void {
+        self::$routes[$path] = ['file' => $controllerFile, 'role' => $role, 'perm' => $perm, 'license' => $license];
     }
 
     /** Register pure view template */
@@ -42,6 +42,9 @@ class Router {
             if ($r['perm'] && !can($r['perm'])) {
                 flash('danger', 'You do not have permission to access that page.');
                 redirect('dashboard');
+            }
+            if (!empty($r['license'])) {
+                require_license($r['license']);
             }
             $before = get_declared_classes();
             require_once APP_PATH . '/' . $r['file'];

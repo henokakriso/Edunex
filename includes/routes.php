@@ -183,16 +183,16 @@ Router::page('university/program', 'university/university.php', ['registrar', 'd
 Router::page('university/semesters', 'university/university.php', ['registrar']);
 Router::page('university/registration', 'university/university.php', ['registrar', 'student']);
 Router::page('university/my-schedule', 'university/university.php', ['student']);
-Router::page('university/clearance', 'university/university.php', ['student']);
-Router::page('university/clearance/manage', 'university/university.php', ['registrar', 'dean', 'hod', 'bursar', 'librarian', 'student_affairs']);
-Router::page('university/transcript', 'university/university.php', ['student']);
-Router::page('university/transcript/manage', 'university/university.php', ['registrar']);
-Router::page('university/fees', 'university/university.php', ['student']);
-Router::page('university/fees/manage', 'university/university.php', ['bursar', 'registrar']);
-Router::page('university/theses', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student']);
-Router::page('university/thesis', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student']);
+Router::page('university/clearance', 'university/university.php', ['student'], null, 'clearance');
+Router::page('university/clearance/manage', 'university/university.php', ['registrar', 'dean', 'hod', 'bursar', 'librarian', 'student_affairs'], null, 'clearance');
+Router::page('university/transcript', 'university/university.php', ['student'], null, 'transcripts');
+Router::page('university/transcript/manage', 'university/university.php', ['registrar'], null, 'transcripts');
+Router::page('university/fees', 'university/university.php', ['student'], null, 'finance');
+Router::page('university/fees/manage', 'university/university.php', ['bursar', 'registrar'], null, 'finance');
+Router::page('university/theses', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student'], null, 'thesis');
+Router::page('university/thesis', 'university/university.php', ['registrar', 'dean', 'vice_dean', 'hod', 'student'], null, 'thesis');
 Router::page('university/timetable', 'university/university.php', ['registrar', 'dean', 'student']);
-Router::page('university/id-cards', 'university/university.php', ['registrar', 'student_affairs']);
+Router::page('university/id-cards', 'university/university.php', ['registrar', 'student_affairs'], null, 'id-cards');
 
 /* ---- Parent ---- */
 Router::page('parent/dashboard', 'parent/dashboard.php', 'parent');
@@ -211,10 +211,10 @@ Router::page('exams/result', 'exams/result.php', ['student', 'teacher', 'regiona
 
 Router::page('assignments/view', 'assignments/view.php', ['student', 'teacher', 'parent', 'regional']);
 
-Router::page('ai/tutor', 'ai/tutor.php', ['student', 'teacher', 'principal']);
-Router::page('ai/tutor/stream', 'ai/tutor_stream.php', ['student', 'teacher', 'principal']);
-Router::page('ai/assistant', 'ai/assistant.php', ['student', 'teacher', 'principal']);
-Router::page('ai/assistant/stream', 'ai/assistant_stream.php', ['student', 'teacher', 'principal']);
+Router::page('ai/tutor', 'ai/tutor.php', ['student', 'teacher', 'principal'], null, 'ai-tutor');
+Router::page('ai/tutor/stream', 'ai/tutor_stream.php', ['student', 'teacher', 'principal'], null, 'ai-tutor');
+Router::page('ai/assistant', 'ai/assistant.php', ['student', 'teacher', 'principal'], null, 'ai-assistant');
+Router::page('ai/assistant/stream', 'ai/assistant_stream.php', ['student', 'teacher', 'principal'], null, 'ai-assistant');
 Router::page('ai/job/progress', 'ai/job_progress.php', ['student', 'teacher', 'principal']);
 Router::page('ai/job/cancel', 'ai/job_cancel.php', ['student', 'teacher', 'principal']);
 Router::page('ai/history', 'ai/history.php', ['student', 'teacher', 'principal']);
@@ -222,8 +222,8 @@ Router::page('ai/flashcards', 'ai/flashcards.php', ['student', 'teacher', 'princ
 Router::page('ai/flashcard-image', 'ai/flashcard_image.php', ['student', 'teacher', 'principal']);
 Router::page('ai/quiz', 'ai/quiz.php', ['student', 'teacher', 'principal']);
 
-Router::page('library', 'library/index.php', '*');
-Router::page('library/item', 'library/item.php', '*');
+Router::page('library', 'library/index.php', '*', null, 'library');
+Router::page('library/item', 'library/item.php', '*', null, 'library');
 
 Router::page('messages', 'communication/messages.php', '*');
 Router::page('communication/messages', 'communication/messages.php', '*');
@@ -238,7 +238,7 @@ Router::page('analytics/student', 'analytics/student.php', ['student', 'parent']
 Router::page('analytics/teacher', 'analytics/teacher.php', 'teacher');
 Router::page('analytics/admin', 'analytics/admin.php', 'regional');
 
-Router::page('certificates', 'certificates/index.php', ['student', 'parent']);
+Router::page('certificates', 'certificates/index.php', ['student', 'parent'], null, 'certificates');
 Router::page('certificates/view', 'certificates/view.php', '*');
 Router::page('certificates/verify', 'certificates/verify.php', '*');
 
@@ -280,8 +280,8 @@ Router::page('api/search', 'api/search.php', '*');
 Router::page('api/exams/autosave', 'api/exams.php', '*');
 Router::page('api/exams/flag', 'api/exams.php', '*');
 Router::page('api/messages/send', 'api/messages.php', '*');
-Router::page('api/ai/chat', 'api/ai.php', '*');
-Router::page('api/ai/warm', 'api/ai_warm.php', '*');
+Router::page('api/ai/chat', 'api/ai.php', '*', null, 'ai-tutor');
+Router::page('api/ai/warm', 'api/ai_warm.php', '*', null, 'ai-tutor');
 Router::page('api/attendance', 'api/attendance.php', '*');
 Router::page('api/reactions', 'api/reactions.php', '*');
 Router::page('api/upload', 'api/upload.php', '*');

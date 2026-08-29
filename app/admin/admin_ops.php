@@ -1559,6 +1559,12 @@ class Ctl_licenses {
             "SELECT l.*, sc.name AS school_name FROM licenses l LEFT JOIN schools sc ON sc.id = l.school_id
              ORDER BY $orderBy LIMIT 200");
         $schools = Database::all("SELECT id, name FROM schools ORDER BY name");
+        // Attach seat usage to each license
+        foreach ($rows as &$l) {
+            if ($l['school_id']) {
+                $l['_usage'] = license_seat_usage((int)$l['school_id']);
+            }
+        }
         Router::render('app/admin/licenses', ['title' => 'Licenses', 'rows' => $rows, 'schools' => $schools, 'sort' => $sort, 'dir' => $dir]);
     }
 }

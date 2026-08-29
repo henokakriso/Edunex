@@ -1216,3 +1216,110 @@ function generate_student_card(int $studentId): array {
     $card = Database::one("SELECT * FROM student_cards WHERE student_id = ? AND status = 'active'", [$studentId]);
     return ['ok' => true, 'card' => $card];
 }
+
+/* ═══════════════ LICENSE TIER SYSTEM ═══════════════ */
+
+/** Get the active license for a school (or platform-wide if school_id=0). */
+function license_for_school(int $schoolId): ?array {
+    static $cache = [];
+    $key = 'lic_' . $schoolId;
+    if (isset($cache[$key])) return $cache[$key];
+    $now = date('Y-m-d');
+    $lic = Database::one(
+        "SELECT * FROM licenses WHERE (school_id = ? OR school_id IS NULL) AND status = 'active'
+         AND (expires_at IS NULL OR expires_at >= ?) ORDER BY school_id DESC LIMIT 1",
+        [$schoolId, $now]
+    );
+    $cache[$key] = $lic;
+    return $lic;
+}
+
+/** Check if a school's license allows a specific module. */
+function license_can(int $schoolId, string $moduleKey): bool {
+    $lic = license_for_school($schoolId);
+    if (!$lic) return true; // No license = allow all (backward compat for ministry users)
+    $tier = $lic['type'] ?? 'standard';
+    $allowed = Database::scalar(
+        "SELECT COUNT(*) FROM license_tier_features WHERE tier = ? AND module_key = ?",
+        [$tier, $moduleKey], 0
+    );
+    return $allowed > 0;
+}
+
+/** Get all modules allowed by a license tier. */
+function license_modules(string $tier): array {
+    return Database::all("SELECT module_key, max_seats, max_schools FROM license_tier_features WHERE tier = ?", [$tier]);
+}
+
+/** Get seat limit for a tier (0=unlimited). */
+function license_seat_limit(string $tier): int {
+    $row = Database::one("SELECT max_seats FROM license_tier_features WHERE tier = ? LIMIT 1", [$tier]);
+    return $row ? (int)$row['max_seats'] : 0;
+}
+
+/** Get school limit for a tier (0=unlimited). */
+function license_school_limit(string $tier): int {
+    $row = Database::one("SELECT max_schools FROM license_tier_features WHERE tier = ? LIMIT 1", [$tier]);
+    return $row ? (int)$row['max_schools'] : 0;
+}
+
+/** Check if a school can add more users (seat limit not exceeded). */
+function license_seats_available(int $schoolId): bool {
+    $lic = license_for_school($schoolId);
+    if (!$lic) return true;
+    $limit = (int)$lic['seats'];
+    if ($limit <= 0) return true; // 0 = unlimited
+    $used = (int)Database::scalar(
+        "SELECT COUNT(*) FROM users WHERE school_id = ? AND status = 'active'", [$schoolId], 0
+    );
+    return $used < $limit;
+}
+
+/** Get seat usage for a license. */
+function license_seat_usage(int $schoolId): array {
+    $lic = license_for_school($schoolId);
+    if (!$lic) return ['limit' => 0, 'used' => 0, 'pct' => 0];
+    $limit = (int)$lic['seats'];
+    $used = (int)Database::scalar(
+        "SELECT COUNT(*) FROM users WHERE school_id = ? AND status = 'active'", [$schoolId], 0
+    );
+    $pct = $limit > 0 ? round($used / $limit * 100) : 0;
+    return ['limit' => $limit, 'used' => $used, 'pct' => $pct];
+}
+
+/** Check if a license is expired or expiring soon. Returns: 'ok', 'expiring', 'expired'. */
+function license_status(int $schoolId): string {
+    $lic = license_for_school($schoolId);
+    if (!$lic) return 'ok';
+    if ($lic['status'] !== 'active') return 'expired';
+    if (!$lic['expires_at']) return 'ok';
+    $days = (strtotime($lic['expires_at']) - time()) / 86400;
+    if ($days < 0) return 'expired';
+    if ($days <= 30) return 'expiring';
+    return 'ok';
+}
+
+/** Auto-expire licenses past their expiration date. */
+function license_auto_expire(): int {
+    $stmt = Database::run(
+        "UPDATE licenses SET status = 'expired' WHERE status = 'active' AND expires_at IS NOT NULL AND expires_at < CURDATE()"
+    );
+    return $stmt->rowCount();
+}
+
+/** Check if the current user's school has a valid license for a module. Returns true if allowed. */
+function require_license(string $moduleKey): void {
+    $u = me();
+    if (!$u) return;
+    // Ministry/regional admins bypass license checks
+    if (in_array($u['role'] ?? '', ['ministry', 'regional', 'zonal', 'woreda'])) return;
+    $schoolId = (int)($u['school_id'] ?? 0);
+    if ($schoolId <= 0) return;
+    if (!license_can($schoolId, $moduleKey)) {
+        $lic = license_for_school($schoolId);
+        $tier = $lic['type'] ?? 'none';
+        http_response_code(403);
+        echo '<div style="text-align:center;padding:60px;font-family:system-ui"><h2>Module Not Available</h2><p>This feature requires a <b>' . ucfirst($tier) . '</b> license or higher.</p><p>Contact your administrator to upgrade.</p></div>';
+        exit;
+    }
+}
