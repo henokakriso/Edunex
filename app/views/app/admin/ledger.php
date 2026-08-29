@@ -3,11 +3,50 @@ $actionBadge = ['INSERT' => 'success', 'UPDATE' => 'warning', 'DELETE' => 'dange
 $ledgerSortUrl = fn($col) => url('admin/ledger?' . http_build_query(array_merge($_GET, ['sort'=>$col, 'dir'=> ($_GET['sort'] ?? '')===$col && ($_GET['dir'] ?? 'desc')==='asc' ? 'desc' : 'asc'])));
 $sort = $_GET['sort'] ?? 'id';
 $dir = $_GET['dir'] ?? 'desc';
+$chainOk = $status['ok'] ?? true;
 ?>
 <style>
-.stat-ring{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;border:3px solid var(--c-success);margin:0 auto}
-.stat-ring.broken{border-color:var(--c-danger);animation:pulse-danger 1.5s infinite}
-@keyframes pulse-danger{0%,100%{box-shadow:0 0 0 0 rgba(255,50,50,.3)}50%{box-shadow:0 0 20px 4px rgba(255,50,50,.4)}}
+.av-dashboard{--av-green:#27ff9e;--av-red:#ff5c7a;--av-amber:#ffc84d;--av-cyan:#38e6e6;--av-bg:#0a0f1e;--av-panel:#0d1321;--av-border:#1c2a45}
+.av-hero{background:linear-gradient(135deg,var(--av-bg) 0%,#0d1a2e 50%,var(--av-bg) 100%);border:1px solid var(--av-border);border-radius:16px;padding:28px 32px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;margin-bottom:18px}
+.av-hero::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none}
+.av-hero::after{content:"";position:absolute;top:-50%;right:-10%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(39,255,158,.06) 0%,transparent 70%);pointer-events:none}
+.av-shield{position:relative;width:110px;height:110px;flex-shrink:0}
+.av-shield-ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--av-green);animation:avPulse 2.5s ease-in-out infinite}
+.av-shield-ring.warning{border-color:var(--av-red);animation:avPulseDanger 1.5s ease-in-out infinite}
+.av-shield-inner{position:absolute;inset:12px;border-radius:50%;background:rgba(39,255,158,.08);display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid rgba(39,255,158,.2)}
+.av-shield-inner.warning{background:rgba(255,92,122,.08);border-color:rgba(255,92,122,.2)}
+.av-shield-icon{font-size:2.2em;color:var(--av-green);line-height:1}
+.av-shield-icon.warning{color:var(--av-red)}
+.av-shield-status{font-size:10px;letter-spacing:.15em;color:var(--av-green);font-weight:700;margin-top:4px}
+.av-shield-status.warning{color:var(--av-red)}
+@keyframes avPulse{0%,100%{box-shadow:0 0 0 0 rgba(39,255,158,.35)}50%{box-shadow:0 0 24px 4px rgba(39,255,158,.2)}}
+@keyframes avPulseDanger{0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,.4)}50%{box-shadow:0 0 30px 6px rgba(255,92,122,.3)}}
+.av-info{flex:1;position:relative;z-index:1}
+.av-title{font-size:1.3em;font-weight:700;margin:0 0 4px}
+.av-title.ok{color:var(--av-green)} .av-title.danger{color:var(--av-red)}
+.av-subtitle{font-size:.82em;color:var(--av-cyan);opacity:.8;margin:0 0 12px}
+.av-meta{display:flex;gap:16px;flex-wrap:wrap}
+.av-meta-item{display:flex;align-items:center;gap:6px;font-size:.78em;color:rgba(255,255,255,.55)}
+.av-meta-item .dot{width:6px;height:6px;border-radius:50%;background:var(--av-green);flex-shrink:0}
+.av-meta-item .dot.amber{background:var(--av-amber)} .av-meta-item .dot.red{background:var(--av-red)}
+.av-progress{height:3px;background:var(--av-border);border-radius:2px;margin-top:14px;overflow:hidden}
+.av-progress-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--av-green),var(--av-cyan));transition:width .6s}
+.av-progress-bar.warning{background:linear-gradient(90deg,var(--av-red),var(--av-amber))}
+
+.av-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.av-stat{background:var(--av-panel);border:1px solid var(--av-border);border-radius:12px;padding:16px;text-align:center;position:relative;overflow:hidden;transition:border-color .2s}
+.av-stat:hover{border-color:var(--av-cyan)}
+.av-stat::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--av-cyan),transparent);opacity:.4}
+.av-stat-icon{font-size:1.3em;margin-bottom:4px}
+.av-stat-val{font-size:1.6em;font-weight:700;font-family:ui-monospace,monospace;line-height:1.2}
+.av-stat-val.green{color:var(--av-green)} .av-stat-val.cyan{color:var(--av-cyan)} .av-stat-val.amber{color:var(--av-amber)} .av-stat-val.red{color:var(--av-red)}
+.av-stat-label{font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:2px}
+
+.av-quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.av-quick-btn{background:rgba(56,230,230,.06);border:1px solid var(--av-border);color:var(--av-cyan);border-radius:8px;padding:7px 14px;font-size:11px;font-family:inherit;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.av-quick-btn:hover{background:var(--av-cyan);color:var(--av-bg);border-color:var(--av-cyan)}
+.av-quick-btn.danger{color:var(--av-red);border-color:rgba(255,92,122,.3)} .av-quick-btn.danger:hover{background:var(--av-red);color:#fff;border-color:var(--av-red)}
+
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
 .filter-bar .flex-col{min-width:120px}
 </style>
@@ -24,84 +63,88 @@ $dir = $_GET['dir'] ?? 'desc';
   </div>
 </div>
 
-<!-- Status banner -->
-<?php if ($status['ok']): ?>
-  <div class="card" style="border-left:4px solid var(--c-success);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
-    <div class="stat-ring">
-      <span style="font-size:1.4em;color:var(--c-success)"><?= icon('shield') ?></span>
-      <span class="tiny bold" style="color:var(--c-success)">INTACT</span>
+<!-- Antivirus-style hero -->
+<div class="av-hero av-dashboard">
+  <div class="av-shield">
+    <div class="av-shield-ring<?= $chainOk ? '' : ' warning' ?>"></div>
+    <div class="av-shield-inner<?= $chainOk ? '' : ' warning' ?>">
+      <div class="av-shield-icon<?= $chainOk ? '' : ' warning' ?>"><?= $chainOk ? icon('shield') : icon('shield') ?></div>
+      <div class="av-shield-status<?= $chainOk ? '' : ' warning' ?>"><?= $chainOk ? 'SECURED' : 'THREAT' ?></div>
     </div>
-    <div>
-      <strong>Chain Integrity: Verified</strong>
-      <p class="tiny faint" style="margin:2px 0 0"><?= number_format($status['entries']) ?> entries · All hashes valid · No tampering detected</p>
+  </div>
+  <div class="av-info">
+    <div class="av-title <?= $chainOk ? 'ok' : 'danger' ?>"><?= $chainOk ? 'System Protected — No Threats Detected' : 'Threat Detected — Chain Compromised' ?></div>
+    <div class="av-subtitle"><?= $chainOk ? 'All record hashes are valid. Integrity chain is secure.' : 'Tampering found at entry #' . number_format($status['broken_at']) . '. Immediate action required.' ?></div>
+    <div class="av-meta">
+      <div class="av-meta-item"><span class="dot<?= $chainOk ? '' : ' red' ?>"></span> <?= $chainOk ? 'Real-time protection: ON' : 'INTEGRITY VIOLATION' ?></div>
+      <div class="av-meta-item"><span class="dot"></span> <?= number_format($status['entries']) ?> records scanned</div>
+      <div class="av-meta-item"><span class="dot amber"></span> <?= $stats['active_keys'] ?> active key(s)</div>
       <?php if ($stats['last_verify']): ?>
-        <p class="tiny faint">Last verified: <?= e($stats['last_verify']['verified_at']) ?> by <?= e($stats['last_verify']['verified_by'] ?? 'system') ?></p>
+        <div class="av-meta-item"><span class="dot"></span> Last scan: <?= e($stats['last_verify']['verified_at']) ?></div>
       <?php endif; ?>
     </div>
-  </div>
-<?php else: ?>
-  <div class="card" style="border-left:4px solid var(--c-danger);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;background:rgba(255,50,50,.05)">
-    <div class="stat-ring broken">
-      <span style="font-size:1.4em;color:var(--c-danger)"><?= icon('shield') ?></span>
-      <span class="tiny bold" style="color:var(--c-danger)">BROKEN</span>
-    </div>
-    <div>
-      <strong style="color:var(--c-danger)">Chain Integrity: COMPROMISED</strong>
-      <p class="tiny" style="color:var(--c-danger);margin:2px 0 0">Tampering detected at entry #<?= number_format($status['broken_at']) ?>. Immediate investigation required.</p>
-    </div>
-  </div>
-<?php endif; ?>
-
-<!-- Stats grid -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px">
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">Total Entries</div>
-    <div class="stat-num"><?= number_format($stats['total']) ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">Active HMAC Keys</div>
-    <div class="stat-num" style="color:var(--c-primary)"><?= $stats['active_keys'] ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">Tables Tracked</div>
-    <div class="stat-num"><?= count($stats['tables']) ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">Crypto Engine</div>
-    <div class="stat-num" style="color:<?= $cryptoLoaded ? 'var(--c-success)' : 'var(--c-danger)' ?>"><?= $cryptoLoaded ? 'C/FFI' : 'PHP' ?></div>
-    <div class="tiny faint"><?= $cryptoLoaded ? 'ledger_crypto.so loaded' : 'fallback mode' ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">INSERT</div>
-    <div class="stat-num" style="color:var(--c-success)"><?= number_format($stats['actions']['INSERT'] ?? 0) ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">UPDATE</div>
-    <div class="stat-num" style="color:var(--c-warning)"><?= number_format($stats['actions']['UPDATE'] ?? 0) ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">DELETE</div>
-    <div class="stat-num" style="color:var(--c-danger)"><?= number_format($stats['actions']['DELETE'] ?? 0) ?></div>
-  </div>
-  <div class="card" style="padding:14px;text-align:center">
-    <div class="stat-label">Key Rotation</div>
-    <form method="post" class="inline" style="margin-top:4px"><?= csrf_field() ?>
-      <button class="btn btn-sm btn-ghost" name="rotate_key" value="1" onclick="return confirm('Rotate HMAC key? Previous chain entries remain valid.')"><?= icon('refresh') ?> Rotate</button>
-    </form>
+    <div class="av-progress"><div class="av-progress-bar<?= $chainOk ? '' : ' warning' ?>" style="width:<?= $chainOk ? '100' : '0' ?>%"></div></div>
   </div>
 </div>
 
-<!-- Tables breakdown -->
-<?php if ($stats['tables']): ?>
-  <div class="card" style="padding:14px 18px;margin-bottom:16px">
-    <strong class="tiny faint" style="text-transform:uppercase;letter-spacing:.1em">Tracked Tables</strong>
-    <div class="flex gap-8" style="margin-top:8px;flex-wrap:wrap">
-      <?php foreach ($stats['tables'] as $t): ?>
-        <span class="badge badge-primary"><?= e($t['table_name']) ?> · <?= number_format($t['cnt']) ?></span>
-      <?php endforeach; ?>
-    </div>
+<!-- Stats -->
+<div class="av-stats av-dashboard">
+  <div class="av-stat">
+    <div class="av-stat-icon">🔗</div>
+    <div class="av-stat-val green"><?= number_format($stats['total']) ?></div>
+    <div class="av-stat-label">Chain Links</div>
   </div>
-<?php endif; ?>
+  <div class="av-stat">
+    <div class="av-stat-icon">🔐</div>
+    <div class="av-stat-val cyan"><?= $stats['active_keys'] ?></div>
+    <div class="av-stat-label">HMAC Keys</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">📋</div>
+    <div class="av-stat-val cyan"><?= count($stats['tables']) ?></div>
+    <div class="av-stat-label">Tables Monitored</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">⚙️</div>
+    <div class="av-stat-val <?= $cryptoLoaded ? 'green' : 'red' ?>"><?= $cryptoLoaded ? 'C' : 'PHP' ?></div>
+    <div class="av-stat-label">Crypto Engine</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">➕</div>
+    <div class="av-stat-val green"><?= number_format($stats['actions']['INSERT'] ?? 0) ?></div>
+    <div class="av-stat-label">Writes</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">✏️</div>
+    <div class="av-stat-val amber"><?= number_format($stats['actions']['UPDATE'] ?? 0) ?></div>
+    <div class="av-stat-label">Modifications</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">🗑️</div>
+    <div class="av-stat-val red"><?= number_format($stats['actions']['DELETE'] ?? 0) ?></div>
+    <div class="av-stat-label">Deletions</div>
+  </div>
+  <div class="av-stat">
+    <div class="av-stat-icon">🔄</div>
+    <form method="post" class="inline" style="margin-top:4px"><?= csrf_field() ?>
+      <button class="av-quick-btn" name="rotate_key" value="1" onclick="return confirm('Rotate HMAC key?')" style="border:none;background:none;padding:0;font-size:inherit">⟳ Rotate</button>
+    </form>
+    <div class="av-stat-label">Key Rotation</div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="av-quick av-dashboard">
+  <form method="post" class="inline"><?= csrf_field() ?>
+    <button class="av-quick-btn" name="reverify" value="1">🔍 Full Chain Scan</button>
+  </form>
+  <form method="post" class="inline"><?= csrf_field() ?>
+    <button class="av-quick-btn" name="export_ledger" value="1">⤓ Export Report</button>
+  </form>
+  <form method="post" class="inline"><?= csrf_field() ?>
+    <button class="av-quick-btn danger" name="rotate_key" value="1" onclick="return confirm('Rotate HMAC key?')">🔑 Rotate Key</button>
+  </form>
+</div>
 
 <!-- Filters -->
 <form method="get" class="card filter-bar" style="padding:12px 16px;margin-bottom:16px">
