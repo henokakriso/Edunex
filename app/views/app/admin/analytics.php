@@ -307,24 +307,24 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 <!-- ═══════════════ 8. GEOGRAPHIC ANALYTICS ═══════════════ -->
 <?php if ($regions): ?>
 <?php
-  // Region label positions (x%, y%) on the Ethiopia SVG — approximate centroids
+  // Region label positions (x%, y%) — accurate geographic centroids on Ethiopia map
   $regionPos = [
-    'Tigray'            => [48, 14],
-    'Afar'              => [68, 24],
-    'Amhara'            => [42, 28],
-    'Addis Ababa'       => [40, 48],
-    'Dire Dawa'         => [72, 38],
-    'Harari'            => [74, 38],
-    'Oromia'            => [50, 52],
-    'SNNPR'             => [40, 62],
-    'Sidama'            => [52, 64],
-    'South West Ethiopia'=> [30, 58],
-    'South Ethiopia'    => [38, 68],
-    'Central Ethiopia'  => [44, 56],
-    'Benishangul-Gumuz'=> [24, 38],
-    'Gambela'           => [18, 50],
-    'Somali'            => [78, 50],
-    'Contested'         => [55, 40],
+    'Tigray'             => [44, 13],
+    'Afar'               => [65, 20],
+    'Amhara'             => [42, 25],
+    'Addis Ababa'        => [43, 46],
+    'Dire Dawa'          => [72, 35],
+    'Harari'             => [71, 37],
+    'Oromia'             => [47, 54],
+    'SNNPR'              => [39, 66],
+    'Sidama'             => [53, 66],
+    'South West Ethiopia'=> [28, 56],
+    'South Ethiopia'     => [37, 74],
+    'Central Ethiopia'   => [43, 60],
+    'Benishangul-Gumuz'  => [20, 34],
+    'Gambela'            => [14, 46],
+    'Somali'             => [80, 55],
+    'Contested'          => [56, 40],
   ];
   $maxStudents = max(array_map(fn($r) => (int)$r['students'], $regions));
 ?>
@@ -337,26 +337,54 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
   <!-- Ethiopia SVG Map with data labels -->
   <div class="geo-map-wrap card" style="padding:0;overflow:hidden">
     <div style="position:relative">
-      <svg class="geo-map-svg" viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg">
+      <svg class="geo-map-svg" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="ethGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".15"/>
-            <stop offset="100%" stop-color="var(--accent)" stop-opacity=".05"/>
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity=".06"/>
           </linearGradient>
-          <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity=".08"/></filter>
+          <filter id="mapShadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".08"/></filter>
         </defs>
-        <!-- Ethiopia simplified outline -->
-        <path d="M165 18 L185 12 L210 15 L230 10 L260 18 L285 25 L310 20 L330 30
-                 L340 55 L350 80 L360 110 L355 140 L348 165 L340 190
-                 L355 210 L365 235 L370 260 L368 285 L360 310
-                 L345 330 L330 350 L310 365 L290 375 L270 385
-                 L250 395 L230 405 L210 415 L190 420 L175 430
-                 L160 445 L140 455 L120 460 L100 450 L85 435
-                 L70 415 L60 395 L50 370 L45 345 L40 320
-                 L38 295 L42 270 L50 245 L55 220 L52 195
-                 L48 170 L50 145 L55 120 L62 95 L70 75
-                 L80 55 L95 38 L115 25 L135 20 L150 18 Z"
-              fill="url(#ethGrad)" stroke="var(--border)" stroke-width="1.5" filter="url(#shadow)"/>
+        <!-- Ethiopia outline — recognizable shape -->
+        <path d="
+          M180 8 L195 5 L215 10 L235 6 L255 14 L275 10
+          L298 18 L315 12 L330 22 L342 18
+          L355 30 L362 48 L368 68 L372 92
+          L375 115 L378 140 L380 165 L378 190
+          L375 215 L382 238 L388 260
+          L390 285 L385 308 L378 330
+          L365 352 L348 370 L328 385
+          L308 398 L288 408 L268 418
+          L248 428 L228 438 L210 448
+          L192 455 L175 465 L158 475
+          L140 482 L120 488 L102 480
+          L88 468 L76 452 L68 432
+          L58 410 L50 388 L44 365
+          L40 340 L38 315 L36 290
+          L38 265 L42 240 L48 218
+          L52 195 L50 172 L48 150
+          L52 128 L58 108 L65 90
+          L74 72 L85 55 L98 40
+          L112 28 L130 18 L150 12 L168 10 Z"
+          fill="url(#ethGrad)" stroke="var(--border)" stroke-width="1.8"
+          stroke-linejoin="round" filter="url(#mapShadow)"/>
+        <!-- Compass rose -->
+        <g transform="translate(355,430)" opacity=".3">
+          <circle r="18" fill="none" stroke="var(--text-secondary)" stroke-width=".8"/>
+          <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--text-secondary)" stroke-width=".6"/>
+          <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--text-secondary)" stroke-width=".6"/>
+          <text x="0" y="-20" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="600">N</text>
+          <text x="22" y="3" text-anchor="middle" font-size="6" fill="var(--text-secondary)">E</text>
+          <text x="0" y="26" text-anchor="middle" font-size="6" fill="var(--text-secondary)">S</text>
+          <text x="-22" y="3" text-anchor="middle" font-size="6" fill="var(--text-secondary)">W</text>
+        </g>
+        <!-- Scale bar -->
+        <g transform="translate(20,460)" opacity=".25">
+          <line x1="0" y1="0" x2="60" y2="0" stroke="var(--text-secondary)" stroke-width="1.2"/>
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="var(--text-secondary)" stroke-width="1"/>
+          <line x1="60" y1="-3" x2="60" y2="3" stroke="var(--text-secondary)" stroke-width="1"/>
+          <text x="30" y="12" text-anchor="middle" font-size="7" fill="var(--text-secondary)">~500 km</text>
+        </g>
       </svg>
 
       <!-- Data labels positioned over regions -->
