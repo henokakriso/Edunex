@@ -34,13 +34,13 @@ $isMinistry = $__role === 'ministry';
           <div class="wizard-pip" data-step="<?= $s ?>" style="flex:1;height:5px;border-radius:3px;background:<?= $s === 1 ? 'var(--accent)' : 'var(--border)' ?>;transition:background .2s"></div>
         <?php endfor; ?>
       </div>
-      <div class="flex gap-8" style="font-size:11.5px;color:var(--text-faint);margin-bottom:14px;flex-wrap:wrap">
+      <div class="flex gap-8" style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;flex-wrap:wrap;align-items:center">
         <span id="step-label-1" style="font-weight:700;color:var(--accent)">1. Identity</span>
-        <span style="opacity:.3">→</span><span id="step-label-2">2. Location</span>
-        <span style="opacity:.3">→</span><span id="step-label-3">3. Contact</span>
-        <span style="opacity:.3">→</span><span id="step-label-4">4. Administration</span>
-        <span style="opacity:.3">→</span><span id="step-label-5">5. Academic</span>
-        <span style="opacity:.3">→</span><span id="step-label-6">6. Modules & Review</span>
+        <span style="opacity:.4;font-size:13px">→</span><span id="step-label-2">2. Location</span>
+        <span style="opacity:.4;font-size:13px">→</span><span id="step-label-3">3. Contact</span>
+        <span style="opacity:.4;font-size:13px">→</span><span id="step-label-4">4. Administration</span>
+        <span style="opacity:.4;font-size:13px">→</span><span id="step-label-5">5. Academic</span>
+        <span style="opacity:.4;font-size:13px">→</span><span id="step-label-6">6. Modules & Review</span>
       </div>
     </div>
 
@@ -290,7 +290,7 @@ $isMinistry = $__role === 'ministry';
     document.querySelectorAll('.wizard-pip').forEach(el => el.style.background = parseInt(el.dataset.step) <= s ? 'var(--accent)' : 'var(--border)');
     for (let i = 1; i <= 6; i++) {
       const lbl = document.getElementById('step-label-' + i);
-      if (lbl) { lbl.style.fontWeight = i == s ? '700' : '400'; lbl.style.color = i == s ? 'var(--accent)' : 'var(--text-faint)'; }
+      if (lbl) { lbl.style.fontWeight = i == s ? '700' : '600'; lbl.style.color = i == s ? 'var(--accent)' : 'var(--text)'; }
     }
     title.innerHTML = icons[s-1] + ' Create School — Step ' + s + ' of 6';
     prevBtn.style.display = s > 1 ? '' : 'none';
