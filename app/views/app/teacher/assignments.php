@@ -5,51 +5,62 @@
     <h1><?= icon('doc') ?> Assignments</h1>
     <p class="sub">Create and manage assignments</p>
   </div>
-  <button class="btn btn-primary" onclick="document.getElementById('new-assign').style.display='block';this.style.display='none'">+ New assignment</button>
+  <button class="btn btn-primary" data-open-modal="new-assign-modal">+ New assignment</button>
 </div>
 
-<form method="post" class="card" id="new-assign" style="display:none;margin-bottom:22px">
-  <?= csrf_field() ?>
-  <h3 class="card-title"><?= icon('plus') ?> Create assignment</h3>
-  <div class="grid2">
-    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Essay: The Water Cycle"></div>
-    <div class="flex-col"><label class="small faint">Course * (only your authorised subjects)</label>
-      <select class="input" name="course_id" required>
-        <option value="">— Choose course —</option>
-        <?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?> (<?= e($c['subject_name']) ?>)</option><?php endforeach; ?>
-      </select>
-      <?php if (!$courses): ?><p class="tiny faint" style="margin-top:4px">No authorised courses yet — ask your director to assign subjects.</p><?php endif; ?>
+<div class="modal-backdrop" id="new-assign-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3><?= icon('plus') ?> New assignment</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
-    <div class="flex-col"><label class="small faint">Due date</label><input class="input" type="datetime-local" name="due_date" value="<?= e(date('Y-m-d\TH:i', time() + 86400 * 7)) ?>"></div>
-    <div class="flex-col"><label class="small faint">Max score</label><input class="input" type="number" name="max_score" value="100" min="1" step="1"></div>
-    <div class="flex-col"><label class="small faint">Late submissions</label>
-      <select class="input" name="allow_late"><option value="1">Allowed</option><option value="0">Not allowed</option></select>
-    </div>
-    <div class="flex-col"><label class="small faint">Late penalty (%)</label><input class="input" type="number" name="late_penalty" value="0" min="0" max="100"></div>
-    <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description / instructions</label><textarea class="input" name="description" rows="4"></textarea></div>
-    <div class="flex-col" style="grid-column:1/-1">
-      <label class="small faint">Rubric — criterion, max points and weight (%)</label>
-      <div id="rubric-rows" class="flex-col gap-8">
-        <div class="rubric-row" data-weight="40">
-          <input class="input flex-1" name="r_criterion[]" placeholder="Criterion — e.g. Content accuracy">
-          <div class="rubric-num"><label class="tiny faint">Max pts</label><input class="input" type="number" name="r_max[]" value="10" min="0" step="0.5"></div>
-          <div class="rubric-num"><label class="tiny faint">Weight %</label><input class="input r-weight" type="number" name="r_weight[]" value="40" min="0" max="100"></div>
-          <button type="button" class="btn btn-sm btn-ghost rubric-del" title="Remove row"><?= icon('trash') ?></button>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <div class="grid2">
+          <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Essay: The Water Cycle"></div>
+          <div class="flex-col"><label class="small faint">Course * (only your authorised subjects)</label>
+            <select class="input" name="course_id" required>
+              <option value="">— Choose course —</option>
+              <?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?> (<?= e($c['subject_name']) ?>)</option><?php endforeach; ?>
+            </select>
+            <?php if (!$courses): ?><p class="tiny faint" style="margin-top:4px">No authorised courses yet — ask your director to assign subjects.</p><?php endif; ?>
+          </div>
+          <div class="flex-col"><label class="small faint">Due date</label><input class="input" type="datetime-local" name="due_date" value="<?= e(date('Y-m-d\TH:i', time() + 86400 * 7)) ?>"></div>
+          <div class="flex-col"><label class="small faint">Max score</label><input class="input" type="number" name="max_score" value="100" min="1" step="1"></div>
+          <div class="flex-col"><label class="small faint">Late submissions</label>
+            <select class="input" name="allow_late"><option value="1">Allowed</option><option value="0">Not allowed</option></select>
+          </div>
+          <div class="flex-col"><label class="small faint">Late penalty (%)</label><input class="input" type="number" name="late_penalty" value="0" min="0" max="100"></div>
+          <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description / instructions</label><textarea class="input" name="description" rows="4"></textarea></div>
+          <div class="flex-col" style="grid-column:1/-1">
+            <label class="small faint">Rubric — criterion, max points and weight (%)</label>
+            <div id="rubric-rows" class="flex-col gap-8">
+              <div class="rubric-row" data-weight="40">
+                <input class="input flex-1" name="r_criterion[]" placeholder="Criterion — e.g. Content accuracy">
+                <div class="rubric-num"><label class="tiny faint">Max pts</label><input class="input" type="number" name="r_max[]" value="10" min="0" step="0.5"></div>
+                <div class="rubric-num"><label class="tiny faint">Weight %</label><input class="input r-weight" type="number" name="r_weight[]" value="40" min="0" max="100"></div>
+                <button type="button" class="btn btn-sm btn-ghost rubric-del" title="Remove row"><?= icon('trash') ?></button>
+              </div>
+            </div>
+            <div class="flex gap-8" style="align-items:center;margin-top:10px">
+              <button type="button" class="btn btn-sm btn-ghost" id="rubric-add">+ Add row</button>
+              <div class="flex-1">
+                <div class="flex-between small faint"><span>Total weight</span><b id="rubric-total" class="small">40%</b></div>
+                <div class="progress" style="height:8px"><div id="rubric-bar" style="width:40%"></div></div>
+                <p class="tiny faint" id="rubric-hint" style="margin-top:4px">Weights don't need to sum to 100 — each criterion is scaled automatically.</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="flex gap-8" style="align-items:center;margin-top:10px">
-        <button type="button" class="btn btn-sm btn-ghost" id="rubric-add">+ Add row</button>
-        <div class="flex-1">
-          <div class="flex-between small faint"><span>Total weight</span><b id="rubric-total" class="small">40%</b></div>
-          <div class="progress" style="height:8px"><div id="rubric-bar" style="width:40%"></div></div>
-          <p class="tiny faint" id="rubric-hint" style="margin-top:4px">Weights don't need to sum to 100 — each criterion is scaled automatically.</p>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" name="create_assign" value="1"><?= icon('rocket') ?> Create assignment</button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
-  <?php if (!$courses): ?><button class="btn btn-success" disabled name="create_assign" value="1"><?= icon('rocket') ?> Create</button>
-  <?php else: ?><button class="btn btn-success" name="create_assign" value="1"><?= icon('rocket') ?> Create</button><?php endif; ?>
-</form>
+</div>
 
 <div class="flex-col gap-16">
   <?php foreach ($assignments as $a): ?>

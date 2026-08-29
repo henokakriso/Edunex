@@ -5,18 +5,30 @@
     <h1><?= icon('chat') ?> Course Forum<?= $course ? ' — ' . e($course['title']) : '' ?></h1>
     <p class="sub">Ask questions, discuss lessons, help classmates</p>
   </div>
-  <button class="btn btn-primary" onclick="document.getElementById('new-topic').style.display='block';this.style.display='none'">+ New topic</button>
+  <button class="btn btn-primary" data-open-modal="new-topic-modal">+ New topic</button>
 </div>
 
 <?php if ($course): ?>
-  <form method="post" class="card" id="new-topic" style="display:none;margin-bottom:18px">
-    <?= csrf_field() ?>
-    <h3 class="card-title" style="margin-top:0"><?= icon('edit') ?> Start a discussion</h3>
-    <input class="input" name="title" placeholder="Topic title" required>
-    <textarea class="input" style="margin-top:10px;min-height:90px" name="body" placeholder="What would you like to discuss?"></textarea>
-    <?php if ($__u['role'] === 'teacher'): ?><label class="small faint" style="margin-top:8px;display:block"><input type="checkbox" name="pinned" value="1"> Pin to top</label><?php endif; ?>
-    <button class="btn btn-success" style="margin-top:10px" name="new_topic" value="1"><?= icon('megaphone') ?> Post</button>
-  </form>
+<div class="modal-backdrop" id="new-topic-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3><?= icon('edit') ?> Start a discussion</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
+    </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input class="input" name="title" placeholder="Topic title" required>
+        <textarea class="input" style="margin-top:10px;min-height:90px" name="body" placeholder="What would you like to discuss?"></textarea>
+        <?php if ($__u['role'] === 'teacher'): ?><label class="small faint" style="margin-top:8px;display:block"><input type="checkbox" name="pinned" value="1"> Pin to top</label><?php endif; ?>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" name="new_topic" value="1"><?= icon('megaphone') ?> Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <?php endif; ?>
 
 <div class="flex-col gap-10">

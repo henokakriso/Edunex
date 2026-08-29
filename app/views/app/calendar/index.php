@@ -18,27 +18,39 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
     <a class="btn btn-ghost" href="<?= e(url('calendar&month=' . $prev . '&year=' . $prevY)) ?>" title="Previous month">←</a>
     <a class="btn btn-ghost" href="<?= e(url('calendar')) ?>">Today</a>
     <a class="btn btn-ghost" href="<?= e(url('calendar&month=' . $next . '&year=' . $nextY)) ?>" title="Next month">→</a>
-    <?php if ($canCreate): ?><button class="btn btn-primary" onclick="document.getElementById('new-event').style.display='block';this.style.display='none'">+ Event</button><?php endif; ?>
+    <?php if ($canCreate): ?><button class="btn btn-primary" data-open-modal="new-event-modal">+ Event</button><?php endif; ?>
   </div>
 </div>
 
 <?php if ($canCreate): ?>
-<form method="post" class="card" id="new-event" style="display:none;margin-bottom:18px">
-  <?= csrf_field() ?>
-  <h3 class="card-title"><?= icon('plus') ?> Add event</h3>
-  <div class="grid2">
-    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Math club meeting"></div>
-    <div class="flex-col"><label class="small faint">Type</label>
-      <select class="input" name="type"><?php foreach (['event','class','exam','assignment','meeting','deadline','birthday','reminder'] as $t): ?><option value="<?= $t ?>"><?= ucfirst($t) ?></option><?php endforeach; ?></select>
+<div class="modal-backdrop" id="new-event-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3><?= icon('plus') ?> Add event</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
-    <div class="flex-col"><label class="small faint">Starts</label><input class="input" type="datetime-local" name="start_at" value="<?= e(date('Y-m-d\TH:i', mktime(9, 0, 0, $month, min(28, $isThisMonth ? $todayDay : 1), $year))) ?>" required></div>
-    <div class="flex-col"><label class="small faint">Ends (optional)</label><input class="input" type="datetime-local" name="end_at"></div>
-    <div class="flex-col"><label class="small faint">Location</label><input class="input" name="location" placeholder="Room 12 / online"></div>
-    <div class="flex-col"><label class="small faint"><input type="checkbox" name="all_day" value="1"> All day</label></div>
-    <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description</label><input class="input" name="description"></div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <div class="grid2">
+          <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Math club meeting"></div>
+          <div class="flex-col"><label class="small faint">Type</label>
+            <select class="input" name="type"><?php foreach (['event','class','exam','assignment','meeting','deadline','birthday','reminder'] as $t): ?><option value="<?= $t ?>"><?= ucfirst($t) ?></option><?php endforeach; ?></select>
+          </div>
+          <div class="flex-col"><label class="small faint">Starts</label><input class="input" type="datetime-local" name="start_at" value="<?= e(date('Y-m-d\TH:i', mktime(9, 0, 0, $month, min(28, $isThisMonth ? $todayDay : 1), $year))) ?>" required></div>
+          <div class="flex-col"><label class="small faint">Ends (optional)</label><input class="input" type="datetime-local" name="end_at"></div>
+          <div class="flex-col"><label class="small faint">Location</label><input class="input" name="location" placeholder="Room 12 / online"></div>
+          <div class="flex-col"><label class="small faint"><input type="checkbox" name="all_day" value="1"> All day</label></div>
+          <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description</label><input class="input" name="description"></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" name="create_event" value="1"><?= icon('plus') ?> Add event</button>
+        </div>
+      </form>
+    </div>
   </div>
-  <button class="btn btn-success" name="create_event" value="1"><?= icon('plus') ?> Add</button>
-</form>
+</div>
 <?php endif; ?>
 
 <div class="grid" style="grid-template-columns:1.55fr 1fr;gap:18px;align-items:start">

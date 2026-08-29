@@ -5,23 +5,39 @@
     <h1><?= icon('refresh') ?> Transfers & Referrals</h1>
     <p class="sub">University-to-university transfers and referral codes — Ministry managed</p>
   </div>
-  <button class="btn btn-primary" onclick="document.getElementById('new-code').style.display='block';this.style.display='none'">+ Generate code</button>
+  <button class="btn btn-primary" data-open-modal="new-code-modal">+ Generate code</button>
 </div>
 
-<form method="post" class="card" id="new-code" style="display:none;margin-bottom:18px">
-  <?= csrf_field() ?>
-  <h3 class="card-title"><?= icon('ticket') ?> New referral/transfer code</h3>
-  <div class="grid2">
-    <div class="flex-col"><label class="small faint">Issuing university</label>
-      <select class="input" name="school_id"><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
+<!-- Generate Code Modal -->
+<div class="modal-backdrop" id="new-code-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3>New Referral/Transfer Code</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
-    <div class="flex-col"><label class="small faint">Purpose</label>
-      <select class="input" name="purpose"><option value="referral">Referral</option><option value="transfer">Transfer</option></select>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_code" value="1">
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
+          <div class="flex-col"><label class="small faint">Issuing university</label>
+            <select class="input" name="school_id"><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
+          </div>
+          <div class="flex-col"><label class="small faint">Purpose</label>
+            <select class="input" name="purpose"><option value="referral">Referral</option><option value="transfer">Transfer</option></select>
+          </div>
+          <div class="flex-col"><label class="small faint">Expires</label><input class="input" type="date" name="expires_at" value="<?= e(date('Y-m-d', time() + 90 * 86400)) ?>"></div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit"><?= icon('ticket') ?> Generate</button>
+        </div>
+      </form>
     </div>
-    <div class="flex-col"><label class="small faint">Expires</label><input class="input" type="date" name="expires_at" value="<?= e(date('Y-m-d', time() + 90 * 86400)) ?>"></div>
   </div>
-  <button class="btn btn-success" name="create_code" value="1"><?= icon('ticket') ?> Generate</button>
-</form>
+</div>
 
 <div class="grid" style="grid-template-columns:1.4fr 1fr;gap:22px;align-items:start">
   <div class="card">

@@ -19,29 +19,41 @@ $canUpload = $canUpload ?? false;
     <p class="sub">Books, notes, past exams and tutorials<?= $canUpload ? ' — you can upload new items' : '' ?></p>
   </div>
   <?php if ($canUpload): ?>
-    <button class="btn btn-primary" onclick="document.getElementById('upload-form').style.display='block';this.style.display='none'">+ Upload item</button>
+    <button class="btn btn-primary" data-open-modal="upload-modal">+ Upload item</button>
   <?php endif; ?>
 </div>
 
 <?php if ($canUpload): ?>
-<form method="post" enctype="multipart/form-data" class="card" id="upload-form" style="display:none;margin-bottom:18px">
-  <?= csrf_field() ?>
-  <h3 class="card-title" style="margin-top:0"><?= icon('upload') ?> Upload to Library</h3>
-  <div class="grid2">
-    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Book or resource title"></div>
-    <div class="flex-col"><label class="small faint">Type</label>
-      <select class="input" name="type">
-        <option value="book">Book</option><option value="notes">Notes</option><option value="paper">Paper</option>
-        <option value="slides">Slides</option><option value="video">Video</option><option value="past_exam">Past Exam</option><option value="tutorial">Tutorial</option>
-      </select>
+<div class="modal-backdrop" id="upload-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3><?= icon('upload') ?> Upload to Library</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
-    <div class="flex-col"><label class="small faint">Author</label><input class="input" name="author" placeholder="Author name"></div>
-    <div class="flex-col"><label class="small faint">Category</label><input class="input" name="category" placeholder="e.g. Mathematics, STEM"></div>
+    <div class="modal-body">
+      <form method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
+        <div class="grid2">
+          <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Book or resource title"></div>
+          <div class="flex-col"><label class="small faint">Type</label>
+            <select class="input" name="type">
+              <option value="book">Book</option><option value="notes">Notes</option><option value="paper">Paper</option>
+              <option value="slides">Slides</option><option value="video">Video</option><option value="past_exam">Past Exam</option><option value="tutorial">Tutorial</option>
+            </select>
+          </div>
+          <div class="flex-col"><label class="small faint">Author</label><input class="input" name="author" placeholder="Author name"></div>
+          <div class="flex-col"><label class="small faint">Category</label><input class="input" name="category" placeholder="e.g. Mathematics, STEM"></div>
+        </div>
+        <div class="flex-col" style="margin-top:10px"><label class="small faint">Description</label><textarea class="input" name="description" rows="3" placeholder="Brief description..."></textarea></div>
+        <div class="flex-col" style="margin-top:10px"><label class="small faint">File (PDF, DOC, PPT, MP4, MP3)</label><input class="input" type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.webm,.mp3"></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" name="upload_item" value="1"><?= icon('upload') ?> Upload item</button>
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="flex-col" style="margin-top:10px"><label class="small faint">Description</label><textarea class="input" name="description" rows="3" placeholder="Brief description..."></textarea></div>
-  <div class="flex-col" style="margin-top:10px"><label class="small faint">File (PDF, DOC, PPT, MP4, MP3)</label><input class="input" type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.webm,.mp3"></div>
-  <div style="margin-top:12px"><button class="btn btn-success" name="upload_item" value="1"><?= icon('upload') ?> Upload</button></div>
-</form>
+</div>
 <?php endif; ?>
 
 <div class="card" style="margin-bottom:18px">

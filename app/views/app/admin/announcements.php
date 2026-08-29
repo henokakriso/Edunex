@@ -16,46 +16,58 @@ $asBadge = ['none'=>'badge-muted','pending'=>'badge-warning','approved'=>'badge-
     <h1><?= icon('megaphone') ?> Announcements</h1>
     <p class="sub">Broadcast globally, to a region, or a zone — regional admins approve targeted announcements</p>
   </div>
-  <button class="btn btn-primary" onclick="document.getElementById('new-ann').style.display='block';this.style.display='none'">+ New announcement</button>
+  <button class="btn btn-primary" data-open-modal="new-ann-modal">+ New announcement</button>
 </div>
 
-<form method="post" class="card" id="new-ann" style="display:none;margin-bottom:18px">
-  <?= csrf_field() ?>
-  <h3 class="card-title"><?= icon('megaphone') ?> New announcement</h3>
-  <div class="grid2">
-    <div class="flex-col"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Announcement title"></div>
-    <div class="flex-col" id="course-wrap" style="display:none"><label class="small faint">Course</label>
-      <select class="input" name="course_id"><option value="0">— Select course —</option><?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach; ?></select>
+<!-- Create Announcement Modal -->
+<div class="modal-backdrop" id="new-ann-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3>New Announcement</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
-  </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_ann" value="1">
+        <input type="hidden" name="audience" id="ann-audience" value="all">
 
-  <div class="grid2" style="margin-top:12px">
-    <div class="flex-col"><label class="small faint">Target Region <span class="tiny faint">(optional — requires regional approval)</span></label>
-      <select class="input" name="target_region" id="ann-region" onchange="onTargetChange()">
-        <option value="">— All regions —</option>
-        <?php foreach ($regions as $r): ?><option value="<?= e($r['region']) ?>"><?= e($r['region']) ?></option><?php endforeach; ?>
-      </select>
-    </div>
-    <div class="flex-col"><label class="small faint">Target Zone <span class="tiny faint">(optional — requires zonal approval)</span></label>
-      <select class="input" name="target_zone" id="ann-zone" onchange="onTargetChange()">
-        <option value="">— All zones —</option>
-        <?php foreach ($zones as $z): ?>
-          <option value="<?= e($z['zone_name']) ?>" data-region="<?= e($z['region_name']) ?>"><?= e($z['zone_name']) ?> (<?= e($z['region_name']) ?>)</option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-  </div>
+        <div class="flex-col" style="margin-bottom:14px"><label class="small faint">Title *</label><input class="input" name="title" required placeholder="Announcement title"></div>
+        <div class="flex-col" id="course-wrap" style="display:none;margin-bottom:14px"><label class="small faint">Course</label>
+          <select class="input" name="course_id"><option value="0">— Select course —</option><?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach; ?></select>
+        </div>
 
-  <div class="flex-col" style="margin-top:12px">
-    <label class="small faint">Content *</label>
-    <textarea class="input" name="content" rows="5" required placeholder="Write your announcement..."></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="flex-col"><label class="small faint">Target Region <span class="tiny faint">(optional)</span></label>
+            <select class="input" name="target_region" id="ann-region" onchange="onTargetChange()">
+              <option value="">— All regions —</option>
+              <?php foreach ($regions as $r): ?><option value="<?= e($r['region']) ?>"><?= e($r['region']) ?></option><?php endforeach; ?>
+            </select>
+          </div>
+          <div class="flex-col"><label class="small faint">Target Zone <span class="tiny faint">(optional)</span></label>
+            <select class="input" name="target_zone" id="ann-zone" onchange="onTargetChange()">
+              <option value="">— All zones —</option>
+              <?php foreach ($zones as $z): ?>
+                <option value="<?= e($z['zone_name']) ?>" data-region="<?= e($z['region_name']) ?>"><?= e($z['zone_name']) ?> (<?= e($z['region_name']) ?>)</option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex-col" style="margin-bottom:14px">
+          <label class="small faint">Content *</label>
+          <textarea class="input" name="content" rows="5" required placeholder="Write your announcement..."></textarea>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;margin-bottom:16px"><input type="checkbox" name="pinned" value="1"> Pin to top</label>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit"><?= icon('megaphone') ?> Post</button>
+        </div>
+      </form>
+    </div>
   </div>
-  <input type="hidden" name="audience" id="ann-audience" value="all">
-  <div style="display:flex;align-items:center;gap:16px;margin-top:12px">
-    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" name="pinned" value="1"> Pin to top</label>
-    <button class="btn btn-success" name="create_ann" value="1"><?= icon('megaphone') ?> Post</button>
-  </div>
-</form>
+</div>
 
 <div class="card" style="padding:0">
   <div style="padding:18px 20px;border-bottom:1px solid var(--border)">

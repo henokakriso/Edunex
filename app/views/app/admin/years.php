@@ -35,77 +35,85 @@ $eduLabels = ['school'=>'Schools (K-12)','university'=>'Universities'];
     <h1 style="font-size:22px;font-weight:700;letter-spacing:-.02em"><?= icon('calendar') ?> Academic Years &amp; Semesters</h1>
     <p style="font-size:13px;color:var(--text-secondary);margin-top:2px">Create shared calendars per education level — applies to all matching schools automatically</p>
   </div>
-  <button class="btn btn-primary" onclick="toggleYearForm()" id="btn-new-year">+ New Year</button>
+  <button class="btn btn-primary" data-open-modal="new-year-modal" id="btn-new-year">+ New Year</button>
 </div>
 
-<!-- Create Year Form -->
-<div id="year-form" style="display:none;margin-bottom:20px">
-  <form method="post" class="yr-wizard">
-    <?= csrf_field() ?>
-    <input type="hidden" name="create_year" value="1">
-
-    <div class="yr-wiz-section">
-      <div class="yr-wiz-title">Calendar Type</div>
-      <div style="display:flex;gap:16px;flex-wrap:wrap">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:12px 16px;border-radius:10px;border:2px solid var(--border);transition:border-color .15s" id="lbl-shared" onclick="setShared(true)">
-          <input type="checkbox" name="is_shared" id="is-shared" checked onchange="setShared(this.checked)">
-          <div><b style="font-size:13px">Shared Calendar</b><br><span style="font-size:12px;color:var(--text-secondary)">Applies to all schools/universities of the same level</span></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:12px 16px;border-radius:10px;border:2px solid var(--border);transition:border-color .15s" id="lbl-individual" onclick="setShared(false)">
-          <input type="radio" name="is_shared" value="0" id="is-individual" onchange="setShared(false)">
-          <div><b style="font-size:13px">Individual School</b><br><span style="font-size:12px;color:var(--text-secondary)">Create for one specific school only</span></div>
-        </label>
-      </div>
+<!-- Create Year Modal -->
+<div class="modal-backdrop" id="new-year-modal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head">
+      <h3>New Academic Year</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
+    <div class="modal-body">
+      <form method="post" id="year-form">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_year" value="1">
 
-    <div class="yr-wiz-section">
-      <div class="yr-wiz-title">Basic Information</div>
-      <div class="yr-wiz-grid">
-        <div class="flex-col"><label>Education Level *</label>
-          <select class="input" name="education_level" required><option value="school">Schools (K-12)</option><option value="university">Universities</option></select>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Calendar Type</h4>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:12px 16px;border-radius:10px;border:2px solid var(--border);transition:border-color .15s" id="lbl-shared" onclick="setShared(true)">
+              <input type="checkbox" name="is_shared" id="is-shared" checked onchange="setShared(this.checked)">
+              <div><b style="font-size:13px">Shared Calendar</b><br><span style="font-size:12px;color:var(--text-secondary)">Applies to all schools/universities of the same level</span></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:12px 16px;border-radius:10px;border:2px solid var(--border);transition:border-color .15s" id="lbl-individual" onclick="setShared(false)">
+              <input type="radio" name="is_shared" value="0" id="is-individual" onchange="setShared(false)">
+              <div><b style="font-size:13px">Individual School</b><br><span style="font-size:12px;color:var(--text-secondary)">Create for one specific school only</span></div>
+            </label>
+          </div>
         </div>
-        <div class="flex-col" id="school-select-wrap" style="display:none"><label>School *</label>
-          <select class="input" name="school_id"><option value="0">— Select —</option><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
-        </div>
-        <div class="flex-col"><label>Year Name *</label><input class="input" name="name" required placeholder="2026/27"></div>
-        <div class="flex-col"><label>Ethiopian Year</label><input class="input" name="ethiopian_year" placeholder="2019 E.C."></div>
-        <div class="flex-col"><label>Status</label>
-          <select class="input" name="status"><option value="active">Active</option><option value="draft">Draft</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
-        </div>
-      </div>
-    </div>
 
-    <div class="yr-wiz-section">
-      <div class="yr-wiz-title">Calendar Dates</div>
-      <div class="yr-wiz-grid">
-        <div class="flex-col"><label>Gregorian Start *</label><input class="input" type="date" name="start_date" required></div>
-        <div class="flex-col"><label>Gregorian End *</label><input class="input" type="date" name="end_date" required></div>
-        <div class="flex-col"><label>Ethiopian Start</label><input class="input" name="ethiopian_start" placeholder="Meskerem 1, 2019 E.C."></div>
-        <div class="flex-col"><label>Ethiopian End</label><input class="input" name="ethiopian_end" placeholder="Pagume 6, 2019 E.C."></div>
-        <div class="flex-col"><label>Primary Calendar</label>
-          <select class="input" name="primary_calendar"><option value="ethiopian">Ethiopian</option><option value="gregorian">Gregorian</option><option value="both">Both</option></select>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Basic Information</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Education Level *</label>
+              <select class="input" name="education_level" required><option value="school">Schools (K-12)</option><option value="university">Universities</option></select>
+            </div>
+            <div class="flex-col" id="school-select-wrap" style="display:none"><label class="small faint">School *</label>
+              <select class="input" name="school_id"><option value="0">— Select —</option><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
+            </div>
+            <div class="flex-col"><label class="small faint">Year Name *</label><input class="input" name="name" required placeholder="2026/27"></div>
+            <div class="flex-col"><label class="small faint">Ethiopian Year</label><input class="input" name="ethiopian_year" placeholder="2019 E.C."></div>
+            <div class="flex-col"><label class="small faint">Status</label>
+              <select class="input" name="status"><option value="active">Active</option><option value="draft">Draft</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="yr-wiz-section">
-      <div class="yr-wiz-title">Academic Structure</div>
-      <div class="yr-wiz-grid">
-        <div class="flex-col"><label>Semesters *</label>
-          <select class="input" name="num_semesters" id="num-sem" onchange="updateSemFields()"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Calendar Dates</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Gregorian Start *</label><input class="input" type="date" name="start_date" required></div>
+            <div class="flex-col"><label class="small faint">Gregorian End *</label><input class="input" type="date" name="end_date" required></div>
+            <div class="flex-col"><label class="small faint">Ethiopian Start</label><input class="input" name="ethiopian_start" placeholder="Meskerem 1, 2019 E.C."></div>
+            <div class="flex-col"><label class="small faint">Ethiopian End</label><input class="input" name="ethiopian_end" placeholder="Pagume 6, 2019 E.C."></div>
+            <div class="flex-col"><label class="small faint">Primary Calendar</label>
+              <select class="input" name="primary_calendar"><option value="ethiopian">Ethiopian</option><option value="gregorian">Gregorian</option><option value="both">Both</option></select>
+            </div>
+          </div>
         </div>
-        <div class="flex-col"><label>Working Days/Week</label><input class="input" type="number" name="working_days_per_week" value="5" min="1" max="7"></div>
-        <div class="flex-col"><label>Weekend Days</label><input class="input" name="weekend_days" value="fri,sat"></div>
-        <div class="flex-col"><label>Days Target</label><input class="input" type="number" name="school_days_target" placeholder="180"></div>
-      </div>
-      <div id="sem-fields" style="margin-top:14px"></div>
-    </div>
 
-    <div style="padding:16px 24px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border)">
-      <button type="button" class="btn" onclick="toggleYearForm()">Cancel</button>
-      <button class="btn btn-success"><?= icon('plus') ?> Create Calendar</button>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Academic Structure</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Semesters *</label>
+              <select class="input" name="num_semesters" id="num-sem" onchange="updateSemFields()"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+            </div>
+            <div class="flex-col"><label class="small faint">Working Days/Week</label><input class="input" type="number" name="working_days_per_week" value="5" min="1" max="7"></div>
+            <div class="flex-col"><label class="small faint">Weekend Days</label><input class="input" name="weekend_days" value="fri,sat"></div>
+            <div class="flex-col"><label class="small faint">Days Target</label><input class="input" type="number" name="school_days_target" placeholder="180"></div>
+          </div>
+          <div id="sem-fields" style="margin-top:14px"></div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit"><?= icon('plus') ?> Create Calendar</button>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </div>
 
 <!-- Shared Calendars -->
@@ -307,7 +315,7 @@ $eduLabels = ['school'=>'Schools (K-12)','university'=>'Universities'];
 </div>
 
 <script>
-function toggleYearForm(){const f=document.getElementById('year-form'),b=document.getElementById('btn-new-year');if(f.style.display==='none'){f.style.display='block';b.style.display='none';updateSemFields()}else{f.style.display='none';b.style.display=''}}
+function toggleYearForm(){const m=document.getElementById('new-year-modal');if(m.classList.contains('open')){m.classList.remove('open')}else{m.classList.add('open');updateSemFields()}}
 function setShared(v){document.getElementById('is-shared').checked=v;document.getElementById('is-individual').checked=!v;document.getElementById('school-select-wrap').style.display=v?'none':'';document.getElementById('lbl-shared').style.borderColor=v?'#6366f1':'var(--border)';document.getElementById('lbl-individual').style.borderColor=!v?'#6366f1':'var(--border)'}
 function updateSemFields(){const n=parseInt(document.getElementById('num-sem').value),c=document.getElementById('sem-fields');let h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">';for(let i=1;i<=n;i++){h+=`<div style="display:flex;gap:8px;align-items:end"><div class="flex-col flex-1"><label style="font-size:12px;font-weight:600;margin-bottom:4px">Semester ${i}</label><input class="input" name="semester_${i}_name" placeholder="Semester ${['I','II','III','IV'][i-1]||i}" style="font-size:13px"></div><div class="flex-col" style="width:130px"><label style="font-size:12px;font-weight:600;margin-bottom:4px">Start</label><input class="input" type="date" name="semester_${i}_start" style="font-size:13px"></div><div class="flex-col" style="width:130px"><label style="font-size:12px;font-weight:600;margin-bottom:4px">End</label><input class="input" type="date" name="semester_${i}_end" style="font-size:13px"></div></div>`}c.innerHTML=h+'</div>'}
 function editSem(id,name,start,end){document.getElementById('esm-id').value=id;document.getElementById('esm-name').value=name;document.getElementById('esm-start').value=start;document.getElementById('esm-end').value=end;document.getElementById('edit-sem-modal').classList.add('open')}

@@ -33,24 +33,33 @@
       </div>
       <div class="flex-col">
         <label class="small faint">Action</label>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-topic').style.display='block';this.closest('.forum-filter').querySelector('button').style.display='none'"><?= icon('plus') ?> New topic</button>
+        <button type="button" class="btn btn-primary" data-open-modal="new-topic-modal"><?= icon('plus') ?> New topic</button>
       </div>
     </form>
     <p class="tiny faint" style="margin:10px 0 0">Only courses in the subjects assigned to you by the director. Students enrolled in <b><?= $course ? e($course['title']) : 'the selected course' ?></b> can see and join these discussions.</p>
   </div>
 
   <?php if ($course): ?>
-    <form method="post" class="card" id="new-topic" style="display:none;margin-bottom:18px">
-      <?= csrf_field() ?>
-      <h3 class="card-title" style="margin-top:0"><?= icon('edit') ?> Start a discussion in <?= e($course['title']) ?></h3>
-      <input class="input" name="title" placeholder="Topic title — e.g. "Explain question 4 from the worksheet"" required>
-      <textarea class="input" style="margin-top:10px;min-height:100px" name="body" placeholder="What would you like to discuss? Add context so students can give good answers."></textarea>
-      <label class="check" style="margin-top:10px"><input type="checkbox" name="pinned" value="1"> Pin to top of the course discussion</label>
-      <div class="flex gap-8" style="margin-top:12px">
-        <button class="btn btn-success" name="new_topic" value="1"><?= icon('megaphone') ?> Post discussion</button>
-        <button type="button" class="btn btn-ghost" onclick="this.closest('.card').style.display='none';document.querySelector('.forum-filter button').style.display=''">Cancel</button>
+    <div class="modal-backdrop" id="new-topic-modal">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-head">
+          <h3><?= icon('edit') ?> New topic — <?= e($course['title']) ?></h3>
+          <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
+        </div>
+        <div class="modal-body">
+          <form method="post">
+            <?= csrf_field() ?>
+            <input class="input" name="title" placeholder="Topic title — e.g. "Explain question 4 from the worksheet"" required>
+            <textarea class="input" style="margin-top:10px;min-height:100px" name="body" placeholder="What would you like to discuss? Add context so students can give good answers."></textarea>
+            <label class="check" style="margin-top:10px"><input type="checkbox" name="pinned" value="1"> Pin to top of the course discussion</label>
+            <div class="modal-foot">
+              <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+              <button class="btn btn-primary" name="new_topic" value="1"><?= icon('megaphone') ?> Post discussion</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
+    </div>
   <?php endif; ?>
 
   <div class="flex-col gap-10">

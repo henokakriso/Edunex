@@ -9,120 +9,123 @@ $hasFilter = $region || $schoolId || $yearId || $type || $status;
     <h1><?= icon('calendar') ?> Academic Calendar</h1>
     <p class="sub">Manage events, holidays, and official celebrations</p>
   </div>
-  <button class="btn btn-primary" onclick="document.getElementById('new-event').style.display='block';this.style.display='none'">+ New Event</button>
+  <button class="btn btn-primary" data-open-modal="new-event-modal">+ New Event</button>
 </div>
 
-<!-- Create Event Form -->
-<div id="new-event" style="display:none;margin-bottom:20px">
-  <form method="post" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-    <?= csrf_field() ?>
-    <input type="hidden" name="create_event" value="1">
-
-    <!-- Event Information -->
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0 0 14px;font-size:15px">Event Information</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
-        <div class="flex-col"><label class="small faint">Event Name *</label><input class="input" name="title" required placeholder="Ethiopian New Year"></div>
-        <div class="flex-col"><label class="small faint">Name (Amharic)</label><input class="input" name="title_am" placeholder="የኢትዮጵያ አዲስ ዓመት"></div>
-        <div class="flex-col"><label class="small faint">Name (Afaan Oromo)</label><input class="input" name="title_om" placeholder="Fuundee Affan Oromoo"></div>
-        <div class="flex-col"><label class="small faint">Event Type *</label>
-          <select class="input" name="event_type" required>
-            <?php foreach ($eventTypeLabels as $k => $v): ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?>
-          </select>
-        </div>
-        <div class="flex-col"><label class="small faint">Category</label>
-          <select class="input" name="category">
-            <option value="national">National</option><option value="regional">Regional</option>
-            <option value="zonal">Zonal</option><option value="woreda">Woreda</option><option value="school">School</option>
-          </select>
-        </div>
-        <div class="flex-col"><label class="small faint">Priority</label>
-          <select class="input" name="priority">
-            <option value="low">Low</option><option value="normal" selected>Normal</option>
-            <option value="high">High</option><option value="critical">Critical</option>
-          </select>
-        </div>
-        <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description</label><textarea class="input" name="description" rows="2"></textarea></div>
-      </div>
+<!-- Create Event Modal -->
+<div class="modal-backdrop" id="new-event-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3>New Event</h3>
+      <button class="btn btn-ghost btn-sm" data-close-modal><?= icon('x') ?></button>
     </div>
+    <div class="modal-body">
+      <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="create_event" value="1">
 
-    <!-- Dates -->
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0 0 14px;font-size:15px">Date &amp; Time</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-        <div class="flex-col"><label class="small faint">Ethiopian Date</label><input class="input" name="ethiopian_date" placeholder="Meskerem 1, 2019 E.C."></div>
-        <div class="flex-col"><label class="small faint">Gregorian Start *</label><input class="input" type="date" name="gregorian_start" required></div>
-        <div class="flex-col"><label class="small faint">Gregorian End</label><input class="input" type="date" name="gregorian_end"></div>
-        <div class="flex-col"><label class="small faint">Start Time</label><input class="input" type="time" name="start_time"></div>
-        <div class="flex-col"><label class="small faint">End Time</label><input class="input" type="time" name="end_time"></div>
-        <div class="flex-col"><label class="small faint">&nbsp;</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 0"><input type="checkbox" name="all_day" checked> All Day Event</label>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Event Information</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Event Name *</label><input class="input" name="title" required placeholder="Ethiopian New Year"></div>
+            <div class="flex-col"><label class="small faint">Name (Amharic)</label><input class="input" name="title_am" placeholder="የኢትዮጵያ አዲስ ዓመት"></div>
+            <div class="flex-col"><label class="small faint">Name (Afaan Oromo)</label><input class="input" name="title_om" placeholder="Fuundee Affan Oromoo"></div>
+            <div class="flex-col"><label class="small faint">Event Type *</label>
+              <select class="input" name="event_type" required>
+                <?php foreach ($eventTypeLabels as $k => $v): ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?>
+              </select>
+            </div>
+            <div class="flex-col"><label class="small faint">Category</label>
+              <select class="input" name="category">
+                <option value="national">National</option><option value="regional">Regional</option>
+                <option value="zonal">Zonal</option><option value="woreda">Woreda</option><option value="school">School</option>
+              </select>
+            </div>
+            <div class="flex-col"><label class="small faint">Priority</label>
+              <select class="input" name="priority">
+                <option value="low">Low</option><option value="normal" selected>Normal</option>
+                <option value="high">High</option><option value="critical">Critical</option>
+              </select>
+            </div>
+            <div class="flex-col" style="grid-column:1/-1"><label class="small faint">Description</label><textarea class="input" name="description" rows="2"></textarea></div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Scope & Authority -->
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0 0 14px;font-size:15px">Scope &amp; Authority</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
-        <div class="flex-col"><label class="small faint">Scope</label>
-          <select class="input" name="scope_type">
-            <option value="national">National</option><option value="regional">Regional</option>
-            <option value="zonal">Zonal</option><option value="woreda">Woreda</option>
-            <option value="school">School</option><option value="grade">Grade</option><option value="section">Section</option>
-          </select>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Date &amp; Time</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Ethiopian Date</label><input class="input" name="ethiopian_date" placeholder="Meskerem 1, 2019 E.C."></div>
+            <div class="flex-col"><label class="small faint">Gregorian Start *</label><input class="input" type="date" name="gregorian_start" required></div>
+            <div class="flex-col"><label class="small faint">Gregorian End</label><input class="input" type="date" name="gregorian_end"></div>
+            <div class="flex-col"><label class="small faint">Start Time</label><input class="input" type="time" name="start_time"></div>
+            <div class="flex-col"><label class="small faint">End Time</label><input class="input" type="time" name="end_time"></div>
+            <div class="flex-col"><label class="small faint">&nbsp;</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 0"><input type="checkbox" name="all_day" checked> All Day Event</label>
+            </div>
+          </div>
         </div>
-        <div class="flex-col"><label class="small faint">School (if school scope)</label>
-          <select class="input" name="school_id"><option value="">— None —</option><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
-        </div>
-        <div class="flex-col"><label class="small faint">Issuing Authority</label>
-          <select class="input" name="issuing_authority">
-            <option value="federal">Federal Government</option><option value="ministry">Ministry of Education</option>
-            <option value="regional_bureau">Regional Education Bureau</option><option value="zone">Zone</option>
-            <option value="woreda">Woreda</option><option value="school">School</option>
-          </select>
-        </div>
-        <div class="flex-col"><label class="small faint">Authority Name</label><input class="input" name="authority_name" placeholder="Ministry of Education"></div>
-        <div class="flex-col"><label class="small faint">Directive Number</label><input class="input" name="directive_number" placeholder="No. 1334/2024"></div>
-        <div class="flex-col"><label class="small faint">Academic Year</label>
-          <select class="input" name="academic_year_id"><option value="">— None —</option><?php foreach ($years as $y): ?><option value="<?= (int)$y['id'] ?>"><?= e($y['name']) ?></option><?php endforeach; ?></select>
-        </div>
-      </div>
-    </div>
 
-    <!-- Academic Effects -->
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0 0 14px;font-size:15px">Academic Effects</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="school_closed"> School Closed</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="teaching_suspended"> Teaching Suspended</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="examination_suspended"> Examination Suspended</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="attendance_required"> Attendance Required</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="is_academic_day" checked> Is Academic Day</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="makeup_day_required"> Makeup Day Required</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="affects_academic_days"> Affects Academic Days</label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="affects_semester"> Affects Semester</label>
-      </div>
-    </div>
-
-    <!-- Publication -->
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0 0 14px;font-size:15px">Publication</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-        <div class="flex-col"><label class="small faint">Status</label>
-          <select class="input" name="event_status">
-            <option value="draft">Draft</option><option value="pending_approval">Pending Approval</option>
-            <option value="approved">Approved</option><option value="published">Published</option>
-          </select>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Scope &amp; Authority</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Scope</label>
+              <select class="input" name="scope_type">
+                <option value="national">National</option><option value="regional">Regional</option>
+                <option value="zonal">Zonal</option><option value="woreda">Woreda</option>
+                <option value="school">School</option><option value="grade">Grade</option><option value="section">Section</option>
+              </select>
+            </div>
+            <div class="flex-col"><label class="small faint">School (if school scope)</label>
+              <select class="input" name="school_id"><option value="">— None —</option><?php foreach ($schools as $s): ?><option value="<?= (int)$s['id'] ?>"><?= e($s['name']) ?></option><?php endforeach; ?></select>
+            </div>
+            <div class="flex-col"><label class="small faint">Issuing Authority</label>
+              <select class="input" name="issuing_authority">
+                <option value="federal">Federal Government</option><option value="ministry">Ministry of Education</option>
+                <option value="regional_bureau">Regional Education Bureau</option><option value="zone">Zone</option>
+                <option value="woreda">Woreda</option><option value="school">School</option>
+              </select>
+            </div>
+            <div class="flex-col"><label class="small faint">Authority Name</label><input class="input" name="authority_name" placeholder="Ministry of Education"></div>
+            <div class="flex-col"><label class="small faint">Directive Number</label><input class="input" name="directive_number" placeholder="No. 1334/2024"></div>
+            <div class="flex-col"><label class="small faint">Academic Year</label>
+              <select class="input" name="academic_year_id"><option value="">— None —</option><?php foreach ($years as $y): ?><option value="<?= (int)$y['id'] ?>"><?= e($y['name']) ?></option><?php endforeach; ?></select>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div style="padding:16px 20px;display:flex;gap:10px;justify-content:flex-end">
-      <button type="button" class="btn" onclick="document.getElementById('new-event').style.display='none'">Cancel</button>
-      <button class="btn btn-success"><?= icon('plus') ?> Create Event</button>
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Academic Effects</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="school_closed"> School Closed</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="teaching_suspended"> Teaching Suspended</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="examination_suspended"> Examination Suspended</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="attendance_required"> Attendance Required</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="is_academic_day" checked> Is Academic Day</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="makeup_day_required"> Makeup Day Required</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="affects_academic_days"> Affects Academic Days</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg-hover)"><input type="checkbox" name="affects_semester"> Affects Semester</label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <h4 style="margin:0 0 10px;font-size:14px;font-weight:700">Publication</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <div class="flex-col"><label class="small faint">Status</label>
+              <select class="input" name="event_status">
+                <option value="draft">Draft</option><option value="pending_approval">Pending Approval</option>
+                <option value="approved">Approved</option><option value="published">Published</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button class="btn btn-primary" type="submit"><?= icon('plus') ?> Create Event</button>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </div>
 
 <!-- Events List -->
