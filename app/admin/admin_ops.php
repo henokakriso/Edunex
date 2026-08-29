@@ -234,7 +234,7 @@ class Ctl_logs {
             // Paper
             echo '<div class="report-paper" id="report-content">';
             // Watermark
-            echo '<div class="rv-watermark"><img class="wm-logo" src="' . $logoBlack . '" alt=""><div class="wm-url">www.henokakriso.com</div></div>';
+            echo '<div class="rv-watermark"><img class="wm-logo" src="' . $logoBlack . '" alt="EDUNEX"><div style="font-size:32px;font-weight:800;letter-spacing:6px;color:#1e293b;opacity:.3">EDUNEX</div><div class="wm-url">www.henokakriso.com</div></div>';
             // Header
             echo '<div class="rp-header"><div class="logos-row">';
             echo '<div class="flag-wrap"><img class="logo-img flag-img" src="' . $ethiopianFlag . '" alt="Ethiopia"></div>';
