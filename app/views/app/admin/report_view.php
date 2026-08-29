@@ -58,7 +58,7 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
   color:var(--accent);border:1px solid rgba(99,102,241,.2);
   box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
-.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:var(--accent)}
+.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06)}
 [data-theme="dark"] .rv-btn--print{background:rgba(30,41,59,.5);border-color:rgba(99,102,241,.15)}
 .rv-btn svg{width:16px;height:16px;flex-shrink:0}
 

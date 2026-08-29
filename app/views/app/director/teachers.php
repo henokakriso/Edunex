@@ -206,7 +206,7 @@
 <style>
 .teacher-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
 .tcard { display:flex; flex-direction:column; gap:14px; padding:20px; border-radius:18px; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.tcard:hover { transform:translateY(-3px); box-shadow:var(--shadow); border-color:color-mix(in srgb,var(--accent) 45%,var(--border)); }
+.tcard:hover { transform:translateY(-3px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 8px 32px rgba(0,0,0,.08); border-color:transparent; }
 .thead { display:flex; gap:14px; align-items:flex-start; }
 .tavatar { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:#fff; flex:none; }
 .thead-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
@@ -231,12 +231,12 @@
 .tactions .btn-danger { background:transparent; border:1px solid color-mix(in srgb,var(--danger) 25%,transparent); color:var(--danger); }
 .tactions .btn-danger:hover { background:var(--danger-soft); border-color:var(--danger); }
 .stat-link { text-decoration:none; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.stat-link:hover { transform:translateY(-2px); box-shadow:var(--shadow); border-color:color-mix(in srgb,var(--accent) 45%,var(--border)); }
+.stat-link:hover { transform:translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 6px 24px rgba(0,0,0,.07); border-color:transparent; }
 .stat-link.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 5%,var(--card)); }
 .stat-link.on::after { content:"✕"; position:absolute; top:8px; right:10px; font-size:11px; color:var(--accent); opacity:.85; }
 .subject-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
 .chip { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:12.5px; cursor:pointer; background:var(--card); transition:all .15s ease; }
-.chip:hover { border-color:var(--accent); }
+.chip:hover { border-color:transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
 .chip input { accent-color: var(--accent); }
 .chip:has(input:checked) { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); font-weight:600; }
 </style>

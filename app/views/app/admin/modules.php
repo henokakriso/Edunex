@@ -300,8 +300,12 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
 <script>
 function toggleScopeType(radio) {
   document.getElementById('scope-selectors').style.display = radio.value === 'all' ? 'none' : 'block';
-  document.querySelectorAll('.scope-option').forEach(el => el.style.borderColor = 'var(--border)');
-  radio.closest('.scope-option').style.borderColor = 'var(--accent)';
+  document.querySelectorAll('.scope-option').forEach(el => {
+    el.style.borderColor = 'var(--border)';
+    el.style.boxShadow = '';
+  });
+  radio.closest('.scope-option').style.borderColor = 'transparent';
+  radio.closest('.scope-option').style.boxShadow = '0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1)';
 }
 function filterSchools() {
   var q = document.getElementById('school-search').value.toLowerCase();
@@ -311,6 +315,7 @@ function filterSchools() {
 }
 // Init active scope border
 document.querySelectorAll('input[name=scope_type]:checked').forEach(el => {
-  el.closest('.scope-option').style.borderColor = 'var(--accent)';
+  el.closest('.scope-option').style.borderColor = 'transparent';
+  el.closest('.scope-option').style.boxShadow = '0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1)';
 });
 </script>

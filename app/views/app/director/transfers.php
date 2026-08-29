@@ -231,14 +231,14 @@ foreach (array_merge($incoming, $outgoing) as $r) {
 
 <style>
 .in-row { display:flex; gap:14px; align-items:center; padding:14px 16px; border-radius:14px; margin-bottom:12px; border:1px solid var(--border); background:var(--bg-elev); transition:border-color .15s ease, transform .15s ease; }
-.in-row:hover { border-color:color-mix(in srgb,var(--accent) 40%,var(--border)); transform:translateX(2px); }
+.in-row:hover { border-color:transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); transform:translateX(2px); }
 .in-row:last-child { margin-bottom:0; }
 .in-row .avatar { background:linear-gradient(135deg,var(--info),var(--accent)); }
 .in-row b.small { font-size:13.5px; }
 .in-row p.tiny { font-size:11.5px; }
 .code-copy { display:inline-flex; align-items:center; gap:7px; background:var(--bg-soft); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12.5px; font-weight:600; letter-spacing:.02em; color:var(--text); cursor:pointer; transition:all .15s ease; }
 .code-copy .ico { width:13px; height:13px; opacity:.7; }
-.code-copy:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+.code-copy:hover { border-color:transparent; color:var(--accent); transform:translateY(-1px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
 .code-copy.copied { border-color:var(--success); color:var(--success); }
 .sec-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
 .sec-head .sec-ico { width:32px; height:32px; border-radius:10px; background:var(--accent-soft); color:var(--accent); display:inline-flex; align-items:center; justify-content:center; flex:none; }

@@ -4,7 +4,7 @@ $statusMeta = ['present' => ['Present', 'ok'], 'late' => ['Late', 'warn'], 'abse
 <style>
   .seg { display: inline-flex; gap: 6px; }
   .seg-btn { padding: 7px 12px; border: 1px solid var(--border); background: var(--bg-elev); border-radius: 8px; cursor: pointer; font-size: .78rem; color: var(--text-faint); transition: all .15s; display: inline-flex; align-items: center; gap: 5px; }
-  .seg-btn:hover { border-color: var(--accent); color: var(--text); }
+  .seg-btn:hover { border-color: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); color: var(--text); }
   .seg-btn svg { width: 14px; height: 14px; }
   .seg-btn.ok.active { background: var(--success); border-color: var(--success); color: #fff; }
   .seg-btn.warn.active { background: var(--warning); border-color: var(--warning); color: #fff; }

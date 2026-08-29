@@ -3,7 +3,7 @@ $asBadge = ['none'=>'badge-muted','pending'=>'badge-warning','approved'=>'badge-
 ?>
 <style>
 .ann-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;background:var(--bg-elev);transition:border-color .15s,box-shadow .15s;cursor:default}
-.ann-row:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border));box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.ann-row:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06)}
 .ann-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
 .ann-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
 .ann-content{font-size:12.5px;color:var(--text-secondary);margin-top:3px;line-height:1.5}

@@ -3,7 +3,7 @@
 <style>
   .exp-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   .exp-tile { display: flex; align-items: center; gap: 13px; padding: 17px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); transition: all var(--transition); text-decoration: none; color: inherit; min-width: 0; }
-  .exp-tile:hover { border-color: var(--accent); background: var(--bg-hover); transform: translateY(-1px); }
+  .exp-tile:hover { border-color: transparent; background: var(--bg-hover); transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 16px rgba(0,0,0,.06); }
   .exp-ic { width: 42px; height: 42px; border-radius: 11px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .exp-ic svg { width: 20px; height: 20px; color: var(--accent); }
   .exp-tile b { font-size: 13.5px; }
