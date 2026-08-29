@@ -334,24 +334,25 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 <?php if ($regions): ?>
 <?php
   $ethMap = url('public/images/ethiopia-map.png');
-  // Accurate geographic centroids on the Ethiopia map image (%) — adjusted to stay within silhouette
+  // Positions verified against map.png black silhouette boundaries
+  // y=10%: x=22-54%, y=20%: x=17-62%, y=35%: x=10-65%, y=50%: x=7-73%, y=55%: x=7-85%, y=60%: x=0-99%
   $regionPos = [
-    'Tigray'             => [44, 14],
-    'Afar'               => [62, 22],
-    'Amhara'             => [40, 28],
-    'Addis Ababa'        => [39, 48],
-    'Dire Dawa'          => [66, 36],
-    'Harari'             => [65, 38],
-    'Oromia'             => [44, 56],
-    'SNNPR'              => [34, 68],
-    'Sidama'             => [48, 68],
-    'South West Ethiopia'=> [22, 56],
-    'South Ethiopia'     => [32, 78],
-    'Central Ethiopia'   => [38, 62],
-    'Benishangul-Gumuz'  => [14, 36],
-    'Gambela'            => [10, 48],
-    'Somali'             => [74, 52],
-    'Contested'          => [54, 42],
+    'Tigray'             => [40, 12],
+    'Afar'               => [55, 20],
+    'Amhara'             => [38, 26],
+    'Addis Ababa'        => [32, 46],
+    'Dire Dawa'          => [58, 36],
+    'Harari'             => [57, 38],
+    'Oromia'             => [40, 54],
+    'SNNPR'              => [30, 66],
+    'Sidama'             => [42, 66],
+    'South West Ethiopia'=> [18, 56],
+    'South Ethiopia'     => [28, 76],
+    'Central Ethiopia'   => [34, 60],
+    'Benishangul-Gumuz'  => [12, 38],
+    'Gambela'            => [9, 48],
+    'Somali'             => [68, 56],
+    'Contested'          => [50, 42],
   ];
   $totalSchools = array_sum(array_column($regions, 'schools'));
   $totalStudents = array_sum(array_column($regions, 'students'));
