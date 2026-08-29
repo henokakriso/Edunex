@@ -52,20 +52,33 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .geo-map-wrap{position:relative;background:var(--bg-elev);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .geo-map-img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.08))}
 .geo-map-overlay{position:absolute;inset:0}
-.geo-label{position:absolute;pointer-events:none;text-align:center;transform:translate(-50%,-50%);z-index:2;transition:all .2s}
-.geo-label:hover{z-index:10;transform:translate(-50%,-50%) scale(1.1)}
-.geo-label .gl-dot{width:10px;height:10px;border-radius:50%;margin:0 auto 3px;border:2px solid rgba(255,255,255,.8);box-shadow:0 0 12px rgba(99,102,241,.6);animation:geoPulse 2s ease-in-out infinite}
-@keyframes geoPulse{0%,100%{box-shadow:0 0 8px rgba(99,102,241,.4)}50%{box-shadow:0 0 18px rgba(99,102,241,.7)}}
-.geo-label .gl-card{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.6);border-radius:10px;padding:8px 12px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:110px}
-[data-theme="dark"] .geo-label .gl-card{background:rgba(30,41,59,.88);border-color:rgba(255,255,255,.08)}
-.geo-label .gl-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap}
-.geo-label .gl-row{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--text-secondary);line-height:1.4}
-.geo-label .gl-row span{display:flex;align-items:center;gap:3px}
-.geo-label .gl-val{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
-.geo-label .gl-ic{width:6px;height:6px;border-radius:2px;flex-shrink:0}
-.geo-label .gl-ic-std{background:#6366f1}
-.geo-label .gl-ic-stu{background:#22c55e}
-.geo-label .gl-ic-tch{background:#f59e0b}
+.geo-dot{position:absolute;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:3;transition:all .2s;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 14px rgba(99,102,241,.5);animation:geoPulse 2.5s ease-in-out infinite}
+.geo-dot:hover{transform:translate(-50%,-50%) scale(1.4);box-shadow:0 0 24px rgba(99,102,241,.8);z-index:10}
+@keyframes geoPulse{0%,100%{box-shadow:0 0 10px rgba(99,102,241,.4)}50%{box-shadow:0 0 22px rgba(99,102,241,.7)}}
+.geo-dot .dot-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:var(--text);text-shadow:0 1px 4px rgba(255,255,255,.8);pointer-events:none}
+[data-theme="dark"] .geo-dot .dot-label{text-shadow:0 1px 4px rgba(0,0,0,.8)}
+/* Popup */
+.geo-popup{position:absolute;width:280px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:20;padding:0;display:none;overflow:hidden}
+.geo-popup.show{display:block;animation:popupIn .2s ease-out}
+@keyframes popupIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+[data-theme="dark"] .geo-popup{background:rgba(30,41,59,.95);border-color:rgba(255,255,255,.08)}
+.geo-popup .pop-head{padding:14px 16px 10px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+.geo-popup .pop-head h4{margin:0;font-size:14px;font-weight:700}
+.geo-popup .pop-close{background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px;padding:0 4px;line-height:1}
+.geo-popup .pop-body{padding:12px 16px}
+.geo-popup .pop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.geo-popup .pop-stat{padding:8px 10px;border-radius:8px;background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.08)}
+.geo-popup .pop-stat .ps-val{font-size:18px;font-weight:800;color:var(--text)}
+.geo-popup .pop-stat .ps-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-secondary)}
+.geo-popup .pop-stat.pop-accent{background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.15)}
+.geo-popup .pop-stat.pop-accent .ps-val{color:var(--accent)}
+.geo-popup .pop-bar{margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06)}
+.geo-popup .pop-bar-label{font-size:10px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px}
+.geo-popup .pop-bar-track{height:6px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden}
+.geo-popup .pop-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+/* Connection lines */
+.geo-lines{position:absolute;inset:0;pointer-events:none;z-index:1}
+.geo-lines line{stroke:var(--accent);stroke-width:1;stroke-dasharray:4 4;opacity:.2}
 .geo-legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .geo-legend span{font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:5px}
 .geo-legend span::before{content:'';width:10px;height:10px;border-radius:3px}
@@ -360,11 +373,38 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
     <div class="gs-card"><div class="gs-val" style="color:#10b981"><?= number_format($totalActive) ?></div><div class="gs-label">Active Schools</div></div>
   </div>
 
-  <!-- Map with live data labels -->
+  <!-- Map with clickable dots + connection lines -->
   <div class="geo-map-wrap card" style="padding:20px">
-    <div style="position:relative;max-width:600px;margin:0 auto">
+    <div style="position:relative;max-width:600px;margin:0 auto" id="eth-map">
       <img class="geo-map-img" src="<?= $ethMap ?>" alt="Ethiopia Map">
       <div class="geo-map-overlay">
+        <!-- SVG connection lines between all region dots -->
+        <svg class="geo-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <?php
+          $posArr = [];
+          foreach ($regions as $rg) {
+            $pos = $regionPos[$rg['region']] ?? null;
+            if ($pos) $posArr[] = $pos;
+          }
+          // Connect each dot to its nearest 2 neighbors
+          for ($i = 0; $i < count($posArr); $i++) {
+            $dists = [];
+            for ($j = 0; $j < count($posArr); $j++) {
+              if ($i === $j) continue;
+              $dists[$j] = sqrt(pow($posArr[$i][0]-$posArr[$j][0],2) + pow($posArr[$i][1]-$posArr[$j][1],2));
+            }
+            asort($dists);
+            $neighbors = array_slice(array_keys($dists), 0, 2);
+            foreach ($neighbors as $n) {
+              if ($n > $i) { // draw each line once
+                echo '<line x1="'.$posArr[$i][0].'" y1="'.$posArr[$i][1].'" x2="'.$posArr[$n][0].'" y2="'.$posArr[$n][1].'"/>';
+              }
+            }
+          }
+          ?>
+        </svg>
+
+        <!-- Clickable dots for each region -->
         <?php foreach ($regions as $rg):
           $name = $rg['region'];
           $pos = $regionPos[$name] ?? null;
@@ -373,18 +413,40 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
           $students = (int)$rg['students'];
           $teachers = (int)$rg['teachers'];
           $active = (int)$rg['active_schools'];
+          $pct = $schools > 0 ? round($active / $schools * 100) : 0;
+          $ratio = $teachers > 0 ? round($students / $teachers, 1) : '—';
           $intensity = $maxStudents > 0 ? $students / $maxStudents : 0;
+          $color = $pct > 80 ? '#22c55e' : ($pct > 50 ? '#f59e0b' : '#ef4444');
         ?>
-        <div class="geo-label" style="left:<?= $pos[0] ?>%;top:<?= $pos[1] ?>%">
-          <div class="gl-dot" style="background:rgba(99,102,241,<?= 0.4 + $intensity * 0.6 ?>);width:<?= 8 + round($intensity * 8) ?>px;height:<?= 8 + round($intensity * 8) ?>px"></div>
-          <div class="gl-card">
-            <div class="gl-name"><?= e($name) ?></div>
-            <div class="gl-row"><span><span class="gl-ic gl-ic-std"></span>Schools</span><span class="gl-val"><?= number_format($schools) ?></span></div>
-            <div class="gl-row"><span><span class="gl-ic gl-ic-stu"></span>Students</span><span class="gl-val"><?= number_format($students) ?></span></div>
-            <div class="gl-row"><span><span class="gl-ic gl-ic-tch"></span>Teachers</span><span class="gl-val"><?= number_format($teachers) ?></span></div>
-          </div>
+        <div class="geo-dot" style="left:<?= $pos[0] ?>%;top:<?= $pos[1] ?>%;background:<?= $color ?>" data-region="<?= e($name) ?>" data-schools="<?= $schools ?>" data-students="<?= $students ?>" data-teachers="<?= $teachers ?>" data-active="<?= $active ?>" data-pct="<?= $pct ?>" data-ratio="<?= $ratio ?>" onclick="showGeoPopup(this)">
+          <span class="dot-label"><?= e($name) ?></span>
         </div>
         <?php endforeach; ?>
+
+        <!-- Popup card -->
+        <div class="geo-popup" id="geo-popup">
+          <div class="pop-head">
+            <h4 id="pop-title">Region</h4>
+            <button class="pop-close" onclick="closeGeoPopup()">&times;</button>
+          </div>
+          <div class="pop-body">
+            <div class="pop-grid">
+              <div class="pop-stat pop-accent"><div class="ps-val" id="pop-schools">0</div><div class="ps-label">Schools</div></div>
+              <div class="pop-stat pop-accent"><div class="ps-val" id="pop-active">0</div><div class="ps-label">Active</div></div>
+              <div class="pop-stat"><div class="ps-val" style="color:#22c55e" id="pop-students">0</div><div class="ps-label">Students</div></div>
+              <div class="pop-stat"><div class="ps-val" style="color:#f59e0b" id="pop-teachers">0</div><div class="ps-label">Teachers</div></div>
+            </div>
+            <div class="pop-bar">
+              <div class="pop-bar-label">School Active Rate</div>
+              <div class="pop-bar-track"><div class="pop-bar-fill" id="pop-bar" style="width:0%;background:#22c55e"></div></div>
+              <div style="text-align:right;margin-top:3px"><span class="gl-val" id="pop-pct" style="font-size:12px;font-weight:700">0%</span></div>
+            </div>
+            <div class="pop-bar">
+              <div class="pop-bar-label">Student : Teacher Ratio</div>
+              <div style="margin-top:3px"><span class="gl-val" id="pop-ratio" style="font-size:14px;font-weight:700">—</span> <span style="font-size:10px;color:var(--text-secondary)">students per teacher</span></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -466,6 +528,49 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 </div>
 
 <script>
+function showGeoPopup(dot) {
+  var popup = document.getElementById('geo-popup');
+  var map = document.getElementById('eth-map');
+  var mapRect = map.getBoundingClientRect();
+  var dotRect = dot.getBoundingClientRect();
+  var name = dot.dataset.region;
+  var schools = parseInt(dot.dataset.schools);
+  var students = parseInt(dot.dataset.students);
+  var teachers = parseInt(dot.dataset.teachers);
+  var active = parseInt(dot.dataset.active);
+  var pct = parseInt(dot.dataset.pct);
+  var ratio = dot.dataset.ratio;
+  document.getElementById('pop-title').textContent = name;
+  document.getElementById('pop-schools').textContent = schools.toLocaleString();
+  document.getElementById('pop-active').textContent = active.toLocaleString();
+  document.getElementById('pop-students').textContent = students.toLocaleString();
+  document.getElementById('pop-teachers').textContent = teachers.toLocaleString();
+  document.getElementById('pop-pct').textContent = pct + '%';
+  document.getElementById('pop-ratio').textContent = ratio;
+  var bar = document.getElementById('pop-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 80 ? '#22c55e' : (pct > 50 ? '#f59e0b' : '#ef4444');
+  // Position popup near the dot
+  var overlay = dot.closest('.geo-map-overlay');
+  var ovRect = overlay.getBoundingClientRect();
+  var left = dotRect.left - ovRect.left + dotRect.width / 2;
+  var top = dotRect.top - ovRect.top + dotRect.height / 2 + 20;
+  if (left + 290 > ovRect.width) left = ovRect.width - 295;
+  if (left < 5) left = 5;
+  if (top + 260 > ovRect.height) top = dotRect.top - ovRect.top - 260;
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  popup.classList.add('show');
+  // Close on outside click
+  setTimeout(function() { document.addEventListener('click', geoPopupClose); }, 0);
+}
+function geoPopupClose(e) {
+  if (!e.target.closest('.geo-popup') && !e.target.closest('.geo-dot')) closeGeoPopup();
+}
+function closeGeoPopup() {
+  document.getElementById('geo-popup').classList.remove('show');
+  document.removeEventListener('click', geoPopupClose);
+}
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.EdunexChart) return;
   const lc = document.getElementById('login-chart');
