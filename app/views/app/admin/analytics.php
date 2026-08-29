@@ -55,8 +55,8 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .geo-dot{position:absolute;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:3;transition:all .2s;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 14px rgba(99,102,241,.5);animation:geoPulse 2.5s ease-in-out infinite}
 .geo-dot:hover{transform:translate(-50%,-50%) scale(1.4);box-shadow:0 0 24px rgba(99,102,241,.8);z-index:10}
 @keyframes geoPulse{0%,100%{box-shadow:0 0 10px rgba(99,102,241,.4)}50%{box-shadow:0 0 22px rgba(99,102,241,.7)}}
-.geo-dot .dot-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:var(--text);text-shadow:0 1px 4px rgba(255,255,255,.8);pointer-events:none}
-[data-theme="dark"] .geo-dot .dot-label{text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.geo-dot .dot-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.8),0 0 12px rgba(0,0,0,.5);pointer-events:none}
+[data-theme="dark"] .geo-dot .dot-label{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9)}
 /* Popup */
 .geo-popup{position:absolute;width:280px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:20;padding:0;display:none;overflow:hidden}
 .geo-popup.show{display:block;animation:popupIn .2s ease-out}
@@ -334,24 +334,24 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 <?php if ($regions): ?>
 <?php
   $ethMap = url('public/images/ethiopia-map.png');
-  // Accurate geographic centroids on the Ethiopia map image (%)
+  // Accurate geographic centroids on the Ethiopia map image (%) — adjusted to stay within silhouette
   $regionPos = [
-    'Tigray'             => [46, 12],
-    'Afar'               => [63, 20],
-    'Amhara'             => [42, 26],
-    'Addis Ababa'        => [40, 48],
-    'Dire Dawa'          => [70, 36],
-    'Harari'             => [69, 38],
-    'Oromia'             => [46, 55],
-    'SNNPR'              => [36, 68],
-    'Sidama'             => [50, 68],
-    'South West Ethiopia'=> [24, 58],
-    'South Ethiopia'     => [34, 76],
-    'Central Ethiopia'   => [40, 62],
-    'Benishangul-Gumuz'  => [16, 36],
-    'Gambela'            => [10, 50],
-    'Somali'             => [78, 56],
-    'Contested'          => [55, 40],
+    'Tigray'             => [44, 14],
+    'Afar'               => [62, 22],
+    'Amhara'             => [40, 28],
+    'Addis Ababa'        => [39, 48],
+    'Dire Dawa'          => [66, 36],
+    'Harari'             => [65, 38],
+    'Oromia'             => [44, 56],
+    'SNNPR'              => [34, 68],
+    'Sidama'             => [48, 68],
+    'South West Ethiopia'=> [22, 56],
+    'South Ethiopia'     => [32, 78],
+    'Central Ethiopia'   => [38, 62],
+    'Benishangul-Gumuz'  => [14, 36],
+    'Gambela'            => [10, 48],
+    'Somali'             => [74, 52],
+    'Contested'          => [54, 42],
   ];
   $totalSchools = array_sum(array_column($regions, 'schools'));
   $totalStudents = array_sum(array_column($regions, 'students'));
@@ -431,10 +431,10 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
           </div>
           <div class="pop-body">
             <div class="pop-grid">
-              <div class="pop-stat pop-accent"><div class="ps-val" id="pop-schools">0</div><div class="ps-label">Schools</div></div>
-              <div class="pop-stat pop-accent"><div class="ps-val" id="pop-active">0</div><div class="ps-label">Active</div></div>
-              <div class="pop-stat"><div class="ps-val" style="color:#22c55e" id="pop-students">0</div><div class="ps-label">Students</div></div>
-              <div class="pop-stat"><div class="ps-val" style="color:#f59e0b" id="pop-teachers">0</div><div class="ps-label">Teachers</div></div>
+              <div class="pop-stat" style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.12)"><div class="ps-val" style="color:#6366f1" id="pop-schools">0</div><div class="ps-label">Schools</div></div>
+              <div class="pop-stat" style="background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.12)"><div class="ps-val" style="color:#10b981" id="pop-active">0</div><div class="ps-label">Active</div></div>
+              <div class="pop-stat" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.12)"><div class="ps-val" style="color:#22c55e" id="pop-students">0</div><div class="ps-label">Students</div></div>
+              <div class="pop-stat" style="background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.12)"><div class="ps-val" style="color:#f59e0b" id="pop-teachers">0</div><div class="ps-label">Teachers</div></div>
             </div>
             <div class="pop-bar">
               <div class="pop-bar-label">School Active Rate</div>
