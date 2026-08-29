@@ -54,18 +54,7 @@ $badgeIcons = ['medal-gold','medal-silver','medal-bronze','trophy','crown','star
   <?php if (!$all): ?><p class="muted small">No badges yet. Create your first badge above.</p><?php endif; ?>
 </div>
 
-<div class="card" style="margin-top:18px">
-  <h3 class="card-title" style="margin-top:0"><?= icon('gift') ?> Award a badge</h3>
-  <form method="post" class="flex gap-8">
-    <?= csrf_field() ?>
-    <select class="input" name="badge_id" style="max-width:280px" required>
-      <option value="">— Badge —</option>
-      <?php foreach ($all as $b): ?><option value="<?= (int)$b['id'] ?>"><?= e($b['name']) ?></option><?php endforeach; ?>
-    </select>
-    <input class="input flex-1" name="student_id" placeholder="Student ID or email" required>
-    <button class="btn btn-primary" name="award_badge" value="1"><?= icon('gift') ?> Award</button>
-  </form>
-</div>
+
 
 <script>
 function toggleBadgeForm() {
