@@ -50,20 +50,33 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .score-row .sr-val{font-size:13px;font-weight:700;width:30px;text-align:right;font-variant-numeric:tabular-nums}
 /* Geographic */
 .geo-map-wrap{position:relative;background:var(--bg-elev);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-.geo-map-svg{width:100%;height:auto;display:block}
-.geo-map-svg path{fill:var(--border);stroke:var(--bg);stroke-width:1.2;transition:fill .2s}
-.geo-map-svg path:hover{fill:var(--accent);opacity:.7}
-.geo-label{position:absolute;pointer-events:none;text-align:center;transform:translate(-50%,-50%);z-index:2}
-.geo-label .gl-name{font-size:9px;font-weight:700;color:var(--text);white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.15)}
-.geo-label .gl-stats{font-size:8px;color:var(--text-secondary);white-space:nowrap;line-height:1.3}
-.geo-label .gl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin:0 auto 2px;box-shadow:0 0 8px rgba(99,102,241,.5)}
+.geo-map-img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.08))}
+.geo-map-overlay{position:absolute;inset:0}
+.geo-label{position:absolute;pointer-events:none;text-align:center;transform:translate(-50%,-50%);z-index:2;transition:all .2s}
+.geo-label:hover{z-index:10;transform:translate(-50%,-50%) scale(1.1)}
+.geo-label .gl-dot{width:10px;height:10px;border-radius:50%;margin:0 auto 3px;border:2px solid rgba(255,255,255,.8);box-shadow:0 0 12px rgba(99,102,241,.6);animation:geoPulse 2s ease-in-out infinite}
+@keyframes geoPulse{0%,100%{box-shadow:0 0 8px rgba(99,102,241,.4)}50%{box-shadow:0 0 18px rgba(99,102,241,.7)}}
+.geo-label .gl-card{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.6);border-radius:10px;padding:8px 12px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:110px}
+[data-theme="dark"] .geo-label .gl-card{background:rgba(30,41,59,.88);border-color:rgba(255,255,255,.08)}
+.geo-label .gl-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap}
+.geo-label .gl-row{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--text-secondary);line-height:1.4}
+.geo-label .gl-row span{display:flex;align-items:center;gap:3px}
+.geo-label .gl-val{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.geo-label .gl-ic{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.geo-label .gl-ic-std{background:#6366f1}
+.geo-label .gl-ic-stu{background:#22c55e}
+.geo-label .gl-ic-tch{background:#f59e0b}
 .geo-legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.geo-legend span{font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+.geo-legend span{font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:5px}
 .geo-legend span::before{content:'';width:10px;height:10px;border-radius:3px}
 .geo-legend .gl-schools::before{background:#6366f1}
 .geo-legend .gl-students::before{background:#22c55e}
 .geo-legend .gl-teachers::before{background:#f59e0b}
 .geo-legend .gl-active::before{background:#10b981}
+.geo-summary{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.geo-summary .gs-card{flex:1;min-width:120px;padding:10px 14px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border);text-align:center}
+.geo-summary .gs-val{font-size:18px;font-weight:800;color:var(--accent)}
+.geo-summary .gs-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);margin-top:2px}
 .geo-geo-table{margin-top:16px}
 .geo-geo-table table{width:100%;border-collapse:collapse;font-size:12px}
 .geo-geo-table th{text-align:left;padding:8px 12px;background:var(--bg);font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
@@ -307,26 +320,31 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 <!-- ═══════════════ 8. GEOGRAPHIC ANALYTICS ═══════════════ -->
 <?php if ($regions): ?>
 <?php
-  // Region label positions (x%, y%) — accurate geographic centroids on Ethiopia map
+  $ethMap = url('public/images/ethiopia-map.png');
+  // Accurate geographic centroids on the Ethiopia map image (%)
   $regionPos = [
-    'Tigray'             => [44, 13],
-    'Afar'               => [65, 20],
-    'Amhara'             => [42, 25],
-    'Addis Ababa'        => [43, 46],
-    'Dire Dawa'          => [72, 35],
-    'Harari'             => [71, 37],
-    'Oromia'             => [47, 54],
-    'SNNPR'              => [39, 66],
-    'Sidama'             => [53, 66],
-    'South West Ethiopia'=> [28, 56],
-    'South Ethiopia'     => [37, 74],
-    'Central Ethiopia'   => [43, 60],
-    'Benishangul-Gumuz'  => [20, 34],
-    'Gambela'            => [14, 46],
-    'Somali'             => [80, 55],
-    'Contested'          => [56, 40],
+    'Tigray'             => [46, 12],
+    'Afar'               => [63, 20],
+    'Amhara'             => [42, 26],
+    'Addis Ababa'        => [40, 48],
+    'Dire Dawa'          => [70, 36],
+    'Harari'             => [69, 38],
+    'Oromia'             => [46, 55],
+    'SNNPR'              => [36, 68],
+    'Sidama'             => [50, 68],
+    'South West Ethiopia'=> [24, 58],
+    'South Ethiopia'     => [34, 76],
+    'Central Ethiopia'   => [40, 62],
+    'Benishangul-Gumuz'  => [16, 36],
+    'Gambela'            => [10, 50],
+    'Somali'             => [78, 56],
+    'Contested'          => [55, 40],
   ];
-  $maxStudents = max(array_map(fn($r) => (int)$r['students'], $regions));
+  $totalSchools = array_sum(array_column($regions, 'schools'));
+  $totalStudents = array_sum(array_column($regions, 'students'));
+  $totalTeachers = array_sum(array_column($regions, 'teachers'));
+  $totalActive = array_sum(array_column($regions, 'active_schools'));
+  $maxStudents = max(array_column($regions, 'students'));
 ?>
 <div class="cmd-section">
   <div class="section-head">
@@ -334,86 +352,47 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
     <div class="section-line"></div>
   </div>
 
-  <!-- Ethiopia SVG Map with data labels -->
-  <div class="geo-map-wrap card" style="padding:0;overflow:hidden">
-    <div style="position:relative">
-      <svg class="geo-map-svg" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="ethGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".18"/>
-            <stop offset="100%" stop-color="var(--accent)" stop-opacity=".06"/>
-          </linearGradient>
-          <filter id="mapShadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".08"/></filter>
-        </defs>
-        <!-- Ethiopia outline — recognizable shape -->
-        <path d="
-          M180 8 L195 5 L215 10 L235 6 L255 14 L275 10
-          L298 18 L315 12 L330 22 L342 18
-          L355 30 L362 48 L368 68 L372 92
-          L375 115 L378 140 L380 165 L378 190
-          L375 215 L382 238 L388 260
-          L390 285 L385 308 L378 330
-          L365 352 L348 370 L328 385
-          L308 398 L288 408 L268 418
-          L248 428 L228 438 L210 448
-          L192 455 L175 465 L158 475
-          L140 482 L120 488 L102 480
-          L88 468 L76 452 L68 432
-          L58 410 L50 388 L44 365
-          L40 340 L38 315 L36 290
-          L38 265 L42 240 L48 218
-          L52 195 L50 172 L48 150
-          L52 128 L58 108 L65 90
-          L74 72 L85 55 L98 40
-          L112 28 L130 18 L150 12 L168 10 Z"
-          fill="url(#ethGrad)" stroke="var(--border)" stroke-width="1.8"
-          stroke-linejoin="round" filter="url(#mapShadow)"/>
-        <!-- Compass rose -->
-        <g transform="translate(355,430)" opacity=".3">
-          <circle r="18" fill="none" stroke="var(--text-secondary)" stroke-width=".8"/>
-          <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--text-secondary)" stroke-width=".6"/>
-          <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--text-secondary)" stroke-width=".6"/>
-          <text x="0" y="-20" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="600">N</text>
-          <text x="22" y="3" text-anchor="middle" font-size="6" fill="var(--text-secondary)">E</text>
-          <text x="0" y="26" text-anchor="middle" font-size="6" fill="var(--text-secondary)">S</text>
-          <text x="-22" y="3" text-anchor="middle" font-size="6" fill="var(--text-secondary)">W</text>
-        </g>
-        <!-- Scale bar -->
-        <g transform="translate(20,460)" opacity=".25">
-          <line x1="0" y1="0" x2="60" y2="0" stroke="var(--text-secondary)" stroke-width="1.2"/>
-          <line x1="0" y1="-3" x2="0" y2="3" stroke="var(--text-secondary)" stroke-width="1"/>
-          <line x1="60" y1="-3" x2="60" y2="3" stroke="var(--text-secondary)" stroke-width="1"/>
-          <text x="30" y="12" text-anchor="middle" font-size="7" fill="var(--text-secondary)">~500 km</text>
-        </g>
-      </svg>
+  <!-- Summary cards -->
+  <div class="geo-summary">
+    <div class="gs-card"><div class="gs-val"><?= number_format($totalSchools) ?></div><div class="gs-label">Total Schools</div></div>
+    <div class="gs-card"><div class="gs-val" style="color:#22c55e"><?= number_format($totalStudents) ?></div><div class="gs-label">Students</div></div>
+    <div class="gs-card"><div class="gs-val" style="color:#f59e0b"><?= number_format($totalTeachers) ?></div><div class="gs-label">Teachers</div></div>
+    <div class="gs-card"><div class="gs-val" style="color:#10b981"><?= number_format($totalActive) ?></div><div class="gs-label">Active Schools</div></div>
+  </div>
 
-      <!-- Data labels positioned over regions -->
-      <?php foreach ($regions as $rg):
-        $name = $rg['region'];
-        $pos = $regionPos[$name] ?? null;
-        if (!$pos) continue;
-        $schools = (int)$rg['schools'];
-        $students = (int)$rg['students'];
-        $teachers = (int)$rg['teachers'];
-        $active = (int)$rg['active_schools'];
-        $intensity = $maxStudents > 0 ? $students / $maxStudents : 0;
-      ?>
-      <div class="geo-label" style="left:<?= $pos[0] ?>%;top:<?= $pos[1] ?>%">
-        <div class="gl-dot" style="width:<?= 6 + round($intensity * 10) ?>px;height:<?= 6 + round($intensity * 10) ?>px;background:rgba(99,102,241,<?= 0.4 + $intensity * 0.6 ?>)"></div>
-        <div class="gl-name"><?= e($name) ?></div>
-        <div class="gl-stats">
-          <?= number_format($students) ?> students<br>
-          <?= number_format($schools) ?> schools · <?= number_format($teachers) ?> teachers
+  <!-- Map with live data labels -->
+  <div class="geo-map-wrap card" style="padding:20px">
+    <div style="position:relative;max-width:600px;margin:0 auto">
+      <img class="geo-map-img" src="<?= $ethMap ?>" alt="Ethiopia Map">
+      <div class="geo-map-overlay">
+        <?php foreach ($regions as $rg):
+          $name = $rg['region'];
+          $pos = $regionPos[$name] ?? null;
+          if (!$pos) continue;
+          $schools = (int)$rg['schools'];
+          $students = (int)$rg['students'];
+          $teachers = (int)$rg['teachers'];
+          $active = (int)$rg['active_schools'];
+          $intensity = $maxStudents > 0 ? $students / $maxStudents : 0;
+        ?>
+        <div class="geo-label" style="left:<?= $pos[0] ?>%;top:<?= $pos[1] ?>%">
+          <div class="gl-dot" style="background:rgba(99,102,241,<?= 0.4 + $intensity * 0.6 ?>);width:<?= 8 + round($intensity * 8) ?>px;height:<?= 8 + round($intensity * 8) ?>px"></div>
+          <div class="gl-card">
+            <div class="gl-name"><?= e($name) ?></div>
+            <div class="gl-row"><span><span class="gl-ic gl-ic-std"></span>Schools</span><span class="gl-val"><?= number_format($schools) ?></span></div>
+            <div class="gl-row"><span><span class="gl-ic gl-ic-stu"></span>Students</span><span class="gl-val"><?= number_format($students) ?></span></div>
+            <div class="gl-row"><span><span class="gl-ic gl-ic-tch"></span>Teachers</span><span class="gl-val"><?= number_format($teachers) ?></span></div>
+          </div>
         </div>
+        <?php endforeach; ?>
       </div>
-      <?php endforeach; ?>
     </div>
 
     <div class="geo-legend">
       <span class="gl-schools">Schools</span>
       <span class="gl-students">Students</span>
       <span class="gl-teachers">Teachers</span>
-      <span class="gl-active">Active Schools</span>
+      <span class="gl-active">Active</span>
     </div>
   </div>
 
