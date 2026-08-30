@@ -103,14 +103,13 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
             <?php if ($dayEvents): ?><span class="tiny faint" style="margin-left:auto"><?= count($dayEvents) ?><?= count($dayEvents)===1 ? '' : 's' ?></span><?php endif; ?>
           </div>
           <div>
-            <?php foreach (array_slice($dayEvents, 0, 3) as $ev): ?>
-              <div class="cal-event" style="border-left-color:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>;background:color-mix(in srgb, <?= $typeCls[$ev['type']] ?? 'var(--muted)' ?> 12%, transparent)">
-                <?php if (!$ev['all_day']): ?><b class="tiny" style="font-size:11.5px;color:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>"><?= e(date('H:i', strtotime($ev['start_at']))) ?></b> <?php endif; ?>
-                <span style="font-size:12.5px;font-weight:600"><?= e(mb_strimwidth((string)$ev['title'], 0, 13, '…')) ?></span>
+            <?php if ($dayEvents): ?>
+              <div class="d-flex" style="gap:4px;flex-wrap:wrap;margin-top:4px">
+                <?php foreach (array_unique(array_map(fn($e) => $e['type'] ?? 'event', $dayEvents)) as $t): ?>
+                  <span title="<?= e(ucfirst($t)) ?>" style="width:8px;height:8px;border-radius:50%;background:<?= $typeCls[$t] ?? 'var(--muted)' ?>;flex:none"></span>
+                <?php endforeach; ?>
+                <?php if (count($dayEvents) > 1): ?><span class="tiny faint" style="margin-left:auto;font-size:10px"><?= count($dayEvents) ?></span><?php endif; ?>
               </div>
-            <?php endforeach; ?>
-            <?php if (count($dayEvents) > 3): ?>
-              <div class="tiny faint" style="padding:2px 6px">+<?= count($dayEvents) - 3 ?> more</div>
             <?php endif; ?>
           </div>
         </div>
