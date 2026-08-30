@@ -298,7 +298,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=35') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=36') ?>">
 </head>
 <body>
   <div class="shell">
@@ -370,7 +370,7 @@ $__icons = [
           <span class="input-ico"><?= icon('search') ?></span>
           <input id="global-search" class="has-ico" type="text" name="q" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none'">
           <button type="button" class="input-icon-btn" id="gs-clear" style="display:none" onclick="document.getElementById('global-search').value='';this.style.display='none';document.getElementById('global-search').focus()"><?= icon('x') ?></button>
-          <button type="submit" class="btn btn-sm btn-primary" style="padding:6px 14px;font-size:12px;height:auto;flex-shrink:0"><?= icon('search') ?></button>
+          <button type="submit" class="search-submit" title="Search"><?= icon('search') ?></button>
         </form>
 
         <div class="spacer"></div>
