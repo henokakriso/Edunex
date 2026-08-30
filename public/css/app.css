@@ -151,7 +151,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, 
   transition: all var(--transition); white-space: nowrap;
   font-family: inherit;
 }
-.btn:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); text-decoration: none; box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 8px; }
@@ -167,15 +166,19 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, 
 
 /* ---------- Cards ---------- */
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  background: var(--glass-card);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 22px;
   box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
-  transition: box-shadow var(--transition), transform var(--transition);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  transition: all .25s cubic-bezier(.4,0,.2,1);
 }
-.card-hover:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
+.card::before, .card-hover::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: background .25s ease; }
+.card:hover::before, .card-hover:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
+.card:hover, .card-hover:hover { background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); border-color: rgba(255,255,255,.3); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
 .card-pad { padding: 28px; }
 
 /* ---------- Empty state ---------- */
@@ -769,8 +772,10 @@ kbd { font-family: inherit; }
 .modal-box .modal-foot { padding: 0 24px 20px; display: flex; gap: 8px; justify-content: flex-end; }
 
 /* Stat boxes (ledger / dashboards) */
-.stat-box { padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-card); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); display: flex; flex-direction: column; gap: 6px; text-align: center; align-items: center; transition: all .25s cubic-bezier(.4,0,.2,1); }
-.stat-box:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
+.stat-box { padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-card); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); display: flex; flex-direction: column; gap: 6px; text-align: center; align-items: center; transition: all .25s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+.stat-box::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: opacity .25s ease; }
+.stat-box:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
+.stat-box:hover { background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); border-color: rgba(255,255,255,.3); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
 
 /* Chat list + bubbles (messages module) */
 .chat-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; transition: background var(--transition); }
@@ -802,8 +807,10 @@ kbd { font-family: inherit; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pos-rel { position: relative; }
 .flex-1 { flex: 1; }
-.clickable { cursor: pointer; transition: all .25s cubic-bezier(.4,0,.2,1); }
-.clickable:hover { border-color: transparent; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
+.clickable { position: relative; overflow: hidden; cursor: pointer; transition: all .25s cubic-bezier(.4,0,.2,1); }
+.clickable::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: background .25s ease; }
+.clickable:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
+.clickable:hover { border-color: transparent; background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
 
 /* Filter chips */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -852,7 +859,7 @@ kbd { font-family: inherit; }
   cursor: pointer;
 }
 .user-list-row:last-child { border-bottom: none; }
-.user-list-row:hover { background: var(--glass-nav-hover); backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
+.user-list-row:hover { background: color-mix(in srgb, var(--glass-bg) 45%, rgba(255,255,255,.12)); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 20px rgba(13,148,136,.04); }
 .user-list-row .chk { padding: 2px; }
 .user-list-row .row-act { display: flex; gap: 6px; align-items: center; justify-content: center; }
 
@@ -916,7 +923,7 @@ kbd { font-family: inherit; }
   cursor: pointer;
 }
 .school-list-row:last-child { border-bottom: none; }
-.school-list-row:hover { background: var(--glass-nav-hover); backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
+.school-list-row:hover { background: color-mix(in srgb, var(--glass-bg) 45%, rgba(255,255,255,.12)); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 20px rgba(13,148,136,.04); }
 .school-list-row .row-act { display: flex; gap: 6px; align-items: center; justify-content: center; }
 .sl-col { display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; overflow: hidden; text-align: left; border-right: 1px solid var(--border); }
 .sl-col:first-child { padding-left: 16px; }
@@ -945,7 +952,7 @@ kbd { font-family: inherit; }
   border: 1px solid var(--border); border-radius: 10px; color: var(--text-dim);
   font-size: 13px; text-decoration: none; transition: all var(--transition); padding: 0 8px;
 }
-.pager-btn:hover { border-color: transparent; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 4px 16px rgba(0,0,0,.07); color: var(--accent); }
+.pager-btn:hover { border-color: transparent; color: var(--accent); background: color-mix(in srgb, var(--glass-bg) 50%, rgba(255,255,255,.1)); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 2px 8px rgba(0,0,0,.04); }
 .pager-btn.on { background: var(--accent); border-color: transparent; color: #fff; font-weight: 600; box-shadow: 0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.2), 0 0 12px rgba(13,148,136,.15); }
 
 /* Detail drawer */
@@ -1027,7 +1034,7 @@ a.list-row, div.list-row, .list-row:not(tr) {
   padding: 10px 6px; border-radius: 10px;
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: var(--glass-nav-hover); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 6px 24px rgba(0,0,0,.07); }
+a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: color-mix(in srgb, var(--glass-bg) 45%, rgba(255,255,255,.12)); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 20px rgba(13,148,136,.04); }
 tr.list-row { display: table-row; }
 
 /* Chart mount points render inline SVG nicely */
@@ -1038,8 +1045,10 @@ tr.list-row { display: table-row; }
 #view-root div[id$="-chart"] { position: relative; }
 
 /* Stat cards (school profile) — icon left, value right, no overlap */
-.stat-card { display: flex; align-items: center; gap: 14px; transition: box-shadow .2s, transform .2s; }
-.stat-card:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
+.stat-card { display: flex; align-items: center; gap: 14px; transition: all .25s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: opacity .25s ease; }
+.stat-card:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
+.stat-card:hover { background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); border-color: rgba(255,255,255,.3); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
 .stat-card .stat-icon { margin-bottom: 0; flex-shrink: 0; }
 .stat-card .stat-value { font-size: 1.6rem; line-height: 1.05; }
 .stat-card > div:last-child { min-width: 0; }
@@ -1082,7 +1091,7 @@ tr.list-row { display: table-row; }
   transition: background var(--transition), color var(--transition), border-color var(--transition);
   vertical-align: middle;
 }
-.icon-btn:hover { background: var(--bg-hover); color: var(--text); border-color: transparent; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.2); }
+.icon-btn:hover { background: color-mix(in srgb, var(--glass-bg) 50%, rgba(255,255,255,.1)); color: var(--text); border-color: transparent; box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 2px 8px rgba(0,0,0,.04); }
 .icon-btn.ok:hover, .icon-btn.success:hover { color: var(--success); border-color: transparent; background: var(--success-soft); box-shadow: 0 0 0 1px rgba(34,197,94,.25), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
 .icon-btn.warn:hover { color: var(--warning); border-color: transparent; background: var(--warning-soft); box-shadow: 0 0 0 1px rgba(245,158,11,.25), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
 .icon-btn.danger:hover, .icon-btn.remove:hover { color: var(--danger); border-color: transparent; background: var(--danger-soft); box-shadow: 0 0 0 1px rgba(239,68,68,.25), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
@@ -1342,8 +1351,10 @@ tr.list-row td:last-child { vertical-align: middle; }
 @keyframes bounce { 0%,100% { transform: translateY(0); opacity:.4 } 50% { transform: translateY(-3px); opacity:1 } }
 
 /* ---- Teacher dashboard ---- */
-.tstat-card { transition: all .25s cubic-bezier(.4,0,.2,1); }
-.tstat-card:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
+.tstat-card { transition: all .25s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+.tstat-card::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: opacity .25s ease; }
+.tstat-card:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
+.tstat-card:hover { background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); border-color: rgba(255,255,255,.3); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
 .tstat-card .stat-ico { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
 .tstat-card:nth-child(2) .stat-ico { background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); }
 .tstat-card:nth-child(3) .stat-ico { background: color-mix(in srgb, var(--info) 12%, transparent); color: var(--info); }
@@ -1429,9 +1440,9 @@ html[data-theme="light"] {
 }
 
 .nav-item:hover {
-  background: var(--glass-nav-hover) !important;
-  border-color: var(--glass-border) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  background: color-mix(in srgb, var(--glass-bg) 50%, rgba(255,255,255,.1)) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.05), 0 2px 8px rgba(0,0,0,.04) !important;
   color: var(--text) !important;
 }
 
@@ -1469,21 +1480,58 @@ html[data-theme="light"] {
   transition: all .25s cubic-bezier(.4,0,.2,1);
   color: var(--text) !important;
   position: relative;
+  overflow: hidden;
+}
+
+.card::before, .card-hover::before, .stat-box::before, .stat-card::before, .tstat-card::before, .clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%);
+  pointer-events: none;
+  z-index: 1;
+  transition: background .25s ease;
+}
+
+.card:hover::before, .card-hover:hover::before, .stat-box:hover::before, .stat-card:hover::before, .tstat-card:hover::before, .clickable:hover::before {
+  background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%);
 }
 
 .card:hover {
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1);
-  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)) !important;
+  border-color: rgba(255,255,255,.3) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06) !important;
 }
 
 /* ─── Buttons — Liquid Glass ─── */
 .btn {
   position: relative;
+  overflow: hidden;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--text) !important;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 50%, rgba(255,255,255,.04) 100%);
+  pointer-events: none;
+  z-index: 1;
+  transition: background .2s ease;
+}
+
+.btn:hover::before {
+  background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 40%, rgba(255,255,255,.12) 100%);
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--glass-card) 55%, rgba(255,255,255,.15));
+  border-color: rgba(255,255,255,.3);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 4px 16px rgba(0,0,0,.06);
 }
 
 .btn-primary {
@@ -1547,8 +1595,9 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
 }
 
 .topbar-icon:hover {
-  background: var(--glass-nav-hover) !important;
+  background: color-mix(in srgb, var(--glass-bg) 50%, rgba(255,255,255,.1)) !important;
   color: var(--text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 8px rgba(0,0,0,.04) !important;
 }
 
 /* ─── Modals — Liquid Glass ─── */
@@ -1617,7 +1666,8 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
 }
 
 .dropdown-item:hover {
-  background: var(--glass-nav-hover) !important;
+  background: color-mix(in srgb, var(--glass-bg) 50%, rgba(255,255,255,.1)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.05) !important;
 }
 
 /* ─── Toasts — Liquid Glass ─── */
@@ -1653,7 +1703,8 @@ table.table td {
 }
 
 table.table tr:hover td {
-  background: var(--glass-nav-hover) !important;
+  background: color-mix(in srgb, var(--glass-bg) 45%, rgba(255,255,255,.1)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3) !important;
 }
 
 table.data {
@@ -1672,7 +1723,8 @@ table.data td {
 }
 
 table.data tr:hover td {
-  background: var(--glass-nav-hover) !important;
+  background: color-mix(in srgb, var(--glass-bg) 45%, rgba(255,255,255,.1)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3) !important;
 }
 
 /* ─── Inputs — Liquid Glass ─── */
