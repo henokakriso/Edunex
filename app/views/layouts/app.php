@@ -24,7 +24,6 @@ $__nav = [
     ['announcements', 'Announcements', 'admin/announcements', icon('megaphone')],
     ['reports', 'Reports', 'admin/reports', icon('trend-up')],
     ['analytics', 'Analytics', 'admin/analytics', icon('chart-bar')],
-    ['badges', 'Badges & Achievements', 'admin/badges', icon('medal')],
     ['logs', 'Logs', 'admin/logs', icon('note')],
     ['backups', 'Backups', 'admin/backups', icon('save')],
     ['PLATFORM'],
@@ -341,7 +340,7 @@ $__icons = [
       <a class="nav-item <?= str_starts_with($__route, 'calendar') ? 'active' : '' ?>" href="<?= url('index.php?r=calendar') ?>">
         <span class="ico"><?= icon('calendar') ?></span>Calendar
       </a>
-      <?php if (in_array(($__u['role'] ?? ''), ['student', 'ministry'], true)): ?>
+      <?php if (($__u['role'] ?? '') === 'student'): ?>
       <a class="nav-item <?= str_starts_with($__route, 'gamification') ? 'active' : '' ?>" href="<?= url('index.php?r=gamification') ?>">
         <span class="ico"><?= icon('game') ?></span>Gamification
       </a>
