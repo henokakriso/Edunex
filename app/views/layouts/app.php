@@ -365,9 +365,10 @@ $__icons = [
       <div class="topbar">
         <button class="btn btn-ghost menu-btn" style="padding:8px"><?= icon('menu') ?></button>
 
-        <div class="search-box">
+        <div class="search-box" style="position:relative">
           <span><?= icon('search') ?></span>
-          <input id="global-search" type="text" placeholder="Search courses, books, people…" autocomplete="off">
+          <input id="global-search" type="text" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none'">
+          <button type="button" class="input-icon-btn" id="gs-clear" style="display:none;position:absolute;right:40px" onclick="document.getElementById('global-search').value='';this.style.display='none';document.getElementById('global-search').focus()"><?= icon('x') ?></button>
           <kbd>Ctrl K</kbd>
         </div>
 

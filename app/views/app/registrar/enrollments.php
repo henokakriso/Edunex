@@ -6,7 +6,10 @@
     <p class="sub">Course enrollments for your school</p>
   </div>
   <form method="get" class="flex gap-6" action="<?= e(url('registrar/enrollments')) ?>">
-    <input class="input" name="q" value="<?= e($q) ?>" placeholder="Search student or course…" style="min-width:200px">
+    <div class="input-icon-wrap">
+      <input class="input" name="q" id="reg-search" value="<?= e($q) ?>" placeholder="Search student or course…" style="min-width:200px;padding-right:30px" oninput="document.getElementById('reg-clear').style.display=this.value?'flex':'none'">
+      <button type="button" class="input-icon-btn" id="reg-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('reg-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
+    </div>
     <select class="input" name="semester">
       <option value="0">All semesters</option>
       <?php foreach ($semesters as $s): ?>

@@ -132,7 +132,10 @@ if ($view === 'detail' && !empty($mod)): ?>
           <div>
             <div class="flex-between" style="margin-bottom:6px">
               <div class="small" style="font-weight:600"><?= icon('school') ?> Schools</div>
-              <input type="text" class="input" id="school-search" placeholder="Search schools…" oninput="filterSchools()" style="width:200px;padding:5px 10px;font-size:12px">
+              <div class="input-icon-wrap" style="width:200px">
+                <input type="text" class="input" id="school-search" placeholder="Search schools…" oninput="filterSchools();document.getElementById('sch-clear').style.display=this.value?'flex':'none'" style="width:100%;padding:5px 10px;font-size:12px;padding-right:26px">
+                <button type="button" class="input-icon-btn" id="sch-clear" style="display:none;right:4px" onclick="document.getElementById('school-search').value='';this.style.display='none';filterSchools()"><?= icon('x') ?></button>
+              </div>
             </div>
             <div id="school-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
               <?php foreach ($schools as $s): ?>
@@ -223,7 +226,10 @@ if ($view === 'detail' && !empty($mod)): ?>
   <form method="get" class="flex gap-6">
     <input type="hidden" name="r" value="admin/modules">
     <?php if ($group): ?><input type="hidden" name="group" value="<?= e($group) ?>"><?php endif; ?>
-    <input class="input" name="q" value="<?= e($q) ?>" placeholder="Search modules…" style="width:200px">
+    <div class="input-icon-wrap" style="width:200px">
+      <input class="input" name="q" id="mod-search" value="<?= e($q) ?>" placeholder="Search modules…" style="width:100%;padding-right:26px" oninput="document.getElementById('mod-clear').style.display=this.value?'flex':'none'">
+      <button type="button" class="input-icon-btn" id="mod-clear" style="display:<?= $q ? 'flex' : 'none' ?>;right:4px" onclick="document.getElementById('mod-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
+    </div>
     <select class="input" name="only">
       <option value="">All status</option>
       <option value="on" <?= $only === 'on' ? 'selected' : '' ?>>Enabled</option>
