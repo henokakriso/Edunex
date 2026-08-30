@@ -2,9 +2,12 @@
 $asBadge = ['none'=>'badge-muted','pending'=>'badge-warning','approved'=>'badge-success','rejected'=>'badge-danger'];
 ?>
 <style>
-.ann-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;background:var(--bg-elev);transition:border-color .15s,box-shadow .15s;cursor:default}
-.ann-row:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
-.ann-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.ann-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);margin-bottom:6px;background:var(--glass-bg);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);transition:all .25s cubic-bezier(.4,0,.2,1);cursor:default;position:relative;overflow:hidden}
+.ann-row::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.ann-row:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow)}
+.ann-row:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 50%,rgba(255,255,255,.06) 100%)}
+.ann-row:focus-visible{outline:none;border-color:rgba(255,255,255,.25);box-shadow:0 0 0 2px var(--bg),0 0 0 4px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.4),0 0 16px rgba(255,255,255,.04)}
+.ann-row:active{transform:scale(.998)}
 .ann-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
 .ann-content{font-size:12.5px;color:var(--text-secondary);margin-top:3px;line-height:1.5}
 .ann-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px}
