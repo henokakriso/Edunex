@@ -33,7 +33,7 @@ if ($view === 'detail' && !empty($mod)): ?>
 <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
   <div>
     <!-- Status + Meta -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:16px;padding:20px">
       <div class="flex-between" style="margin-bottom:14px">
         <h3 style="margin:0">Module Information</h3>
         <span class="badge <?= $mod['enabled'] ? 'badge-success' : 'badge-warning' ?>" style="font-size:12px;padding:4px 12px"><?= $mod['enabled'] ? 'ENABLED' : 'DISABLED' ?></span>
@@ -52,7 +52,7 @@ if ($view === 'detail' && !empty($mod)): ?>
     </div>
 
     <!-- Dependencies -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:16px;padding:20px">
       <h3 class="card-title" style="margin-top:0"><?= icon('git-branch') ?> Dependencies</h3>
       <?php if ($depModules): ?>
         <div class="flex gap-6" style="flex-wrap:wrap">
@@ -79,7 +79,7 @@ if ($view === 'detail' && !empty($mod)): ?>
     </div>
 
     <!-- Scope -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:16px;padding:20px">
       <h3 class="card-title" style="margin-top:0"><?= icon('globe') ?> Activation Scope</h3>
       <p class="small faint" style="margin-bottom:12px">Control where this module is available. Lower-level scopes inherit from higher levels.</p>
       <form method="post">
@@ -90,7 +90,7 @@ if ($view === 'detail' && !empty($mod)): ?>
             'regional' => ['Regional', 'By region, zone, or woreda'],
             'selective' => ['School-level', 'Specific schools only'],
           ] as $sv => [$sl, $desc]): ?>
-            <label style="display:flex;gap:10px;padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" class="scope-option <?= $mod['scope_type'] === $sv ? 'active' : '' ?>">
+            <label class="scope-option <?= $mod['scope_type'] === $sv ? 'active' : '' ?>" style="display:flex;gap:10px;padding:12px;border:1px solid var(--glass-border);border-radius:10px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)">
               <input type="radio" name="scope_type" value="<?= $sv ?>" <?= $mod['scope_type'] === $sv ? 'checked' : '' ?> onchange="toggleScopeType(this)" style="margin-top:2px">
               <div><div class="small" style="font-weight:600"><?= $sl ?></div><div class="tiny faint"><?= $desc ?></div></div>
             </label>
@@ -205,7 +205,7 @@ if ($view === 'detail' && !empty($mod)): ?>
     ['icon' => 'x-circle', 'label' => 'Disabled', 'value' => $counts['off'], 'color' => '#ef4444'],
   ];
   foreach ($stats as $s): ?>
-    <div class="card" style="padding:14px;text-align:center">
+    <div class="card stat-box" style="text-align:center">
       <div style="color:<?= $s['color'] ?>;margin-bottom:4px"><?= icon($s['icon']) ?></div>
       <div style="font-size:20px;font-weight:700;color:<?= $s['color'] ?>"><?= $s['value'] ?></div>
       <div class="tiny faint"><?= $s['label'] ?></div>
@@ -250,9 +250,9 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">
       <?php foreach ($grouped[$gk] as $m): ?>
-        <div class="card" style="padding:16px;position:relative;overflow:hidden;transition:all .15s;<?= $m['enabled'] ? '' : 'opacity:.6' ?>">
-          <?php if ($m['is_core']): ?><div style="position:absolute;top:12px;right:12px"><?= icon('shield-check') ?></div><?php endif; ?>
-          <div class="flex gap-10" style="align-items:flex-start;margin-bottom:10px">
+        <div class="card module-card" style="<?= $m['enabled'] ? '' : 'opacity:.6' ?>">
+          <?php if ($m['is_core']): ?><div style="position:absolute;top:12px;right:12px;z-index:2"><?= icon('shield-check') ?></div><?php endif; ?>
+          <div class="flex gap-10" style="align-items:flex-start;margin-bottom:10px;position:relative;z-index:2">
             <div style="width:40px;height:40px;border-radius:10px;background:<?= $groupColors[$gk] ?>15;display:flex;align-items:center;justify-content:center;color:<?= $groupColors[$gk] ?>;flex-shrink:0;font-size:18px">
               <?= icon($m['icon']) ?>
             </div>
@@ -266,7 +266,7 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
               </div>
             </div>
           </div>
-          <div class="flex-between" style="margin-top:8px">
+          <div class="flex-between" style="margin-top:8px;position:relative;z-index:2">
             <div class="flex gap-6" style="align-items:center">
               <span class="tiny faint" style="display:flex;align-items:center;gap:3px"><?= icon($securityIcons[$m['security_status']]) ?> <?= $securityLabels[$m['security_status']] ?></span>
               <?php if ($m['scope_type'] !== 'all'): ?><span class="tiny" style="color:var(--accent)"><?= icon('globe') ?> <?= e(ucfirst($m['scope_type'])) ?></span><?php endif; ?>
@@ -291,7 +291,7 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
 <?php endforeach; ?>
 
 <?php if (!$modules): ?>
-  <div class="card" style="padding:40px;text-align:center">
+  <div class="card empty-state">
     <p class="muted"><?= icon('search') ?> No modules match your filters.</p>
   </div>
 <?php endif; ?>
@@ -301,11 +301,14 @@ $groupOrder = ['core', 'standard', 'optional', 'advanced'];
 function toggleScopeType(radio) {
   document.getElementById('scope-selectors').style.display = radio.value === 'all' ? 'none' : 'block';
   document.querySelectorAll('.scope-option').forEach(el => {
-    el.style.borderColor = 'var(--border)';
+    el.style.borderColor = 'var(--glass-border)';
     el.style.boxShadow = '';
+    el.style.background = 'var(--glass-bg)';
   });
-  radio.closest('.scope-option').style.borderColor = 'transparent';
-  radio.closest('.scope-option').style.boxShadow = '0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1)';
+  var active = radio.closest('.scope-option');
+  active.style.borderColor = 'rgba(13,148,136,.5)';
+  active.style.background = 'var(--glass-hover-bg)';
+  active.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 0 1px rgba(13,148,136,.3), 0 0 16px rgba(13,148,136,.08)';
 }
 function filterSchools() {
   var q = document.getElementById('school-search').value.toLowerCase();
@@ -315,7 +318,9 @@ function filterSchools() {
 }
 // Init active scope border
 document.querySelectorAll('input[name=scope_type]:checked').forEach(el => {
-  el.closest('.scope-option').style.borderColor = 'transparent';
-  el.closest('.scope-option').style.boxShadow = '0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1)';
+  var active = el.closest('.scope-option');
+  active.style.borderColor = 'rgba(13,148,136,.5)';
+  active.style.background = 'var(--glass-hover-bg)';
+  active.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 0 1px rgba(13,148,136,.3), 0 0 16px rgba(13,148,136,.08)';
 });
 </script>
