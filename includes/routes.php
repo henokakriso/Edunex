@@ -250,8 +250,8 @@ Router::page('notes', 'notes/notes.php', ['student', 'teacher', 'parent']);
 Router::page('games', 'games/games.php', ['student', 'teacher']);
 Router::page('search', 'search/index.php', '*');
 
-Router::page('files', 'files/index.php', 'regional');
-Router::page('files/view', 'files/view.php', 'regional');
+Router::page('files', 'files/index.php', 'ministry');
+Router::page('files/view', 'files/view.php', 'ministry');
 
 Router::page('reports/index', 'reports/index.php', ['regional', 'teacher']);
 Router::page('reports/export', 'reports/export.php', ['regional', 'teacher', 'principal']);
