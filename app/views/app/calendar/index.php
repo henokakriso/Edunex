@@ -9,6 +9,42 @@ $todayDay = (int)date('j'); $todayMon = (int)date('n'); $todayYr = (int)date('Y'
 $isThisMonth = $todayMon === $month && $todayYr === $year;
 $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], true);
 ?>
+<style>
+.cal-day{position:relative;min-height:84px;border:1px solid var(--glass-border);border-radius:14px;padding:8px;background:var(--glass-bg);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer;overflow:hidden}
+.cal-day::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.07) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.cal-day:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow);transform:translateY(-1px)}
+.cal-day:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.04) 50%,rgba(255,255,255,.08) 100%)}
+.cal-day:active{transform:scale(.97);box-shadow:inset 0 2px 4px rgba(0,0,0,.06)}
+.cal-day.today{background:rgba(13,148,136,.08);border-color:rgba(13,148,136,.3)}
+.cal-day.today::before{background:linear-gradient(135deg,rgba(13,148,136,.12) 0%,rgba(255,255,255,.03) 50%,rgba(13,148,136,.06) 100%)}
+.cal-day.today:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.05),0 0 20px rgba(13,148,136,.1)}
+.cal-date-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-weight:800;font-size:12px;color:var(--text)}
+.cal-day.today .cal-date-num{background:var(--accent);color:#fff}
+.cal-event{margin-bottom:3px;border-left:3px solid;border-radius:6px;padding:2px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px}
+.cal-dow{text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 0}
+.cal-popup{position:fixed;z-index:2000;width:320px;max-height:400px;overflow:auto;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:18px;backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:0 20px 60px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.06);display:none;padding:0}
+.cal-popup::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 40%,rgba(255,255,255,.03) 100%);pointer-events:none}
+.cal-popup.show{display:block;animation:calPopIn .25s cubic-bezier(.4,0,.2,1)}
+@keyframes calPopIn{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.cal-popup-head{padding:14px 16px 10px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.cal-popup-head h4{margin:0;font-size:14px;font-weight:700;color:var(--text)}
+.cal-popup-close{width:26px;height:26px;border-radius:50%;border:none;background:var(--bg-hover);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.cal-popup-close:hover{background:var(--border);color:var(--text)}
+.cal-popup-body{padding:10px 14px 14px;position:relative;z-index:1}
+.cal-popup-ev{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);margin-bottom:6px;background:var(--glass-bg);backdrop-filter:blur(10px);transition:all .2s ease;position:relative;overflow:hidden}
+.cal-popup-ev::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 50%);pointer-events:none}
+.cal-popup-ev:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
+.cal-popup-ev-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cal-popup-ev-info{flex:1;min-width:0}
+.cal-popup-ev-info b{font-size:13px;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-popup-ev-info span{font-size:11px;color:var(--text-dim)}
+.cal-popup-empty{text-align:center;padding:20px 10px;color:var(--text-dim);font-size:13px}
+.cal-popup-empty .ico{font-size:28px;margin-bottom:6px;display:block;opacity:.5}
+.cal-toast{position:fixed;top:20px;right:20px;z-index:3000;padding:14px 20px;border-radius:14px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:0 12px 40px rgba(0,0,0,.12),0 0 0 1px rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;max-width:340px;font-size:13px;color:var(--text);animation:toastIn .3s cubic-bezier(.4,0,.2,1)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
+.cal-toast::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 40%);pointer-events:none}
+</style>
 <div class="page-head page-head-flex">
   <div>
     <h1><?= icon('calendar') ?> Calendar <span class="faint" style="font-weight:400">· <?= e(date('F Y', mktime(0, 0, 0, $month, 1, $year))) ?></span></h1>
@@ -61,15 +97,14 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
       <?php endforeach; ?>
       <?php for ($i = 0; $i < $startDow; $i++): ?><div></div><?php endfor; ?>
       <?php for ($d = 1; $d <= $daysInMonth; $d++): $isToday = $d === $todayDay && $isThisMonth; $dayEvents = $byDay[$d] ?? []; ?>
-        <div class="cal-day" data-day="<?= $d ?>" style="position:relative;min-height:84px;border:1px solid var(--border);border-radius:12px;padding:7px;background:<?= $isToday ? 'linear-gradient(140deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent)' : 'transparent' ?>">
+        <div class="cal-day<?= $isToday ? ' today' : '' ?>" data-day="<?= $d ?>" data-events='<?= e(json_encode(array_map(fn($e) => ['title'=>$e['title'],'type'=>$e['type']??'event','time'=>$e['start_at']?date('H:i',strtotime($e['start_at'])):'','all_day'=>(int)($e['all_day']??0)], $dayEvents))) ?>'>
           <div class="d-flex" style="align-items:center;justify-content:space-between;margin-bottom:4px">
-            <span class="cal-date-num" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-weight:800;font-size:12px;<?= $isToday ? 'background:var(--accent);color:var(--bg)' : 'color:var(--ink)' ?>"><?= $d ?></span>
-            <?php if ($dayEvents): ?><span class="tiny faint" style="margin-left:auto"><?= count($dayEvents) ?><?= count($dayEvents)===1 ? ' event' : ' events' ?></span><?php endif; ?>
+            <span class="cal-date-num"><?= $d ?></span>
+            <?php if ($dayEvents): ?><span class="tiny faint" style="margin-left:auto"><?= count($dayEvents) ?><?= count($dayEvents)===1 ? '' : 's' ?></span><?php endif; ?>
           </div>
           <div>
             <?php foreach (array_slice($dayEvents, 0, 3) as $ev): ?>
-              <div class="cal-event" data-event="<?= (int)$ev['id'] ?>" title="<?= e($ev['title']) ?>"
-                   style="margin-bottom:3px;border-left:3px solid <?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>;background:color-mix(in srgb, <?= $typeCls[$ev['type']] ?? 'var(--muted)' ?> 12%, transparent);border-radius:6px;padding:2px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer">
+              <div class="cal-event" style="border-left-color:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>;background:color-mix(in srgb, <?= $typeCls[$ev['type']] ?? 'var(--muted)' ?> 12%, transparent)">
                 <?php if (!$ev['all_day']): ?><b class="tiny" style="font-size:11.5px;color:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>"><?= e(date('H:i', strtotime($ev['start_at']))) ?></b> <?php endif; ?>
                 <span style="font-size:12.5px;font-weight:600"><?= e(mb_strimwidth((string)$ev['title'], 0, 13, '…')) ?></span>
               </div>
@@ -141,56 +176,70 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 
 <script>
 (function () {
-  const events = <?= json_encode(array_map(fn($e) => [
-    'id' => (int)$e['id'], 'title' => $e['title'], 'type' => $e['type'],
-    'start' => $e['start_at'], 'end' => $e['end_at'] ?? '',
-    'location' => $e['location'] ?? '', 'all_day' => (int)($e['all_day'] ?? 0),
-    'description' => $e['description'] ?? '', 'own' => (int)($e['created_by'] ?? 0),
-    'creator' => ($e['creator_first'] ?? '') !== '' ? [
-      'id' => (int)($e['created_by'] ?? 0), 'name' => $e['creator_first'] . ' ' . ($e['creator_last'] ?? ''),
-      'role' => ucfirst($e['creator_role'] ?? ''),
-    ] : null,
-  ], $events)) ?>;
-  const colors = <?= json_encode(array_map(fn($c) => $c, $typeCls)) ?>;
-  let last = null;
-  const close = () => { const m = document.getElementById('event-modal'); if (m) { m.remove(); last = null; } };
-  const open = (id) => {
-    const ev = events.find(e => e.id === id);
-    if (!ev) return;
-    close();
-    const m = document.createElement('div');
-    m.id = 'event-modal';
-    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;';
-    const inside = document.createElement('div');
-    inside.className = 'card';
-    inside.style.cssText = 'max-width:520px;width:92%;padding:22px;max-height:80vh;overflow:auto;';
-    const fmt = (s) => s ? new Date(s.replace(' ', 'T')).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-    const typeTxt = ev.type.charAt(0).toUpperCase() + ev.type.slice(1);
-    inside.innerHTML =
-      '<div class="flex-between"><h3 style="margin:0">' + escapeHtml(ev.title) + '</h3>' +
-      '<button type="button" class="btn btn-sm btn-ghost" data-close="">✕</button></div>' +
-      '<span class="badge" style="margin-top:8px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:color-mix(in srgb, ' + (colors[ev.type] || 'var(--muted)') + ' 15%, transparent);color:' + (colors[ev.type] || 'var(--muted)') + '">' + typeTxt + '</span>' +
-      (ev.description ? '<p style="margin:10px 0">' + escapeHtml(ev.description) + '</p>' : '<p class="muted small" style="margin-top:10px">No description.</p>') +
-      '<div class="tiny faint" style="margin-top:12px;line-height:1.7">' +
-      '<div>' + (ev.all_day ? 'All day · ' + fmt(ev.start).split(',')[0] : fmt(ev.start) + (ev.end ? ' → ' + fmt(ev.end) : '')) + '</div>' +
-      (ev.location ? '<div>' + escapeHtml(ev.location) + '</div>' : '') +
-      '</div>' +
-      '<div style="margin-top:14px;padding-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-      (ev.creator
-        ? '<span style="font-size:14px"><b>' + escapeHtml(ev.creator.name) + '</b> <span class="tiny faint">· ' + escapeHtml(ev.creator.role) + ' · created this event</span></span>' +
-          '<button type="button" class="btn btn-sm btn-ghost" onclick="openProfileDrawer(' + ev.creator.id + ')">' + escapeHtml('View profile') + '</button>'
-        : '<span class="tiny faint">Created by <b>School</b></span>') +
-      '</div>';
-    m.appendChild(inside);
-    document.body.appendChild(m);
-    setTimeout(() => { const b = m.querySelector('[data-close]'); if (b) b.addEventListener('click', close); }, 0);
-    m.addEventListener('click', e => { if (e.target === m) close(); });
-  };
-  window.closeCalendarModal = close;
-  document.addEventListener('click', e => {
-    const row = e.target.closest('[data-event]');
-    if (row && !row.closest('form')) open(parseInt(row.dataset.event, 10));
+  const typeColors = <?= json_encode($typeCls) ?>;
+  const monthName = '<?= e(date('F Y', mktime(0,0,0,$month,1,$year))) ?>';
+  let activePopup = null;
+
+  function closePopup() {
+    if (activePopup) { activePopup.remove(); activePopup = null; }
+    document.removeEventListener('click', outsideClick);
+  }
+  function outsideClick(e) {
+    if (activePopup && !activePopup.contains(e.target) && !e.target.closest('.cal-day')) closePopup();
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'cal-toast';
+    t.innerHTML = '<span style="font-size:18px">📅</span><span>' + msg + '</span>';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.animation = 'toastOut .3s forwards'; setTimeout(() => t.remove(), 300); }, 2500);
+  }
+
+  document.querySelectorAll('.cal-day').forEach(day => {
+    day.addEventListener('click', function(e) {
+      if (e.target.closest('.cal-event')) return;
+      closePopup();
+      const d = parseInt(this.dataset.day);
+      const evs = JSON.parse(this.dataset.events || '[]');
+
+      const popup = document.createElement('div');
+      popup.className = 'cal-popup';
+
+      let body = '';
+      if (evs.length) {
+        evs.forEach(ev => {
+          const c = typeColors[ev.type] || 'var(--muted)';
+          const time = ev.all_day ? 'All day' : (ev.time || '—');
+          body += '<div class="cal-popup-ev"><div class="cal-popup-ev-dot" style="background:' + c + '"></div><div class="cal-popup-ev-info"><b>' + esc(ev.title) + '</b><span>' + esc(time) + ' · ' + esc(ev.type.charAt(0).toUpperCase() + ev.type.slice(1)) + '</span></div></div>';
+        });
+      } else {
+        body = '<div class="cal-popup-empty"><span class="ico">📭</span>No events on ' + esc(monthName.split(' ')[0]) + ' ' + d + '</div>';
+      }
+
+      popup.innerHTML = '<div class="cal-popup-head"><h4>' + esc(monthName.split(' ')[0]) + ' ' + d + '</h4><button class="cal-popup-close">&times;</button></div><div class="cal-popup-body">' + body + '</div>';
+      document.body.appendChild(popup);
+      activePopup = popup;
+
+      const rect = this.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - 160;
+      let top = rect.bottom + 8;
+      if (left < 10) left = 10;
+      if (left + 320 > window.innerWidth) left = window.innerWidth - 330;
+      if (top + 400 > window.innerHeight) top = rect.top - 8 - popup.offsetHeight;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+
+      popup.querySelector('.cal-popup-close').addEventListener('click', closePopup);
+      setTimeout(() => document.addEventListener('click', outsideClick), 0);
+
+      if (!evs.length) {
+        showToast('No events on ' + esc(monthName.split(' ')[0]) + ' ' + d);
+      }
+    });
   });
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 })();
 </script>
 
