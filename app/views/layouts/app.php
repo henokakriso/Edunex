@@ -298,7 +298,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=39') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=40') ?>">
 </head>
 <body>
   <div class="shell">
