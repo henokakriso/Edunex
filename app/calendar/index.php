@@ -20,7 +20,7 @@ class Ctl_index {
         $events = Database::all(
             "SELECT c.*, u.first_name AS creator_first, u.last_name AS creator_last, u.role AS creator_role,
                     c.event_type AS type, c.gregorian_start AS start_at, c.gregorian_end AS end_at,
-                    c.start_time, c.end_time, c.location,
+                    c.start_time, c.end_time, c.location
              FROM calendar_events c
              LEFT JOIN users u ON u.id = c.created_by
              WHERE c.school_id = ?
