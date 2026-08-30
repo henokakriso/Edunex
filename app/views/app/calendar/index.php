@@ -1,6 +1,6 @@
 <?php /* Calendar view — redesigned with distinctive date styling */
-$typeCls = ['class' => 'var(--accent)', 'exam' => 'var(--danger)', 'assignment' => 'var(--warning)', 'event' => 'var(--muted)', 'meeting' => 'var(--success)', 'deadline' => 'var(--danger)', 'birthday' => 'var(--warning)', 'reminder' => 'var(--muted)'];
-$typeBadge = ['class' => 'badge accent', 'exam' => 'badge danger', 'assignment' => 'badge warning', 'event' => 'badge muted', 'meeting' => 'badge success', 'deadline' => 'badge danger', 'birthday' => 'badge warning', 'reminder' => 'badge muted'];
+$typeCls = ['class' => 'var(--accent)', 'academic' => 'var(--accent)', 'exam' => 'var(--danger)', 'assignment' => 'var(--warning)', 'event' => 'var(--muted)', 'meeting' => 'var(--success)', 'deadline' => 'var(--danger)', 'birthday' => 'var(--warning)', 'reminder' => 'var(--muted)', 'holiday' => '#a855f7', 'administrative' => '#6366f1'];
+$typeBadge = ['class' => 'badge accent', 'academic' => 'badge accent', 'exam' => 'badge danger', 'assignment' => 'badge warning', 'event' => 'badge muted', 'meeting' => 'badge success', 'deadline' => 'badge danger', 'birthday' => 'badge warning', 'reminder' => 'badge muted', 'holiday' => 'badge accent', 'administrative' => 'badge accent'];
 $prev = $month === 1 ? 12 : $month - 1;
 $prevY = $month === 1 ? $year - 1 : $year;
 $next = $month === 12 ? 1 : $month + 1;
@@ -44,16 +44,34 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 @keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 @keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
 .cal-toast::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 40%);pointer-events:none}
+.cal-picker{display:flex;align-items:center;gap:6px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px;padding:4px 6px;backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);position:relative;overflow:hidden}
+.cal-picker::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none}
+.cal-picker-sel{background:none;border:none;outline:none;color:var(--text);font-size:13px;font-weight:600;font-family:inherit;padding:6px 8px;border-radius:8px;cursor:pointer;transition:all .2s ease;appearance:none;-webkit-appearance:none;position:relative;z-index:1}
+.cal-picker-sel:hover{background:var(--glass-hover-bg)}
+.cal-picker-sel:focus{box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.cal-picker-sel option{background:var(--bg-elev);color:var(--text);border:none}
+.cal-picker-today{background:none;border:1px solid var(--glass-border);color:var(--accent);font-size:12px;font-weight:700;font-family:inherit;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .2s ease;position:relative;z-index:1;white-space:nowrap}
+.cal-picker-today:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
 </style>
 <div class="page-head page-head-flex">
   <div>
-    <h1><?= icon('calendar') ?> Calendar <span class="faint" style="font-weight:400">· <?= e(date('F Y', mktime(0, 0, 0, $month, 1, $year))) ?></span></h1>
+    <h1><?= icon('calendar') ?> Calendar</h1>
     <p class="sub">Your schedule, classes, exams and deadlines at a glance</p>
   </div>
-  <div class="d-flex" style="gap:8px">
-    <a class="btn btn-ghost" href="<?= e(url('calendar&month=' . $prev . '&year=' . $prevY)) ?>" title="Previous month">←</a>
-    <a class="btn btn-ghost" href="<?= e(url('calendar')) ?>">Today</a>
-    <a class="btn btn-ghost" href="<?= e(url('calendar&month=' . $next . '&year=' . $nextY)) ?>" title="Next month">→</a>
+  <div class="d-flex" style="gap:8px;align-items:center">
+    <div class="cal-picker">
+      <select class="cal-picker-sel" id="cal-month" onchange="calNav()">
+        <?php foreach (['January','February','March','April','May','June','July','August','September','October','November','December'] as $i => $mn): ?>
+          <option value="<?= $i + 1 ?>" <?= ($i + 1) === $month ? 'selected' : '' ?>><?= $mn ?></option>
+        <?php endforeach; ?>
+      </select>
+      <select class="cal-picker-sel" id="cal-year" onchange="calNav()">
+        <?php for ($y = (int)date('Y'); $y >= 2015; $y--): ?>
+          <option value="<?= $y ?>" <?= $y === $year ? 'selected' : '' ?>><?= $y ?></option>
+        <?php endfor; ?>
+      </select>
+      <button type="button" class="cal-picker-today" onclick="location.href='<?= e(url('calendar')) ?>'">Today</button>
+    </div>
     <?php if ($canCreate): ?><button class="btn btn-primary" data-open-modal="new-event-modal">+ Event</button><?php endif; ?>
   </div>
 </div>
@@ -104,11 +122,10 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
           </div>
           <div>
             <?php if ($dayEvents): ?>
-              <div class="d-flex" style="gap:4px;flex-wrap:wrap;margin-top:4px">
+              <div class="d-flex" style="gap:4px;flex-wrap:wrap;margin-top:6px;justify-content:center">
                 <?php foreach (array_unique(array_map(fn($e) => $e['type'] ?? 'event', $dayEvents)) as $t): ?>
-                  <span title="<?= e(ucfirst($t)) ?>" style="width:8px;height:8px;border-radius:50%;background:<?= $typeCls[$t] ?? 'var(--muted)' ?>;flex:none"></span>
+                  <span title="<?= e(ucfirst($t)) ?>" style="width:10px;height:10px;border-radius:50%;background:<?= $typeCls[$t] ?? 'var(--muted)' ?>;flex:none;box-shadow:0 0 6px <?= $typeCls[$t] ?? 'var(--muted)' ?>40"></span>
                 <?php endforeach; ?>
-                <?php if (count($dayEvents) > 1): ?><span class="tiny faint" style="margin-left:auto;font-size:10px"><?= count($dayEvents) ?></span><?php endif; ?>
               </div>
             <?php endif; ?>
           </div>
@@ -305,4 +322,11 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
       });
   };
 })();
+</script>
+<script>
+function calNav() {
+  const m = document.getElementById('cal-month').value;
+  const y = document.getElementById('cal-year').value;
+  location.href = '<?= e(url('calendar')) ?>&month=' + m + '&year=' + y;
+}
 </script>
