@@ -103,13 +103,13 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
             <?php if (!empty($ev['description'])): ?><p class="tiny muted event-desc"><?= e(mb_strimwidth((string)$ev['description'], 0, 90, '…')) ?></p><?php endif; ?>
             <?php if (!empty($ev['creator_first'])): ?>
               <p class="tiny faint" style="margin-top:3px">Created by <b><?= e($ev['creator_first'] . ' ' . $ev['creator_last']) ?></b> <?= e(ucfirst($ev['creator_role'])) ?>
-                · <button type="button" class="event-profile-link" style="font-weight:700;border:none;background:none;cursor:pointer;color:var(--accent);padding:0" onclick="openProfileDrawer(<?= (int)$ev['user_id'] ?>)"><?= icon('user') ?> View profile</button></p>
+                · <button type="button" class="event-profile-link" style="font-weight:700;border:none;background:none;cursor:pointer;color:var(--accent);padding:0" onclick="openProfileDrawer(<?= (int)($ev['created_by'] ?? 0) ?>)"><?= icon('user') ?> View profile</button></p>
             <?php else: ?>
               <p class="tiny faint" style="margin-top:3px">Created by <b>School</b></p>
             <?php endif; ?>
           </div>
-          <?php if ($ev['user_id'] === null): ?><span class="badge badge-muted">school</span>
-          <?php elseif ((int)$ev['user_id'] === (int)$__u['id']): ?>
+          <?php if (empty($ev['created_by'])): ?><span class="badge badge-muted">school</span>
+          <?php elseif ((int)$ev['created_by'] === (int)$__u['id']): ?>
             <form method="post" class="inline" data-confirm="Delete this event?">
               <?= csrf_field() ?><input type="hidden" name="delete_event" value="<?= (int)$ev['id'] ?>">
               <button class="btn btn-sm btn-danger"><?= icon('trash') ?></button>
@@ -145,9 +145,9 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
     'id' => (int)$e['id'], 'title' => $e['title'], 'type' => $e['type'],
     'start' => $e['start_at'], 'end' => $e['end_at'] ?? '',
     'location' => $e['location'] ?? '', 'all_day' => (int)($e['all_day'] ?? 0),
-    'description' => $e['description'] ?? '', 'own' => (int)($e['user_id'] ?? 0),
+    'description' => $e['description'] ?? '', 'own' => (int)($e['created_by'] ?? 0),
     'creator' => ($e['creator_first'] ?? '') !== '' ? [
-      'id' => (int)$e['user_id'], 'name' => $e['creator_first'] . ' ' . ($e['creator_last'] ?? ''),
+      'id' => (int)($e['created_by'] ?? 0), 'name' => $e['creator_first'] . ' ' . ($e['creator_last'] ?? ''),
       'role' => ucfirst($e['creator_role'] ?? ''),
     ] : null,
   ], $events)) ?>;
