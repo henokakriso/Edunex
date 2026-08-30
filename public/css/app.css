@@ -1813,6 +1813,23 @@ table.table tr:hover td, table.data tr:hover td {
   min-width: 0;
 }
 
+.search-box input.has-ico {
+  padding-left: 4px;
+}
+
+.search-box .input-ico {
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: color .2s ease;
+}
+
+.search-box:focus-within .input-ico {
+  color: var(--accent);
+}
+
 .search-box input::placeholder {
   color: var(--text-faint);
 }

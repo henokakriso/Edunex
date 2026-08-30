@@ -298,7 +298,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=32') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=33') ?>">
 </head>
 <body>
   <div class="shell">
@@ -365,10 +365,10 @@ $__icons = [
       <div class="topbar">
         <button class="btn btn-ghost menu-btn" style="padding:8px"><?= icon('menu') ?></button>
 
-        <div class="search-box" style="position:relative">
-          <span><?= icon('search') ?></span>
-          <input id="global-search" type="text" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none'">
-          <button type="button" class="input-icon-btn" id="gs-clear" style="display:none;position:absolute;right:40px" onclick="document.getElementById('global-search').value='';this.style.display='none';document.getElementById('global-search').focus()"><?= icon('x') ?></button>
+        <div class="search-box">
+          <span class="input-ico"><?= icon('search') ?></span>
+          <input id="global-search" class="has-ico" type="text" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none'">
+          <button type="button" class="input-icon-btn" id="gs-clear" style="display:none" onclick="document.getElementById('global-search').value='';this.style.display='none';document.getElementById('global-search').focus()"><?= icon('x') ?></button>
           <kbd>Ctrl K</kbd>
         </div>
 
