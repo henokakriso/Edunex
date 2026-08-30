@@ -151,7 +151,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, 
   transition: all var(--transition); white-space: nowrap;
   font-family: inherit;
 }
-.btn:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); text-decoration: none; transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); }
+.btn:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); text-decoration: none; box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 8px; }
@@ -175,7 +175,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .chip:focus-visible, 
   backdrop-filter: blur(10px);
   transition: box-shadow var(--transition), transform var(--transition);
 }
-.card-hover:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1); transform: translateY(-2px); }
+.card-hover:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
 .card-pad { padding: 28px; }
 
 /* ---------- Empty state ---------- */
@@ -511,7 +511,7 @@ table.data tr:hover td { background: var(--bg-hover); }
 .notif-item.unread:hover { background: var(--accent-soft); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 1px rgba(255,255,255,.15); }
 .notif-ico { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
 .notif-tab { display: block; text-decoration: none; color: inherit; transition: border-color .15s ease, transform .15s ease; }
-.notif-tab:hover { border-color: transparent; backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 6px 20px rgba(0,0,0,.08); transform: translateX(3px); }
+.notif-tab:hover { border-color: transparent; backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 6px 20px rgba(0,0,0,.08); }
 
 /* ---------- Gmail-style notification inbox ---------- */
 .notif-inbox { padding: 4px 0; }
@@ -555,7 +555,7 @@ table.data tr:hover td { background: var(--bg-hover); }
 .qnav button.answered { background: var(--success); color: #fff; border-color: var(--success); }
 .qnav button.flagged { background: var(--warning); color: #fff; border-color: var(--warning); }
 .qnav button.current { outline: 2px solid var(--accent); outline-offset: 2px; }
-.qnav button:hover { transform: scale(1.08); }
+.qnav button:hover { backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
 
 .timer {
   font-variant-numeric: tabular-nums;
@@ -770,7 +770,7 @@ kbd { font-family: inherit; }
 
 /* Stat boxes (ledger / dashboards) */
 .stat-box { padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-card); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); display: flex; flex-direction: column; gap: 6px; text-align: center; align-items: center; transition: all .25s cubic-bezier(.4,0,.2,1); }
-.stat-box:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1); transform: translateY(-2px); }
+.stat-box:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
 
 /* Chat list + bubbles (messages module) */
 .chat-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; transition: background var(--transition); }
@@ -803,7 +803,7 @@ kbd { font-family: inherit; }
 .pos-rel { position: relative; }
 .flex-1 { flex: 1; }
 .clickable { cursor: pointer; transition: all .25s cubic-bezier(.4,0,.2,1); }
-.clickable:hover { transform: translateY(-2px); border-color: transparent; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1); }
+.clickable:hover { border-color: transparent; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
 
 /* Filter chips */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1027,7 +1027,7 @@ a.list-row, div.list-row, .list-row:not(tr) {
   padding: 10px 6px; border-radius: 10px;
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: var(--bg-hover); box-shadow: 0 2px 12px rgba(0,0,0,.1); transform: translateY(-1px); }
+a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover { background: var(--glass-nav-hover); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 6px 24px rgba(0,0,0,.07); }
 tr.list-row { display: table-row; }
 
 /* Chart mount points render inline SVG nicely */
@@ -1039,7 +1039,7 @@ tr.list-row { display: table-row; }
 
 /* Stat cards (school profile) — icon left, value right, no overlap */
 .stat-card { display: flex; align-items: center; gap: 14px; transition: box-shadow .2s, transform .2s; }
-.stat-card:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.3), 0 8px 32px rgba(0,0,0,.08); transform: translateY(-2px); }
+.stat-card:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
 .stat-card .stat-icon { margin-bottom: 0; flex-shrink: 0; }
 .stat-card .stat-value { font-size: 1.6rem; line-height: 1.05; }
 .stat-card > div:last-child { min-width: 0; }
@@ -1110,7 +1110,7 @@ tr.list-row td:last-child { vertical-align: middle; }
   transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 .chain-block:first-child .chain-main { margin-top: 12px; }
-.chain-main:hover { backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 16px rgba(0,0,0,.06); transform: translateX(2px); }
+.chain-main:hover { backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.25), 0 4px 16px rgba(0,0,0,.06); }
 .chain-top { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
 .chain-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
 .chain-num { color: var(--text-faint); font-size: 12px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; padding: 2px 8px; }
@@ -1281,7 +1281,7 @@ tr.list-row td:last-child { vertical-align: middle; }
 .tutor-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; align-items: start; }
 .tutor-sidebar { position: sticky; top: 14px; }
 .btn-new-chat { width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 10px; border-radius: 11px; border: 1.5px dashed var(--accent); background: transparent; color: var(--accent); font-weight: 600; font-size: 12.5px; cursor: pointer; transition: all var(--transition); }
-.btn-new-chat:hover { background: var(--accent-soft); border-style: solid; transform: translateY(-1px); backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 6px 24px rgba(0,0,0,.08); }
+.btn-new-chat:hover { background: var(--accent-soft); border-style: solid; backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 6px 24px rgba(0,0,0,.08); }
 .btn-new-chat:active { transform: translateY(0); }
 .tutor-chat { display: flex; flex-direction: column; height: 640px; }
 .tutor-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
@@ -1317,7 +1317,7 @@ tr.list-row td:last-child { vertical-align: middle; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .suggest-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
 .suggest-chips button { border: 1px solid var(--border); background: var(--bg-elev); color: var(--text-dim); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; cursor: pointer; transition: all .15s ease; }
-.suggest-chips button:hover { border-color: transparent; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 4px 16px rgba(0,0,0,.07); color: var(--accent); background: var(--accent-soft); transform: translateY(-1px); }
+.suggest-chips button:hover { border-color: transparent; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.3), 0 4px 16px rgba(0,0,0,.07); color: var(--accent); background: var(--accent-soft); }
 .chat-tab { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 10px; cursor: pointer; transition: background var(--transition); text-decoration: none; color: inherit; border: 1px solid transparent; }
 .chat-tab:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 1px rgba(255,255,255,.15); }
 .chat-tab.active { background: var(--accent-soft); border-color: transparent; box-shadow: 0 0 0 1px rgba(13,148,136,.4), inset 0 1px 1px rgba(255,255,255,.25), 0 0 12px rgba(13,148,136,.1); }
@@ -1343,7 +1343,7 @@ tr.list-row td:last-child { vertical-align: middle; }
 
 /* ---- Teacher dashboard ---- */
 .tstat-card { transition: all .25s cubic-bezier(.4,0,.2,1); }
-.tstat-card:hover { transform: translateY(-3px); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1); }
+.tstat-card:hover { backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); box-shadow: 0 0 0 1px rgba(255,255,255,.25), inset 0 1px 1px rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.08); }
 .tstat-card .stat-ico { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
 .tstat-card:nth-child(2) .stat-ico { background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); }
 .tstat-card:nth-child(3) .stat-ico { background: color-mix(in srgb, var(--info) 12%, transparent); color: var(--info); }
