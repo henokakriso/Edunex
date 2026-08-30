@@ -52,14 +52,18 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 .cal-picker-sel option{background:var(--bg-elev);color:var(--text);border:none}
 .cal-picker-today{background:none;border:1px solid var(--glass-border);color:var(--accent);font-size:12px;font-weight:700;font-family:inherit;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .2s ease;position:relative;z-index:1;white-space:nowrap}
 .cal-picker-today:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.cal-picker-arrow{width:30px;height:30px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;position:relative;z-index:1;flex-shrink:0;line-height:1}
+.cal-picker-arrow:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
+.cal-picker-arrow:active{transform:scale(.92)}
 </style>
-<div class="page-head page-head-flex">
+<div class="page-head" style="flex-direction:column;align-items:center;text-align:center;gap:12px">
   <div>
     <h1><?= icon('calendar') ?> Calendar</h1>
     <p class="sub">Your schedule, classes, exams and deadlines at a glance</p>
   </div>
-  <div class="d-flex" style="gap:8px;align-items:center">
+  <div class="d-flex" style="gap:8px;align-items:center;justify-content:center">
     <div class="cal-picker">
+      <button type="button" class="cal-picker-arrow" onclick="calPrev()" title="Previous month">‹</button>
       <select class="cal-picker-sel" id="cal-month" onchange="calNav()">
         <?php foreach (['January','February','March','April','May','June','July','August','September','October','November','December'] as $i => $mn): ?>
           <option value="<?= $i + 1 ?>" <?= ($i + 1) === $month ? 'selected' : '' ?>><?= $mn ?></option>
@@ -70,6 +74,7 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
           <option value="<?= $y ?>" <?= $y === $year ? 'selected' : '' ?>><?= $y ?></option>
         <?php endfor; ?>
       </select>
+      <button type="button" class="cal-picker-arrow" onclick="calNext()" title="Next month">›</button>
       <button type="button" class="cal-picker-today" onclick="location.href='<?= e(url('calendar')) ?>'">Today</button>
     </div>
     <?php if ($canCreate): ?><button class="btn btn-primary" data-open-modal="new-event-modal">+ Event</button><?php endif; ?>
@@ -328,5 +333,19 @@ function calNav() {
   const m = document.getElementById('cal-month').value;
   const y = document.getElementById('cal-year').value;
   location.href = '<?= e(url('calendar')) ?>&month=' + m + '&year=' + y;
+}
+function calPrev() {
+  const sel = document.getElementById('cal-month');
+  const yr = document.getElementById('cal-year');
+  if (sel.value === '1') { sel.value = '12'; yr.value = parseInt(yr.value) - 1; }
+  else sel.value = parseInt(sel.value) - 1;
+  calNav();
+}
+function calNext() {
+  const sel = document.getElementById('cal-month');
+  const yr = document.getElementById('cal-year');
+  if (sel.value === '12') { sel.value = '1'; yr.value = parseInt(yr.value) + 1; }
+  else sel.value = parseInt(sel.value) + 1;
+  calNav();
 }
 </script>
