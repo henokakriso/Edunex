@@ -36,7 +36,7 @@ $cards = [
 
 <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px">
   <?php foreach ($cards as [$label, $val, $icon, $link]): ?>
-    <a class="card stat-card" href="<?= e(url($link)) ?>" style="padding:16px 14px;transition:transform .15s ease,box-shadow .15s ease;border:1px solid var(--border)">
+    <a class="card stat-card" href="<?= e(url($link)) ?>" style="padding:16px 14px">
       <div class="stat-icon" style="font-size:22px"><?= $icon ?></div>
       <div>
         <div class="stat-value" style="font-size:1.5rem"><?= is_int($val) ? (int)$val : e($val) ?></div>
@@ -115,7 +115,7 @@ $cards = [
   <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('school') ?> Schools</h3>
     <?php foreach ($schoolStats as $s): ?>
-      <a class="list-row" href="<?= e(url('admin/school&id=' . $s['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
+      <a class="list-row" href="<?= e(url('admin/school&id=' . $s['id'])) ?>">
         <div class="avatar" style="background:var(--accent-soft)"><?= icon('school') ?></div>
         <div class="flex-1">
           <b class="small"><?= e($s['name']) ?> <span class="tiny faint">(<?= e($s['code']) ?>)</span></b>
@@ -128,7 +128,7 @@ $cards = [
   <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('spark') ?> Recent signups</h3>
     <?php foreach ($newUsers as $nu): ?>
-      <a class="list-row" href="<?= e(url('admin/user&id=' . $nu['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
+      <a class="list-row" href="<?= e(url('admin/user&id=' . $nu['id'])) ?>">
         <div class="avatar"><?= e(mb_substr((string)$nu['name'], 0, 1)) ?></div>
         <div class="flex-1 small">
           <b><?= e($nu['name']) ?></b>
@@ -140,7 +140,7 @@ $cards = [
   <div class="card" style="padding:20px">
     <h3 class="card-title" style="margin-top:0"><?= icon('note') ?> Recent activity</h3>
     <?php foreach (array_slice($activity, 0, 8) as $a): ?>
-      <div class="list-row" style="padding:10px 12px;margin:4px 0;border-radius:10px">
+      <div class="list-row">
         <div class="flex-1 small">
           <b><?= e($a['user_name'] ?: 'System') ?></b> — <?= e($a['description']) ?>
           <p class="tiny faint"><?= e($a['action']) ?> · <?= e(time_ago($a['created_at'])) ?></p>
@@ -152,7 +152,7 @@ $cards = [
     <h3 class="card-title" style="margin-top:0"><?= icon('chain') ?> Blockchain integrity</h3>
     <p class="tiny faint" style="margin-top:-4px">Hash-chained ledger per school — grades, attendance & certificates</p>
     <?php foreach ($ledger as $lg): ?>
-      <a class="list-row" href="<?= e(url('admin/ledger&school=' . $lg['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
+      <a class="list-row" href="<?= e(url('admin/ledger&school=' . $lg['id'])) ?>">
         <div class="flex-1 small"><b><?= e($lg['school']) ?></b><p class="tiny faint"><?= (int)$lg['entries'] ?> chained records</p></div>
         <span class="badge <?= $lg['ok'] ? 'badge-success' : 'badge-danger' ?>"><?= $lg['ok'] ? icon('check-circle') . ' INTACT' : icon('ban-circle') . ' BROKEN #' . (int)$lg['broken_at'] ?></span>
       </a>
@@ -163,7 +163,7 @@ $cards = [
     <h3 class="card-title" style="margin-top:0"><?= icon('globe') ?> Regional admin performance</h3>
     <p class="tiny faint" style="margin-top:-4px">Capacity: 15 schools per admin · workload balance recommendations</p>
     <?php foreach ($adminPerf as $ap): ?>
-      <a class="list-row" href="<?= e(url('admin/user&id=' . (int)$ap['id'])) ?>" style="padding:10px 12px;margin:4px 0;border-radius:10px;text-decoration:none;transition:background .15s">
+      <a class="list-row" href="<?= e(url('admin/user&id=' . (int)$ap['id'])) ?>">
         <div class="avatar" style="background:var(--accent-soft)"><?= icon('globe') ?></div>
         <div class="flex-1 small">
           <b><?= e($ap['name']) ?></b>
