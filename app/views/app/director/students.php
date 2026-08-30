@@ -88,7 +88,7 @@
 <style>
 .student-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
 .scard { display:flex; flex-direction:column; gap:14px; padding:20px; border-radius:18px; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.scard:hover { transform:translateY(-3px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 8px 32px rgba(0,0,0,.08); border-color:transparent; }
+.scard:hover { transform:translateY(-3px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 8px 32px rgba(0,0,0,.08); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border-color:transparent; }
 .shead { display:flex; gap:14px; align-items:flex-start; }
 .savatar { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:#fff; flex:none; background:linear-gradient(135deg,#0284c7,#0ea5e9); }
 .shead-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }

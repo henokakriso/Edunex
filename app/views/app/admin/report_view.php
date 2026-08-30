@@ -58,7 +58,7 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
   color:var(--accent);border:1px solid rgba(99,102,241,.2);
   box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
-.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06)}
+.rv-btn--print:hover{background:rgba(99,102,241,.06);border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06);backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%)}
 [data-theme="dark"] .rv-btn--print{background:rgba(30,41,59,.5);border-color:rgba(99,102,241,.15)}
 .rv-btn svg{width:16px;height:16px;flex-shrink:0}
 
@@ -139,7 +139,7 @@ $ethiopianFlag = url('public/images/ethiopian-flag.jpeg');
 }
 .report-paper tbody td{padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.04);color:var(--text)}
 .report-paper tbody tr{transition:background .15s}
-.report-paper tbody tr:hover{background:rgba(99,102,241,.04)}
+.report-paper tbody tr:hover{background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);}
 .report-paper tbody tr:nth-child(even){background:rgba(99,102,241,.02)}
 [data-theme="dark"] .report-paper tbody td{border-bottom-color:rgba(255,255,255,.04)}
 [data-theme="dark"] .report-paper thead th{background:rgba(99,102,241,.12);border-bottom-color:rgba(99,102,241,.15)}

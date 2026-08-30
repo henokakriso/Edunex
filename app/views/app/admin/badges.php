@@ -22,7 +22,7 @@ $medalStyles = [
 ?>
 <style>
 .badge-card{position:relative;border-radius:16px;overflow:hidden;transition:all .2s}
-.badge-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.badge-card:hover{transform:translateY(-3px);backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 1px rgba(255,255,255,.35), 0 8px 32px rgba(0,0,0,.1);}
 .badge-medal{position:relative;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;border:3px solid rgba(255,255,255,.4);box-shadow:0 4px 12px var(--medal-shadow);margin:0 auto 10px}
 .badge-medal::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid var(--medal-ribbon)}
 .badge-medal .medal-shine{position:absolute;top:4px;left:8px;width:12px;height:6px;background:rgba(255,255,255,.4);border-radius:50%;transform:rotate(-30deg)}

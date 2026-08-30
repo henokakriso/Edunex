@@ -22,17 +22,17 @@
   .an-row:last-child { border-bottom: none; padding-bottom: 2px; }
   .perf-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 13px; background: var(--bg-elev); margin-bottom: 10px; transition: border-color .15s ease, transform .15s ease; text-decoration: none; color: inherit; }
   .perf-row:last-child { margin-bottom: 0; }
-  .perf-row:hover { border-color: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); transform: translateY(-1px); }
+  .perf-row:hover { border-color: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); transform: translateY(-1px); }
   .perf-ic { width: 40px; height: 40px; border-radius: 11px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-soft); color: var(--accent); }
   .perf-ic .ico { width: 19px; height: 19px; }
   .rank-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-elev); margin-bottom: 9px; transition: border-color .15s ease, transform .15s ease; text-decoration: none; color: inherit; }
   .rank-row:last-child { margin-bottom: 0; }
-  .rank-row:hover { border-color: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); transform: translateX(2px); }
+  .rank-row:hover { border-color: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); transform: translateX(2px); }
   .rank-badge { width: 26px; height: 26px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; }
   .rank-badge .ico { width: 14px; height: 14px; }
   .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
   .legend-row { border-radius: 9px; transition: background .12s ease; padding: 5px 8px; margin: 0 -8px; text-decoration: none; color: inherit; }
-  .legend-row:hover { background: var(--bg-hover); }
+  .legend-row:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
   .click-card { display: block; text-decoration: none; color: inherit; cursor: pointer; }
   .tstat-card .stat-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 3px 0; }
   .tstat-card .stat-text b { font-size: 1.55rem; line-height: 1.1; letter-spacing: -.02em; color: var(--text); }

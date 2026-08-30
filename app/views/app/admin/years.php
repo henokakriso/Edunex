@@ -5,7 +5,7 @@ $eduLabels = ['school'=>'Schools (K-12)','university'=>'Universities'];
 ?>
 <style>
 .yr-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .2s}
-.yr-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.yr-card:hover{backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 6px 24px rgba(0,0,0,.08);}
 .yr-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap}
 .yr-title{font-size:16px;font-weight:700;letter-spacing:-.01em}
 .yr-meta{font-size:13px;color:var(--text-secondary);margin-top:4px;line-height:1.5}
@@ -13,7 +13,7 @@ $eduLabels = ['school'=>'Schools (K-12)','university'=>'Universities'];
 .yr-section+.yr-section{border-top:1px solid var(--border)}
 .yr-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-faint);margin-bottom:10px}
 .sem-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:var(--bg-hover);margin-bottom:6px;transition:background .15s}
-.sem-row:hover{background:var(--border)}
+.sem-row:hover{background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 1px rgba(255,255,255,.15);}
 .sem-name{font-size:14px;font-weight:600;min-width:140px}
 .sem-dates{font-size:13px;color:var(--text-secondary);flex:1}
 .sem-actions{display:flex;gap:4px;opacity:.5;transition:opacity .15s}

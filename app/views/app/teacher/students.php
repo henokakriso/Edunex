@@ -3,7 +3,7 @@ $reExam = fn($s) => ($s['enrollment_status'] ?? 'active') === 'inactive';
 ?>
 <style>
   .stu-row { transition: background .15s; }
-  .stu-row:hover { background: var(--bg-hover); }
+  .stu-row:hover { background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 1px rgba(255,255,255,.15); }
   .parent-chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
   .parent-chip .avatar-sm { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .62rem; font-weight: 700; background: var(--accent-soft, rgba(29,105,201,.15)); color: var(--accent); }
   .course-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--bg); border: 1px solid var(--border); padding: 3px 10px; border-radius: 99px; font-size: .74rem; }

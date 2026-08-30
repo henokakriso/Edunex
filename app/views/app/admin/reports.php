@@ -21,7 +21,7 @@ $currentYear = (int)date('Y');
 ?>
 <style>
 .rpt-type{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:all .2s ease;background:var(--bg-elev)}
-.rpt-type:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06)}
+.rpt-type:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
 .rpt-type.selected{border-color:transparent;background:var(--accent-soft);box-shadow:0 0 0 1px rgba(13,148,136,.4),inset 0 1px 1px rgba(255,255,255,.25),0 0 12px rgba(13,148,136,.1)}
 .rpt-type input[type=checkbox]{display:none}
 .rpt-type .rpt-name{font-size:13.5px;font-weight:600;color:var(--text)}
@@ -30,7 +30,7 @@ $currentYear = (int)date('Y');
 .rpt-type.selected .rpt-dot{border-color:var(--accent);background:var(--accent)}
 .rpt-type.selected .rpt-dot::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
 .rpt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg-elev);transition:all .2s ease;text-decoration:none;color:inherit}
-.rpt-row:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06)}
+.rpt-row:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
 .rpt-row:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12);outline:none}
 </style>
 

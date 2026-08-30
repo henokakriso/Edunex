@@ -3,7 +3,7 @@ $asBadge = ['none'=>'','pending'=>'badge-warning','approved'=>'badge-success','r
 ?>
 <style>
 .ann-card{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:12px;border:1px solid var(--border);background:var(--bg-elev);transition:border-color .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit}
-.ann-card:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06)}
+.ann-card:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
 .ann-card:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15);outline:none}
 .ann-card.pinned{border-left:3px solid var(--accent)}
 .ann-title{font-size:14.5px;font-weight:600;color:var(--text);line-height:1.3}

@@ -13,7 +13,7 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 @media(max-width:980px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:1fr}}
 .kpi{padding:18px 20px;border-radius:14px;background:var(--bg-elev);border:1px solid var(--border);transition:all .2s ease}
-.kpi:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.25),0 6px 24px rgba(0,0,0,.07);transform:translateY(-1px)}
+.kpi:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.25),0 6px 24px rgba(0,0,0,.07);backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);transform:translateY(-1px)}
 .kpi .kpi-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .kpi .kpi-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .kpi .kpi-top .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);font-weight:600}
@@ -24,7 +24,7 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 /* Alert cards */
 .alert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .alert-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-elev);cursor:pointer;transition:all .2s ease}
-.alert-item:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);transform:translateY(-1px)}
+.alert-item:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);transform:translateY(-1px)}
 .alert-item .a-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .alert-item .a-dot.red{background:#ef4444}.alert-item .a-dot.orange{background:#f59e0b}.alert-item .a-dot.yellow{background:#eab308}
 .alert-item .a-text{font-size:12.5px;color:var(--text);flex:1}
@@ -34,7 +34,7 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .perf-table thead th{text-align:left;padding:10px 14px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border);white-space:nowrap}
 .perf-table tbody td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text)}
 .perf-table tbody tr{transition:background .12s}
-.perf-table tbody tr:hover{background:rgba(99,102,241,.03)}
+.perf-table tbody tr:hover{background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);}
 .perf-table tbody tr:nth-child(even){background:rgba(99,102,241,.02)}
 /* Workload bar */
 .wl-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
