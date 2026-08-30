@@ -1765,7 +1765,7 @@ table.table tr:hover td, table.data tr:hover td {
 }
 
 /* ─── SEARCH BOX — Apple Glass Search ─── */
-.search-box {
+form.search-box, .search-box {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1781,9 +1781,10 @@ table.table tr:hover td, table.data tr:hover td {
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   transition: all .3s cubic-bezier(.4,0,.2,1);
   position: relative;
+  margin: 0;
 }
 
-.search-box::before {
+form.search-box::before, .search-box::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1793,16 +1794,16 @@ table.table tr:hover td, table.data tr:hover td {
   transition: background .3s ease;
 }
 
-.search-box:focus-within::before {
+form.search-box:focus-within::before, .search-box:focus-within::before {
   background: linear-gradient(135deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.03) 50%, rgba(255,255,255,.06) 100%);
 }
 
-.search-box:focus-within {
+form.search-box:focus-within, .search-box:focus-within {
   border-color: rgba(13,148,136,.4) !important;
   box-shadow: 0 0 0 1px rgba(13,148,136,.3), inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 20px rgba(13,148,136,.08) !important;
 }
 
-.search-box input {
+form.search-box input, .search-box input {
   background: none;
   border: none;
   outline: none;
@@ -1816,11 +1817,11 @@ table.table tr:hover td, table.data tr:hover td {
   line-height: 42px;
 }
 
-.search-box input.has-ico {
+form.search-box input.has-ico, .search-box input.has-ico {
   padding-left: 6px;
 }
 
-.search-box .input-ico {
+form.search-box .input-ico, .search-box .input-ico {
   color: var(--text-faint);
   display: flex;
   align-items: center;
@@ -1832,30 +1833,20 @@ table.table tr:hover td, table.data tr:hover td {
   transition: color .2s ease;
 }
 
+form.search-box .input-ico svg,
+form.search-box .input-ico .ico,
 .search-box .input-ico svg,
 .search-box .input-ico .ico {
   width: 16px;
   height: 16px;
 }
 
-.search-box:focus-within .input-ico {
+form.search-box:focus-within .input-ico, .search-box:focus-within .input-ico {
   color: var(--accent);
 }
 
-.search-box input::placeholder {
+form.search-box input::placeholder, .search-box input::placeholder {
   color: var(--text-faint);
-}
-
-.search-box kbd {
-  background: rgba(255,255,255,.06);
-  border: 1px solid var(--glass-border);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 11px;
-  color: var(--text-faint);
-  font-family: inherit;
-  flex-shrink: 0;
-  line-height: 1;
 }
 
 /* ─── INPUT ICON WRAP — Apple Glass Search Field ─── */
