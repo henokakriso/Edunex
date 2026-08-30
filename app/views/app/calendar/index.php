@@ -119,51 +119,10 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 </div>
 <?php endif; ?>
 
-<div class="grid" style="grid-template-columns:1.55fr 1fr;gap:18px;align-items:start">
-  <div class="card" style="padding:16px 18px">
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
-      <?php foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $d): ?>
-        <div class="cal-dow tiny faint" style="text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase"><?= $d ?></div>
-      <?php endforeach; ?>
-      <?php for ($i = 0; $i < $startDow; $i++): ?><div></div><?php endfor; ?>
-      <?php for ($d = 1; $d <= $daysInMonth; $d++): $isToday = $d === $todayDay && $isThisMonth; $dayEvents = $byDay[$d] ?? []; ?>
-        <div class="cal-day<?= $isToday ? ' today' : '' ?>" data-day="<?= $d ?>" data-events='<?= e(json_encode(array_map(fn($e) => ['title'=>$e['title'],'type'=>$e['type']??'event','time'=>$e['start_at']?date('H:i',strtotime($e['start_at'])):'','all_day'=>(int)($e['all_day']??0)], $dayEvents))) ?>'>
-          <div class="d-flex" style="align-items:center;justify-content:space-between;margin-bottom:4px">
-            <span class="cal-date-num"><?= $d ?></span>
-            <?php if ($dayEvents): ?><span class="tiny faint" style="margin-left:auto"><?= count($dayEvents) ?><?= count($dayEvents)===1 ? '' : 's' ?></span><?php endif; ?>
-          </div>
-          <div>
-            <?php if ($dayEvents): ?>
-              <div class="d-flex" style="gap:4px;flex-wrap:wrap;margin-top:6px;justify-content:center">
-                <?php foreach (array_unique(array_map(fn($e) => $e['type'] ?? 'event', $dayEvents)) as $t): ?>
-                  <span title="<?= e(ucfirst($t)) ?>" style="width:10px;height:10px;border-radius:50%;background:<?= $typeCls[$t] ?? 'var(--muted)' ?>;flex:none;box-shadow:0 0 6px <?= $typeCls[$t] ?? 'var(--muted)' ?>40"></span>
-                <?php endforeach; ?>
-              </div>
-            <?php endif; ?>
-          </div>
-        </div>
-      <?php endfor; ?>
-    </div>
-  </div>
+<div class="grid" style="grid-template-columns:1fr 1.6fr 1fr;gap:18px;align-items:start">
 
+  <!-- LEFT: Events -->
   <div style="display:flex;flex-direction:column;gap:16px">
-    <div class="card" style="padding:16px 18px">
-      <h3 class="card-title" style="margin-top:0"><?= icon('palette') ?> Event Types</h3>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <?php foreach (array_unique($typeCls) as $tk => $tc): ?>
-          <div class="d-flex" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg)">
-            <span style="width:12px;height:12px;border-radius:50%;background:<?= $tc ?>;flex:none;box-shadow:0 0 8px <?= $tc ?>40"></span>
-            <span style="font-size:13px;font-weight:600;color:var(--text)"><?= e(ucfirst($tk)) ?></span>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Events & Exams below calendar -->
-<div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-top:18px">
-  <div style="display:flex;flex-direction:column;gap:18px">
     <div class="card" style="padding:18px 20px">
       <h3 class="card-title" style="margin-top:0"><?= icon('calendar') ?> This month's events</h3>
       <?php if ($events): ?>
@@ -211,7 +170,49 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
     </div>
     <?php endif; ?>
   </div>
-  <div></div>
+
+  <!-- CENTER: Calendar -->
+  <div class="card" style="padding:16px 18px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
+      <?php foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $d): ?>
+        <div class="cal-dow tiny faint" style="text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase"><?= $d ?></div>
+      <?php endforeach; ?>
+      <?php for ($i = 0; $i < $startDow; $i++): ?><div></div><?php endfor; ?>
+      <?php for ($d = 1; $d <= $daysInMonth; $d++): $isToday = $d === $todayDay && $isThisMonth; $dayEvents = $byDay[$d] ?? []; ?>
+        <div class="cal-day<?= $isToday ? ' today' : '' ?>" data-day="<?= $d ?>" data-events='<?= e(json_encode(array_map(fn($e) => ['title'=>$e['title'],'type'=>$e['type']??'event','time'=>$e['start_at']?date('H:i',strtotime($e['start_at'])):'','all_day'=>(int)($e['all_day']??0)], $dayEvents))) ?>'>
+          <div class="d-flex" style="align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span class="cal-date-num"><?= $d ?></span>
+            <?php if ($dayEvents): ?><span class="tiny faint" style="margin-left:auto"><?= count($dayEvents) ?><?= count($dayEvents)===1 ? '' : 's' ?></span><?php endif; ?>
+          </div>
+          <div>
+            <?php if ($dayEvents): ?>
+              <div class="d-flex" style="gap:4px;flex-wrap:wrap;margin-top:6px;justify-content:center">
+                <?php foreach (array_unique(array_map(fn($e) => $e['type'] ?? 'event', $dayEvents)) as $t): ?>
+                  <span title="<?= e(ucfirst($t)) ?>" style="width:10px;height:10px;border-radius:50%;background:<?= $typeCls[$t] ?? 'var(--muted)' ?>;flex:none;box-shadow:0 0 6px <?= $typeCls[$t] ?? 'var(--muted)' ?>40"></span>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endfor; ?>
+    </div>
+  </div>
+
+  <!-- RIGHT: Event Types -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card" style="padding:16px 18px">
+      <h3 class="card-title" style="margin-top:0"><?= icon('palette') ?> Event Types</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <?php foreach (array_unique($typeCls) as $tk => $tc): ?>
+          <div class="d-flex" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg)">
+            <span style="width:12px;height:12px;border-radius:50%;background:<?= $tc ?>;flex:none;box-shadow:0 0 8px <?= $tc ?>40"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--text)"><?= e(ucfirst($tk)) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
