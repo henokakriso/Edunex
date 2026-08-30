@@ -6,8 +6,9 @@
   </div>
   <form method="get" class="inline">
     <input type="hidden" name="r" value="director/students">
-    <div class="input-icon-wrap">
-      <input class="input" style="width:230px;padding-right:30px" name="q" id="stu-search" value="<?= e($q) ?>" placeholder="Search name, ID, email…" oninput="document.getElementById('stu-clear').style.display=this.value?'flex':'none'">
+    <div class="input-icon-wrap" style="width:250px">
+      <span class="input-ico"><?= icon('search') ?></span>
+      <input class="input has-ico" name="q" id="stu-search" value="<?= e($q) ?>" placeholder="Search name, ID, email…" oninput="document.getElementById('stu-clear').style.display=this.value?'flex':'none'">
       <button type="button" class="input-icon-btn" id="stu-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('stu-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
     </div>
   </form>

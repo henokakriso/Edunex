@@ -31,7 +31,7 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
     <input type="hidden" name="r" value="admin/regions">
     <input type="hidden" name="tab" value="regions">
     <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
-      <div class="input-icon-wrap"><input class="input" name="q" value="<?= e($q) ?>" placeholder="Region name" style="min-width:220px;padding-right:36px"><button type="submit" class="input-icon-btn" title="Search"><?= icon('search') ?></button></div>
+      <div class="input-icon-wrap" style="min-width:220px"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="reg-reg-search" value="<?= e($q) ?>" placeholder="Region name" oninput="document.getElementById('reg-reg-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="reg-reg-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('reg-reg-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
     </div>
   </form>
   <button class="btn btn-primary" data-open-modal="new-region-modal">+ New region</button>
@@ -102,7 +102,7 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
     <input type="hidden" name="r" value="admin/regions">
     <input type="hidden" name="tab" value="zones">
     <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
-      <div class="input-icon-wrap"><input class="input" name="q" value="<?= e($q) ?>" placeholder="Zone name" style="min-width:220px;padding-right:36px"><button type="submit" class="input-icon-btn" title="Search"><?= icon('search') ?></button></div>
+      <div class="input-icon-wrap" style="min-width:220px"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="zone-search" value="<?= e($q) ?>" placeholder="Zone name" oninput="document.getElementById('zone-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="zone-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('zone-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
     </div>
     <div class="flex-col"><label class="small faint">Region</label>
       <select class="input" name="region_id" onchange="this.form.submit()">
@@ -181,7 +181,7 @@ $mk = fn(string $k, string $v = '') => url('admin/regions?' . http_build_query(a
     <input type="hidden" name="r" value="admin/regions">
     <input type="hidden" name="tab" value="woredas">
     <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
-      <div class="input-icon-wrap"><input class="input" name="q" value="<?= e($q) ?>" placeholder="Woreda name" style="min-width:220px;padding-right:36px"><button type="submit" class="input-icon-btn" title="Search"><?= icon('search') ?></button></div>
+      <div class="input-icon-wrap" style="min-width:220px"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="wrd-search" value="<?= e($q) ?>" placeholder="Woreda name" oninput="document.getElementById('wrd-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="wrd-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('wrd-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
     </div>
     <div class="flex-col"><label class="small faint">Region</label>
       <select class="input" name="region_id" onchange="this.form.submit()">

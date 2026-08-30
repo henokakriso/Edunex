@@ -59,7 +59,7 @@ $canUpload = $canUpload ?? false;
 <div class="card" style="margin-bottom:18px">
   <form method="get" class="flex gap-12" style="align-items:end">
     <input type="hidden" name="r" value="library">
-    <div class="flex-col flex-1"><label class="small faint">Search</label><div class="input-icon-wrap"><input class="input" name="q" id="lib-search" value="<?= e($q) ?>" placeholder="Search by title, author or category…" style="padding-right:30px" oninput="document.getElementById('lib-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="lib-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('lib-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div></div>
+    <div class="flex-col flex-1"><label class="small faint">Search</label><div class="input-icon-wrap"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="lib-search" value="<?= e($q) ?>" placeholder="Search by title, author or category…" oninput="document.getElementById('lib-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="lib-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('lib-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div></div>
     <div class="flex-col"><label class="small faint">Type</label>
       <select class="input" name="type" onchange="this.form.submit()">
         <option value="">All types</option>

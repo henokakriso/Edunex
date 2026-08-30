@@ -19,7 +19,8 @@ $highlight = function (string $text) use ($q): string {
 
 <form method="get" class="flex gap-8" style="margin-bottom:20px">
   <div class="input-icon-wrap" style="flex:1">
-    <input class="input" style="width:100%;padding-right:30px" type="search" name="q" id="gl-search" placeholder="Search courses, lessons, exams, people, forum…" value="<?= e($q) ?>" autofocus oninput="document.getElementById('gl-clear').style.display=this.value?'flex':'none'">
+    <span class="input-ico"><?= icon('search') ?></span>
+    <input class="input has-ico" style="width:100%" type="search" name="q" id="gl-search" placeholder="Search courses, lessons, exams, people, forum…" value="<?= e($q) ?>" autofocus oninput="document.getElementById('gl-clear').style.display=this.value?'flex':'none'">
     <button type="button" class="input-icon-btn" id="gl-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('gl-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
   </div>
   <button class="btn btn-primary">Search</button>

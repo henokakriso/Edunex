@@ -7,8 +7,9 @@
   <div class="flex gap-8" style="flex-wrap:wrap">
     <form method="get" class="inline">
       <input type="hidden" name="r" value="director/teachers">
-      <div class="input-icon-wrap">
-        <input class="input" style="width:230px;padding-right:30px" type="text" name="q" id="tchr-search" value="<?= e($q ?? '') ?>" placeholder="Search name, email, phone…" oninput="document.getElementById('tchr-clear').style.display=this.value?'flex':'none'">
+      <div class="input-icon-wrap" style="width:250px">
+        <span class="input-ico"><?= icon('search') ?></span>
+        <input class="input has-ico" type="text" name="q" id="tchr-search" value="<?= e($q ?? '') ?>" placeholder="Search name, email, phone…" oninput="document.getElementById('tchr-clear').style.display=this.value?'flex':'none'">
         <button type="button" class="input-icon-btn" id="tchr-clear" style="display:<?= ($q ?? '') ? 'flex' : 'none' ?>" onclick="document.getElementById('tchr-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
       </div>
     </form>

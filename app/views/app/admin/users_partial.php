@@ -33,7 +33,7 @@ $mk = fn(string $k, string $v = '') => url('admin/users?' . http_build_query(arr
   <form method="get" class="ajax-nav flex gap-10" style="flex-wrap:wrap;align-items:end">
     <input type="hidden" name="r" value="admin/users">
     <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
-      <div class="input-icon-wrap"><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, email or ID" style="min-width:220px;padding-right:36px"><button type="submit" class="input-icon-btn" title="Search"><?= icon('search') ?></button></div>
+      <div class="input-icon-wrap"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="usr-search" value="<?= e($q) ?>" placeholder="Name, email or ID" oninput="document.getElementById('usr-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="usr-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('usr-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
     </div>
     <div class="flex-col"><label class="small faint">Status</label>
       <select class="input" name="status" onchange="this.form.submit()">
