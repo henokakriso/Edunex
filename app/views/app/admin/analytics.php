@@ -7,13 +7,16 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .cmd-section{margin-bottom:28px}
 .cmd-section .section-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .cmd-section .section-head h2{margin:0;font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text)}
-.cmd-section .section-head .section-line{flex:1;height:1px;background:var(--border)}
-/* KPI Cards */
+.cmd-section .section-head .section-line{flex:1;height:1px;background:var(--glass-border)}
+/* KPI Cards — Apple Glass */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 @media(max-width:980px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:1fr}}
-.kpi{padding:18px 20px;border-radius:14px;background:var(--bg-elev);border:1px solid var(--border);transition:all .2s ease}
-.kpi:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.25),0 6px 24px rgba(0,0,0,.07);backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);transform:translateY(-1px)}
+.kpi{padding:18px 20px;border-radius:14px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.kpi:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow)}
+.kpi:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 50%,rgba(255,255,255,.06) 100%)}
+.kpi:focus-visible{outline:none;border-color:rgba(255,255,255,.25);box-shadow:0 0 0 2px var(--bg),0 0 0 4px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.4),0 0 16px rgba(255,255,255,.04)}
 .kpi .kpi-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .kpi .kpi-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .kpi .kpi-top .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);font-weight:600}
@@ -21,35 +24,38 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .kpi .kpi-sub{font-size:11.5px;color:var(--text-secondary);margin-top:4px}
 .kpi .kpi-sub .up{color:var(--success)}
 .kpi .kpi-sub .down{color:var(--danger)}
-/* Alert cards */
+/* Alert cards — Apple Glass */
 .alert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.alert-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-elev);cursor:pointer;transition:all .2s ease}
-.alert-item:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);transform:translateY(-1px)}
+.alert-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.alert-item::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.alert-item:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow)}
+.alert-item:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 50%,rgba(255,255,255,.06) 100%)}
+.alert-item:focus-visible{outline:none;border-color:rgba(255,255,255,.25);box-shadow:0 0 0 2px var(--bg),0 0 0 4px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.4),0 0 16px rgba(255,255,255,.04)}
 .alert-item .a-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .alert-item .a-dot.red{background:#ef4444}.alert-item .a-dot.orange{background:#f59e0b}.alert-item .a-dot.yellow{background:#eab308}
 .alert-item .a-text{font-size:12.5px;color:var(--text);flex:1}
 .alert-item .a-count{font-size:13px;font-weight:700;color:var(--text)}
-/* Performance table */
+/* Performance table — Apple Glass */
 .perf-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
-.perf-table thead th{text-align:left;padding:10px 14px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border);white-space:nowrap}
-.perf-table tbody td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text)}
-.perf-table tbody tr{transition:background .12s}
-.perf-table tbody tr:hover{background: var(--glass-nav-hover); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);}
-.perf-table tbody tr:nth-child(even){background:rgba(99,102,241,.02)}
-/* Workload bar */
+.perf-table thead th{text-align:left;padding:10px 14px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--glass-border);white-space:nowrap}
+.perf-table tbody td{padding:10px 14px;border-bottom:1px solid var(--glass-border);color:var(--text)}
+.perf-table tbody tr{transition:all .2s ease}
+.perf-table tbody tr:hover{background:var(--glass-hover-bg);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.04)}
+.perf-table tbody tr:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.15)}
+/* Workload bar — Apple Glass */
 .wl-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .wl-bar .wl-name{width:120px;font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wl-bar .wl-track{flex:1;height:8px;border-radius:4px;background:var(--border);overflow:hidden}
+.wl-bar .wl-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--glass-border);overflow:hidden}
 .wl-bar .wl-fill{height:100%;border-radius:4px;transition:width .4s ease}
 .wl-bar .wl-pct{width:40px;font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
 /* Score breakdown */
-.score-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.score-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--glass-border)}
 .score-row:last-child{border-bottom:none}
 .score-row .sr-label{flex:1;font-size:12.5px;color:var(--text)}
 .score-row .sr-weight{font-size:11px;color:var(--text-secondary);width:40px;text-align:right}
 .score-row .sr-val{font-size:13px;font-weight:700;width:30px;text-align:right;font-variant-numeric:tabular-nums}
-/* Geographic */
-.geo-map-wrap{position:relative;background:var(--bg-elev);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+/* Geographic — Apple Glass */
+.geo-map-wrap{position:relative;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:16px;overflow:hidden;backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
 .geo-map-img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.08))}
 .geo-map-overlay{position:absolute;inset:0}
 .geo-dot{position:absolute;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:3;transition:all .2s;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 14px rgba(99,102,241,.5);animation:geoPulse 2.5s ease-in-out infinite}
@@ -57,24 +63,24 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 @keyframes geoPulse{0%,100%{box-shadow:0 0 10px rgba(99,102,241,.4)}50%{box-shadow:0 0 22px rgba(99,102,241,.7)}}
 .geo-dot .dot-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.8),0 0 12px rgba(0,0,0,.5);pointer-events:none}
 [data-theme="dark"] .geo-dot .dot-label{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9)}
-/* Popup */
-.geo-popup{position:absolute;width:280px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:20;padding:0;display:none;overflow:hidden}
+/* Popup — Apple Glass */
+.geo-popup{position:absolute;width:280px;background:var(--glass-bg);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--glass-border);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:20;padding:0;display:none;overflow:hidden}
 .geo-popup.show{display:block;animation:popupIn .2s ease-out}
 @keyframes popupIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 [data-theme="dark"] .geo-popup{background:rgba(30,41,59,.95);border-color:rgba(255,255,255,.08)}
-.geo-popup .pop-head{padding:14px 16px 10px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+.geo-popup .pop-head{padding:14px 16px 10px;border-bottom:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center}
 .geo-popup .pop-head h4{margin:0;font-size:14px;font-weight:700}
 .geo-popup .pop-close{background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px;padding:0 4px;line-height:1}
 .geo-popup .pop-body{padding:12px 16px}
 .geo-popup .pop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.geo-popup .pop-stat{padding:8px 10px;border-radius:8px;background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.08)}
+.geo-popup .pop-stat{padding:8px 10px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
 .geo-popup .pop-stat .ps-val{font-size:18px;font-weight:800;color:var(--text)}
 .geo-popup .pop-stat .ps-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-secondary)}
 .geo-popup .pop-stat.pop-accent{background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.15)}
 .geo-popup .pop-stat.pop-accent .ps-val{color:var(--accent)}
-.geo-popup .pop-bar{margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06)}
+.geo-popup .pop-bar{margin-top:10px;padding-top:10px;border-top:1px solid var(--glass-border)}
 .geo-popup .pop-bar-label{font-size:10px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px}
-.geo-popup .pop-bar-track{height:6px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden}
+.geo-popup .pop-bar-track{height:6px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--glass-border);overflow:hidden}
 .geo-popup .pop-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
 /* Connection lines */
 .geo-lines{position:absolute;inset:0;pointer-events:none;z-index:1}
@@ -86,15 +92,20 @@ $completionRate = $enrollments > 0 ? round($completions/$enrollments*100,1) : 0;
 .geo-legend .gl-students::before{background:#22c55e}
 .geo-legend .gl-teachers::before{background:#f59e0b}
 .geo-legend .gl-active::before{background:#10b981}
+/* Geographic summary cards — Apple Glass */
 .geo-summary{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.geo-summary .gs-card{flex:1;min-width:120px;padding:10px 14px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border);text-align:center}
+.geo-summary .gs-card{flex:1;min-width:120px;padding:10px 14px;border-radius:12px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);text-align:center;transition:all .25s ease;position:relative;overflow:hidden}
+.geo-summary .gs-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none}
+.geo-summary .gs-card:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.05),var(--glass-hover-shadow)}
 .geo-summary .gs-val{font-size:18px;font-weight:800;color:var(--accent)}
 .geo-summary .gs-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);margin-top:2px}
+/* Geo data table — Apple Glass */
 .geo-geo-table{margin-top:16px}
 .geo-geo-table table{width:100%;border-collapse:collapse;font-size:12px}
-.geo-geo-table th{text-align:left;padding:8px 12px;background:var(--bg);font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
-.geo-geo-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
-.geo-geo-table tr:hover td{background:rgba(255,255,255,.03)}
+.geo-geo-table th{text-align:left;padding:8px 12px;background:transparent;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--glass-border)}
+.geo-geo-table td{padding:8px 12px;border-bottom:1px solid var(--glass-border)}
+.geo-geo-table tr:hover td{background:var(--glass-hover-bg);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.geo-geo-table tr:focus-visible td{outline:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
 </style>
 
 <!-- ═══════════════ PAGE HEAD ═══════════════ -->
