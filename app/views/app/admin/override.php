@@ -6,7 +6,7 @@
   </div>
   <form method="get" class="flex gap-6" action="<?= e(url('admin/override')) ?>">
     <input class="input" name="q" value="<?= e($q) ?>" placeholder="Search name or email…" style="min-width:240px">
-    <button class="btn btn-primary"><?= icon('search') ?> Search</button>
+    <button class="btn btn-ghost" title="Search"><?= icon('search') ?></button>
   </form>
 </div>
 
@@ -19,7 +19,7 @@
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('role')) ?>">Role<span class="sort-arrow<?= $sort==='role' ? ' active' : '' ?>"><?= $sort==='role' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('school')) ?>">School<span class="sort-arrow<?= $sort==='school' ? ' active' : '' ?>"><?= $sort==='school' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
       <th><a class="ajax-nav sort-link" href="<?= e($oSortUrl('status')) ?>">Status<span class="sort-arrow<?= $sort==='status' ? ' active' : '' ?>"><?= $sort==='status' && $dir==='desc' ? '&#9660;' : '&#9650;' ?></span></a></th>
-      <th style="width:430px">Emergency actions</th>
+      <th style="text-align:right">Emergency actions</th>
     </tr></thead>
     <tbody>
       <?php $i = 0; foreach ($rows as $r): ?>
@@ -30,27 +30,27 @@
           <td class="small"><?= e($r['school_name'] ?: '—') ?></td>
           <td><span class="badge <?= $r['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($r['status']) ?></span></td>
           <td>
-            <div class="flex gap-6" style="flex-wrap:wrap">
+            <div class="eo-actions">
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
-                <button class="btn btn-xs btn-ghost" name="unlock" value="1"><?= icon('unlock') ?> Unlock</button>
+                <button class="btn btn-xs btn-ghost" name="unlock" value="1" title="Unlock account"><?= icon('unlock') ?></button>
               </form>
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
                 <input type="hidden" name="password" value="">
-                <button class="btn btn-xs btn-ghost" name="reset_password" value="1" onclick="var p=prompt('New password (leave empty for random):');this.form.password.value=p||''"><?= icon('key') ?> Reset pass</button>
+                <button class="btn btn-xs btn-ghost" name="reset_password" value="1" title="Reset password" onclick="var p=prompt('New password (leave empty for random):');this.form.password.value=p||''"><?= icon('key') ?></button>
               </form>
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
-                <button class="btn btn-xs btn-ghost" name="revoke_sessions" value="1" onclick="return confirm('Revoke ALL sessions for this user?')"><?= icon('close') ?> Revoke sessions</button>
+                <button class="btn btn-xs btn-ghost" name="revoke_sessions" value="1" title="Revoke all sessions" onclick="return confirm('Revoke ALL sessions for this user?')"><?= icon('close') ?></button>
               </form>
               <form method="post" class="inline">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
-                <button class="btn btn-xs btn-danger" name="impersonate" value="1" onclick="return confirm('Impersonate this user? This is logged.')"><?= icon('user') ?> Impersonate</button>
+                <button class="btn btn-xs btn-danger" name="impersonate" value="1" title="Impersonate user" onclick="return confirm('Impersonate this user? This is logged.')"><?= icon('user') ?></button>
               </form>
             </div>
           </td>

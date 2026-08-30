@@ -1961,3 +1961,20 @@ a.list-row:hover, div.list-row:hover, .list-row:not(tr):hover {
   position: relative;
   z-index: 2;
 }
+
+/* ─── Emergency Override — Balanced 2x2 action grid ─── */
+.eo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  justify-items: end;
+}
+
+.eo-actions .btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
