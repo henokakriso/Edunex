@@ -1768,14 +1768,14 @@ table.table tr:hover td, table.data tr:hover td {
 .search-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
   border-radius: 12px;
-  padding: 0 14px;
-  height: 38px;
+  padding: 0 16px;
+  height: 42px;
   flex: 1;
-  max-width: 400px;
+  max-width: 440px;
   color: var(--text) !important;
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
@@ -1808,22 +1808,34 @@ table.table tr:hover td, table.data tr:hover td {
   outline: none;
   color: var(--text);
   flex: 1;
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: inherit;
   min-width: 0;
+  padding: 0;
+  height: 100%;
+  line-height: 42px;
 }
 
 .search-box input.has-ico {
-  padding-left: 4px;
+  padding-left: 6px;
 }
 
 .search-box .input-ico {
   color: var(--text-faint);
   display: flex;
   align-items: center;
+  justify-content: center;
   pointer-events: none;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   transition: color .2s ease;
+}
+
+.search-box .input-ico svg,
+.search-box .input-ico .ico {
+  width: 16px;
+  height: 16px;
 }
 
 .search-box:focus-within .input-ico {
@@ -1835,13 +1847,15 @@ table.table tr:hover td, table.data tr:hover td {
 }
 
 .search-box kbd {
-  background: var(--glass-bg);
+  background: rgba(255,255,255,.06);
   border: 1px solid var(--glass-border);
   border-radius: 6px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   font-size: 11px;
   color: var(--text-faint);
+  font-family: inherit;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 /* ─── INPUT ICON WRAP — Apple Glass Search Field ─── */
