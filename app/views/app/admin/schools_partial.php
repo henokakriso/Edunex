@@ -26,7 +26,9 @@ $mk = fn(string $k, string $v = '') => url('admin/schools?' . http_build_query(a
 <div class="card" style="margin-bottom:18px">
   <form method="get" class="ajax-nav flex gap-10" style="flex-wrap:wrap;align-items:end">
     <input type="hidden" name="r" value="admin/schools">
-    <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label><input class="input" name="q" value="<?= e($q) ?>" placeholder="Name, code or city" style="min-width:220px"></div>
+    <div class="flex-col flex-1" style="min-width:200px"><label class="small faint">Search</label>
+      <div class="input-icon-wrap" style="min-width:220px"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="sch-list-search" value="<?= e($q) ?>" placeholder="Name, code or city" oninput="document.getElementById('sch-list-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="sch-list-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('sch-list-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
+    </div>
     <div class="flex-col"><label class="small faint">Status</label>
       <select class="input" name="status" onchange="this.form.submit()">
         <option value="">All statuses</option>

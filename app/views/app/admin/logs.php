@@ -29,7 +29,7 @@ $filterParams = array_filter(['action'=>$action, 'q'=>$q, 'days'=>$days]);
       </div>
       <div class="flex-col">
         <label class="small faint">Search detail</label>
-        <input class="input" name="q" value="<?= e($q) ?>" placeholder="keyword…" style="min-width:180px">
+        <div class="input-icon-wrap" style="min-width:200px"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="log-search" value="<?= e($q) ?>" placeholder="keyword…" oninput="document.getElementById('log-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="log-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('log-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div>
       </div>
       <div class="flex-col">
         <label class="small faint">Since</label>

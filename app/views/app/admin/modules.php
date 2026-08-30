@@ -132,10 +132,10 @@ if ($view === 'detail' && !empty($mod)): ?>
           <div>
             <div class="flex-between" style="margin-bottom:6px">
               <div class="small" style="font-weight:600"><?= icon('school') ?> Schools</div>
-              <div class="input-icon-wrap" style="width:200px">
-                <span class="input-ico" style="left:6px"><?= icon('search') ?></span>
-                <input type="text" class="input has-ico" id="school-search" placeholder="Search schools…" oninput="filterSchools();document.getElementById('sch-clear').style.display=this.value?'flex':'none'" style="padding-left:24px">
-                <button type="button" class="input-icon-btn" id="sch-clear" style="display:none;right:4px" onclick="document.getElementById('school-search').value='';this.style.display='none';filterSchools()"><?= icon('x') ?></button>
+               <div class="input-icon-wrap" style="width:200px">
+                <span class="input-ico"><?= icon('search') ?></span>
+                <input type="text" class="input has-ico" id="school-search" placeholder="Search schools…" oninput="filterSchools();document.getElementById('sch-clear').style.display=this.value?'flex':'none'">
+                <button type="button" class="input-icon-btn" id="sch-clear" style="display:none" onclick="document.getElementById('school-search').value='';this.style.display='none';filterSchools()"><?= icon('x') ?></button>
               </div>
             </div>
             <div id="school-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
