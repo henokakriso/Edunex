@@ -6,7 +6,10 @@
   </div>
   <form method="get" class="flex gap-6" action="<?= e(url('admin/override')) ?>">
     <input type="hidden" name="r" value="admin/override">
-    <input class="input" name="q" value="<?= e($q) ?>" placeholder="Search name or email…" style="min-width:240px">
+    <div class="input-icon-wrap">
+      <input class="input" name="q" id="eo-search" value="<?= e($q) ?>" placeholder="Search name or email…" style="min-width:240px;padding-right:30px" oninput="document.getElementById('eo-clear').style.display=this.value?'flex':'none'">
+      <button type="button" class="input-icon-btn" id="eo-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('eo-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
+    </div>
     <button class="btn btn-ghost" title="Search"><?= icon('search') ?></button>
   </form>
 </div>
