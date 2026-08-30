@@ -55,6 +55,13 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 .cal-picker-arrow{width:30px;height:30px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;position:relative;z-index:1;flex-shrink:0;line-height:1}
 .cal-picker-arrow:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
 .cal-picker-arrow:active{transform:scale(.92)}
+.cal-list-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);transition:all .25s ease;position:relative;overflow:hidden;cursor:default}
+.cal-list-item::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none}
+.cal-list-item:hover{border-color:var(--glass-hover-border);box-shadow:var(--glass-hover-shadow);background:var(--glass-hover-bg);transform:translateY(-1px)}
+.cal-list-item:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.09) 0%,transparent 50%,rgba(255,255,255,.03) 100%)}
+.cal-list-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.cal-list-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.cal-list-body b{font-size:14px;color:var(--text)}
 </style>
 <div class="page-head" style="flex-direction:column;align-items:center;text-align:center;gap:12px">
   <div>
@@ -151,54 +158,60 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
         <?php endforeach; ?>
       </div>
     </div>
-    <div class="card" style="padding:16px 18px">
+  </div>
+</div>
+
+<!-- Events & Exams below calendar -->
+<div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-top:18px">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card" style="padding:18px 20px">
       <h3 class="card-title" style="margin-top:0"><?= icon('calendar') ?> This month's events</h3>
-      <?php foreach ($events as $ev): ?>
-        <div class="list-row" style="padding:9px 0;border-bottom:1px solid var(--border)" data-event="<?= (int)$ev['id'] ?>">
-          <span style="width:4px;height:36px;border-radius:99px;background:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>;flex:none"></span>
-          <div class="flex-1">
-            <div class="d-flex" style="align-items:center;gap:8px;flex-wrap:wrap">
-              <b class="small event-link" style="font-size:14px"><?= e($ev['title']) ?></b>
-              <span class="<?= $typeBadge[$ev['type']] ?? 'badge muted' ?>" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em"><?= e(ucfirst($ev['type'])) ?></span>
+      <?php if ($events): ?>
+        <div style="display:flex;flex-direction:column;gap:6px">
+        <?php foreach ($events as $ev): ?>
+          <div class="cal-list-item" data-event="<?= (int)$ev['id'] ?>">
+            <span class="cal-list-dot" style="background:<?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>;box-shadow:0 0 8px <?= $typeCls[$ev['type']] ?? 'var(--muted)' ?>40"></span>
+            <div class="cal-list-body">
+              <div class="d-flex" style="align-items:center;gap:8px;flex-wrap:wrap">
+                <b><?= e($ev['title']) ?></b>
+                <span class="<?= $typeBadge[$ev['type']] ?? 'badge muted' ?>" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em"><?= e(ucfirst($ev['type'])) ?></span>
+              </div>
+              <span class="tiny faint"><?= e(date('M j, H:i', strtotime($ev['start_at']))) ?></span>
             </div>
-            <p class="tiny faint"><?= e(date('M j, H:i', strtotime($ev['start_at']))) ?><?= $ev['location'] ? ' · ' . e($ev['location']) : '' ?></p>
-            <?php if (!empty($ev['description'])): ?><p class="tiny muted event-desc"><?= e(mb_strimwidth((string)$ev['description'], 0, 90, '…')) ?></p><?php endif; ?>
-            <?php if (!empty($ev['creator_first'])): ?>
-              <p class="tiny faint" style="margin-top:3px">Created by <b><?= e($ev['creator_first'] . ' ' . $ev['creator_last']) ?></b> <?= e(ucfirst($ev['creator_role'])) ?>
-                · <button type="button" class="event-profile-link" style="font-weight:700;border:none;background:none;cursor:pointer;color:var(--accent);padding:0" onclick="openProfileDrawer(<?= (int)($ev['created_by'] ?? 0) ?>)"><?= icon('user') ?> View profile</button></p>
-            <?php else: ?>
-              <p class="tiny faint" style="margin-top:3px">Created by <b>School</b></p>
+            <?php if (empty($ev['created_by'])): ?><span class="badge badge-muted" style="font-size:10px">school</span>
+            <?php elseif ((int)$ev['created_by'] === (int)$__u['id']): ?>
+              <form method="post" class="inline" data-confirm="Delete this event?">
+                <?= csrf_field() ?><input type="hidden" name="delete_event" value="<?= (int)$ev['id'] ?>">
+                <button class="btn btn-sm btn-ghost" style="color:var(--danger);padding:4px"><?= icon('trash') ?></button>
+              </form>
             <?php endif; ?>
           </div>
-          <?php if (empty($ev['created_by'])): ?><span class="badge badge-muted">school</span>
-          <?php elseif ((int)$ev['created_by'] === (int)$__u['id']): ?>
-            <form method="post" class="inline" data-confirm="Delete this event?">
-              <?= csrf_field() ?><input type="hidden" name="delete_event" value="<?= (int)$ev['id'] ?>">
-              <button class="btn btn-sm btn-danger"><?= icon('trash') ?></button>
-            </form>
-          <?php endif; ?>
+        <?php endforeach; ?>
         </div>
-      <?php endforeach; ?>
-      <?php if (!$events): ?><p class="muted small">No events this month.</p><?php endif; ?>
+      <?php else: ?>
+        <p class="muted small" style="text-align:center;padding:16px 0">No events this month.</p>
+      <?php endif; ?>
     </div>
 
     <?php if ($exams): ?>
-    <div class="card" style="padding:16px 18px">
-      <h3 class="card-title" style="margin-top:0"><?= icon('note') ?> Upcoming exams <span class="badge danger" style="vertical-align:middle">auto</span></h3>
-      <?php foreach ($exams as $ex): ?>
-        <div class="list-row" style="padding:9px 0;border-bottom:1px solid var(--border)">
-          <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:color-mix(in srgb, var(--danger) 13%, transparent);color:var(--danger);flex:none"><?= icon('note') ?></span>
-          <div class="flex-1">
-            <b class="small"><?= e($ex['title']) ?></b>
-            <p class="tiny faint"><?= e(date('M j, H:i', strtotime($ex['start_at']))) ?> · <?= e($ex['course_title']) ?></p>
-            <?php if (!empty($ex['description'])): ?><p class="tiny faint"><?= e(mb_strimwidth((string)$ex['description'], 0, 120, '…')) ?></p><?php endif; ?>
+    <div class="card" style="padding:18px 20px">
+      <h3 class="card-title" style="margin-top:0"><?= icon('note') ?> Upcoming exams <span class="badge danger" style="vertical-align:middle;font-size:10px">auto</span></h3>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <?php foreach ($exams as $ex): ?>
+          <div class="cal-list-item">
+            <span class="cal-list-dot" style="background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,.4)"></span>
+            <div class="cal-list-body">
+              <b><?= e($ex['title']) ?></b>
+              <span class="tiny faint"><?= e(date('M j, H:i', strtotime($ex['start_at']))) ?> · <?= e($ex['course_title']) ?></span>
+            </div>
+            <span class="badge danger" style="font-size:10px;font-weight:700;text-transform:uppercase"><?= e($ex['exam_type']) ?></span>
           </div>
-          <span class="<?= $typeBadge['exam'] ?>"><?= e($ex['exam_type']) ?></span>
-        </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
+      </div>
     </div>
     <?php endif; ?>
   </div>
+  <div></div>
 </div>
 
 <script>
