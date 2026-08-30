@@ -20,7 +20,7 @@ $highlight = function (string $text) use ($q): string {
 <form method="get" class="search-box" style="max-width:none;margin-bottom:20px">
   <input type="hidden" name="r" value="search">
   <span class="input-ico"><?= icon('search') ?></span>
-  <input id="gl-search" type="text" name="q" placeholder="Search courses, lessons, exams, people, forum…" value="<?= e($q) ?>" autofocus oninput="document.getElementById('gl-clear').style.display=this.value?'flex':'none'">
+  <input id="gl-search" type="text" name="q" placeholder="Search courses, lessons, exams, people, forum…" value="<?= e($q) ?>" autofocus oninput="document.getElementById('gl-clear').style.display=this.value?'flex':'none';clearTimeout(this._t);if(this.value.length>=2)this._t=setTimeout(()=>this.form.submit(),400)">
   <button type="button" class="input-icon-btn" id="gl-clear" style="display:<?= $q ? 'flex' : 'none' ?>" onclick="document.getElementById('gl-search').value='';this.style.display='none'"><?= icon('x') ?></button>
   <button type="submit" class="search-submit" title="Search"><?= icon('search') ?></button>
 </form>

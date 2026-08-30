@@ -11,7 +11,7 @@ $role = $role ?? '';
   <form class="search-box" style="max-width:280px" method="get">
     <input type="hidden" name="r" value="courses">
     <span class="input-ico"><?= icon('search') ?></span>
-    <input name="q" id="crs-search" placeholder="Search courses…" value="<?= e($_GET['q'] ?? '') ?>" oninput="document.getElementById('crs-clear').style.display=this.value?'flex':'none'">
+    <input name="q" id="crs-search" placeholder="Search courses…" value="<?= e($_GET['q'] ?? '') ?>" oninput="document.getElementById('crs-clear').style.display=this.value?'flex':'none';clearTimeout(this._t);this._t=setTimeout(()=>this.form.submit(),400)">
     <button type="button" class="input-icon-btn" id="crs-clear" style="display:<?= ($_GET['q'] ?? '') ? 'flex' : 'none' ?>" onclick="document.getElementById('crs-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button>
   </form>
   <?php if ($role === 'principal'): ?>

@@ -298,7 +298,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=37') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=38') ?>">
 </head>
 <body>
   <div class="shell">
@@ -365,10 +365,10 @@ $__icons = [
       <div class="topbar">
         <button class="btn btn-ghost menu-btn" style="padding:8px"><?= icon('menu') ?></button>
 
-        <form class="search-box" method="get" action="<?= e(url('search')) ?>">
+        <form class="search-box" method="get" action="<?= e(url('search')) ?>" id="global-search-form">
           <input type="hidden" name="r" value="search">
           <span class="input-ico"><?= icon('search') ?></span>
-          <input id="global-search" type="text" name="q" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none'">
+          <input id="global-search" type="text" name="q" placeholder="Search courses, books, people…" autocomplete="off" oninput="document.getElementById('gs-clear').style.display=this.value?'flex':'none';clearTimeout(this._t);if(this.value.length>=2)this._t=setTimeout(()=>this.form.submit(),400)">
           <button type="button" class="input-icon-btn" id="gs-clear" onclick="document.getElementById('global-search').value='';this.style.display='none';document.getElementById('global-search').focus()"><?= icon('x') ?></button>
           <button type="submit" class="search-submit" title="Search"><?= icon('search') ?></button>
         </form>
