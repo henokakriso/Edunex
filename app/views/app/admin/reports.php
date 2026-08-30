@@ -20,18 +20,25 @@ $reportTypes = [
 $currentYear = (int)date('Y');
 ?>
 <style>
-.rpt-type{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:all .2s ease;background:var(--bg-elev)}
-.rpt-type:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 16px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
-.rpt-type.selected{border-color:transparent;background:var(--accent-soft);box-shadow:0 0 0 1px rgba(13,148,136,.4),inset 0 1px 1px rgba(255,255,255,.25),0 0 12px rgba(13,148,136,.1)}
+.rpt-type{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);background:var(--glass-bg);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);position:relative;overflow:hidden}
+.rpt-type::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.rpt-type:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow)}
+.rpt-type:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 50%,rgba(255,255,255,.06) 100%)}
+.rpt-type:focus-visible{outline:none;border-color:rgba(255,255,255,.25);box-shadow:0 0 0 2px var(--bg),0 0 0 4px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.4),0 0 16px rgba(255,255,255,.04)}
+.rpt-type.selected{border-color:rgba(13,148,136,.35);background:rgba(13,148,136,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.05),0 0 20px rgba(13,148,136,.06)}
+.rpt-type.selected::before{background:linear-gradient(135deg,rgba(13,148,136,.12) 0%,rgba(255,255,255,.03) 50%,rgba(13,148,136,.06) 100%)}
+.rpt-type.selected:hover{background:rgba(13,148,136,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.15),inset -1px 0 0 rgba(255,255,255,.05),0 0 24px rgba(13,148,136,.1)}
 .rpt-type input[type=checkbox]{display:none}
 .rpt-type .rpt-name{font-size:13.5px;font-weight:600;color:var(--text)}
 .rpt-type .rpt-desc{font-size:11.5px;color:var(--text-secondary);margin-top:1px}
-.rpt-type .rpt-dot{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.rpt-type .rpt-dot{width:18px;height:18px;border-radius:6px;border:2px solid var(--glass-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s ease;background:var(--glass-bg)}
 .rpt-type.selected .rpt-dot{border-color:var(--accent);background:var(--accent)}
 .rpt-type.selected .rpt-dot::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
-.rpt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg-elev);transition:all .2s ease;text-decoration:none;color:inherit}
-.rpt-row:hover{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.15),inset 0 1px 1px rgba(255,255,255,.2),0 4px 12px rgba(0,0,0,.06);backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%)}
-.rpt-row:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12);outline:none}
+.rpt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--glass-border);margin-bottom:6px;background:var(--glass-bg);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);transition:all .25s cubic-bezier(.4,0,.2,1);text-decoration:none;color:inherit;position:relative;overflow:hidden}
+.rpt-row::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(255,255,255,.02) 100%);pointer-events:none;transition:background .3s ease}
+.rpt-row:hover{background:var(--glass-hover-bg);border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(255,255,255,.06),var(--glass-hover-shadow)}
+.rpt-row:hover::before{background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 50%,rgba(255,255,255,.06) 100%)}
+.rpt-row:focus-visible{outline:none;border-color:rgba(255,255,255,.25);box-shadow:0 0 0 2px var(--bg),0 0 0 4px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.4),0 0 16px rgba(255,255,255,.04)}
 </style>
 
 <div class="page-head">
