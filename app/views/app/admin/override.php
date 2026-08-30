@@ -5,6 +5,7 @@
     <p class="sub">Unlock accounts, reset passwords, revoke sessions, impersonate users</p>
   </div>
   <form method="get" class="flex gap-6" action="<?= e(url('admin/override')) ?>">
+    <input type="hidden" name="r" value="admin/override">
     <input class="input" name="q" value="<?= e($q) ?>" placeholder="Search name or email…" style="min-width:240px">
     <button class="btn btn-ghost" title="Search"><?= icon('search') ?></button>
   </form>
