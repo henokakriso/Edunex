@@ -460,7 +460,7 @@ function permissions_for(string $role): array {
 function can(string $perm): bool {
     $u = me();
     if (!$u) return false;
-    if ($u['role'] === 'regional') return true;
+    if (in_array($u['role'], ['ministry', 'regional'], true)) return true;
     return in_array($perm, permissions_for($u['role']), true);
 }
 
