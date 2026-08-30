@@ -70,7 +70,7 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
         <?php endforeach; ?>
       </select>
       <select class="cal-picker-sel" id="cal-year" onchange="calNav()">
-        <?php for ($y = (int)date('Y'); $y >= 2015; $y--): ?>
+        <?php for ($y = (int)date('Y') + 10; $y >= 2015; $y--): ?>
           <option value="<?= $y ?>" <?= $y === $year ? 'selected' : '' ?>><?= $y ?></option>
         <?php endfor; ?>
       </select>
@@ -137,14 +137,20 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
         </div>
       <?php endfor; ?>
     </div>
-    <div class="d-flex" style="gap:18px;margin-top:14px;flex-wrap:wrap">
-      <?php foreach (array_unique($typeCls) as $tk => $tc): ?>
-        <span class="cal-legend" style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--text)"><span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:<?= $tc ?>"></span><?= e(ucfirst($tk)) ?></span>
-      <?php endforeach; ?>
-    </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card" style="padding:16px 18px">
+      <h3 class="card-title" style="margin-top:0"><?= icon('palette') ?> Event Types</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <?php foreach (array_unique($typeCls) as $tk => $tc): ?>
+          <div class="d-flex" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg)">
+            <span style="width:12px;height:12px;border-radius:50%;background:<?= $tc ?>;flex:none;box-shadow:0 0 8px <?= $tc ?>40"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--text)"><?= e(ucfirst($tk)) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
     <div class="card" style="padding:16px 18px">
       <h3 class="card-title" style="margin-top:0"><?= icon('calendar') ?> This month's events</h3>
       <?php foreach ($events as $ev): ?>
