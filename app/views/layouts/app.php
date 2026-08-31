@@ -303,61 +303,61 @@ $__icons = [
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
   <link rel="stylesheet" href="<?= url('public/css/app.css?v=40') ?>">
   <style>
+    <?php
+    $accentMap = ['teal'=>'#0d9488','blue'=>'#0284c7','indigo'=>'#4f46e5','purple'=>'#7c3aed','pink'=>'#db2777','red'=>'#ef4444','orange'=>'#f97316','amber'=>'#f59e0b','emerald'=>'#059669','cyan'=>'#06b6d4','rose'=>'#f43f5e','violet'=>'#8b5cf6'];
+    $ac = $accentMap[$__u['accent_color'] ?? 'teal'] ?? '#0d9488';
+    $fs = e($__u['font_size'] ?? '14');
+    $cw = e($__u['content_width'] ?? '1400');
+    $compact = ($__u['compact_mode'] ?? '0') === '1';
+    $noAnim = ($__u['reduce_motion'] ?? '0') === '1' || ($__u['show_animations'] ?? '1') === '0';
+    $noBlur = ($__u['blur_effects'] ?? '1') === '0';
+    $noBorders = ($__u['show_borders'] ?? '1') === '0';
+    $noGradients = ($__u['show_gradients'] ?? '1') === '0';
+    $sidebarStyle = $__u['sidebar_style'] ?? 'default';
+    ?>
     :root {
-      <?php
-      $accentMap = ['teal'=>'#0d9488','blue'=>'#0284c7','indigo'=>'#4f46e5','purple'=>'#7c3aed','pink'=>'#db2777','red'=>'#ef4444','orange'=>'#f97316','amber'=>'#f59e0b','emerald'=>'#059669','cyan'=>'#06b6d4','rose'=>'#f43f5e','violet'=>'#8b5cf6'];
-      $ac = $accentMap[$__u['accent_color'] ?? 'teal'] ?? '#0d9488';
-      $fs = e($__u['font_size'] ?? '14');
-      $cw = e($__u['content_width'] ?? '1400');
-      $compact = ($__u['compact_mode'] ?? '0') === '1';
-      $noAnim = ($__u['reduce_motion'] ?? '0') === '1' || ($__u['show_animations'] ?? '1') === '0';
-      $noBlur = ($__u['blur_effects'] ?? '1') === '0';
-      $noBorders = ($__u['show_borders'] ?? '1') === '0';
-      $noGradients = ($__u['show_gradients'] ?? '1') === '0';
-      $sidebarStyle = $__u['sidebar_style'] ?? 'default';
-      ?>
       --accent: <?= $ac ?>;
       --font-size-base: <?= $fs ?>px;
       --content-max-width: <?= $cw ?>px;
       --radius-lg: <?= e($__u['card_radius'] ?? '18') ?>px;
-      --radius: <?= (int)($__u['card_radius'] ?? '18') - 4 ?>px;
+      --radius: <?= max(0, (int)($__u['card_radius'] ?? '18') - 4) ?>px;
       --line-height: <?= e($__u['line_height'] ?? '1.55') ?>;
       <?php if ($compact): ?>
       --sidebar-w: 60px;
       <?php endif; ?>
-      <?php if ($noAnim): ?>
-      *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
-      <?php endif; ?>
-      <?php if ($noBlur): ?>
-      *, *::before, *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-      <?php endif; ?>
-      <?php if ($noBorders): ?>
-      .card, .stat-card, .stat-box, .tstat-card, .module-card { border-color: transparent !important; }
-      <?php endif; ?>
-      <?php if ($noGradients): ?>
-      .card::before, .stat-card::before, .stat-box::before { background: none !important; }
-      <?php endif; ?>
     }
+    <?php if ($noAnim): ?>
+    *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+    <?php endif; ?>
+    <?php if ($noBlur): ?>
+    *, *::before, *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    <?php endif; ?>
+    <?php if ($noBorders): ?>
+    .card, .stat-card, .stat-box, .tstat-card, .module-card { border-color: transparent !important; }
+    <?php endif; ?>
+    <?php if ($noGradients): ?>
+    .card::before, .stat-card::before, .stat-box::before { background: none !important; }
+    <?php endif; ?>
     <?php if ($sidebarStyle === 'compact'): ?>
+    .sidebar { width: 64px !important; min-width: 64px !important; padding: 14px 6px !important; overflow: hidden; }
     .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name { display: none !important; }
-    .sidebar { width: 64px !important; min-width: 64px !important; padding: 12px 6px !important; }
-    .sidebar .nav-item { padding: 10px !important; justify-content: center; }
-    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; }
+    .sidebar .nav-item { padding: 10px !important; justify-content: center; text-indent: -999px; overflow: hidden; }
+    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; text-indent: 0; }
+    .sidebar .nav-item .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; text-indent: 0; }
     .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
-    .sidebar .brand img { margin: 0 !important; }
+    .sidebar .brand img { margin: 0 !important; width: 34px !important; height: 34px !important; }
     .shell { grid-template-columns: 64px minmax(0, 1fr) !important; }
     .topbar { left: 64px !important; width: calc(100% - 64px) !important; }
-    .sidebar .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; }
     <?php elseif ($sidebarStyle === 'icons'): ?>
+    .sidebar { width: 60px !important; min-width: 60px !important; padding: 14px 4px !important; overflow: hidden; }
     .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .nav-section { display: none !important; }
-    .sidebar { width: 60px !important; min-width: 60px !important; padding: 12px 4px !important; }
-    .sidebar .nav-item { padding: 10px !important; justify-content: center; }
-    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; }
+    .sidebar .nav-item { padding: 10px !important; justify-content: center; text-indent: -999px; overflow: hidden; }
+    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; text-indent: 0; }
+    .sidebar .nav-item .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; text-indent: 0; }
     .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
-    .sidebar .brand img { margin: 0 !important; width: 32px !important; height: 32px !important; }
+    .sidebar .brand img { margin: 0 !important; width: 30px !important; height: 30px !important; }
     .shell { grid-template-columns: 60px minmax(0, 1fr) !important; }
     .topbar { left: 60px !important; width: calc(100% - 60px) !important; }
-    .sidebar .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; }
     <?php endif; ?>
   </style>
 </head>
