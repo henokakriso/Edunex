@@ -10,14 +10,25 @@ class Ctl_profile {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
             $tab = $_POST['tab_save'] ?? 'profile';
-            if ($tab === 'theme') {
+            if ($tab === 'display') {
                 Database::update('users', [
                     'theme' => $_POST['theme'] ?? 'dark',
                     'language' => $_POST['language'] ?? 'en',
+                    'accent_color' => $_POST['accent_color'] ?? 'teal',
+                    'font_size' => $_POST['font_size'] ?? '14',
+                    'sidebar_style' => $_POST['sidebar_style'] ?? 'default',
+                    'content_width' => $_POST['content_width'] ?? '1400',
+                    'show_animations' => $_POST['animations'] ?? '1',
+                    'compact_mode' => $_POST['compact_mode'] ?? '0',
+                    'show_avatars' => $_POST['show_avatars'] ?? '1',
+                    'show_borders' => $_POST['show_borders'] ?? '1',
+                    'show_gradients' => $_POST['gradients'] ?? '1',
+                    'blur_effects' => $_POST['blur_effects'] ?? '1',
+                    'reduce_motion' => $_POST['reduce_motion'] ?? '0',
                 ], 'id = ?', [$uid]);
                 Auth::refreshUser();
-                flash('success', 'Preferences saved.');
-                redirect('settings/profile&tab=theme');
+                flash('success', 'Display settings saved.');
+                redirect('settings/profile&tab=display');
             } elseif ($tab === 'fayda') {
                 Database::update('users', [
                     'fayda_id' => trim($_POST['fayda_id'] ?? ''),

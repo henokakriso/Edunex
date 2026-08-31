@@ -1,7 +1,7 @@
 <?php /* Settings — tabbed for ALL roles */
 $__tabs = [
     ['profile', icon('user') . ' Profile', 'profile'],
-    ['theme', icon('palette') . ' Theme', 'theme'],
+    ['display', icon('palette') . ' Display', 'display'],
     ['security', icon('shield') . ' Security', 'security'],
     ['fayda', icon('badge') . ' Fayda ID', 'fayda'],
     ['sessions', icon('monitor') . ' Sessions', 'sessions'],
@@ -27,6 +27,15 @@ $__tab = $activeTab ?? 'profile';
 .theme-card:active{transform:scale(.97)}
 .fayda-card{padding:24px;border-radius:16px;border:1px solid var(--glass-border);background:linear-gradient(135deg,var(--accent-soft),rgba(13,148,136,.05));position:relative;overflow:hidden}
 .fayda-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 40%);pointer-events:none}
+.color-swatch{width:36px;height:36px;border-radius:10px;border:2px solid var(--glass-border);cursor:pointer;transition:all .2s cubic-bezier(.25,.46,.45,.94);position:relative}
+.color-swatch:hover{transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.color-swatch.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--text)}
+.color-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.display-option{padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:all .25s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
+.display-option::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
+.display-option:hover{border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
+.font-size-preview{width:100%;height:48px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.25,.46,.45,.94)}
+</style>
 .session-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);transition:all .25s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
 .session-item::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
 .session-item:hover{border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
@@ -86,14 +95,16 @@ $__tab = $activeTab ?? 'profile';
   </form>
 </div>
 
-<?php elseif ($__tab === 'theme'): ?>
+<?php elseif ($__tab === 'display'): ?>
 <div class="settings-section">
-  <form method="post" class="card settings-card">
+  <form method="post" class="card settings-card" style="max-width:720px">
     <?= csrf_field() ?>
-    <input type="hidden" name="tab_save" value="theme">
-    <h3 style="margin-top:0;margin-bottom:6px"><?= icon('palette') ?> Theme</h3>
-    <p class="small faint" style="margin-bottom:18px">Choose your preferred appearance</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+    <input type="hidden" name="tab_save" value="display">
+
+    <!-- Theme Mode -->
+    <h3 style="margin-top:0;margin-bottom:6px"><?= icon('palette') ?> Appearance</h3>
+    <p class="small faint" style="margin-bottom:14px">Choose your preferred look</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
       <label class="theme-card<?= ($__u['theme'] ?? 'dark') === 'dark' ? ' active' : '' ?>">
         <input type="radio" name="theme" value="dark" style="display:none" <?= ($__u['theme'] ?? 'dark') === 'dark' ? 'checked' : '' ?>>
         <div style="font-size:28px;margin-bottom:8px"><?= icon('moon') ?></div>
@@ -107,10 +118,106 @@ $__tab = $activeTab ?? 'profile';
         <div class="tiny faint" style="margin-top:4px">Clean and bright</div>
       </label>
     </div>
+
+    <!-- Accent Color -->
+    <h3 style="margin:0 0 6px"><?= icon('droplet') ?> Accent Color</h3>
+    <p class="small faint" style="margin-bottom:12px">Customize the primary color across the interface</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+      <?php
+      $colors = [
+        'teal' => '#0d9488', 'blue' => '#0284c7', 'indigo' => '#4f46e5', 'purple' => '#7c3aed',
+        'pink' => '#db2777', 'red' => '#ef4444', 'orange' => '#f97316', 'amber' => '#f59e0b',
+        'emerald' => '#059669', 'cyan' => '#06b6d4', 'rose' => '#f43f5e', 'violet' => '#8b5cf6',
+      ];
+      $currentAccent = $__u['accent_color'] ?? 'teal';
+      foreach ($colors as $name => $hex): ?>
+        <div class="color-swatch<?= $currentAccent === $name ? ' active' : '' ?>" style="background:<?= $hex ?>" title="<?= ucfirst($name) ?>">
+          <input type="radio" name="accent_color" value="<?= $name ?>" style="display:none" <?= $currentAccent === $name ? 'checked' : '' ?>>
+        </div>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Font Size -->
+    <h3 style="margin:0 0 6px"><?= icon('type') ?> Font Size</h3>
+    <p class="small faint" style="margin-bottom:12px">Adjust the base text size</p>
+    <?php $currentSize = $__u['font_size'] ?? '14'; ?>
+    <div class="font-size-preview" style="margin-bottom:10px">
+      <span id="font-preview-text" style="font-size:<?= $currentSize ?>px;font-weight:600;color:var(--text)">The quick brown fox jumps over the lazy dog</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:24px">
+      <span class="tiny faint">A</span>
+      <input type="range" name="font_size" id="font-size-slider" min="12" max="18" value="<?= e($currentSize) ?>" step="1" style="flex:1;accent-color:var(--accent)" oninput="document.getElementById('font-preview-text').style.fontSize=this.value+'px';document.getElementById('font-size-val').textContent=this.value+'px'">
+      <span class="tiny faint" style="font-size:16px;font-weight:700">A</span>
+      <span class="tiny faint" id="font-size-val"><?= e($currentSize) ?>px</span>
+    </div>
+
+    <!-- Sidebar Style -->
+    <h3 style="margin:0 0 6px"><?= icon('sidebar') ?> Sidebar</h3>
+    <p class="small faint" style="margin-bottom:12px">Customize sidebar appearance</p>
+    <?php $sideStyle = $__u['sidebar_style'] ?? 'default'; ?>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
+      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'default' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
+        <input type="radio" name="sidebar_style" value="default" style="display:none" <?= $sideStyle === 'default' ? 'checked' : '' ?>>
+        <div style="width:40px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
+        <span class="small" style="font-weight:600">Default</span>
+      </label>
+      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'compact' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
+        <input type="radio" name="sidebar_style" value="compact" style="display:none" <?= $sideStyle === 'compact' ? 'checked' : '' ?>>
+        <div style="width:20px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
+        <span class="small" style="font-weight:600">Compact</span>
+      </label>
+      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'icons' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
+        <input type="radio" name="sidebar_style" value="icons" style="display:none" <?= $sideStyle === 'icons' ? 'checked' : '' ?>>
+        <div style="width:16px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
+        <span class="small" style="font-weight:600">Icons Only</span>
+      </label>
+    </div>
+
+    <!-- Display Options -->
+    <h3 style="margin:0 0 6px"><?= icon('eye') ?> Display Options</h3>
+    <p class="small faint" style="margin-bottom:12px">Fine-tune the interface</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+      <?php
+      $opts = [
+        ['animations', 'Animations', 'Enable smooth transitions and animations', $__u['show_animations'] ?? '1'],
+        ['compact_mode', 'Compact Mode', 'Reduce spacing for more content on screen', $__u['compact_mode'] ?? '0'],
+        ['show_avatars', 'Show Avatars', 'Display user avatars in lists and cards', $__u['show_avatars'] ?? '1'],
+        ['show_borders', 'Glass Borders', 'Show glass border effects on cards', $__u['show_borders'] ?? '1'],
+        ['gradients', 'Gradient Effects', 'Enable gradient backgrounds on elements', $__u['show_gradients'] ?? '1'],
+        ['blur_effects', 'Blur Effects', 'Enable backdrop blur glass effects', $__u['blur_effects'] ?? '1'],
+        ['reduce_motion', 'Reduce Motion', 'Minimize animations for accessibility', $__u['reduce_motion'] ?? '0'],
+      ];
+      foreach ($opts as [$key, $label, $desc, $val]): ?>
+        <div class="display-option">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13.5px"><?= $label ?></div>
+            <div class="tiny faint" style="margin-top:2px"><?= $desc ?></div>
+          </div>
+          <label class="ios-toggle<?= $val === '1' ? ' active' : '' ?>" onclick="this.classList.toggle('active')">
+            <input type="hidden" name="<?= $key ?>" value="<?= $val === '1' ? '1' : '0' ?>">
+            <input type="checkbox" <?= $val === '1' ? 'checked' : '' ?> style="display:none" onchange="this.previousElementSibling.value=this.checked?'1':'0'">
+          </label>
+        </div>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Content Width -->
+    <h3 style="margin:0 0 6px"><?= icon('maximize') ?> Content Width</h3>
+    <p class="small faint" style="margin-bottom:12px">Maximum width of the main content area</p>
+    <?php $cw = $__u['content_width'] ?? '1400'; ?>
+    <div style="display:flex;gap:8px;margin-bottom:24px">
+      <?php foreach (['1000' => 'Narrow', '1200' => 'Medium', '1400' => 'Wide', '1600' => 'Full'] as $w => $label): ?>
+        <button type="button" class="btn <?= $cw === $w ? 'btn-primary' : 'btn-ghost' ?> btn-sm" onclick="this.parentElement.querySelectorAll('.btn').forEach(b=>{b.className='btn btn-ghost btn-sm'});this.className='btn btn-primary btn-sm';this.form.content_width.value='<?= $w ?>'"><?= $label ?></button>
+      <?php endforeach; ?>
+      <input type="hidden" name="content_width" value="<?= e($cw) ?>">
+    </div>
+
+    <!-- Language -->
     <h3 style="margin:0 0 6px"><?= icon('globe') ?> Language</h3>
     <p class="small faint" style="margin-bottom:12px">Interface language</p>
     <select class="input" name="language" style="max-width:300px"><?php foreach (['en' => 'English', 'am' => 'አማርኛ (Amharic)', 'om' => 'Afaan Oromoo', 'ti' => 'ትግርኛ (Tigrinya)', 'so' => 'Soomaali'] as $k => $v): ?><option value="<?= $k ?>" <?= ($__u['language'] ?? 'en') === $k ? 'selected' : '' ?>><?= $v ?></option><?php endforeach; ?></select>
-    <button class="btn btn-primary" style="margin-top:20px"><?= icon('save') ?> Save Preferences</button>
+
+    <button class="btn btn-primary" style="margin-top:24px"><?= icon('save') ?> Save Display Settings</button>
   </form>
 </div>
 
