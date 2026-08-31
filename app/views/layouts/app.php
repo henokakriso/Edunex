@@ -531,7 +531,7 @@ $__icons = [
 
   <!-- Report Issue Modal -->
   <div id="report-issue-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
-    <div class="modal" style="max-width:480px;width:90%">
+    <div class="modal" style="max-width:520px;width:90%">
       <div style="padding:28px 28px 0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
           <span style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;color:var(--warning)"><?= icon('wrench') ?></span>
@@ -543,6 +543,91 @@ $__icons = [
       </div>
       <form method="POST" action="<?= url('index.php?r=ticket/create') ?>" style="padding:0 28px 24px">
         <?= csrf_field() ?>
+        <?php
+        $pageGroups = [
+          'Dashboard & Core' => [
+            'admin/dashboard' => 'Admin Dashboard',
+            'dashboard' => 'Dashboard',
+            'notifications' => 'Notifications',
+            'messages' => 'Messages',
+            'calendar' => 'Calendar',
+          ],
+          'User Management' => [
+            'admin/users' => 'Users',
+            'admin/schools' => 'Schools',
+            'admin/departments' => 'Departments',
+            'admin/subjects' => 'Subjects',
+            'admin/groups' => 'Classes',
+          ],
+          'Academic' => [
+            'admin/courses' => 'Courses',
+            'admin/years' => 'Academic Years',
+            'admin/calendar' => 'Calendar Events',
+            'admin/announcements' => 'Announcements',
+            'admin/reports' => 'Reports',
+          ],
+          'Analytics & System' => [
+            'admin/analytics' => 'Command Center',
+            'admin/modules' => 'Module Registry',
+            'admin/regions' => 'Regions / Zones',
+            'admin/override' => 'Emergency Override',
+          ],
+          'Student' => [
+            'student/assignments' => 'Assignments',
+            'student/exams' => 'Exams',
+            'student/grades' => 'Grades',
+            'student/attendance' => 'Attendance',
+            'student/materials' => 'Materials',
+            'student/gamification' => 'Gamification',
+            'student/certificates' => 'Certificates',
+          ],
+          'Teacher' => [
+            'teacher/courses' => 'My Courses',
+            'teacher/assignments' => 'Assignments',
+            'teacher/exams' => 'Exams',
+            'teacher/grades' => 'Gradebook',
+            'teacher/attendance' => 'Attendance',
+            'teacher/materials' => 'Materials',
+            'teacher/forum' => 'Forum',
+          ],
+          'Parent' => [
+            'parent/overview' => 'Overview',
+            'parent/children' => 'Children',
+            'parent/grades' => 'Grades',
+            'parent/attendance' => 'Attendance',
+          ],
+          'Tools & Content' => [
+            'courses/browse' => 'Browse Courses',
+            'library' => 'Library',
+            'files' => 'Files',
+            'gamification' => 'Gamification',
+            'search' => 'Search',
+          ],
+          'Settings' => [
+            'settings/profile' => 'Profile Settings',
+            'settings/display' => 'Display Settings',
+            'settings/security' => 'Security Settings',
+          ],
+        ];
+        $currentRoute = e($__route);
+        ?>
+        <div class="field" style="margin-bottom:14px">
+          <label style="font-size:13px;font-weight:600;margin-bottom:6px;display:block">Select page / system</label>
+          <select class="input" id="report-page-select" required style="width:100%" onchange="var v=this.value.split('||');document.getElementById('report-page-route').value=v[0];document.getElementById('report-page-label').value=v[1]">
+            <option value="">— Choose a page —</option>
+            <?php foreach ($pageGroups as $group => $pages): ?>
+              <optgroup label="<?= e($group) ?>">
+                <?php foreach ($pages as $route => $label): ?>
+                  <option value="<?= e($route) ?>||<?= e($label) ?>" <?= $currentRoute === $route ? 'selected' : '' ?>><?= e($label) ?></option>
+                <?php endforeach; ?>
+              </optgroup>
+            <?php endforeach; ?>
+            <optgroup label="Other">
+              <option value="<?= e($__route) ?>||Other: <?= e($__route) ?>">Current page (<?= e($__route ?: 'home') ?>)</option>
+              <option value="other||Other (specify below)">Other — describe below</option>
+            </optgroup>
+          </select>
+        </div>
         <input type="hidden" name="page_route" id="report-page-route" value="<?= e($__route) ?>">
         <input type="hidden" name="page_label" id="report-page-label" value="<?= e($title ?? '') ?>">
         <div class="field" style="margin-bottom:18px">
