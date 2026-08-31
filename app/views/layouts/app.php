@@ -470,12 +470,12 @@ $__icons = [
 
         <?php if (($__u['role'] ?? '') !== 'it_admin'): ?>
         <div style="position:relative">
-          <button class="topbar-icon" onclick="document.getElementById('report-dropdown').classList.toggle('open')" title="Report Issue" style="color:var(--warning,#f59e0b)"><?= icon('wrench') ?></button>
-          <div id="report-dropdown" class="dropdown-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:200px;z-index:9999">
-            <a class="dropdown-item" href="#" onclick="document.getElementById('report-dropdown').classList.remove('open');document.getElementById('report-issue-modal').style.display='flex';return false">
+          <button class="topbar-icon" onclick="toggleReportDropdown(event)" title="Report Issue" style="color:var(--warning,#f59e0b)"><?= icon('wrench') ?></button>
+          <div id="report-dropdown" class="report-dd">
+            <a class="dropdown-item" href="#" onclick="closeReportDropdown();document.getElementById('report-issue-modal').style.display='flex';return false">
               <span style="margin-right:8px;color:var(--warning)"><?= icon('plus-circle') ?></span> New Report
             </a>
-            <a class="dropdown-item" href="#" onclick="document.getElementById('report-dropdown').classList.remove('open');openReportTracking();return false">
+            <a class="dropdown-item" href="#" onclick="closeReportDropdown();openReportTracking();return false">
               <span style="margin-right:8px;color:var(--info)"><?= icon('list') ?></span> Report Tracking
             </a>
           </div>
@@ -700,16 +700,19 @@ $__icons = [
   <?php endif; ?>
   <script>
   /* Report dropdown toggle */
+  function toggleReportDropdown(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('report-dropdown');
+    dd.classList.toggle('open');
+  }
+  function closeReportDropdown() {
+    var dd = document.getElementById('report-dropdown');
+    if (dd) dd.classList.remove('open');
+  }
   document.addEventListener('click', function(e) {
     var dd = document.getElementById('report-dropdown');
-    if (!dd) return;
-    var btn = dd.previousElementSibling;
-    if (btn && btn.contains(e.target)) return;
-    dd.classList.remove('open');
+    if (dd && !dd.contains(e.target)) dd.classList.remove('open');
   });
-  var ddStyle = document.createElement('style');
-  ddStyle.textContent = '.dropdown-menu.open{display:block!important;animation:iOSslideIn .2s ease}';
-  document.head.appendChild(ddStyle);
 
   /* Report Tracking */
   function openReportTracking() {

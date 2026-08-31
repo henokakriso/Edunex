@@ -464,6 +464,18 @@ table.data tr:last-child td { border-bottom: none; }
 .dropdown-divider { height: 1px; background: var(--border); margin: 5px 8px; }
 .dropdown-head { font-size: 11px; color: var(--text-faint); padding: 7px 11px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
 
+/* Report dropdown — standalone (not inside .dropdown parent) */
+.report-dd {
+  position: absolute; right: 0; top: calc(100% + 8px); min-width: 210px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-lg);
+  padding: 6px; z-index: 9999;
+  opacity: 0; visibility: hidden; transform: translateY(-6px) scale(.97);
+  transition: all .18s cubic-bezier(.25,.46,.45,.94);
+  pointer-events: none;
+}
+.report-dd.open { opacity: 1; visibility: visible; transform: none; pointer-events: all; }
+
 /* ---------- Tabs ---------- */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 22px; overflow-x: auto; }
 .tab {
