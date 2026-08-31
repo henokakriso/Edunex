@@ -339,18 +339,18 @@ $__icons = [
     .card::before, .stat-card::before, .stat-box::before { background: none !important; }
     <?php endif; ?>
     <?php if ($sidebarStyle === 'compact'): ?>
+    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .page-indicator-label { display: none !important; }
     .sidebar { width: 64px !important; min-width: 64px !important; padding: 14px 6px !important; overflow: hidden; }
-    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name { display: none !important; }
     .sidebar .nav-item { padding: 10px !important; justify-content: center; text-indent: -999px; overflow: hidden; }
     .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; text-indent: 0; }
     .sidebar .nav-item .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; text-indent: 0; }
     .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
     .sidebar .brand img { margin: 0 !important; width: 34px !important; height: 34px !important; }
+    .sidebar .page-indicator { justify-content: center; padding: 8px; margin: 0 4px 10px; }
     .shell { grid-template-columns: 64px minmax(0, 1fr) !important; }
     .topbar { left: 64px !important; width: calc(100% - 64px) !important; }
     <?php elseif ($sidebarStyle === 'icons'): ?>
-    .sidebar { width: 60px !important; min-width: 60px !important; padding: 14px 4px !important; overflow: hidden; }
-    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .nav-section { display: none !important; }
+    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .nav-section, .sidebar .page-indicator { display: none !important; }
     .sidebar .nav-item { padding: 10px !important; justify-content: center; text-indent: -999px; overflow: hidden; }
     .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; text-indent: 0; }
     .sidebar .nav-item .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; text-indent: 0; }
@@ -371,6 +371,27 @@ $__icons = [
           <div class="brand-name">Edunex<?php if (is_demo_mode()): ?> <span style="display:inline-block;font-size:0.55em;background:var(--warning,#f59e0b);color:#000;padding:1px 5px;border-radius:4px;vertical-align:middle;cursor:help" title="DEMO mode active — sample data shown. Switch to Normal mode in Settings.">DEMO</span><?php endif; ?></div>
           <div class="brand-sub"><?= e(setting('site_name', 'Learning')) ?> · <?= e($__u['school_name'] ?? '') ?></div>
         </div>
+      </div>
+
+      <?php
+      // Build current page indicator
+      $currentPageLabel = 'Dashboard';
+      $currentPageIcon = icon('chart-bar');
+      foreach (($__nav[$__role] ?? []) as $ni) {
+          if (count($ni) > 1) {
+              [, $lbl, $href, $ico] = $ni;
+              if ($__route === $href || str_starts_with($__route, $href . '/')) {
+                  $currentPageLabel = $lbl;
+                  $currentPageIcon = $ico;
+                  break;
+              }
+          }
+      }
+      if ($__route === '' || $__route === 'dashboard') { $currentPageLabel = 'Dashboard'; $currentPageIcon = icon('chart-bar'); }
+      ?>
+      <div class="page-indicator">
+        <span class="page-indicator-ico"><?= $currentPageIcon ?></span>
+        <span class="page-indicator-label"><?= e($currentPageLabel) ?></span>
       </div>
 
       <?php foreach (($__nav[$__role] ?? []) as $__navItem): ?>
@@ -483,8 +504,8 @@ $__icons = [
         <?php endif; ?>
 
         <div class="dropdown" style="position:relative">
-          <button class="topbar-icon" style="border:none;background:none">
-            <img class="avatar" src="<?= e(avatar_url($__u)) ?>" alt="avatar" style="border-radius:50%">
+          <button class="topbar-icon" style="border:none;background:none;padding:2px">
+            <img class="avatar" src="<?= e(avatar_url($__u)) ?>" alt="avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
           </button>
           <div class="dropdown-menu">
             <div class="dropdown-head"><?= e(full_name($__u)) ?></div>
