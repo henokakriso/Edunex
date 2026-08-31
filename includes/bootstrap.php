@@ -40,6 +40,7 @@ require_once INC_PATH . '/Qr.php';
 require_once INC_PATH . '/AiTutor.php';
 require_once INC_PATH . '/SubjectAuth.php';
 require_once INC_PATH . '/Ledger.php';
+require_once INC_PATH . '/FileSecurity.php';
 require_once INC_PATH . '/CWorker.php';
 require_once INC_PATH . '/FcardTool.php';
 require_once INC_PATH . '/AiJob.php';

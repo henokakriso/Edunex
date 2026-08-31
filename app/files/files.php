@@ -75,11 +75,12 @@ class Ctl_index {
                         'name' => $safeName, 'original_name' => $safeName,
                         'path' => $res['path'], 'mime' => $file['type'] ?? '', 'size' => $res['size'],
                         'version' => 1, 'parent_id' => $parent ?: null,
+                        'file_hash' => $res['hash'] ?? null, 'is_encrypted' => ($res['encrypted'] ?? false) ? 1 : 0,
                     ]);
                     $fid = Database::insertId();
                     Database::insert('file_versions', ['file_id' => $fid, 'version' => 1, 'path' => $res['path'], 'size' => $res['size'], 'created_by' => $uid]);
-                    log_activity('files.upload', 'Uploaded ' . $file['name']);
-                    flash('success', 'File uploaded.');
+                    log_activity('files.upload', 'Uploaded ' . $file['name'] . ' (encrypted, hashed)');
+                    flash('success', 'File uploaded securely.');
                 }
                 redirect('files' . ($parent ? '&folder=' . $parent : ''));
             }
@@ -91,8 +92,8 @@ class Ctl_index {
                     if (!$res['error']) {
                         $nv = (int)$f['version'] + 1;
                         Database::insert('file_versions', ['file_id' => $fid, 'version' => $nv, 'path' => $res['path'], 'size' => $res['size'], 'created_by' => $uid]);
-                        Database::update('files', ['path' => $res['path'], 'size' => $res['size'], 'version' => $nv, 'mime' => $f['mime']], 'id = ?', [$fid]);
-                        flash('success', 'New version uploaded (v' . $nv . ').');
+                        Database::update('files', ['path' => $res['path'], 'size' => $res['size'], 'version' => $nv, 'mime' => $f['mime'], 'file_hash' => $res['hash'] ?? null, 'is_encrypted' => ($res['encrypted'] ?? false) ? 1 : 0], 'id = ?', [$fid]);
+                        flash('success', 'New version uploaded securely (v' . $nv . ').');
                     } else flash('danger', $res['error']);
                 }
                 redirect('files&folder=' . $parent);

@@ -229,13 +229,29 @@ function upload_file(array $file, string $dir, array $allowedExt = null): array 
     if (isset($validMimes[$ext]) && $mimeType !== $validMimes[$ext]) {
         return $fail('File content does not match extension');
     }
+    // FileSecurity: scan for malicious content, hash, encrypt
+    [$safe, $reason] = FileSecurity::scanForMalicious($file['tmp_name'], $ext);
+    if (!$safe) {
+        return $fail($reason);
+    }
+    $rawContent = @file_get_contents($file['tmp_name']);
+    if ($rawContent === false) {
+        return $fail('Failed to read uploaded file');
+    }
+    $fileHash = FileSecurity::hash($rawContent);
+    $encrypted = FileSecurity::encrypt($rawContent);
+    if ($encrypted === '') {
+        return $fail('Failed to encrypt file');
+    }
+    // Write encrypted content to target
     $targetDir = STORAGE_PATH . '/' . $dir;
     if (!is_dir($targetDir)) @mkdir($targetDir, 0750, true);
     $name = date('Ymd_His') . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
-    if (!move_uploaded_file($file['tmp_name'], $targetDir . '/' . $name)) {
+    $dest = $targetDir . '/' . $name;
+    if (file_put_contents($dest, $encrypted) === false) {
         return $fail('Failed to save file');
     }
-    return [true, $dir . '/' . $name, 'ok' => true, 'error' => null, 'path' => $dir . '/' . $name, 'size' => (int)$file['size']];
+    return [true, $dir . '/' . $name, 'ok' => true, 'error' => null, 'path' => $dir . '/' . $name, 'size' => (int)$file['size'], 'hash' => $fileHash, 'encrypted' => true];
 }
 
 /** Human readable bytes */
