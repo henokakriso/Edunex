@@ -340,18 +340,24 @@ $__icons = [
     }
     <?php if ($sidebarStyle === 'compact'): ?>
     .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name { display: none !important; }
-    .sidebar { width: 60px !important; }
-    .sidebar .nav-item span.ico { margin: 0 !important; }
-    .content { margin-left: 60px !important; }
-    .topbar { left: 60px !important; }
+    .sidebar { width: 64px !important; min-width: 64px !important; padding: 12px 6px !important; }
+    .sidebar .nav-item { padding: 10px !important; justify-content: center; }
+    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; }
+    .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
+    .sidebar .brand img { margin: 0 !important; }
+    .shell { grid-template-columns: 64px minmax(0, 1fr) !important; }
+    .topbar { left: 64px !important; width: calc(100% - 64px) !important; }
+    .sidebar .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; }
     <?php elseif ($sidebarStyle === 'icons'): ?>
-    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .sidebar-footer span:not(.ico) { display: none !important; }
-    .sidebar { width: 64px !important; }
-    .sidebar .nav-item { justify-content: center; padding: 10px !important; }
-    .sidebar .nav-item span.ico { margin: 0 !important; }
-    .sidebar .brand { justify-content: center; }
-    .content { margin-left: 64px !important; }
-    .topbar { left: 64px !important; }
+    .sidebar .nav-label, .sidebar .brand-sub, .sidebar .brand-name, .sidebar .nav-section { display: none !important; }
+    .sidebar { width: 60px !important; min-width: 60px !important; padding: 12px 4px !important; }
+    .sidebar .nav-item { padding: 10px !important; justify-content: center; }
+    .sidebar .nav-item .ico { margin: 0 !important; font-size: 20px; }
+    .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
+    .sidebar .brand img { margin: 0 !important; width: 32px !important; height: 32px !important; }
+    .shell { grid-template-columns: 60px minmax(0, 1fr) !important; }
+    .topbar { left: 60px !important; width: calc(100% - 60px) !important; }
+    .sidebar .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; }
     <?php endif; ?>
   </style>
 </head>
@@ -378,7 +384,7 @@ $__icons = [
             <?php $active = $__href === $__route || ($__href === 'dashboard' && $__route === ''); ?>
           <?php endif; ?>
           <a class="nav-item <?= $active ? 'active' : '' ?>" href="<?= url('index.php?r=' . $__href) ?>">
-            <span class="ico"><?= $__icon ?></span><?= e($__label) ?>
+            <span class="ico"><?= $__icon ?></span><span class="nav-label"><?= e($__label) ?></span>
           </a>
         <?php endif; ?>
       <?php endforeach; ?>
@@ -387,31 +393,31 @@ $__icons = [
       <div class="nav-section">General</div>
       <?php if (!$__inactive): ?>
       <a class="nav-item <?= str_starts_with($__route, 'messages') ? 'active' : '' ?>" href="<?= url('index.php?r=messages') ?>">
-        <span class="ico"><?= icon('chat') ?></span>Messages
+        <span class="ico"><?= icon('chat') ?></span><span class="nav-label">Messages</span>
       </a>
       <a class="nav-item <?= str_starts_with($__route, 'calendar') ? 'active' : '' ?>" href="<?= url('index.php?r=calendar') ?>">
-        <span class="ico"><?= icon('calendar') ?></span>Calendar
+        <span class="ico"><?= icon('calendar') ?></span><span class="nav-label">Calendar</span>
       </a>
       <?php if (($__u['role'] ?? '') === 'student'): ?>
       <a class="nav-item <?= str_starts_with($__route, 'gamification') ? 'active' : '' ?>" href="<?= url('index.php?r=gamification') ?>">
-        <span class="ico"><?= icon('game') ?></span>Gamification
+        <span class="ico"><?= icon('game') ?></span><span class="nav-label">Gamification</span>
       </a>
       <?php endif; ?>
       <?php if (($__u['role'] ?? '') === 'ministry'): ?>
       <a class="nav-item <?= str_starts_with($__route, 'files') ? 'active' : '' ?>" href="<?= url('index.php?r=files') ?>">
-        <span class="ico"><?= icon('folder') ?></span>Files
+        <span class="ico"><?= icon('folder') ?></span><span class="nav-label">Files</span>
       </a>
       <?php endif; ?>
       <?php endif; ?>
       <a class="nav-item <?= str_starts_with($__route, 'notifications') ? 'active' : '' ?>" href="<?= url('index.php?r=notifications') ?>">
-        <span class="ico"><?= icon('bell') ?></span>Notifications
+        <span class="ico"><?= icon('bell') ?></span><span class="nav-label">Notifications</span>
         <?php if ($__unread > 0): ?><span class="cnt"><?= min($__unread, 99) ?></span><?php endif; ?>
       </a>
       <a class="nav-item <?= str_starts_with($__route, 'settings') ? 'active' : '' ?>" href="<?= url('index.php?r=settings/profile') ?>">
-        <span class="ico"><?= icon('gear') ?></span>Settings
+        <span class="ico"><?= icon('gear') ?></span><span class="nav-label">Settings</span>
       </a>
       <a class="nav-item" href="<?= url('index.php?r=auth/logout') ?>">
-        <span class="ico"><?= icon('logout') ?></span>Log out
+        <span class="ico"><?= icon('logout') ?></span><span class="nav-label">Log out</span>
       </a>
     </aside>
 
