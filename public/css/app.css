@@ -44,7 +44,7 @@ html[data-theme="dark"] {
   --bg-soft: #11151f;
   --bg-elev: #161b27;
   --bg-hover: #1d2333;
-  --card: rgba(22,27,39,.72);
+  --card: var(--bg-elev);
   --border: rgba(148,163,184,.14);
   --text: #e5e9f2;
   --text-dim: #9aa3b5;
@@ -65,7 +65,7 @@ html[data-theme="light"] {
   --bg-soft: #ffffff;
   --bg-elev: #ffffff;
   --bg-hover: #eef1f8;
-  --card: rgba(255,255,255,.82);
+  --card: var(--bg-elev);
   --border: rgba(15,23,42,.1);
   --text: #101828;
   --text-dim: #5a6478;
@@ -449,8 +449,6 @@ table.data tr:last-child td { border-bottom: none; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal {
   background: var(--glass-modal);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   width: 100%; max-width: 520px;
@@ -845,7 +843,7 @@ kbd { font-family: inherit; }
 .modal-box .modal-foot { padding: 0 24px 20px; display: flex; gap: 8px; justify-content: flex-end; }
 
 /* Stat boxes (ledger / dashboards) */
-.stat-box { padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-card); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); display: flex; flex-direction: column; gap: 6px; text-align: center; align-items: center; transition: all .25s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+.stat-box { padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-card); display: flex; flex-direction: column; gap: 6px; text-align: center; align-items: center; transition: all .25s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
 .stat-box::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%, rgba(255,255,255,.02) 100%); pointer-events: none; z-index: 1; transition: opacity .25s ease; }
 .stat-box:hover::before { background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 40%, rgba(255,255,255,.1) 100%); }
 .stat-box:hover { background: color-mix(in srgb, var(--glass-card) 60%, rgba(255,255,255,.12)); border-color: rgba(255,255,255,.3); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.1), 0 0 24px rgba(13,148,136,.08), 0 8px 32px rgba(0,0,0,.06); }
@@ -1467,15 +1465,15 @@ tr.list-row td:last-child { vertical-align: middle; }
 
 /* ─── Glass Custom Properties ─── */
 html[data-theme="dark"] {
-  --glass-bg: rgba(18,22,36,.55);
+  --glass-bg: var(--bg-elev);
   --glass-border: rgba(255,255,255,.08);
   --glass-highlight: rgba(255,255,255,.04);
   --glass-shadow: rgba(0,0,0,.35);
   --glass-glow: rgba(13,148,136,.12);
   --glass-focus: rgba(13,148,136,.25);
-  --glass-sidebar: rgba(14,18,30,.72);
-  --glass-card: rgba(20,26,42,.58);
-  --glass-modal: rgba(16,22,38,.65);
+  --glass-sidebar: var(--bg-soft);
+  --glass-card: var(--bg-elev);
+  --glass-modal: var(--bg-elev);
   --glass-nav-active: rgba(13,148,136,.12);
   --glass-nav-hover: rgba(255,255,255,.04);
   --glass-inset: inset 0 1px 0 rgba(255,255,255,.06);
@@ -1486,15 +1484,15 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="light"] {
-  --glass-bg: rgba(255,255,255,.6);
+  --glass-bg: var(--bg-elev);
   --glass-border: rgba(0,0,0,.06);
   --glass-highlight: rgba(255,255,255,.7);
   --glass-shadow: rgba(0,0,0,.08);
   --glass-glow: rgba(13,148,136,.08);
   --glass-focus: rgba(13,148,136,.18);
-  --glass-sidebar: rgba(255,255,255,.72);
-  --glass-card: rgba(255,255,255,.62);
-  --glass-modal: rgba(255,255,255,.7);
+  --glass-sidebar: var(--bg-soft);
+  --glass-card: var(--bg-elev);
+  --glass-modal: var(--bg-elev);
   --glass-nav-active: rgba(13,148,136,.1);
   --glass-nav-hover: rgba(0,0,0,.03);
   --glass-inset: inset 0 1px 0 rgba(255,255,255,.8);
@@ -1514,8 +1512,6 @@ html[data-theme="light"] {
 /* ─── SIDEBAR — Glass Drawer ─── */
 .sidebar {
   background: var(--glass-sidebar) !important;
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-right: 1px solid var(--glass-border) !important;
   box-shadow: 1px 0 0 var(--glass-border);
   color: var(--text) !important;
@@ -1568,8 +1564,6 @@ html[data-theme="light"] {
 
 .card {
   background: var(--glass-card) !important;
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid var(--glass-border) !important;
   box-shadow: 0 2px 12px var(--glass-shadow);
   transition: all .3s cubic-bezier(.4,0,.2,1);
@@ -1711,8 +1705,6 @@ a:focus-visible, button:focus-visible, .chip:focus-visible, .tab:focus-visible, 
 /* ─── TOPBAR — Glass header ─── */
 .topbar {
   background: var(--glass-bg) !important;
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-bottom: 1px solid var(--glass-border);
   color: var(--text) !important;
 }
