@@ -344,18 +344,16 @@ table.data tr:last-child td { border-bottom: none; }
 }
 .nav-group-toggle:hover { background: rgba(255,255,255,.04); color: var(--text-dim); }
 .nav-group-chevron {
-  display: flex; align-items: center; transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
   color: var(--text-faint);
 }
-.nav-group.open .nav-group-toggle .nav-group-chevron { transform: rotate(180deg); }
-.nav-group.open .nav-group-toggle { color: var(--accent); }
+.nav-group.open > .nav-group-toggle .nav-group-chevron { transform: rotate(180deg); }
+.nav-group.open > .nav-group-toggle { color: var(--accent); }
 .nav-group-items {
-  display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1);
-  overflow: hidden;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1);
 }
-.nav-group.open .nav-group-items { grid-template-rows: 1fr; }
-.nav-group-items > * { overflow: hidden; }
+.nav-group.open .nav-group-items { max-height: 600px; }
 .nav-group-items .nav-item { padding-left: 20px; font-size: 13px; }
 .nav-item {
   display: flex; align-items: center; gap: 11px;

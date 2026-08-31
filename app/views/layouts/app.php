@@ -301,7 +301,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=41') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=42') ?>">
   <style>
     <?php
     $accentMap = ['teal'=>'#0d9488','blue'=>'#0284c7','indigo'=>'#4f46e5','purple'=>'#7c3aed','pink'=>'#db2777','red'=>'#ef4444','orange'=>'#f97316','amber'=>'#f59e0b','emerald'=>'#059669','cyan'=>'#06b6d4','rose'=>'#f43f5e','violet'=>'#8b5cf6'];
