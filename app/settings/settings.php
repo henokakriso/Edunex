@@ -9,22 +9,58 @@ class Ctl_profile {
         $uid = (int)$u['id'];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_verify();
-            $upd = [
-                'first_name' => trim($_POST['first_name'] ?? ''), 'last_name' => trim($_POST['last_name'] ?? ''),
-                'phone' => trim($_POST['phone'] ?? ''), 'bio' => trim($_POST['bio'] ?? ''),
-                'language' => $_POST['language'] ?? 'en', 'birth_date' => ($_POST['birth_date'] ?? '') ?: null,
-                'gender' => ($_POST['gender'] ?? '') ?: null,
-            ];
-            if (!empty($_FILES['avatar']['name'])) {
-                $res = upload_file($_FILES['avatar'], 'avatars', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                if (!$res['error']) $upd['avatar'] = $res['path'];
+            $tab = $_POST['tab_save'] ?? 'profile';
+            if ($tab === 'theme') {
+                Database::update('users', [
+                    'theme' => $_POST['theme'] ?? 'dark',
+                    'language' => $_POST['language'] ?? 'en',
+                ], 'id = ?', [$uid]);
+                Auth::refreshUser();
+                flash('success', 'Preferences saved.');
+                redirect('settings/profile&tab=theme');
+            } elseif ($tab === 'fayda') {
+                Database::update('users', [
+                    'fayda_id' => trim($_POST['fayda_id'] ?? ''),
+                    'national_id' => trim($_POST['national_id'] ?? ''),
+                    'employee_id' => trim($_POST['employee_id'] ?? ''),
+                    'birth_cert_number' => trim($_POST['birth_cert_number'] ?? ''),
+                ], 'id = ?', [$uid]);
+                Auth::refreshUser();
+                flash('success', 'ID information saved.');
+                redirect('settings/profile&tab=fayda');
+            } else {
+                $upd = [
+                    'first_name' => trim($_POST['first_name'] ?? ''), 'last_name' => trim($_POST['last_name'] ?? ''),
+                    'phone' => trim($_POST['phone'] ?? ''), 'bio' => trim($_POST['bio'] ?? ''),
+                    'language' => $_POST['language'] ?? 'en', 'birth_date' => ($_POST['birth_date'] ?? '') ?: null,
+                    'gender' => ($_POST['gender'] ?? '') ?: null,
+                    'alt_phone' => trim($_POST['alt_phone'] ?? ''),
+                    'address' => trim($_POST['address'] ?? ''),
+                    'emergency_contact' => trim($_POST['emergency_contact'] ?? ''),
+                ];
+                if (!empty($_FILES['avatar']['name'])) {
+                    $res = upload_file($_FILES['avatar'], 'avatars', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                    if (!$res['error']) $upd['avatar'] = $res['path'];
+                }
+                Database::update('users', $upd, 'id = ?', [$uid]);
+                Auth::refreshUser();
+                flash('success', 'Profile updated.');
+                redirect('settings/profile&tab=profile');
             }
-            Database::update('users', $upd, 'id = ?', [$uid]);
-            Auth::refreshUser();
-            flash('success', 'Profile updated.');
-            redirect('settings/profile');
         }
-        Router::render('app/settings/profile', ['title' => 'Profile Settings']);
+        $activeTab = $_GET['tab'] ?? 'profile';
+        $twofa = Database::one("SELECT twofa_secret, twofa_enabled FROM users WHERE id = ?", [$uid]);
+        $henaEnabled = Auth::henaEnabled($uid);
+        $mode = $henaEnabled ? 'hena' : ((int)($twofa['twofa_enabled'] ?? 0) ? 'totp' : 'off');
+        $sessions = Database::all("SELECT * FROM sessions WHERE user_id = ? ORDER BY last_active DESC", [$uid]);
+        Router::render('app/settings/profile', [
+            'title' => 'Settings',
+            'activeTab' => $activeTab,
+            'twofa' => $twofa,
+            'mode' => $mode,
+            'hena_new' => $_SESSION['hena_new_file'] ?? '',
+            'sessions' => $sessions,
+        ]);
     }
 }
 
