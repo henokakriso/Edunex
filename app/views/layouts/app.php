@@ -461,32 +461,43 @@ $__icons = [
       <?php endforeach; ?>
 
       <?php $__inactive = ($__u['role'] ?? '') === 'student' && ($__u['enrollment_status'] ?? 'active') === 'inactive'; ?>
-      <div class="nav-section">General</div>
-      <?php if (!$__inactive): ?>
-      <a class="nav-item <?= str_starts_with($__route, 'messages') ? 'active' : '' ?>" href="<?= url('index.php?r=messages') ?>">
-        <span class="ico"><?= icon('chat') ?></span><span class="nav-label">Messages</span>
-      </a>
-      <a class="nav-item <?= str_starts_with($__route, 'calendar') ? 'active' : '' ?>" href="<?= url('index.php?r=calendar') ?>">
-        <span class="ico"><?= icon('calendar') ?></span><span class="nav-label">Calendar</span>
-      </a>
-      <?php if (($__u['role'] ?? '') === 'student'): ?>
-      <a class="nav-item <?= str_starts_with($__route, 'gamification') ? 'active' : '' ?>" href="<?= url('index.php?r=gamification') ?>">
-        <span class="ico"><?= icon('game') ?></span><span class="nav-label">Gamification</span>
-      </a>
-      <?php endif; ?>
-      <?php if (($__u['role'] ?? '') === 'ministry'): ?>
-      <a class="nav-item <?= str_starts_with($__route, 'files') ? 'active' : '' ?>" href="<?= url('index.php?r=files') ?>">
-        <span class="ico"><?= icon('folder') ?></span><span class="nav-label">Files</span>
-      </a>
-      <?php endif; ?>
-      <?php endif; ?>
-      <a class="nav-item <?= str_starts_with($__route, 'notifications') ? 'active' : '' ?>" href="<?= url('index.php?r=notifications') ?>">
-        <span class="ico"><?= icon('bell') ?></span><span class="nav-label">Notifications</span>
-        <?php if ($__unread > 0): ?><span class="cnt"><?= min($__unread, 99) ?></span><?php endif; ?>
-      </a>
-      <a class="nav-item <?= str_starts_with($__route, 'settings') ? 'active' : '' ?>" href="<?= url('index.php?r=settings/profile') ?>">
-        <span class="ico"><?= icon('gear') ?></span><span class="nav-label">Settings</span>
-      </a>
+      <?php
+      // Check if any General item is active
+      $__generalActive = str_starts_with($__route, 'messages') || str_starts_with($__route, 'calendar') || str_starts_with($__route, 'gamification') || str_starts_with($__route, 'files') || str_starts_with($__route, 'notifications') || str_starts_with($__route, 'settings');
+      ?>
+      <div class="nav-group <?= $__generalActive ? 'open' : '' ?>">
+        <button class="nav-group-toggle" onclick="toggleNavGroup(this)">
+          <span class="nav-group-label">General</span>
+          <span class="nav-group-chevron"><?= icon('chevron-down') ?></span>
+        </button>
+        <div class="nav-group-items">
+          <?php if (!$__inactive): ?>
+          <a class="nav-item <?= str_starts_with($__route, 'messages') ? 'active' : '' ?>" href="<?= url('index.php?r=messages') ?>">
+            <span class="ico"><?= icon('chat') ?></span><span class="nav-label">Messages</span>
+          </a>
+          <a class="nav-item <?= str_starts_with($__route, 'calendar') ? 'active' : '' ?>" href="<?= url('index.php?r=calendar') ?>">
+            <span class="ico"><?= icon('calendar') ?></span><span class="nav-label">Calendar</span>
+          </a>
+          <?php if (($__u['role'] ?? '') === 'student'): ?>
+          <a class="nav-item <?= str_starts_with($__route, 'gamification') ? 'active' : '' ?>" href="<?= url('index.php?r=gamification') ?>">
+            <span class="ico"><?= icon('game') ?></span><span class="nav-label">Gamification</span>
+          </a>
+          <?php endif; ?>
+          <?php if (($__u['role'] ?? '') === 'ministry'): ?>
+          <a class="nav-item <?= str_starts_with($__route, 'files') ? 'active' : '' ?>" href="<?= url('index.php?r=files') ?>">
+            <span class="ico"><?= icon('folder') ?></span><span class="nav-label">Files</span>
+          </a>
+          <?php endif; ?>
+          <?php endif; ?>
+          <a class="nav-item <?= str_starts_with($__route, 'notifications') ? 'active' : '' ?>" href="<?= url('index.php?r=notifications') ?>">
+            <span class="ico"><?= icon('bell') ?></span><span class="nav-label">Notifications</span>
+            <?php if ($__unread > 0): ?><span class="cnt"><?= min($__unread, 99) ?></span><?php endif; ?>
+          </a>
+          <a class="nav-item <?= str_starts_with($__route, 'settings') ? 'active' : '' ?>" href="<?= url('index.php?r=settings/profile') ?>">
+            <span class="ico"><?= icon('gear') ?></span><span class="nav-label">Settings</span>
+          </a>
+        </div>
+      </div>
     </aside>
 
     <!-- ======================= MAIN ======================= -->
