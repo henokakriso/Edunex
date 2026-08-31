@@ -58,6 +58,7 @@ final class EdunexIcons
             'help'       => '<circle cx="12" cy="12" r="8.5"/><path d="M9.8 9a2.4 2.4 0 0 1 4.7.8c0 1.5-2.2 2-2.2 3.3"/><path d="M12 16.8v.2"/>',
             'settings'   => '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
             'wrench'     => '<path d="M14.5 6.5a4 4 0 0 0-5.4 4.8L4 16.4V20l3.5-3.5 3-2.9a4 4 0 0 0 4.8-5.4l-2.5 2.3-2.2-.6.5-2.4 2.4-2.3Z"/>',
+            'copy'       => '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
             'sliders'    => '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><circle cx="4" cy="10" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="20" cy="12" r="2"/>',
             'bell-cog'   => '<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
             'chat'       => '<path d="M21 12a8 8 0 0 1-8 8H4l2-2.5A8 8 0 1 1 21 12Z"/>',

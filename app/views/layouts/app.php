@@ -530,23 +530,28 @@ $__icons = [
   <?php endforeach; endif; ?>
 
   <!-- Report Issue Modal -->
-  <div id="report-issue-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
-    <div class="card" style="max-width:480px;width:90%;padding:1.5rem">
-      <h3 style="margin:0 0 1rem">Report Issue / Request Fix</h3>
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">
-        This creates a secure fix ticket. The IT admin can ONLY access this page — no other data or settings.
-      </p>
-      <form method="POST" action="<?= url('index.php?r=ticket/create') ?>">
+  <div id="report-issue-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal" style="max-width:480px;width:90%">
+      <div style="padding:28px 28px 0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;color:var(--warning)"><?= icon('wrench') ?></span>
+          <h3 style="margin:0;font-size:17px">Report Issue / Request Fix</h3>
+        </div>
+        <p style="color:var(--text-dim);font-size:13px;margin:0 0 18px;line-height:1.5">
+          This creates a secure fix ticket. The IT admin can ONLY access this page — no other data or settings.
+        </p>
+      </div>
+      <form method="POST" action="<?= url('index.php?r=ticket/create') ?>" style="padding:0 28px 24px">
         <?= csrf_field() ?>
         <input type="hidden" name="page_route" id="report-page-route" value="<?= e($__route) ?>">
         <input type="hidden" name="page_label" id="report-page-label" value="<?= e($title ?? '') ?>">
-        <div class="form-group">
-          <label>Describe the issue</label>
-          <textarea name="description" class="form-control" rows="3" placeholder="What's wrong or what needs fixing?" required></textarea>
+        <div class="field" style="margin-bottom:18px">
+          <label style="font-size:13px;font-weight:600;margin-bottom:6px;display:block">Describe the issue</label>
+          <textarea name="description" class="input" rows="3" placeholder="What's wrong or what needs fixing?" required style="width:100%;resize:vertical"></textarea>
         </div>
-        <div class="flex gap-10">
-          <button class="btn btn-primary" type="submit">Create Fix Ticket</button>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
           <button type="button" class="btn btn-ghost" onclick="document.getElementById('report-issue-modal').style.display='none'">Cancel</button>
+          <button class="btn btn-primary" type="submit"><?= icon('send') ?> Create Fix Ticket</button>
         </div>
       </form>
     </div>
@@ -555,16 +560,27 @@ $__icons = [
   <!-- Fix Ticket Result Modal -->
   <?php if (!empty($_SESSION['fix_ticket'])): ?>
   <?php $ft = $_SESSION['fix_ticket']; unset($_SESSION['fix_ticket']); ?>
-  <div id="fix-ticket-result" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
-    <div class="card" style="max-width:480px;width:90%;padding:1.5rem">
-      <h3 style="margin:0 0 0.5rem">Fix Ticket #<?= e($ft['id']) ?> Created</h3>
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Share this token with your IT admin:</p>
-      <div style="background:var(--bg-elevated,#1e293b);padding:1rem;border-radius:8px;font-family:monospace;font-size:0.9rem;word-break:break-all;margin-bottom:1rem;border:1px solid var(--border,#334155)">
-        <?= e($ft['token']) ?>
+  <div id="fix-ticket-result" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal" style="max-width:480px;width:90%">
+      <div style="padding:28px 28px 0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="width:36px;height:36px;border-radius:10px;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;color:var(--success)"><?= icon('check-circle') ?></span>
+          <h3 style="margin:0;font-size:17px">Fix Ticket #<?= e($ft['id']) ?> Created</h3>
+        </div>
+        <p style="color:var(--text-dim);font-size:13px;margin:0 0 18px;line-height:1.5">
+          Share this token with your IT admin:
+        </p>
       </div>
-      <p style="font-size:0.85rem;color:var(--muted)">Page: <b><?= e($ft['page']) ?></b></p>
-      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.dataset.token).then(()=>this.textContent='Copied!')" data-token="<?= e($ft['token']) ?>">Copy Token</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('fix-ticket-result').style.display='none'">Close</button>
+      <div style="padding:0 28px 24px">
+        <div style="background:var(--bg-elev);padding:14px 16px;border-radius:12px;font-family:monospace;font-size:13px;word-break:break-all;margin-bottom:16px;border:1px solid var(--border)">
+          <?= e($ft['token']) ?>
+        </div>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px">Page: <b><?= e($ft['page']) ?></b></p>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="document.getElementById('fix-ticket-result').style.display='none'">Close</button>
+          <button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.dataset.token).then(()=>this.textContent='Copied!')" data-token="<?= e($ft['token']) ?>"><?= icon('copy') ?> Copy Token</button>
+        </div>
+      </div>
     </div>
   </div>
   <script>setTimeout(()=>{var m=document.getElementById('fix-ticket-result');if(m)m.style.display='flex';},100);</script>
