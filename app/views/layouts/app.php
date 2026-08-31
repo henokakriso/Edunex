@@ -301,7 +301,7 @@ $__icons = [
   <title><?= e($title ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
   <link rel="icon" href="<?= url('public/images/favicon.svg') ?>">
   <script>document.documentElement.dataset.theme = localStorage.getItem('edunex-theme') || '<?= e(current_theme()) ?>';</script>
-  <link rel="stylesheet" href="<?= url('public/css/app.css?v=40') ?>">
+  <link rel="stylesheet" href="<?= url('public/css/app.css?v=41') ?>">
   <style>
     <?php
     $accentMap = ['teal'=>'#0d9488','blue'=>'#0284c7','indigo'=>'#4f46e5','purple'=>'#7c3aed','pink'=>'#db2777','red'=>'#ef4444','orange'=>'#f97316','amber'=>'#f59e0b','emerald'=>'#059669','cyan'=>'#06b6d4','rose'=>'#f43f5e','violet'=>'#8b5cf6'];
@@ -416,9 +416,6 @@ $__icons = [
       <a class="nav-item <?= str_starts_with($__route, 'settings') ? 'active' : '' ?>" href="<?= url('index.php?r=settings/profile') ?>">
         <span class="ico"><?= icon('gear') ?></span><span class="nav-label">Settings</span>
       </a>
-      <a class="nav-item" href="<?= url('index.php?r=auth/logout') ?>">
-        <span class="ico"><?= icon('logout') ?></span><span class="nav-label">Log out</span>
-      </a>
     </aside>
 
     <!-- ======================= MAIN ======================= -->
@@ -501,8 +498,6 @@ $__icons = [
         </div>
       </div>
 
-      <?php include BASE_PATH . '/app/views/partials/flashes.php'; ?>
-
       <?php if (isset($_SESSION['impersonated_by']) && !empty($_SESSION['impersonated_by'])): ?>
         <div style="background:linear-gradient(90deg,#7c2d12,#9a3412);color:#fff;padding:10px 18px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <span><?= icon('shield') ?> <b>EMERGENCY OVERRIDE</b> — you are acting as <?= e(full_name($__u)) ?> (<?= e($__u['email']) ?>, <?= e($__u['role']) ?>). All actions are logged.</span>
@@ -520,6 +515,7 @@ $__icons = [
     window.EDUNEX_USER = <?= json_encode(['id' => $__u['id'], 'role' => $__u['role'], 'name' => full_name($__u)]) ?>;
     window.EDUNEX = { URL: <?= json_encode(APP_URL) ?>, API: <?= json_encode(APP_URL) ?> };
     window.EDUNEX_FLASHES = <?= json_encode(flash_drain()) ?>;
+    localStorage.setItem('edunex-toast-pos', <?= json_encode($__u['toast_position'] ?? 'top-right') ?>);
   </script>
   <script src="<?= url('public/js/app.js?v=12') ?>"></script>
   <script>

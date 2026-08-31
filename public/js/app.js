@@ -61,14 +61,21 @@
   /* ---------------- Toasts ---------------- */
   function toast(msg, type = 'info', title = '') {
     let wrap = $('.toast-wrap');
-    if (!wrap) { wrap = document.createElement('div'); wrap.className = 'toast-wrap'; document.body.appendChild(wrap); }
+    if (!wrap) {
+      wrap = document.createElement('div');
+      const pos = localStorage.getItem('edunex-toast-pos') || 'top-center';
+      wrap.className = 'toast-wrap' + (pos !== 'top-center' ? ' pos-' + pos : '');
+      document.body.appendChild(wrap);
+    }
     const t = document.createElement('div');
     t.className = `toast ${type}`;
+    t.style.position = 'relative';
     const icons = { success: ico('check-circle'), error: ico('ban-circle'), warning: ico('alert'), info: ico('info') };
-    t.innerHTML = `<span>${icons[type] || icons.info}</span><div><b>${escapeHtml(title || type[0].toUpperCase() + type.slice(1))}</b><br>${escapeHtml(msg)}</div><button class="toast-close">✕</button>`;
-    t.querySelector('.toast-close').onclick = () => t.remove();
+    const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+    t.innerHTML = `<span class="toast-ico" style="flex-shrink:0;display:flex;font-size:20px;color:${colors[type] || colors.info}">${icons[type] || icons.info}</span><div class="toast-body"><div class="toast-title">${escapeHtml(title || type[0].toUpperCase() + type.slice(1))}</div><div class="toast-msg">${escapeHtml(msg)}</div></div><button class="toast-close">✕</button>`;
+    t.querySelector('.toast-close').onclick = () => { t.style.animation = 'toastOut 0.35s ease forwards'; setTimeout(() => t.remove(), 350); };
     wrap.appendChild(t);
-    setTimeout(() => { t.style.transition = 'all .3s'; t.style.opacity = '0'; t.style.transform = 'translateX(24px)'; setTimeout(() => t.remove(), 300); }, 4200);
+    setTimeout(() => { if (t.parentElement) { t.style.animation = 'toastOut 0.35s ease forwards'; setTimeout(() => t.remove(), 350); } }, 4500);
   }
   window.toast = toast;
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
