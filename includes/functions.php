@@ -26,6 +26,13 @@ function redirect(string $path): void {
     exit;
 }
 
+/** Redirect back to previous page */
+function back(): void {
+    $ref = $_SERVER['HTTP_REFERER'] ?? url('dashboard');
+    header('Location: ' . $ref);
+    exit;
+}
+
 /** CSRF token */
 function csrf_token(): string {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
