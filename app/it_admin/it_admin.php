@@ -17,6 +17,7 @@ class Ctl_it_admin {
             'fix' => $this->fixEntry($u),
             'fix-session' => $this->fixSession($u),
             'resolve' => $this->resolve($u),
+            'heartbeat' => $this->heartbeat($u),
             'audit' => $this->audit($u),
             default => $this->dashboard($u),
         };
@@ -117,7 +118,16 @@ class Ctl_it_admin {
                 'it_admin_id' => $u['id'],
                 'status' => 'in_progress',
                 'claimed_at' => date('Y-m-d H:i:s'),
+                'admin_status' => 'investigating',
             ], 'id = ?', [$ticket['id']]);
+
+            Database::insert('it_fix_logs', [
+                'ticket_id' => $ticket['id'],
+                'it_admin_id' => $u['id'],
+                'action' => 'claimed',
+                'detail' => 'IT admin claimed this ticket and started investigating',
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+            ]);
 
             log_activity('it_fix.claim', "Ticket #{$ticket['id']} claimed by IT admin", $u['id']);
 
@@ -162,19 +172,63 @@ class Ctl_it_admin {
         Database::update('it_fix_tickets', [
             'status' => 'resolved',
             'resolved_at' => date('Y-m-d H:i:s'),
+            'admin_status' => null,
         ], 'id = ?', [$tid]);
 
         Database::insert('it_fix_logs', [
             'ticket_id' => $tid,
             'it_admin_id' => $u['id'],
-            'action' => 'resolve',
-            'detail' => $note ?: 'Ticket resolved',
+            'action' => 'resolved',
+            'detail' => $note ?: 'Ticket resolved successfully',
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
         ]);
 
         log_activity('it_fix.resolve', "Ticket #$tid resolved by IT admin", $u['id']);
         flash('success', 'Ticket #' . $tid . ' resolved.');
         redirect('it_admin/tickets');
+    }
+
+    /** IT admin heartbeat — updates admin_status + logs activity for real-time tracking */
+    private function heartbeat(array $u): void {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { echo json_encode(['error' => 'POST required']); return; }
+        csrf_verify();
+
+        $tid = (int)($_POST['ticket_id'] ?? 0);
+        $status = trim((string)($_POST['admin_status'] ?? ''));
+        $note = trim((string)($_POST['note'] ?? ''));
+
+        if (!$tid || !$status) { echo json_encode(['error' => 'Missing fields']); return; }
+
+        $valid = ['idle', 'investigating', 'fixing', 'testing'];
+        if (!in_array($status, $valid)) { echo json_encode(['error' => 'Invalid status']); return; }
+
+        $ticket = Database::one(
+            "SELECT id, admin_status FROM it_fix_tickets WHERE id = ? AND it_admin_id = ? AND status = 'in_progress'",
+            [$tid, $u['id']]
+        );
+        if (!$ticket) { echo json_encode(['error' => 'No active ticket']); return; }
+
+        Database::update('it_fix_tickets', ['admin_status' => $status], 'id = ?', [$tid]);
+
+        $detail = match ($status) {
+            'investigating' => 'Started investigating the issue',
+            'fixing' => 'Actively working on a fix',
+            'testing' => 'Testing the fix',
+            'idle' => 'Paused — waiting',
+            default => $status,
+        };
+        if ($note) $detail .= ': ' . $note;
+
+        Database::insert('it_fix_logs', [
+            'ticket_id' => $tid,
+            'it_admin_id' => $u['id'],
+            'action' => 'status_' . $status,
+            'detail' => $detail,
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+        ]);
+
+        echo json_encode(['ok' => true, 'status' => $status]);
     }
 
     private function audit(array $u): void {

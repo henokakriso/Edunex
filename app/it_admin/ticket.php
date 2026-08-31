@@ -39,12 +39,21 @@ class Ctl_ticket_api {
             'description' => $description,
             'api_token' => $token,
             'status' => 'open',
+            'priority' => 'normal',
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+24 hours')),
         ]);
 
         Database::insert('it_fix_scopes', [
             'ticket_id' => $ticketId,
             'scope_route' => $pageRoute,
             'scope_label' => $pageLabel,
+        ]);
+
+        Database::insert('it_fix_logs', [
+            'ticket_id' => $ticketId,
+            'it_admin_id' => (int)$u['id'],
+            'action' => 'created',
+            'detail' => "Ticket created for: $pageLabel ($pageRoute)",
         ]);
 
         log_activity('it_fix.create', "Ticket #$ticketId created for $pageRoute", (int)$u['id']);
@@ -73,11 +82,19 @@ class Ctl_ticket_api {
     private function tracking(array $u): void {
         header('Content-Type: application/json');
 
+        // Auto-escalate open tickets past 6 hours
+        Database::run("UPDATE it_fix_tickets SET priority = 'high', escalated_at = NOW() WHERE requested_by = ? AND status IN ('open','in_progress') AND priority = 'normal' AND created_at < DATE_SUB(NOW(), INTERVAL 6 HOUR)", [(int)$u['id']]);
+        // Auto-escalate to critical past 12 hours
+        Database::run("UPDATE it_fix_tickets SET priority = 'critical', escalated_at = NOW() WHERE requested_by = ? AND status IN ('open','in_progress') AND priority = 'high' AND created_at < DATE_SUB(NOW(), INTERVAL 12 HOUR)", [(int)$u['id']]);
+        // Auto-close expired tickets (past 24 hours)
+        Database::run("UPDATE it_fix_tickets SET status = 'closed' WHERE requested_by = ? AND status IN ('open','in_progress') AND expires_at IS NOT NULL AND expires_at < NOW()", [(int)$u['id']]);
+
         $tickets = Database::all(
-            "SELECT t.id, t.page_route, t.page_label, t.description, t.status, t.frozen,
-                    t.frozen_reason, t.created_at, t.claimed_at, t.resolved_at,
+            "SELECT t.id, t.page_route, t.page_label, t.description, t.status, t.priority,
+                    t.frozen, t.frozen_reason, t.created_at, t.claimed_at, t.resolved_at,
+                    t.expires_at, t.escalated_at, t.admin_status,
                     CONCAT(a.first_name, ' ', a.last_name) AS admin_name,
-                    (SELECT detail FROM it_fix_logs l WHERE l.ticket_id = t.id ORDER BY l.created_at DESC LIMIT 1) AS last_admin_note
+                    a.first_name AS admin_first_name
              FROM it_fix_tickets t
              LEFT JOIN users a ON a.id = t.it_admin_id
              WHERE t.requested_by = ?
@@ -85,6 +102,27 @@ class Ctl_ticket_api {
              LIMIT 50",
             [(int)$u['id']]
         );
+
+        // Get activity logs for each ticket
+        foreach ($tickets as &$ticket) {
+            $ticket['logs'] = Database::all(
+                "SELECT l.action, l.detail, l.created_at,
+                        CONCAT(u.first_name, ' ', u.last_name) AS actor_name
+                 FROM it_fix_logs l
+                 LEFT JOIN users u ON u.id = l.it_admin_id
+                 WHERE l.ticket_id = ?
+                 ORDER BY l.created_at DESC
+                 LIMIT 20",
+                [(int)$ticket['id']]
+            );
+            // Calculate time remaining
+            if ($ticket['expires_at']) {
+                $ticket['hours_remaining'] = max(0, round((strtotime($ticket['expires_at']) - time()) / 3600, 1));
+            } else {
+                $ticket['hours_remaining'] = null;
+            }
+        }
+        unset($ticket);
 
         echo json_encode(['tickets' => $tickets]);
     }

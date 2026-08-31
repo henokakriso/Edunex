@@ -653,19 +653,22 @@ $__icons = [
   </div>
 
   <!-- Report Tracking Modal -->
-  <div id="report-tracking-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div id="report-tracking-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeReportTracking()">
     <div class="modal" style="max-width:600px;width:92%;max-height:80vh;overflow-y:auto">
       <div style="padding:28px 28px 0">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <span style="width:36px;height:36px;border-radius:10px;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;color:var(--info)"><?= icon('list') ?></span>
-          <h3 style="margin:0;font-size:17px">Report Tracking</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="width:36px;height:36px;border-radius:10px;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;color:var(--info)"><?= icon('list') ?></span>
+            <h3 style="margin:0;font-size:17px">Report Tracking</h3>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="closeReportTracking()" style="padding:4px 8px">✕</button>
         </div>
         <p style="color:var(--text-dim);font-size:13px;margin:0 0 18px;line-height:1.5">
-          Track your submitted fix tickets and admin responses
+          Track your submitted fix tickets · Auto-refreshes every 15s
         </p>
       </div>
       <div id="tracking-list" style="padding:0 28px 24px">
-        <div style="text-align:center;color:var(--text-dim);padding:30px"><?= icon('loader') ?> Loading...</div>
+        <div style="text-align:center;color:var(--text-dim);padding:30px">Loading...</div>
       </div>
     </div>
   </div>
@@ -685,10 +688,15 @@ $__icons = [
         </p>
       </div>
       <div style="padding:0 28px 24px">
-        <div style="background:var(--bg-elev);padding:14px 16px;border-radius:12px;font-family:monospace;font-size:13px;word-break:break-all;margin-bottom:16px;border:1px solid var(--border)">
+        <div style="background:var(--bg-elev);padding:14px 16px;border-radius:12px;font-family:monospace;font-size:13px;word-break:break-all;margin-bottom:12px;border:1px solid var(--border)">
           <?= e($ft['token']) ?>
         </div>
-        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px">Page: <b><?= e($ft['page']) ?></b></p>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(245,158,11,.12);color:var(--warning)">⏱ Token expires in 24 hours</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(59,130,246,.12);color:var(--info)">⏰ Admin has 6h to fix</span>
+        </div>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 4px">Page: <b><?= e($ft['page']) ?></b></p>
+        <p style="font-size:12px;color:var(--text-dim);margin:0 0 16px;line-height:1.5">After 6 hours the priority escalates to <span style="color:var(--danger);font-weight:600">HIGH</span>. After 12 hours to <span style="color:var(--danger);font-weight:700">CRITICAL</span>. Token expires after 24 hours.</p>
         <div style="display:flex;gap:10px;justify-content:flex-end">
           <button class="btn btn-ghost" onclick="document.getElementById('fix-ticket-result').style.display='none'">Close</button>
           <button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.dataset.token).then(()=>this.textContent='Copied!')" data-token="<?= e($ft['token']) ?>"><?= icon('copy') ?> Copy Token</button>
@@ -715,9 +723,16 @@ $__icons = [
   });
 
   /* Report Tracking */
+  var _trackTimer = null;
   function openReportTracking() {
     document.getElementById('report-tracking-modal').style.display = 'flex';
     loadTracking();
+    if (_trackTimer) clearInterval(_trackTimer);
+    _trackTimer = setInterval(loadTracking, 15000); // refresh every 15s
+  }
+  function closeReportTracking() {
+    document.getElementById('report-tracking-modal').style.display = 'none';
+    if (_trackTimer) { clearInterval(_trackTimer); _trackTimer = null; }
   }
   function loadTracking() {
     var list = document.getElementById('tracking-list');
@@ -733,31 +748,87 @@ $__icons = [
         var html = '';
         var statusColors = {open:'var(--warning)',in_progress:'var(--info)',resolved:'var(--success)',closed:'var(--text-dim)'};
         var statusLabels = {open:'Open',in_progress:'In Progress',resolved:'Resolved',closed:'Closed'};
+        var priColors = {normal:'var(--text-dim)',high:'#f97316',critical:'#ef4444'};
+        var priLabels = {normal:'Normal',high:'HIGH',critical:'CRITICAL'};
+        var adminStatuses = {idle:'Idle',investigating:'Investigating',fixing:'Fixing',testing:'Testing'};
+
         tickets.forEach(function(t) {
           var color = statusColors[t.status] || 'var(--text-dim)';
           var label = statusLabels[t.status] || t.status;
-          var frozenBadge = t.frozen == 1 ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(239,68,68,.12);color:var(--danger)">'+ icoInline('lock')+' Frozen</span>' : '';
+          var priColor = priColors[t.priority] || 'var(--text-dim)';
+          var priLabel = priLabels[t.priority] || t.priority;
+          var isActive = t.status === 'open' || t.status === 'in_progress';
+
           html += '<div class="tracking-card" style="border:1px solid var(--glass-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:var(--glass-bg);position:relative;overflow:hidden;transition:all .2s">';
-          html += '<div style="position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none"></div>';
-          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;position:relative">';
-          html += '<div><span style="font-weight:700;font-size:14px;color:var(--text)">#'+t.id+'</span> ';
-          html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+color+'22;color:'+color+'">'+label+'</span> ';
-          html += frozenBadge;
-          html += '<div style="font-size:12px;color:var(--text-dim);margin-top:4px">'+eHtml(t.page_label || t.page_route)+'</div></div>';
-          html += '<div style="font-size:11px;color:var(--text-dim);white-space:nowrap">'+timeAgo(t.created_at)+'</div></div>';
-          html += '<div style="font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.5;position:relative">'+eHtml(t.description)+'</div>';
+
+          // Header row
+          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+          html += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+          html += '<span style="font-weight:700;font-size:14px;color:var(--text)">#'+t.id+'</span>';
+          html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+color+'22;color:'+color+'">'+label+'</span>';
+          if (t.priority !== 'normal') {
+            html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+priColor+'18;color:'+priColor+'">'+priLabel+'</span>';
+          }
+          if (t.frozen == 1) {
+            html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(239,68,68,.12);color:var(--danger)">'+icoInline('lock')+' Frozen</span>';
+          }
+          html += '</div>';
+          html += '<div style="text-align:right;white-space:nowrap">';
+          html += '<div style="font-size:11px;color:var(--text-dim)">'+timeAgo(t.created_at)+'</div>';
+          if (isActive && t.hours_remaining !== null) {
+            var hrs = t.hours_remaining;
+            var timeColor = hrs > 18 ? 'var(--success)' : hrs > 6 ? 'var(--warning)' : 'var(--danger)';
+            html += '<div style="font-size:11px;font-weight:700;color:'+timeColor+';margin-top:2px">';
+            if (hrs <= 0) html += '⚠ Expired';
+            else if (hrs < 1) html += '⏰ ' + Math.round(hrs * 60) + 'min left';
+            else html += '⏰ ' + hrs + 'h left';
+            html += '</div>';
+          }
+          html += '</div></div>';
+
+          // Page + description
+          html += '<div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">'+icoInline('link')+' '+eHtml(t.page_label || t.page_route)+'</div>';
+          html += '<div style="font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5">'+eHtml(t.description)+'</div>';
+
+          // Admin status bar
           if (t.admin_name) {
-            html += '<div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;position:relative">'+ icoInline('user')+' <b>'+eHtml(t.admin_name)+'</b> is handling this ticket</div>';
-          }
-          if (t.last_admin_note) {
-            html += '<div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-dim);margin-bottom:10px;position:relative"><div style="font-weight:600;margin-bottom:3px;color:var(--text)">Admin note:</div>'+eHtml(t.last_admin_note)+'</div>';
-          }
-          html += '<div style="display:flex;gap:8px;justify-content:flex-end;position:relative">';
-          if (t.status !== 'resolved' && t.status !== 'closed') {
-            if (t.frozen == 1) {
-              html += '<button class="btn btn-ghost btn-sm" onclick="unfreezeTicket('+t.id+')" style="color:var(--warning)">'+ icoInline('unlock')+' Unfreeze</button>';
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border)">';
+            html += '<div style="width:28px;height:28px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:12px;font-weight:700">'+eHtml(t.admin_first_name || '?')+'</div>';
+            html += '<div style="flex:1"><div style="font-size:12px;font-weight:600">'+eHtml(t.admin_name)+'</div>';
+            if (t.admin_status) {
+              var asColor = t.admin_status === 'fixing' ? 'var(--success)' : t.admin_status === 'testing' ? 'var(--accent)' : t.admin_status === 'investigating' ? 'var(--info)' : 'var(--text-dim)';
+              html += '<div style="font-size:11px;color:'+asColor+'">'+icoInline('pulse')+' '+eHtml(adminStatuses[t.admin_status] || t.admin_status)+'</div>';
             } else {
-              html += '<button class="btn btn-ghost btn-sm" onclick="freezeTicket('+t.id+')" style="color:var(--danger)">'+ icoInline('lock')+' Freeze</button>';
+              html += '<div style="font-size:11px;color:var(--text-dim)">Assigned</div>';
+            }
+            html += '</div></div>';
+          }
+
+          // Activity timeline
+          if (t.logs && t.logs.length) {
+            html += '<div style="margin-bottom:10px">';
+            html += '<div style="font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Activity</div>';
+            html += '<div style="position:relative;padding-left:18px">';
+            var showLogs = t.logs.slice(0, 5);
+            showLogs.forEach(function(log, i) {
+              var dotColor = log.action === 'claimed' ? 'var(--info)' : log.action === 'resolved' ? 'var(--success)' : log.action === 'frozen_by_user' ? 'var(--danger)' : log.action === 'page_view' ? 'var(--accent)' : 'var(--text-dim)';
+              html += '<div style="position:relative;padding:0 0 10px 0' + (i === showLogs.length - 1 ? ';padding-bottom:0' : '') + '">';
+              html += '<div style="position:absolute;left:-18px;top:5px;width:8px;height:8px;border-radius:50%;background:'+dotColor+';border:2px solid var(--bg-elev)"></div>';
+              if (i < showLogs.length - 1) html += '<div style="position:absolute;left:-15px;top:15px;width:2px;height:calc(100% - 5px);background:var(--border)"></div>';
+              html += '<div style="font-size:12px;color:var(--text)">'+eHtml(log.detail || log.action)+'</div>';
+              html += '<div style="font-size:10px;color:var(--text-dim);margin-top:1px">'+timeAgo(log.created_at)+'</div>';
+              html += '</div>';
+            });
+            html += '</div></div>';
+          }
+
+          // Action buttons
+          html += '<div style="display:flex;gap:8px;justify-content:flex-end">';
+          if (isActive) {
+            if (t.frozen == 1) {
+              html += '<button class="btn btn-ghost btn-sm" onclick="unfreezeTicket('+t.id+')" style="color:var(--warning)">'+icoInline('unlock')+' Unfreeze</button>';
+            } else {
+              html += '<button class="btn btn-ghost btn-sm" onclick="freezeTicket('+t.id+')" style="color:var(--danger)">'+icoInline('lock')+' Freeze</button>';
             }
           }
           html += '</div></div>';
@@ -774,6 +845,8 @@ $__icons = [
       lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
       unlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
       user: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      link: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+      pulse: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
     };
     return icons[name] || '';
   }
