@@ -34,6 +34,8 @@ $__tab = $activeTab ?? 'profile';
 .display-option{padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:all .25s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
 .display-option::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
 .display-option:hover{border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
+.display-option.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(13,148,136,.25);background:var(--accent-soft)}
+.display-option.active::before{background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 40%)}
 .font-size-preview{width:100%;height:48px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.25,.46,.45,.94)}
 .session-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);transition:all .25s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
 .session-item::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
@@ -103,19 +105,18 @@ $__tab = $activeTab ?? 'profile';
     <!-- Theme Mode -->
     <h3 style="margin-top:0;margin-bottom:6px"><?= icon('palette') ?> Appearance</h3>
     <p class="small faint" style="margin-bottom:14px">Choose your preferred look</p>
+    <input type="hidden" name="theme" value="<?= e(($__u['theme'] ?? 'dark')) ?>" id="theme-val">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
-      <label class="theme-card<?= ($__u['theme'] ?? 'dark') === 'dark' ? ' active' : '' ?>">
-        <input type="radio" name="theme" value="dark" style="display:none" <?= ($__u['theme'] ?? 'dark') === 'dark' ? 'checked' : '' ?>>
+      <button type="button" class="theme-card <?= ($__u['theme'] ?? 'dark') === 'dark' ? 'active' : '' ?>" onclick="selectTheme(this,'dark')">
         <div style="font-size:28px;margin-bottom:8px"><?= icon('moon') ?></div>
         <div style="font-weight:700;font-size:14px">Dark</div>
         <div class="tiny faint" style="margin-top:4px">Easy on the eyes</div>
-      </label>
-      <label class="theme-card<?= ($__u['theme'] ?? 'dark') === 'light' ? ' active' : '' ?>">
-        <input type="radio" name="theme" value="light" style="display:none" <?= ($__u['theme'] ?? 'dark') === 'light' ? 'checked' : '' ?>>
+      </button>
+      <button type="button" class="theme-card <?= ($__u['theme'] ?? 'dark') === 'light' ? 'active' : '' ?>" onclick="selectTheme(this,'light')">
         <div style="font-size:28px;margin-bottom:8px"><?= icon('sun') ?></div>
         <div style="font-weight:700;font-size:14px">Light</div>
         <div class="tiny faint" style="margin-top:4px">Clean and bright</div>
-      </label>
+      </button>
     </div>
 
     <!-- Accent Color -->
@@ -142,6 +143,24 @@ $__tab = $activeTab ?? 'profile';
       el.querySelector('input[type=radio]').checked = true;
       document.documentElement.style.setProperty('--accent', hex);
     }
+    function selectTheme(el, value) {
+      var sec = el.closest('.settings-section');
+      sec.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('theme-val').value = value;
+      document.documentElement.dataset.theme = value;
+    }
+    function selectSidebar(el, value) {
+      var sec = el.closest('.settings-section');
+      sec.querySelectorAll('.display-option').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('sidebar-style-val').value = value;
+    }
+    function toggleOption(el) {
+      el.classList.toggle('active');
+      var h = el.previousElementSibling;
+      h.value = el.classList.contains('active') ? '1' : '0';
+    }
     </script>
 
     <!-- Font Size -->
@@ -162,22 +181,20 @@ $__tab = $activeTab ?? 'profile';
     <h3 style="margin:0 0 6px"><?= icon('sidebar') ?> Sidebar</h3>
     <p class="small faint" style="margin-bottom:12px">Customize sidebar appearance</p>
     <?php $sideStyle = $__u['sidebar_style'] ?? 'default'; ?>
+    <input type="hidden" name="sidebar_style" value="<?= e($sideStyle) ?>" id="sidebar-style-val">
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
-      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'default' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
-        <input type="radio" name="sidebar_style" value="default" style="display:none" <?= $sideStyle === 'default' ? 'checked' : '' ?>>
+      <button type="button" class="display-option <?= $sideStyle === 'default' ? 'active' : '' ?>" onclick="selectSidebar(this,'default')" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center">
         <div style="width:40px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
         <span class="small" style="font-weight:600">Default</span>
-      </label>
-      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'compact' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
-        <input type="radio" name="sidebar_style" value="compact" style="display:none" <?= $sideStyle === 'compact' ? 'checked' : '' ?>>
+      </button>
+      <button type="button" class="display-option <?= $sideStyle === 'compact' ? 'active' : '' ?>" onclick="selectSidebar(this,'compact')" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center">
         <div style="width:20px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
         <span class="small" style="font-weight:600">Compact</span>
-      </label>
-      <label class="display-option" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center<?= $sideStyle === 'icons' ? ';border-color:var(--accent);box-shadow:0 0 0 1px rgba(13,148,136,.2)' : '' ?>">
-        <input type="radio" name="sidebar_style" value="icons" style="display:none" <?= $sideStyle === 'icons' ? 'checked' : '' ?>>
+      </button>
+      <button type="button" class="display-option <?= $sideStyle === 'icons' ? 'active' : '' ?>" onclick="selectSidebar(this,'icons')" style="cursor:pointer;flex-direction:column;gap:6px;text-align:center">
         <div style="width:16px;height:28px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border)"></div>
         <span class="small" style="font-weight:600">Icons Only</span>
-      </label>
+      </button>
     </div>
 
     <!-- Display Options -->
@@ -200,10 +217,8 @@ $__tab = $activeTab ?? 'profile';
             <div style="font-weight:600;font-size:13.5px"><?= $label ?></div>
             <div class="tiny faint" style="margin-top:2px"><?= $desc ?></div>
           </div>
-          <label class="ios-toggle<?= $val === '1' ? ' active' : '' ?>" onclick="this.classList.toggle('active')">
-            <input type="hidden" name="<?= $key ?>" value="<?= $val === '1' ? '1' : '0' ?>">
-            <input type="checkbox" <?= $val === '1' ? 'checked' : '' ?> style="display:none" onchange="this.previousElementSibling.value=this.checked?'1':'0'">
-          </label>
+          <input type="hidden" name="<?= e($key) ?>" value="<?= e($val) ?>">
+          <button type="button" class="ios-toggle <?= $val === '1' ? 'active' : '' ?>" onclick="toggleOption(this)" data-key="<?= e($key) ?>"></button>
         </div>
       <?php endforeach; ?>
     </div>
