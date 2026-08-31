@@ -507,24 +507,43 @@ $__icons = [
           <button class="topbar-icon" style="border:none;background:none;padding:2px">
             <img class="avatar" src="<?= e(avatar_url($__u)) ?>" alt="avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
           </button>
-          <div class="dropdown-menu">
-            <div class="dropdown-head"><?= e(full_name($__u)) ?></div>
-            <div class="dropdown-head" style="text-transform:none;font-weight:500;padding-top:0">
-              <?= e($__u['student_id'] ?? $__u['email']) ?> · Level <?= (int)$__u['level'] ?> · <?= (int)$__u['xp'] ?> XP
+          <div class="dropdown-menu profile-dropdown">
+            <div style="padding:16px 18px 12px;border-bottom:1px solid var(--glass-border)">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+                <img class="avatar avatar-lg" src="<?= e(avatar_url($__u)) ?>" alt="avatar" style="width:48px;height:48px;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(0,0,0,.2)">
+                <div>
+                  <div style="font-weight:700;font-size:15px;color:var(--text)"><?= e(full_name($__u)) ?></div>
+                  <div style="font-size:12px;color:var(--text-dim);margin-top:2px"><?= e($__u['student_id'] ?? $__u['email']) ?></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:var(--accent-soft);color:var(--accent)"><?= icon('user') ?> <?= e(ucfirst($__u['role'])) ?></span>
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(139,92,246,.1);color:#a78bfa">Level <?= (int)$__u['level'] ?></span>
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(245,158,11,.1);color:#fbbf24"><?= icon('zap') ?> <?= (int)$__u['xp'] ?> XP</span>
+              </div>
             </div>
-            <a class="dropdown-item" href="<?= url('index.php?r=settings/profile') ?>"><?= icon('gear') ?> Profile settings</a>
-            <a class="dropdown-item" href="<?= url('index.php?r=settings/security') ?>"><?= icon('lock') ?> Security</a>
-            <div class="dropdown-divider"></div>
-            <form method="post" action="<?= url('index.php?r=admin/toggle-demo') ?>" style="margin:0">
-              <?= csrf_field() ?>
-              <button type="submit" class="dropdown-item" style="gap:8px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font:inherit;color:inherit">
-                <?= is_demo_mode() ? icon('eye-off') : icon('eye') ?>
-                <?= is_demo_mode() ? 'Switch to Normal' : 'Switch to Demo' ?>
-                <span style="margin-left:auto;font-size:10px;padding:2px 6px;border-radius:4px;<?= is_demo_mode() ? 'background:var(--warning,#f59e0b);color:#000' : 'background:var(--success,#22c55e);color:#fff' ?>"><?= is_demo_mode() ? 'DEMO' : 'NORMAL' ?></span>
-              </button>
-            </form>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item danger" href="<?= url('index.php?r=auth/logout') ?>"><?= icon('logout') ?> Log out</a>
+            <div style="padding:6px">
+              <a class="dropdown-item" href="<?= url('index.php?r=settings/profile') ?>">
+                <span class="dropdown-ico"><?= icon('gear') ?></span> Profile settings
+              </a>
+              <a class="dropdown-item" href="<?= url('index.php?r=settings/security') ?>">
+                <span class="dropdown-ico"><?= icon('shield') ?></span> Security
+              </a>
+            </div>
+            <div style="height:1px;background:var(--glass-border);margin:2px 12px"></div>
+            <div style="padding:6px">
+              <form method="post" action="<?= url('index.php?r=admin/toggle-demo') ?>" style="margin:0">
+                <?= csrf_field() ?>
+                <button type="submit" class="dropdown-item" style="gap:10px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font:inherit;color:inherit;padding:9px 12px;border-radius:9px">
+                  <span class="dropdown-ico"><?= is_demo_mode() ? icon('eye-off') : icon('eye') ?></span>
+                  <?= is_demo_mode() ? 'Switch to Normal' : 'Switch to Demo' ?>
+                  <span style="margin-left:auto;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;<?= is_demo_mode() ? 'background:rgba(245,158,11,.15);color:#fbbf24' : 'background:rgba(34,197,94,.15);color:#22c55e' ?>"><?= is_demo_mode() ? 'DEMO' : 'NORMAL' ?></span>
+                </button>
+              </form>
+              <a class="dropdown-item danger" href="<?= url('index.php?r=auth/logout') ?>">
+                <span class="dropdown-ico"><?= icon('logout') ?></span> Log out
+              </a>
+            </div>
           </div>
         </div>
       </div>

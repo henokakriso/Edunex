@@ -121,6 +121,7 @@ final class EdunexIcons
             'shield'     => '<path d="M12 3 5 6v5c0 5 3 7.5 7 10 4-2.5 7-5 7-10V6l-7-3Z"/>',
             'shield-check' => '<path d="M12 3 5 6v5c0 5 3 7.5 7 10 4-2.5 7-5 7-10V6l-7-3Z"/><path d="m9 11.5 2 2 4-4"/>',
             'shield-x'   => '<path d="M12 3 5 6v5c0 5 3 7.5 7 10 4-2.5 7-5 7-10V6l-7-3Z"/><path d="m9.5 9.5 5 5m0-5-5 5"/>',
+            'zap'        => '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
             'gear'       => '<circle cx="12" cy="12" r="3.2"/><path d="M12 2v3m0 14v3M4.5 8.3 7 10M17 14l2.5 1.7M4.5 15.7 7 14M17 10l2.5-1.7M3 8.3V20h18V4"/>',
             'wifi'       => '<path d="M3 8.5a15 15 0 0 1 18 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16.5a6 6 0 0 1 7 0"/><circle cx="12" cy="20" r="1"/>',
             'qr'         => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 17h1M14 20h1M17.5 17v1"/>',
