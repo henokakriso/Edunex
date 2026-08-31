@@ -63,12 +63,12 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 .cal-list-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
 .cal-list-body b{font-size:14px;color:var(--text)}
 </style>
-<div class="page-head" style="flex-direction:column;align-items:center;text-align:center;gap:12px">
+<div class="page-head" style="margin-bottom:18px">
   <div>
     <h1><?= icon('calendar') ?> Calendar</h1>
     <p class="sub">Your schedule, classes, exams and deadlines at a glance</p>
   </div>
-  <div class="d-flex" style="gap:8px;align-items:center;justify-content:center">
+  <div class="d-flex" style="gap:10px;align-items:center">
     <div class="cal-picker">
       <button type="button" class="cal-picker-arrow" onclick="calPrev()" title="Previous month">‹</button>
       <select class="cal-picker-sel" id="cal-month" onchange="calNav()">
