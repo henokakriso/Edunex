@@ -347,6 +347,9 @@ $__icons = [
     .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
     .sidebar .brand img { margin: 0 !important; width: 34px !important; height: 34px !important; }
     .sidebar .page-indicator { justify-content: center; padding: 8px; margin: 0 4px 10px; }
+    .sidebar .nav-group-toggle { justify-content: center; padding: 10px; text-indent: -999px; overflow: hidden; }
+    .sidebar .nav-group-chevron { display: none; }
+    .sidebar .nav-group-items .nav-item { padding-left: 10px; }
     .shell { grid-template-columns: 64px minmax(0, 1fr) !important; }
     .topbar { left: 64px !important; width: calc(100% - 64px) !important; }
     <?php elseif ($sidebarStyle === 'icons'): ?>
@@ -356,6 +359,9 @@ $__icons = [
     .sidebar .nav-item .cnt { position: absolute; top: 4px; right: 4px; font-size: 9px; padding: 1px 4px; text-indent: 0; }
     .sidebar .brand { justify-content: center; padding: 0 0 8px !important; }
     .sidebar .brand img { margin: 0 !important; width: 30px !important; height: 30px !important; }
+    .sidebar .nav-group-toggle { display: none !important; }
+    .sidebar .nav-group-items .nav-item { padding-left: 10px; }
+    .sidebar .nav-group-items { grid-template-rows: 1fr !important; }
     .shell { grid-template-columns: 60px minmax(0, 1fr) !important; }
     .topbar { left: 60px !important; width: calc(100% - 60px) !important; }
     <?php endif; ?>
@@ -394,20 +400,64 @@ $__icons = [
         <span class="page-indicator-label"><?= e($currentPageLabel) ?></span>
       </div>
 
-      <?php foreach (($__nav[$__role] ?? []) as $__navItem): ?>
-        <?php if (count($__navItem) === 1): ?>
-          <div class="nav-section"><?= e($__navItem[0]) ?></div>
-        <?php else: ?>
-          <?php [, $__label, $__href, $__icon] = $__navItem; ?>
-          <?php if (str_starts_with($__route, $__href)): ?>
-            <?php $active = true; ?>
-          <?php else: ?>
-            <?php $active = $__href === $__route || ($__href === 'dashboard' && $__route === ''); ?>
-          <?php endif; ?>
-          <a class="nav-item <?= $active ? 'active' : '' ?>" href="<?= url('index.php?r=' . $__href) ?>">
-            <span class="ico"><?= $__icon ?></span><span class="nav-label"><?= e($__label) ?></span>
-          </a>
-        <?php endif; ?>
+      <?php
+      // Group nav items into sections for accordion
+      $__sections = [];
+      $__currentSection = null;
+      $__dashItem = null;
+      foreach (($__nav[$__role] ?? []) as $__navItem) {
+          if (count($__navItem) === 1) {
+              $__currentSection = $__navItem[0];
+              $__sections[$__currentSection] = [];
+          } elseif ($__currentSection !== null) {
+              $__sections[$__currentSection][] = $__navItem;
+          } else {
+              // Items before first section header (e.g. Dashboard)
+              $__dashItem = $__navItem;
+          }
+      }
+      // Detect active section
+      $__activeSection = null;
+      foreach ($__sections as $secName => $items) {
+          foreach ($items as $item) {
+              [, , $href] = $item;
+              if ($__route === $href || str_starts_with($__route, $href . '/') || ($href === 'dashboard' && $__route === '')) {
+                  $__activeSection = $secName;
+                  break 2;
+              }
+          }
+      }
+      ?>
+
+      <?php if ($__dashItem): ?>
+        <?php [, $__label, $__href, $__icon] = $__dashItem; ?>
+        <?php $active = $__route === $__href || ($__href === 'dashboard' && $__route === ''); ?>
+        <a class="nav-item <?= $active ? 'active' : '' ?>" href="<?= url('index.php?r=' . $__href) ?>">
+          <span class="ico"><?= $__icon ?></span><span class="nav-label"><?= e($__label) ?></span>
+        </a>
+      <?php endif; ?>
+
+      <?php foreach ($__sections as $secName => $secItems): ?>
+        <?php $isOpen = $secName === $__activeSection; ?>
+        <div class="nav-group <?= $isOpen ? 'open' : '' ?>">
+          <button class="nav-group-toggle" onclick="toggleNavGroup(this)">
+            <span class="nav-group-label"><?= e($secName) ?></span>
+            <span class="nav-group-chevron"><?= icon('chevron-down') ?></span>
+          </button>
+          <div class="nav-group-items">
+            <?php foreach ($secItems as $item): ?>
+              <?php [, $__label, $__href, $__icon] = $item; ?>
+              <?php if (str_starts_with($__route, $__href)): ?>
+                <?php $active = true; ?>
+              <?php else: ?>
+                <?php $active = $__href === $__route || ($__href === 'dashboard' && $__route === ''); ?>
+              <?php endif; ?>
+              <a class="nav-item <?= $active ? 'active' : '' ?>" href="<?= url('index.php?r=' . $__href) ?>">
+                <span class="ico"><?= $__icon ?></span><span class="nav-label"><?= e($__label) ?></span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
       <?php endforeach; ?>
 
       <?php $__inactive = ($__u['role'] ?? '') === 'student' && ($__u['enrollment_status'] ?? 'active') === 'inactive'; ?>
@@ -747,6 +797,22 @@ $__icons = [
   <script>setTimeout(()=>{var m=document.getElementById('fix-ticket-result');if(m)m.style.display='flex';},100);</script>
   <?php endif; ?>
   <script>
+  /* Sidebar accordion groups */
+  function toggleNavGroup(btn) {
+    var group = btn.parentElement;
+    var wasOpen = group.classList.contains('open');
+    // Close all other groups
+    document.querySelectorAll('.nav-group.open').forEach(function(g) {
+      if (g !== group) g.classList.remove('open');
+    });
+    // Toggle this one
+    if (wasOpen) {
+      group.classList.remove('open');
+    } else {
+      group.classList.add('open');
+    }
+  }
+
   /* Report dropdown toggle */
   function toggleReportDropdown(e) {
     e.stopPropagation();

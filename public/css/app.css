@@ -330,6 +330,33 @@ table.data tr:last-child td { border-bottom: none; }
 }
 
 .nav-section { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-faint); font-weight: 700; padding: 14px 10px 6px; }
+
+/* Sidebar accordion groups */
+.nav-group { margin: 0; }
+.nav-group-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 10px 11px; border-radius: 10px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--text-faint); font-weight: 700;
+  cursor: pointer; border: none; background: none;
+  font-family: inherit; transition: all .2s ease;
+  user-select: none;
+}
+.nav-group-toggle:hover { background: rgba(255,255,255,.04); color: var(--text-dim); }
+.nav-group-chevron {
+  display: flex; align-items: center; transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+  color: var(--text-faint);
+}
+.nav-group.open .nav-group-toggle .nav-group-chevron { transform: rotate(180deg); }
+.nav-group.open .nav-group-toggle { color: var(--accent); }
+.nav-group-items {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+}
+.nav-group.open .nav-group-items { grid-template-rows: 1fr; }
+.nav-group-items > * { overflow: hidden; }
+.nav-group-items .nav-item { padding-left: 20px; font-size: 13px; }
 .nav-item {
   display: flex; align-items: center; gap: 11px;
   padding: 9px 11px; border-radius: 10px;
