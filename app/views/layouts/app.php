@@ -469,7 +469,17 @@ $__icons = [
         <button class="topbar-icon" data-theme-toggle onclick="EdunexTheme.toggle()" title="Toggle theme"><?= icon('sun') ?></button>
 
         <?php if (($__u['role'] ?? '') !== 'it_admin'): ?>
-        <button class="topbar-icon" onclick="document.getElementById('report-issue-modal').style.display='flex'" title="Report Issue / Request Fix" style="color:var(--warning,#f59e0b)"><?= icon('wrench') ?></button>
+        <div style="position:relative">
+          <button class="topbar-icon" onclick="document.getElementById('report-dropdown').classList.toggle('open')" title="Report Issue" style="color:var(--warning,#f59e0b)"><?= icon('wrench') ?></button>
+          <div id="report-dropdown" class="dropdown-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:200px;z-index:9999">
+            <a class="dropdown-item" href="#" onclick="document.getElementById('report-dropdown').classList.remove('open');document.getElementById('report-issue-modal').style.display='flex';return false">
+              <span style="margin-right:8px;color:var(--warning)"><?= icon('plus-circle') ?></span> New Report
+            </a>
+            <a class="dropdown-item" href="#" onclick="document.getElementById('report-dropdown').classList.remove('open');openReportTracking();return false">
+              <span style="margin-right:8px;color:var(--info)"><?= icon('list') ?></span> Report Tracking
+            </a>
+          </div>
+        </div>
         <?php endif; ?>
 
         <div class="dropdown" style="position:relative">
@@ -642,6 +652,24 @@ $__icons = [
     </div>
   </div>
 
+  <!-- Report Tracking Modal -->
+  <div id="report-tracking-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal" style="max-width:600px;width:92%;max-height:80vh;overflow-y:auto">
+      <div style="padding:28px 28px 0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="width:36px;height:36px;border-radius:10px;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;color:var(--info)"><?= icon('list') ?></span>
+          <h3 style="margin:0;font-size:17px">Report Tracking</h3>
+        </div>
+        <p style="color:var(--text-dim);font-size:13px;margin:0 0 18px;line-height:1.5">
+          Track your submitted fix tickets and admin responses
+        </p>
+      </div>
+      <div id="tracking-list" style="padding:0 28px 24px">
+        <div style="text-align:center;color:var(--text-dim);padding:30px"><?= icon('loader') ?> Loading...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Fix Ticket Result Modal -->
   <?php if (!empty($_SESSION['fix_ticket'])): ?>
   <?php $ft = $_SESSION['fix_ticket']; unset($_SESSION['fix_ticket']); ?>
@@ -670,5 +698,111 @@ $__icons = [
   </div>
   <script>setTimeout(()=>{var m=document.getElementById('fix-ticket-result');if(m)m.style.display='flex';},100);</script>
   <?php endif; ?>
+  <script>
+  /* Report dropdown toggle */
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('report-dropdown');
+    if (!dd) return;
+    var btn = dd.previousElementSibling;
+    if (btn && btn.contains(e.target)) return;
+    dd.classList.remove('open');
+  });
+  var ddStyle = document.createElement('style');
+  ddStyle.textContent = '.dropdown-menu.open{display:block!important;animation:iOSslideIn .2s ease}';
+  document.head.appendChild(ddStyle);
+
+  /* Report Tracking */
+  function openReportTracking() {
+    document.getElementById('report-tracking-modal').style.display = 'flex';
+    loadTracking();
+  }
+  function loadTracking() {
+    var list = document.getElementById('tracking-list');
+    list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:30px">Loading...</div>';
+    fetch('<?= url('index.php?r=ticket/tracking') ?>')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var tickets = data.tickets || [];
+        if (!tickets.length) {
+          list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 20px;border:1px dashed var(--border);border-radius:14px"><div style="font-size:32px;margin-bottom:10px;opacity:.5">📋</div><div style="font-weight:600;margin-bottom:4px">No reports yet</div><div style="font-size:13px">Submit a fix ticket to see it here</div></div>';
+          return;
+        }
+        var html = '';
+        var statusColors = {open:'var(--warning)',in_progress:'var(--info)',resolved:'var(--success)',closed:'var(--text-dim)'};
+        var statusLabels = {open:'Open',in_progress:'In Progress',resolved:'Resolved',closed:'Closed'};
+        tickets.forEach(function(t) {
+          var color = statusColors[t.status] || 'var(--text-dim)';
+          var label = statusLabels[t.status] || t.status;
+          var frozenBadge = t.frozen == 1 ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(239,68,68,.12);color:var(--danger)">'+ icoInline('lock')+' Frozen</span>' : '';
+          html += '<div class="tracking-card" style="border:1px solid var(--glass-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:var(--glass-bg);position:relative;overflow:hidden;transition:all .2s">';
+          html += '<div style="position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none"></div>';
+          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;position:relative">';
+          html += '<div><span style="font-weight:700;font-size:14px;color:var(--text)">#'+t.id+'</span> ';
+          html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+color+'22;color:'+color+'">'+label+'</span> ';
+          html += frozenBadge;
+          html += '<div style="font-size:12px;color:var(--text-dim);margin-top:4px">'+eHtml(t.page_label || t.page_route)+'</div></div>';
+          html += '<div style="font-size:11px;color:var(--text-dim);white-space:nowrap">'+timeAgo(t.created_at)+'</div></div>';
+          html += '<div style="font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.5;position:relative">'+eHtml(t.description)+'</div>';
+          if (t.admin_name) {
+            html += '<div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;position:relative">'+ icoInline('user')+' <b>'+eHtml(t.admin_name)+'</b> is handling this ticket</div>';
+          }
+          if (t.last_admin_note) {
+            html += '<div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-dim);margin-bottom:10px;position:relative"><div style="font-weight:600;margin-bottom:3px;color:var(--text)">Admin note:</div>'+eHtml(t.last_admin_note)+'</div>';
+          }
+          html += '<div style="display:flex;gap:8px;justify-content:flex-end;position:relative">';
+          if (t.status !== 'resolved' && t.status !== 'closed') {
+            if (t.frozen == 1) {
+              html += '<button class="btn btn-ghost btn-sm" onclick="unfreezeTicket('+t.id+')" style="color:var(--warning)">'+ icoInline('unlock')+' Unfreeze</button>';
+            } else {
+              html += '<button class="btn btn-ghost btn-sm" onclick="freezeTicket('+t.id+')" style="color:var(--danger)">'+ icoInline('lock')+' Freeze</button>';
+            }
+          }
+          html += '</div></div>';
+        });
+        list.innerHTML = html;
+      })
+      .catch(function(e) {
+        list.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px">Failed to load tickets</div>';
+      });
+  }
+  function eHtml(s) { var d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+  function icoInline(name) {
+    var icons = {
+      lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+      unlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
+      user: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    };
+    return icons[name] || '';
+  }
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr.replace(' ','T')+'Z');
+    var s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }
+  function freezeTicket(id) {
+    var reason = prompt('Why are you freezing this ticket?\n(Admin will be blocked from proceeding)');
+    if (reason === null) return;
+    var fd = new FormData();
+    fd.append('ticket_id', id);
+    fd.append('reason', reason);
+    fd.append('_csrf', '<?= e(csrf_token()) ?>');
+    fetch('<?= url('index.php?r=ticket/freeze') ?>', {method:'POST', body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(d) { toast(d.message || 'Done', 'success'); loadTracking(); });
+  }
+  function unfreezeTicket(id) {
+    if (!confirm('Unfreeze this ticket? Admin will be able to proceed.')) return;
+    var fd = new FormData();
+    fd.append('ticket_id', id);
+    fd.append('_csrf', '<?= e(csrf_token()) ?>');
+    fetch('<?= url('index.php?r=ticket/unfreeze') ?>', {method:'POST', body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(d) { toast(d.message || 'Done', 'success'); loadTracking(); });
+  }
+  </script>
 </body>
 </html>

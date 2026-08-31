@@ -314,6 +314,9 @@ Router::page('it_admin/resolve', 'it_admin/it_admin.php', 'it_admin');
 Router::page('it_admin/audit', 'it_admin/it_admin.php', 'it_admin');
     Router::page('ticket/create', 'it_admin/ticket.php', '*');
     Router::page('ticket/status', 'it_admin/ticket.php', '*');
+    Router::page('ticket/tracking', 'it_admin/ticket.php', '*');
+    Router::page('ticket/freeze', 'it_admin/ticket.php', '*');
+    Router::page('ticket/unfreeze', 'it_admin/ticket.php', '*');
 
 /* ---- Public: degree verification ---- */
 Router::page('verify/degree', 'verify/degree.php', 'guest');
