@@ -72,7 +72,7 @@ $__tab = $activeTab ?? 'profile';
       </div>
       <div class="field"><label>Birth date</label><input class="input" type="date" name="birth_date" value="<?= e($__u['birth_date'] ?? '') ?>"></div>
       <div class="field"><label>Gender</label>
-        <select class="input" name="gender"><option value="">—</option><option value="m" <?= ($__u['gender'] ?? '') === 'm' ? 'selected' : '' ?>>Male</option><option value="f" <?= ($__u['gender'] ?? '') === 'f' ? 'selected' : '' ?>>Female</option><option value="o" <?= ($__u['gender'] ?? '') === 'o' ? 'selected' : '' ?>>Other</option></select>
+        <select class="input" name="gender"><option value="">—</option><option value="m" <?= ($__u['gender'] ?? '') === 'm' ? 'selected' : '' ?>>Male</option><option value="f" <?= ($__u['gender'] ?? '') === 'f' ? 'selected' : '' ?>>Female</option></select>
       </div>
       <div class="field"><label>Emergency Contact</label><input class="input" name="emergency_contact" value="<?= e($__u['emergency_contact'] ?? '') ?>" placeholder="Name / Phone"></div>
     </div>
