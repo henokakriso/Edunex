@@ -89,8 +89,8 @@ body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  font-size: 14.5px;
-  line-height: 1.55;
+  font-size: var(--font-size-base, 14.5px);
+  line-height: var(--line-height, 1.55);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }

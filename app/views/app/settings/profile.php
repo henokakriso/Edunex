@@ -130,11 +130,19 @@ $__tab = $activeTab ?? 'profile';
       ];
       $currentAccent = $__u['accent_color'] ?? 'teal';
       foreach ($colors as $name => $hex): ?>
-        <div class="color-swatch<?= $currentAccent === $name ? ' active' : '' ?>" style="background:<?= $hex ?>" title="<?= ucfirst($name) ?>">
+        <div class="color-swatch<?= $currentAccent === $name ? ' active' : '' ?>" style="background:<?= $hex ?>" title="<?= ucfirst($name) ?>" onclick="selectAccent(this,'<?= $name ?>','<?= $hex ?>')">
           <input type="radio" name="accent_color" value="<?= $name ?>" style="display:none" <?= $currentAccent === $name ? 'checked' : '' ?>>
         </div>
       <?php endforeach; ?>
     </div>
+    <script>
+    function selectAccent(el, name, hex) {
+      el.closest('.settings-section').querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      el.classList.add('active');
+      el.querySelector('input[type=radio]').checked = true;
+      document.documentElement.style.setProperty('--accent', hex);
+    }
+    </script>
 
     <!-- Font Size -->
     <h3 style="margin:0 0 6px"><?= icon('type') ?> Font Size</h3>
@@ -198,6 +206,56 @@ $__tab = $activeTab ?? 'profile';
           </label>
         </div>
       <?php endforeach; ?>
+    </div>
+
+    <!-- Card Radius -->
+    <h3 style="margin:0 0 6px"><?= icon('square') ?> Card Corner Radius</h3>
+    <p class="small faint" style="margin-bottom:12px">Adjust how rounded the cards appear</p>
+    <?php $cr = $__u['card_radius'] ?? '18'; ?>
+    <div class="font-size-preview" style="margin-bottom:10px;height:40px">
+      <div style="width:80px;height:32px;border:2px solid var(--accent);background:var(--accent-soft);border-radius:<?= $cr ?>px;transition:all .25s ease" id="radius-preview"></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:24px">
+      <span class="tiny faint" style="font-size:11px">0px</span>
+      <input type="range" name="card_radius" min="0" max="28" value="<?= e($cr) ?>" step="2" style="flex:1;accent-color:var(--accent)" oninput="document.getElementById('radius-preview').style.borderRadius=this.value+'px';document.getElementById('radius-val').textContent=this.value+'px'">
+      <span class="tiny faint" style="font-size:11px">28px</span>
+      <span class="tiny faint" id="radius-val"><?= e($cr) ?>px</span>
+    </div>
+
+    <!-- Line Height -->
+    <h3 style="margin:0 0 6px"><?= icon('align-left') ?> Line Spacing</h3>
+    <p class="small faint" style="margin-bottom:12px">Adjust text line height for readability</p>
+    <?php $lh = $__u['line_height'] ?? '1.55'; ?>
+    <div class="font-size-preview" style="margin-bottom:10px;height:auto;padding:10px 14px">
+      <span style="line-height:<?= $lh ?>;font-size:13px;color:var(--text)">The quick brown fox jumps over the lazy dog.<br>This line shows spacing.</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:24px">
+      <span class="tiny faint">Tight</span>
+      <input type="range" name="line_height" min="1.2" max="2.0" value="<?= e($lh) ?>" step="0.05" style="flex:1;accent-color:var(--accent)" oninput="document.querySelectorAll('.font-size-preview span').forEach(s=>s.style.lineHeight=this.value);document.getElementById('lh-val').textContent=this.value">
+      <span class="tiny faint">Loose</span>
+      <span class="tiny faint" id="lh-val"><?= e($lh) ?></span>
+    </div>
+
+    <!-- Notification Position -->
+    <h3 style="margin:0 0 6px"><?= icon('bell-cog') ?> Notification Position</h3>
+    <p class="small faint" style="margin-bottom:12px">Where toast notifications appear</p>
+    <?php $np = $__u['toast_position'] ?? 'top-right'; ?>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:300px;margin-bottom:24px">
+      <?php foreach (['top-right'=>'Top Right','top-left'=>'Top Left','bottom-right'=>'Bottom Right','bottom-left'=>'Bottom Left'] as $v => $l): ?>
+        <button type="button" class="btn <?= $np === $v ? 'btn-primary' : 'btn-ghost' ?> btn-sm" onclick="this.parentElement.querySelectorAll('.btn').forEach(b=>{b.className='btn btn-ghost btn-sm'});this.className='btn btn-primary btn-sm';this.form.toast_position.value='<?= $v ?>'"><?= $l ?></button>
+      <?php endforeach; ?>
+      <input type="hidden" name="toast_position" value="<?= e($np) ?>">
+    </div>
+
+    <!-- Table Density -->
+    <h3 style="margin:0 0 6px"><?= icon('grid-dots') ?> Table Density</h3>
+    <p class="small faint" style="margin-bottom:12px">Row padding in data tables</p>
+    <?php $td = $__u['table_density'] ?? 'normal'; ?>
+    <div style="display:flex;gap:8px;margin-bottom:24px">
+      <?php foreach (['compact'=>'Compact','normal'=>'Normal','relaxed'=>'Relaxed'] as $v => $l): ?>
+        <button type="button" class="btn <?= $td === $v ? 'btn-primary' : 'btn-ghost' ?> btn-sm" onclick="this.parentElement.querySelectorAll('.btn').forEach(b=>{b.className='btn btn-ghost btn-sm'});this.className='btn btn-primary btn-sm';this.form.table_density.value='<?= $v ?>'"><?= $l ?></button>
+      <?php endforeach; ?>
+      <input type="hidden" name="table_density" value="<?= e($td) ?>">
     </div>
 
     <!-- Content Width -->

@@ -176,6 +176,8 @@ final class EdunexIcons
             'type'       => '<path d="M5 4v3"/><path d="M19 4v3"/><path d="M12 4v16"/><path d="M8 20h8"/>',
             'eye'        => '<path d="M2.5 12S5.5 5 12 5s9.5 7 9.5 7-3 7-9.5 7S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
             'power'      => '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
+            'square'     => '<rect x="3" y="3" width="18" height="18" rx="4"/>',
+            'align-left' => '<path d="M3 6h18M3 12h12M3 18h16"/>',
         ];
     }
 
