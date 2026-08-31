@@ -745,50 +745,53 @@ $__icons = [
           list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 20px;border:1px dashed var(--border);border-radius:14px"><div style="font-size:32px;margin-bottom:10px;opacity:.5">📋</div><div style="font-weight:600;margin-bottom:4px">No reports yet</div><div style="font-size:13px">Submit a fix ticket to see it here</div></div>';
           return;
         }
-        var html = '';
+        var html = '<div id="ticket-accordion">';
         var statusColors = {open:'var(--warning)',in_progress:'var(--info)',resolved:'var(--success)',closed:'var(--text-dim)'};
         var statusLabels = {open:'Open',in_progress:'In Progress',resolved:'Resolved',closed:'Closed'};
         var priColors = {normal:'var(--text-dim)',high:'#f97316',critical:'#ef4444'};
-        var priLabels = {normal:'Normal',high:'HIGH',critical:'CRITICAL'};
-        var adminStatuses = {idle:'Idle',investigating:'Investigating',fixing:'Fixing',testing:'Testing'};
+        var priLabels = {normal:'',high:'HIGH',critical:'CRITICAL'};
+        var adminStatuses = {idle:'Paused',investigating:'Investigating',fixing:'Fixing',testing:'Testing'};
 
-        tickets.forEach(function(t) {
+        tickets.forEach(function(t, idx) {
           var color = statusColors[t.status] || 'var(--text-dim)';
           var label = statusLabels[t.status] || t.status;
           var priColor = priColors[t.priority] || 'var(--text-dim)';
-          var priLabel = priLabels[t.priority] || t.priority;
+          var priLabel = priLabels[t.priority] || '';
           var isActive = t.status === 'open' || t.status === 'in_progress';
 
-          html += '<div class="tracking-card" style="border:1px solid var(--glass-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:var(--glass-bg);position:relative;overflow:hidden;transition:all .2s">';
+          // Collapsed header — always visible, clickable
+          html += '<div class="ticket-drawer" id="drawer-'+t.id+'" style="border:1px solid var(--glass-border);border-radius:14px;margin-bottom:8px;background:var(--glass-bg);overflow:hidden;transition:all .3s cubic-bezier(.25,.46,.45,.94)">';
 
-          // Header row
-          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
-          html += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
-          html += '<span style="font-weight:700;font-size:14px;color:var(--text)">#'+t.id+'</span>';
-          html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+color+'22;color:'+color+'">'+label+'</span>';
-          if (t.priority !== 'normal') {
-            html += '<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+priColor+'18;color:'+priColor+'">'+priLabel+'</span>';
-          }
-          if (t.frozen == 1) {
-            html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(239,68,68,.12);color:var(--danger)">'+icoInline('lock')+' Frozen</span>';
-          }
+          // Header (clickable)
+          html += '<div class="ticket-drawer-header" onclick="toggleDrawer('+t.id+')" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:background .15s" onmouseenter="this.style.background=\'var(--glass-hover-bg)\'" onmouseleave="this.style.background=\'transparent\'">';
+          html += '<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">';
+          html += '<span style="font-weight:700;font-size:14px;color:var(--text);white-space:nowrap">#'+t.id+'</span>';
+          html += '<span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:'+color+'22;color:'+color+';white-space:nowrap">'+label+'</span>';
+          if (priLabel) html += '<span style="padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;background:'+priColor+'18;color:'+priColor+'">'+priLabel+'</span>';
+          if (t.frozen == 1) html += '<span style="padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;background:rgba(239,68,68,.12);color:var(--danger)">'+icoInline('lock')+'</span>';
+          html += '<span style="font-size:12px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+eHtml(t.page_label || t.page_route)+'</span>';
           html += '</div>';
-          html += '<div style="text-align:right;white-space:nowrap">';
-          html += '<div style="font-size:11px;color:var(--text-dim)">'+timeAgo(t.created_at)+'</div>';
+          html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
+          html += '<span style="font-size:11px;color:var(--text-dim);white-space:nowrap">'+timeAgo(t.created_at)+'</span>';
+          html += '<span class="drawer-chevron" style="display:inline-flex;transition:transform .25s cubic-bezier(.25,.46,.45,.94);color:var(--text-dim)">'+icoInline('chevron-down')+'</span>';
+          html += '</div></div>';
+
+          // Expandable detail panel
+          html += '<div class="ticket-drawer-body" id="body-'+t.id+'" style="max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.25,.46,.45,.94)">';
+          html += '<div style="padding:0 18px 16px;border-top:1px solid var(--glass-border)">';
+
+          // Description
+          html += '<div style="padding-top:14px;margin-bottom:12px">';
+          html += '<div style="font-size:13px;color:var(--text);line-height:1.5">'+eHtml(t.description)+'</div>';
+          html += '</div>';
+
+          // Time remaining
           if (isActive && t.hours_remaining !== null) {
             var hrs = t.hours_remaining;
             var timeColor = hrs > 18 ? 'var(--success)' : hrs > 6 ? 'var(--warning)' : 'var(--danger)';
-            html += '<div style="font-size:11px;font-weight:700;color:'+timeColor+';margin-top:2px">';
-            if (hrs <= 0) html += '⚠ Expired';
-            else if (hrs < 1) html += '⏰ ' + Math.round(hrs * 60) + 'min left';
-            else html += '⏰ ' + hrs + 'h left';
-            html += '</div>';
+            var timeText = hrs <= 0 ? '⚠ Token expired' : hrs < 1 ? '⏰ ' + Math.round(hrs * 60) + 'min remaining' : '⏰ ' + hrs + 'h remaining';
+            html += '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border);margin-bottom:10px;font-size:12px;font-weight:600;color:'+timeColor+'">'+timeText+'</div>';
           }
-          html += '</div></div>';
-
-          // Page + description
-          html += '<div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">'+icoInline('link')+' '+eHtml(t.page_label || t.page_route)+'</div>';
-          html += '<div style="font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5">'+eHtml(t.description)+'</div>';
 
           // Admin status bar
           if (t.admin_name) {
@@ -811,7 +814,7 @@ $__icons = [
             html += '<div style="position:relative;padding-left:18px">';
             var showLogs = t.logs.slice(0, 5);
             showLogs.forEach(function(log, i) {
-              var dotColor = log.action === 'claimed' ? 'var(--info)' : log.action === 'resolved' ? 'var(--success)' : log.action === 'frozen_by_user' ? 'var(--danger)' : log.action === 'page_view' ? 'var(--accent)' : 'var(--text-dim)';
+              var dotColor = log.action === 'claimed' ? 'var(--info)' : log.action === 'resolved' ? 'var(--success)' : log.action === 'frozen_by_user' ? 'var(--danger)' : log.action.includes('status_') ? 'var(--accent)' : 'var(--text-dim)';
               html += '<div style="position:relative;padding:0 0 10px 0' + (i === showLogs.length - 1 ? ';padding-bottom:0' : '') + '">';
               html += '<div style="position:absolute;left:-18px;top:5px;width:8px;height:8px;border-radius:50%;background:'+dotColor+';border:2px solid var(--bg-elev)"></div>';
               if (i < showLogs.length - 1) html += '<div style="position:absolute;left:-15px;top:15px;width:2px;height:calc(100% - 5px);background:var(--border)"></div>';
@@ -823,21 +826,39 @@ $__icons = [
           }
 
           // Action buttons
-          html += '<div style="display:flex;gap:8px;justify-content:flex-end">';
           if (isActive) {
+            html += '<div style="display:flex;gap:8px;justify-content:flex-end;padding-top:4px">';
             if (t.frozen == 1) {
-              html += '<button class="btn btn-ghost btn-sm" onclick="unfreezeTicket('+t.id+')" style="color:var(--warning)">'+icoInline('unlock')+' Unfreeze</button>';
+              html += '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();unfreezeTicket('+t.id+')" style="color:var(--warning)">'+icoInline('unlock')+' Unfreeze</button>';
             } else {
-              html += '<button class="btn btn-ghost btn-sm" onclick="freezeTicket('+t.id+')" style="color:var(--danger)">'+icoInline('lock')+' Freeze</button>';
+              html += '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();freezeTicket('+t.id+')" style="color:var(--danger)">'+icoInline('lock')+' Freeze</button>';
             }
+            html += '</div>';
           }
-          html += '</div></div>';
+
+          html += '</div></div></div>';
         });
+        html += '</div>';
         list.innerHTML = html;
       })
       .catch(function(e) {
         list.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px">Failed to load tickets</div>';
       });
+  }
+  function toggleDrawer(id) {
+    var body = document.getElementById('body-'+id);
+    var drawer = document.getElementById('drawer-'+id);
+    var chevron = drawer.querySelector('.drawer-chevron');
+    if (!body) return;
+    if (body.style.maxHeight && body.style.maxHeight !== '0px') {
+      body.style.maxHeight = '0px';
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      drawer.style.borderColor = 'var(--glass-border)';
+    } else {
+      body.style.maxHeight = body.scrollHeight + 200 + 'px';
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      drawer.style.borderColor = 'var(--accent)';
+    }
   }
   function eHtml(s) { var d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
   function icoInline(name) {
@@ -847,6 +868,7 @@ $__icons = [
       user: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
       link: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
       pulse: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+      'chevron-down': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
     };
     return icons[name] || '';
   }
