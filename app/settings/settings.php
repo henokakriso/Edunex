@@ -52,7 +52,7 @@ class Ctl_profile {
         $twofa = Database::one("SELECT twofa_secret, twofa_enabled FROM users WHERE id = ?", [$uid]);
         $henaEnabled = Auth::henaEnabled($uid);
         $mode = $henaEnabled ? 'hena' : ((int)($twofa['twofa_enabled'] ?? 0) ? 'totp' : 'off');
-        $sessions = Database::all("SELECT * FROM sessions WHERE user_id = ? ORDER BY last_active DESC", [$uid]);
+        $sessions = Database::all("SELECT * FROM sessions WHERE user_id = ? ORDER BY expires_at DESC", [$uid]);
         Router::render('app/settings/profile', [
             'title' => 'Settings',
             'activeTab' => $activeTab,

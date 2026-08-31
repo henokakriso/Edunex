@@ -239,8 +239,9 @@ $__tab = $activeTab ?? 'profile';
       </form>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
+      <?php $currentSelector = $_COOKIE['remember'] ? explode(':', $_COOKIE['remember'])[0] : ''; ?>
       <?php foreach ($sessions as $i => $s): ?>
-        <?php $isCurrent = ($s['id'] ?? 0) == ($__u['session_version'] ?? 0); ?>
+        <?php $isCurrent = ($s['selector'] ?? '') === $currentSelector; ?>
         <div class="session-item<?= $isCurrent ? ' current' : '' ?>">
           <span style="font-size:24px"><?= $isCurrent ? icon('smartphone') : icon('monitor') ?></span>
           <div style="flex:1;min-width:0">
@@ -248,7 +249,7 @@ $__tab = $activeTab ?? 'profile';
               <b class="small"><?= e(mb_strimwidth($s['user_agent'] ?? 'Unknown', 0, 50, '…')) ?></b>
               <?php if ($isCurrent): ?><span class="security-badge on" style="font-size:10px;padding:2px 8px">Current</span><?php endif; ?>
             </div>
-            <p class="tiny faint" style="margin-top:2px">Last active: <?= e($s['last_active'] ?? '—') ?></p>
+            <p class="tiny faint" style="margin-top:2px">Expires: <?= e($s['expires_at'] ?? '—') ?></p>
           </div>
           <?php if (!$isCurrent): ?>
             <form method="post" class="inline">
