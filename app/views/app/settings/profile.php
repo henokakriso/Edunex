@@ -35,7 +35,6 @@ $__tab = $activeTab ?? 'profile';
 .display-option::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
 .display-option:hover{border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
 .font-size-preview{width:100%;height:48px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.25,.46,.45,.94)}
-</style>
 .session-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);transition:all .25s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
 .session-item::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
 .session-item:hover{border-color:var(--glass-hover-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--glass-hover-shadow)}
