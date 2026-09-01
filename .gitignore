@@ -2,3 +2,4 @@
 model/
 *.log
 .DS_Storeledger_crypto.so
+storage/backups/
