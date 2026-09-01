@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mycnf = tempnam(sys_get_temp_dir(), 'mycnf');
     file_put_contents($mycnf, "[client]\nhost=" . DB_HOST . "\nport=" . DB_PORT . "\nuser=" . DB_USER . "\npassword=" . DB_PASS . "\n");
     chmod($mycnf, 0600);
-    $cmd = sprintf('mysqldump --no-defaults --defaults-extra-file=%s --routines --single-transaction %s > %s 2>/dev/null',
+    $cmd = sprintf('mysqldump --defaults-extra-file=%s --routines --single-transaction %s > %s 2>/dev/null',
         escapeshellarg($mycnf), escapeshellarg(DB_NAME), escapeshellarg($path));
     exec($cmd, $o, $rc);
     @unlink($mycnf);
