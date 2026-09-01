@@ -143,12 +143,15 @@ class Ctl_messages {
         return CWorker::chatEncrypt($convKey, $body);
     }
 
-    /** Unseal + verify integrity via the C backend. On verify failure returns a warning fallback. */
+    /** Unseal + verify integrity via the C backend. On verify failure returns decrypted with warning prefix. */
     public static function unseal(string $convKey, string $cipher, string $hmac): string {
         $expected = CWorker::chatHmac($convKey, $cipher);
         $plain = CWorker::chatDecrypt($convKey, $cipher);
+        if ($plain === '') {
+            return '[ Could not decrypt message ]';
+        }
         if ($expected !== '' && $hmac !== '' && $expected !== $hmac) {
-            return '[ Message integrity check failed — possible tampering ]';
+            return '⚠ ' . $plain;
         }
         return $plain;
     }
