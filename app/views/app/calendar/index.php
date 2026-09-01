@@ -63,12 +63,9 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
 .cal-list-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
 .cal-list-body b{font-size:14px;color:var(--text)}
 </style>
-<div class="page-head" style="margin-bottom:18px;flex-wrap:nowrap">
-  <div style="min-width:0">
-    <h1><?= icon('calendar') ?> Calendar</h1>
-    <p class="sub">Your schedule, classes, exams and deadlines at a glance</p>
-  </div>
-  <div class="d-flex" style="gap:8px;align-items:center;flex-shrink:0">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:nowrap">
+  <h1 style="margin:0;white-space:nowrap"><?= icon('calendar') ?> Calendar</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:nowrap">
     <div class="cal-picker">
       <button type="button" class="cal-picker-arrow" onclick="calPrev()" title="Previous month">‹</button>
       <select class="cal-picker-sel" id="cal-month" onchange="calNav()">
@@ -84,7 +81,7 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
       <button type="button" class="cal-picker-arrow" onclick="calNext()" title="Next month">›</button>
       <button type="button" class="cal-picker-today" onclick="location.href='<?= e(url('calendar')) ?>'">Today</button>
     </div>
-    <?php if ($canCreate): ?><button class="btn btn-primary" data-open-modal="new-event-modal" style="white-space:nowrap">+ Event</button><?php endif; ?>
+    <?php if ($canCreate): ?><button class="btn btn-primary" data-open-modal="new-event-modal" style="white-space:nowrap;flex-shrink:0">+ Event</button><?php endif; ?>
   </div>
 </div>
 
