@@ -1,5 +1,6 @@
 <?php /* Admin academic calendar — events list with create form */
 $eventTypeLabels = $eventTypeLabels ?? [];
+$eventTypeColors = $eventTypeColors ?? [];
 $statusColors = $statusColors ?? [];
 $scopeIcons = $scopeIcons ?? [];
 $hasFilter = $region || $schoolId || $yearId || $type || $status;
@@ -151,7 +152,7 @@ $hasFilter = $region || $schoolId || $yearId || $type || $status;
           <?php if ($ev['title_am']): ?><br><span class="tiny faint"><?= e($ev['title_am']) ?></span><?php endif; ?>
           <?php if ($ev['school_name']): ?><br><span class="badge badge-muted" style="font-size:10px"><?= e($ev['school_name']) ?></span><?php endif; ?>
         </td>
-        <td><span class="badge badge-muted" style="font-size:10px"><?= e($eventTypeLabels[$ev['event_type']] ?? $ev['event_type']) ?></span></td>
+        <td><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:<?= ($eventTypeColors[$ev['event_type']] ?? 'var(--bg-hover)') ?>15;border-left:3px solid <?= $eventTypeColors[$ev['event_type']] ?? 'var(--border)' ?>;color:<?= $eventTypeColors[$ev['event_type']] ?? 'var(--text-dim)' ?>"><?= e($eventTypeLabels[$ev['event_type']] ?? $ev['event_type']) ?></span></td>
         <td style="font-size:12px"><?= ($scopeIcons[$ev['scope_type']] ?? '') . ' ' . e(ucfirst($ev['scope_type'])) ?></td>
         <td class="small"><?= e(date('M j, Y', strtotime($ev['gregorian_start']))) ?><?= $ev['gregorian_end'] ? ' → ' . e(date('M j', strtotime($ev['gregorian_end']))) : '' ?></td>
         <td style="text-align:center"><span class="badge <?= $statusColors[$ev['status']] ?? 'badge-muted' ?>"><?= e(ucfirst(str_replace('_',' ',$ev['status']))) ?></span></td>

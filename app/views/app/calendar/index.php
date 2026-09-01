@@ -199,11 +199,11 @@ $canCreate = in_array($__u['role'] ?? '', ['regional', 'principal', 'teacher'], 
   <div style="display:flex;flex-direction:column;gap:16px">
     <div class="card" style="padding:16px 18px">
       <h3 class="card-title" style="margin-top:0"><?= icon('palette') ?> Event Types</h3>
-      <div style="display:flex;flex-direction:column;gap:5px">
+      <div style="display:flex;flex-direction:column;gap:4px">
         <?php foreach (array_unique($typeCls) as $tk => $tc): ?>
-          <div class="d-flex" style="align-items:center;gap:10px;padding:7px 12px;border-radius:8px;border:1px solid <?= $tc ?>25;background:<?= $tc ?>0a">
-            <span style="width:16px;height:16px;border-radius:4px;background:<?= $tc ?>;flex:none;box-shadow:0 0 12px <?= $tc ?>50"></span>
-            <span style="font-size:13.5px;font-weight:600;color:var(--text)"><?= e(ucfirst($tk)) ?></span>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:<?= $tc ?>12;border-left:4px solid <?= $tc ?>">
+            <span style="width:18px;height:18px;border-radius:5px;background:<?= $tc ?>;flex:none;box-shadow:0 2px 8px <?= $tc ?>60"></span>
+            <span style="font-size:14px;font-weight:700;color:<?= $tc ?>"><?= e(ucfirst($tk)) ?></span>
           </div>
         <?php endforeach; ?>
       </div>

@@ -1348,6 +1348,14 @@ class Ctl_calendar {
             'cultural'=>'Cultural Event','sports'=>'Sports Event','parent'=>'Parent Event',
             'teacher'=>'Teacher Event','other'=>'Other',
         ];
+        $eventTypeColors = [
+            'academic'=>'var(--accent)','examination'=>'var(--danger)','registration'=>'var(--warning)',
+            'holiday'=>'#a855f7','national_celebration'=>'#ef4444','memorial_day'=>'#6b7280',
+            'religious'=>'#8b5cf6','ministry'=>'#0284c7','regional'=>'#0ea5e9',
+            'school'=>'#059669','training'=>'#f59e0b','competition'=>'#ec4899',
+            'cultural'=>'#d946ef','sports'=>'#22c55e','parent'=>'#f97316',
+            'teacher'=>'#6366f1','other'=>'#94a3b8',
+        ];
         $statusColors = ['draft'=>'badge-muted','pending_approval'=>'badge-warning','approved'=>'badge-accent','published'=>'badge-success','cancelled'=>'badge-danger'];
         $scopeIcons = ['national'=>'&#127987;','regional'=>'&#127963;','zonal'=>'&#127970;','woreda'=>'&#127966;','school'=>'&#127979;'];
 
@@ -1420,6 +1428,7 @@ class Ctl_calendar {
         Router::render('app/admin/calendar', [
             'title' => 'Academic Calendar', 'events' => $events, 'schools' => $schools,
             'years' => $years, 'eventTypeLabels' => $eventTypeLabels,
+            'eventTypeColors' => $eventTypeColors,
             'statusColors' => $statusColors, 'scopeIcons' => $scopeIcons,
             'region' => $region, 'schoolId' => $schoolId, 'yearId' => $yearId,
             'type' => $type, 'status' => $status, 'month' => $month, 'year' => $year,
