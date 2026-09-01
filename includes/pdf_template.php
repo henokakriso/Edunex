@@ -172,86 +172,88 @@ function downloadPDF(){
   var el = document.getElementById('pdf-content');
   var fname = <?= json_encode($pdf_filename) ?>;
   var orientation = <?= json_encode($pdf_orientation) ?>;
-  var docId = <?= json_encode($pdf_doc_id) ?>;
-  var stamp = <?= json_encode($pdf_stamp) ?>;
   var subtitle = <?= json_encode($pdf_subtitle) ?>;
-  var footerLeft = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
-  var flagSrc = <?= json_encode('data:' . $flag_mime . ';base64,' . $flag_b64) ?>;
-  var ministrySrc = <?= json_encode('data:' . $ministry_mime . ';base64,' . $ministry_b64) ?>;
+  var footerL = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
+  var flagURI = <?= json_encode($flag_b64 ? ('data:' . $flag_mime . ';base64,' . $flag_b64) : '') ?>;
+  var ministURI = <?= json_encode($ministry_b64 ? ('data:' . $ministry_mime . ';base64,' . $ministry_b64) : '') ?>;
 
-  function loadImg(src){return new Promise(function(resolve){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.height;c.getContext('2d').drawImage(img,0,0);resolve(c)};img.onerror=function(){resolve(null)};img.src=src})}
+  var opt = {
+    margin: [30, 12, 18, 12],
+    filename: fname,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
 
-  Promise.all([loadImg(flagSrc), loadImg(ministrySrc)]).then(function(imgs){
-    var flagCanvas = imgs[0];
-    var ministryCanvas = imgs[1];
+  /* Temporarily hide header/watermark/footer from canvas render */
+  var hidden = [];
+  el.querySelectorAll('.pdf-header, .pdf-watermark, .pdf-footer').forEach(function(e){
+    e.setAttribute('data-was-visible', e.style.display || '');
+    e.style.display = 'none';
+    hidden.push(e);
+  });
 
-    var opt = {
-      margin: [28, 12, 18, 12],
-      filename: fname,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    };
-
-    html2pdf().set(opt).from(el).then(function(pdf){
-      var total = pdf.internal.getNumberOfPages();
-      var W = pdf.internal.pageSize.getWidth();
-      var H = pdf.internal.pageSize.getHeight();
-
-      for (var i = 1; i <= total; i++) {
-        pdf.setPage(i);
-
-        /* ── Header on every page ── */
-        /* Flag on left */
-        if(flagCanvas){
-          try{ pdf.addImage(flagCanvas.toDataURL('image/jpeg',0.95),'JPEG',14,5,18,14); }catch(e){}
-        }
-        /* Title center */
-        pdf.setFontSize(11);
-        pdf.setFont('helvetica','bold');
-        pdf.setTextColor(30,41,59);
-        pdf.text('FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA',W/2,10,{align:'center'});
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica','normal');
-        pdf.setTextColor(100,116,139);
-        pdf.text('Ministry of Education',W/2,15,{align:'center'});
-        /* Ministry logo on right */
-        if(ministryCanvas){
-          try{ pdf.addImage(ministryCanvas.toDataURL('image/png'),'PNG',W-32,3,18,18); }catch(e){}
-        }
-        /* Subtitle */
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica','normal');
-        pdf.setTextColor(99,102,241);
-        pdf.text(subtitle,W/2,21,{align:'center'});
-        /* Separator line below header */
-        pdf.setDrawColor(200);
-        pdf.setLineWidth(0.3);
-        pdf.line(14,24,W-14,24);
-
-        /* ── Watermark on every page ── */
-        pdf.setTextColor(210);
-        pdf.setFontSize(48);
-        pdf.setFont('helvetica','bold');
-        pdf.text('EDUNEX',W/2,H/2,{align:'center',angle:-30});
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica','normal');
-        pdf.text('www.henokakriso.com',W/2,H/2+14,{align:'center',angle:-30});
-
-        /* ── Footer separator ── */
-        pdf.setDrawColor(200);
-        pdf.setLineWidth(0.3);
-        pdf.line(14,H-12,W-14,H-12);
-        /* ── Footer on every page ── */
-        pdf.setFontSize(8);
-        pdf.setTextColor(150);
-        pdf.setFont('helvetica','normal');
-        pdf.text(footerLeft,14,H-7);
-        pdf.text('Page '+i+' of '+total,W-14,H-7,{align:'right'});
-      }
-      pdf.save(fname);
+  html2pdf().set(opt).from(el).then(function(pdf){
+    /* Restore hidden elements */
+    hidden.forEach(function(e){
+      e.style.display = e.getAttribute('data-was-visible') || '';
     });
+
+    var total = pdf.internal.getNumberOfPages();
+    var W = pdf.internal.pageSize.getWidth();
+    var H = pdf.internal.pageSize.getHeight();
+
+    for (var i = 1; i <= total; i++) {
+      pdf.setPage(i);
+
+      /* ── Header on every page ── */
+      if(flagURI){
+        try{ pdf.addImage(flagURI, 'JPEG', 14, 4, 18, 14); }catch(e){}
+      }
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica','bold');
+      pdf.setTextColor(30,41,59);
+      pdf.text('FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA', W/2, 10, {align:'center'});
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica','normal');
+      pdf.setTextColor(100,116,139);
+      pdf.text('Ministry of Education', W/2, 15, {align:'center'});
+      if(ministURI){
+        try{ pdf.addImage(ministURI, 'PNG', W-32, 2, 18, 18); }catch(e){}
+      }
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica','normal');
+      pdf.setTextColor(99,102,241);
+      pdf.text(subtitle, W/2, 21, {align:'center'});
+      pdf.setDrawColor(200);
+      pdf.setLineWidth(0.3);
+      pdf.line(14, 24, W-14, 24);
+
+      /* ── Watermark on every page ── */
+      pdf.setTextColor(210);
+      pdf.setFontSize(48);
+      pdf.setFont('helvetica','bold');
+      pdf.text('EDUNEX', W/2, H/2, {align:'center', angle:-30});
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica','normal');
+      pdf.text('www.henokakriso.com', W/2, H/2+14, {align:'center', angle:-30});
+
+      /* ── Footer on every page ── */
+      pdf.setDrawColor(200);
+      pdf.setLineWidth(0.3);
+      pdf.line(14, H-12, W-14, H-12);
+      pdf.setFontSize(8);
+      pdf.setTextColor(150);
+      pdf.setFont('helvetica','normal');
+      pdf.text(footerL, 14, H-7);
+      pdf.text('Page '+i+' of '+total, W-14, H-7, {align:'right'});
+    }
+    pdf.save(fname);
+  }).catch(function(err){
+    hidden.forEach(function(e){ e.style.display = e.getAttribute('data-was-visible') || ''; });
+    console.error('PDF generation failed:', err);
+    alert('PDF generation failed. Please try again.');
   });
 }
 </script>
