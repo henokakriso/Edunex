@@ -72,60 +72,65 @@ $assignsBy = $group($assigns);
 
 <?php if (!empty($_GET['print'])): ?>
 <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Card — <?= e($__u['first_name'] . ' ' . $__u['last_name']) ?></title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f5;color:#222}
-.viewer-bar{position:sticky;top:0;z-index:100;background:#1a1a2e;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.viewer-bar h1{font-size:15px;font-weight:600}.viewer-bar .btns{display:flex;gap:10px}
-.viewer-bar a,.viewer-bar button{background:#4361ee;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.viewer-bar a:hover,.viewer-bar button:hover{background:#3a56d4}.viewer-bar .btn-secondary{background:#555}.viewer-bar .btn-secondary:hover{background:#444}
-.report{max-width:900px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
-.report-header{padding:28px 32px 20px;border-bottom:2px solid #eee;text-align:center}
-.report-header h2{font-size:20px;margin-bottom:4px}.report-header .meta{color:#666;font-size:12px}
-.section{padding:20px 32px}.section h3{font-size:15px;margin-bottom:12px;color:#4361ee}
-table{width:100%;border-collapse:collapse}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee;font-size:12px}
-th{background:#f8f9fa;font-weight:600;color:#444}.row-num{color:#999;width:36px;text-align:center}
-.progress-cell{width:120px}.progress-bar{height:8px;background:#eee;border-radius:4px;overflow:hidden}.progress-fill{height:100%;border-radius:4px;background:#4361ee}
-.footer{padding:16px 32px;border-top:2px solid #eee;text-align:center;color:#888;font-size:11px;line-height:1.6}
-.footer a{color:#4361ee;text-decoration:none}
-@media print{.viewer-bar{display:none!important}.report{box-shadow:none;margin:0;border-radius:0}body{background:#fff}}
-</style></head><body>
-<div class="viewer-bar"><h1>Report Card — <?= e($__u['first_name'] . ' ' . $__u['last_name']) ?></h1>
-<div class="btns"><button class="btn-secondary" onclick="history.back()">Back</button><a href="javascript:window.print()">Print</a><a href="javascript:downloadPDF()">Download PDF</a></div></div>
-<div class="report">
-<div class="report-header">
-<h2><?= e(setting('site_name') ?? 'Edunex') ?> — Report Card</h2>
-<p class="meta">Student: <?= e($__u['first_name'] . ' ' . $__u['last_name']) ?> (<?= e($__u['student_id']) ?>) · Roll: <?= e($__u['student_id']) ?></p>
-<p class="meta">Generated: <?= e(date('F j, Y')) ?></p>
+<style>body{margin:0;padding:20px;background:var(--bg,#f5f5f5);color:var(--text,#222)}</style>
+</head><body>
+<?php
+$pdf_title = 'Report Card — ' . $__u['first_name'] . ' ' . $__u['last_name'];
+$pdf_subtitle = setting('site_name') ?? 'Edunex';
+$pdf_filename = 'edunex_report_card_' . e($__u['student_id']) . '_' . date('Ymd') . '.pdf';
+$pdf_doc_id = 'EDU-' . date('Y') . '-RC-' . str_pad($__u['id'], 4, '0', STR_PAD_LEFT);
+$pdf_user_name = full_name($__u);
+$pdf_orientation = 'portrait';
+require_once BASE_PATH . '/includes/pdf_template.php';
+?>
+<div class="pdf-toolbar no-print">
+<button class="pdf-toolbar-btn pdf-toolbar-btn--back" onclick="history.back()">← Back</button>
+<button class="pdf-toolbar-btn pdf-toolbar-btn--dl" onclick="downloadPDF()">⬇ Download PDF</button>
+<button class="pdf-toolbar-btn pdf-toolbar-btn--print" onclick="window.print()">🖨 Print</button>
+</div>
+<div class="pdf-paper" id="pdf-content">
+<div class="pdf-watermark"><img class="wm-logo" src="<?= $pdf_logo_black ?>" alt="EDUNEX"><div class="wm-edunex">EDUNEX</div><div class="wm-url">www.henokakriso.com</div></div>
+<div class="pdf-header"><div class="logos-row">
+<div class="flag-wrap"><img class="logo-img flag-img" src="<?= $pdf_ethiopian_flag ?>" alt="Ethiopia"></div>
+<div class="text-center"><h2>Federal Democratic Republic of Ethiopia</h2><div style="font-size:10px;color:var(--text-secondary);letter-spacing:.3px">Ministry of Education</div></div>
+<div class="ministry-wrap"><img class="logo-img" src="<?= $pdf_ministry_logo ?>" alt="Ministry"></div>
+</div><div class="pdf-sub">Report Card</div></div>
+<div class="pdf-meta">
+<span>Document: <strong><?= e($pdf_doc_id) ?></strong></span>
+<span class="meta-dot"></span>
+<span>Generated: <strong><?= e(date('F j, Y')) ?></strong></span>
+<span class="meta-dot"></span>
+<span>Student: <strong><?= e($__u['first_name'] . ' ' . $__u['last_name']) ?></strong></span>
+<span class="meta-dot"></span>
+<span>ID: <strong><?= e($__u['student_id']) ?></strong></span>
 </div>
 <?php foreach ($examsBy as $level => $sems): foreach ($sems as $sem => $rows): ?>
-<div class="section"><h3><?= e($level) ?> · <?= e($sem) ?> — Exams</h3>
-<table><thead><tr><th class="row-num">#</th><th>Exam</th><th>Course</th><th>Score</th><th>Date</th></tr></thead><tbody>
+<div class="pdf-section"><h3><?= e($level) ?> · <?= e($sem) ?> — Exams</h3>
+<table><thead><tr><th>#</th><th>Exam</th><th>Course</th><th>Score</th><th>Date</th></tr></thead><tbody>
 <?php $rn=0; foreach ($rows as $ex): $rn++; $pct = $ex['total_points'] > 0 ? round($ex['score'] / $ex['total_points'] * 100) : 0; ?>
-<tr><td class="row-num"><?= $rn ?></td><td><?= e($ex['title']) ?></td><td><?= e($ex['course_title']) ?></td>
+<tr><td><?= $rn ?></td><td><?= e($ex['title']) ?></td><td><?= e($ex['course_title']) ?></td>
 <td><?= rtrim(rtrim((string)$ex['score'],'0'),'.') ?>/<?= rtrim(rtrim((string)$ex['total_points'],'0'),'.') ?> (<?= $pct ?>%)</td>
-<td class="faint"><?= e(date('M j, Y', strtotime($ex['submitted_at']))) ?></td></tr>
+<td style="color:var(--text-secondary)"><?= e(date('M j, Y', strtotime($ex['submitted_at']))) ?></td></tr>
 <?php endforeach; ?></tbody></table></div>
 <?php endforeach; endforeach; ?>
 <?php foreach ($assignsBy as $level => $sems): foreach ($sems as $sem => $rows): ?>
-<div class="section"><h3><?= e($level) ?> · <?= e($sem) ?> — Assignments</h3>
-<table><thead><tr><th class="row-num">#</th><th>Assignment</th><th>Course</th><th>Score</th><th>Feedback</th></tr></thead><tbody>
+<div class="pdf-section"><h3><?= e($level) ?> · <?= e($sem) ?> — Assignments</h3>
+<table><thead><tr><th>#</th><th>Assignment</th><th>Course</th><th>Score</th><th>Feedback</th></tr></thead><tbody>
 <?php $rn=0; foreach ($rows as $a): $rn++; ?>
-<tr><td class="row-num"><?= $rn ?></td><td><?= e($a['title']) ?></td><td><?= e($a['course_title']) ?></td>
+<tr><td><?= $rn ?></td><td><?= e($a['title']) ?></td><td><?= e($a['course_title']) ?></td>
 <td><?= rtrim(rtrim((string)$a['score'],'0'),'.') ?>/<?= rtrim(rtrim((string)$a['max_score'],'0'),'.') ?></td>
-<td class="faint"><?= e($a['feedback'] ?: '—') ?></td></tr>
+<td style="color:var(--text-secondary)"><?= e($a['feedback'] ?: '—') ?></td></tr>
 <?php endforeach; ?></tbody></table></div>
 <?php endforeach; endforeach; ?>
 <?php if ($courses): ?>
-<div class="section"><h3>Course Progress</h3>
-<table><thead><tr><th class="row-num">#</th><th>Course</th><th>Progress</th></tr></thead><tbody>
+<div class="pdf-section"><h3>Course Progress</h3>
+<table><thead><tr><th>#</th><th>Course</th><th>Progress</th></tr></thead><tbody>
 <?php $rn=0; foreach ($courses as $c): $rn++; ?>
-<tr><td class="row-num"><?= $rn ?></td><td><?= e($c['title']) ?></td>
-<td><div class="progress-bar"><div class="progress-fill" style="width:<?= (float)$c['progress'] ?>%"></div></div> <?= (float)$c['progress'] ?>%</td></tr>
+<tr><td><?= $rn ?></td><td><?= e($c['title']) ?></td>
+<td><div class="pdf-progress"><div class="pdf-progress-fill" style="width:<?= (float)$c['progress'] ?>%"></div></div> <?= (float)$c['progress'] ?>%</td></tr>
 <?php endforeach; ?></tbody></table></div>
 <?php endif; ?>
-<div class="footer"><p><b>Henok Akriso</b> · henokakriso.com</p><p>All system is opensourced under <a href="https://github.com/henokakriso/Edunex" target="_blank">ARWE-PL License</a></p></div>
+<div class="pdf-footer"><span>EDUNEX LMS · henockakriso.com · GitHub @henokakriso · ARWE-PL Licensed [<?= date('Y') ?>]</span><span>Page 1 of 1</span></div>
 </div>
-<script>
-function downloadPDF(){var opt={margin:[10,10],filename:"edunex_report_card_<?= e($__u['student_id']) ?>_<?= date('Ymd') ?>.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}};if(typeof html2pdf!=="undefined"){html2pdf().set(opt).from(document.querySelector(".report")).save();}else{var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=function(){html2pdf().set(opt).from(document.querySelector(".report")).save();};document.head.appendChild(s);}}
-</script></body></html>
+</body></html>
 <?php endif; ?>
