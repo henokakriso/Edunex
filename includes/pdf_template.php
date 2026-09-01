@@ -162,13 +162,45 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 <script>
 function downloadPDF(){
   var el = document.getElementById('pdf-content');
+  var fname = <?= json_encode($pdf_filename) ?>;
+  var orientation = <?= json_encode($pdf_orientation) ?>;
+  var docId = <?= json_encode($pdf_doc_id) ?>;
+  var stamp = <?= json_encode($pdf_stamp) ?>;
+  var footerLeft = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
+
   var opt = {
-    margin: [12, 12],
-    filename: <?= json_encode($pdf_filename) ?>,
+    margin: [12, 12, 18, 12],
+    filename: fname,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: <?= json_encode($pdf_orientation) ?> }
+    jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
-  html2pdf().set(opt).from(el).save();
+
+  html2pdf().set(opt).from(el).then(function(pdf) {
+    var total = pdf.internal.getNumberOfPages();
+    var w = pdf.internal.pageSize.getWidth();
+    var h = pdf.internal.pageSize.getHeight();
+    for (var i = 1; i <= total; i++) {
+      pdf.setPage(i);
+      /* Watermark on every page */
+      pdf.setTextColor(200);
+      pdf.setFontSize(42);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('EDUNEX', w / 2, h / 2, { align: 'center', angle: -30 });
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('www.henokakriso.com', w / 2, h / 2 + 12, { align: 'center', angle: -30 });
+      /* Footer on every page */
+      pdf.setFontSize(8);
+      pdf.setTextColor(150);
+      pdf.text(footerLeft, 12, h - 8);
+      pdf.text('Page ' + i + ' of ' + total, w - 12, h - 8, { align: 'right' });
+      /* Header line on every page */
+      pdf.setDrawColor(220);
+      pdf.line(12, 12, w - 12, 12);
+    }
+    pdf.save(fname);
+  });
 }
 </script>
