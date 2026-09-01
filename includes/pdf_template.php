@@ -22,14 +22,6 @@ $pdf_stamp = $pdf_stamp ?? date('F j, Y \a\t g:i A');
 $pdf_filename = $pdf_filename ?? 'edunex_report_' . date('Ymd_His') . '.pdf';
 $pdf_orientation = $pdf_orientation ?? 'landscape';
 $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
-
-/* Convert images to base64 data URIs for jsPDF */
-$flag_b64 = @base64_encode(@file_get_contents(BASE_PATH . '/public/images/ethiopian-flag.jpeg'));
-$ministry_b64 = @base64_encode(@file_get_contents(BASE_PATH . '/public/images/ministry-logo.png'));
-$logo_b64 = @base64_encode(@file_get_contents(BASE_PATH . '/public/images/logo-black.jpeg'));
-$flag_mime = 'image/jpeg';
-$ministry_mime = 'image/png';
-$logo_mime = 'image/jpeg';
 ?>
 <style>
 /* ── PDF Viewer ─────────────────────────────────── */
@@ -168,92 +160,104 @@ $logo_mime = 'image/jpeg';
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function downloadPDF(){
-  var el = document.getElementById('pdf-content');
-  var fname = <?= json_encode($pdf_filename) ?>;
-  var orientation = <?= json_encode($pdf_orientation) ?>;
-  var subtitle = <?= json_encode($pdf_subtitle) ?>;
-  var footerL = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
-  var flagURI = <?= json_encode($flag_b64 ? ('data:' . $flag_mime . ';base64,' . $flag_b64) : '') ?>;
-  var ministURI = <?= json_encode($ministry_b64 ? ('data:' . $ministry_mime . ';base64,' . $ministry_b64) : '') ?>;
+(function(){
+  var FLAG_URL  = <?= json_encode($pdf_ethiopian_flag) ?>;
+  var MINIS_URL = <?= json_encode($pdf_ministry_logo) ?>;
+  var FNAME     = <?= json_encode($pdf_filename) ?>;
+  var ORIENT    = <?= json_encode($pdf_orientation) ?>;
+  var SUBTITLE  = <?= json_encode($pdf_subtitle) ?>;
+  var FOOTER    = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
 
-  var opt = {
-    margin: [30, 12, 18, 12],
-    filename: fname,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  };
-
-  /* Temporarily hide header/watermark/footer from canvas render */
-  var hidden = [];
-  el.querySelectorAll('.pdf-header, .pdf-watermark, .pdf-footer').forEach(function(e){
-    e.setAttribute('data-was-visible', e.style.display || '');
-    e.style.display = 'none';
-    hidden.push(e);
-  });
-
-  html2pdf().set(opt).from(el).then(function(pdf){
-    /* Restore hidden elements */
-    hidden.forEach(function(e){
-      e.style.display = e.getAttribute('data-was-visible') || '';
+  function toDataURL(url, type){
+    return new Promise(function(resolve){
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function(){
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL(type));
+      };
+      img.onerror = function(){ resolve(null); };
+      img.src = url;
     });
+  }
 
+  function stampEveryPage(pdf, flagURI, minisURI){
     var total = pdf.internal.getNumberOfPages();
     var W = pdf.internal.pageSize.getWidth();
     var H = pdf.internal.pageSize.getHeight();
-
-    for (var i = 1; i <= total; i++) {
+    for(var i = 1; i <= total; i++){
       pdf.setPage(i);
 
-      /* ── Header on every page ── */
-      if(flagURI){
-        try{ pdf.addImage(flagURI, 'JPEG', 14, 4, 18, 14); }catch(e){}
-      }
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica','bold');
-      pdf.setTextColor(30,41,59);
+      /* ── Header ── */
+      if(flagURI){ try{ pdf.addImage(flagURI,'JPEG',14,4,18,14); }catch(e){} }
+      pdf.setFontSize(11); pdf.setFont('helvetica','bold'); pdf.setTextColor(30,41,59);
       pdf.text('FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA', W/2, 10, {align:'center'});
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica','normal');
-      pdf.setTextColor(100,116,139);
+      pdf.setFontSize(8); pdf.setFont('helvetica','normal'); pdf.setTextColor(100,116,139);
       pdf.text('Ministry of Education', W/2, 15, {align:'center'});
-      if(ministURI){
-        try{ pdf.addImage(ministURI, 'PNG', W-32, 2, 18, 18); }catch(e){}
-      }
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica','normal');
-      pdf.setTextColor(99,102,241);
-      pdf.text(subtitle, W/2, 21, {align:'center'});
-      pdf.setDrawColor(200);
-      pdf.setLineWidth(0.3);
+      if(minisURI){ try{ pdf.addImage(minisURI,'PNG',W-32,2,18,18); }catch(e){} }
+      pdf.setFontSize(10); pdf.setFont('helvetica','normal'); pdf.setTextColor(99,102,241);
+      pdf.text(SUBTITLE, W/2, 21, {align:'center'});
+      pdf.setDrawColor(200); pdf.setLineWidth(0.3);
       pdf.line(14, 24, W-14, 24);
 
-      /* ── Watermark on every page ── */
-      pdf.setTextColor(210);
-      pdf.setFontSize(48);
-      pdf.setFont('helvetica','bold');
+      /* ── Watermark ── */
+      pdf.setTextColor(210); pdf.setFontSize(48); pdf.setFont('helvetica','bold');
       pdf.text('EDUNEX', W/2, H/2, {align:'center', angle:-30});
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(12); pdf.setFont('helvetica','normal');
       pdf.text('www.henokakriso.com', W/2, H/2+14, {align:'center', angle:-30});
 
-      /* ── Footer on every page ── */
-      pdf.setDrawColor(200);
-      pdf.setLineWidth(0.3);
+      /* ── Footer ── */
+      pdf.setDrawColor(200); pdf.setLineWidth(0.3);
       pdf.line(14, H-12, W-14, H-12);
-      pdf.setFontSize(8);
-      pdf.setTextColor(150);
-      pdf.setFont('helvetica','normal');
-      pdf.text(footerL, 14, H-7);
+      pdf.setFontSize(8); pdf.setTextColor(150); pdf.setFont('helvetica','normal');
+      pdf.text(FOOTER, 14, H-7);
       pdf.text('Page '+i+' of '+total, W-14, H-7, {align:'right'});
     }
-    pdf.save(fname);
-  }).catch(function(err){
-    hidden.forEach(function(e){ e.style.display = e.getAttribute('data-was-visible') || ''; });
-    console.error('PDF generation failed:', err);
-    alert('PDF generation failed. Please try again.');
-  });
-}
+  }
+
+  window.downloadPDF = function(){
+    var el = document.getElementById('pdf-content');
+    if(!el){ alert('PDF content not found'); return; }
+
+    Promise.all([
+      toDataURL(FLAG_URL, 'image/jpeg'),
+      toDataURL(MINIS_URL, 'image/png')
+    ]).then(function(imgs){
+      var flagURI  = imgs[0];
+      var minisURI = imgs[1];
+
+      var opt = {
+        margin: [28, 12, 16, 12],
+        filename: FNAME,
+        image: { type:'jpeg', quality:0.98 },
+        html2canvas: { scale:2, useCORS:true },
+        jsPDF: { unit:'mm', format:'a4', orientation:ORIENT },
+        pagebreak: { mode:['avoid-all','css','legacy'] }
+      };
+
+      html2pdf().set(opt).from(el).then(function(pdf){
+        stampEveryPage(pdf, flagURI, minisURI);
+        pdf.save(FNAME);
+      }).catch(function(err){
+        console.error('html2pdf error:', err);
+        alert('PDF render failed. Try Print (Ctrl+P) instead.');
+      });
+    }).catch(function(){
+      var opt = {
+        margin: [28, 12, 16, 12],
+        filename: FNAME,
+        image: { type:'jpeg', quality:0.98 },
+        html2canvas: { scale:2 },
+        jsPDF: { unit:'mm', format:'a4', orientation:ORIENT },
+        pagebreak: { mode:['avoid-all','css','legacy'] }
+      };
+      html2pdf().set(opt).from(el).then(function(pdf){
+        stampEveryPage(pdf, null, null);
+        pdf.save(FNAME);
+      });
+    });
+  };
+})();
 </script>
