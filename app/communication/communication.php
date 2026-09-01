@@ -135,7 +135,7 @@ class Ctl_messages {
 
     /** Static helper: does the body look like it was sealed by the C backend? */
     public static function isSealed(?string $body): bool {
-        return strlen($body) >= 44 && preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $body) === 1 && CWorker::available();
+        return strlen($body) >= 40 && preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $body) === 1 && CWorker::available();
     }
 
     /** Seal (encrypt) a message body via the C backend; returns original on failure. */
