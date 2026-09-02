@@ -6,17 +6,11 @@ $maxWeek = max(1, max(array_column($weeks, 'count')));
 $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => 'var(--info)', 'ok' => 'var(--success)'];
 ?>
 <style>
-  .dir-dash { font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; color: #1d1d1f; }
-  .dir-dash h1 { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 700; letter-spacing: -.025em; color: #1d1d1f; font-size: 1.6rem; }
-  .dir-dash h3, .dir-dash .card-title { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 600; letter-spacing: -.02em; color: #1d1d1f; }
-  .dir-dash .stat-value { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 800; letter-spacing: -.03em; color: #1d1d1f; font-size: 1.7rem; }
-  .dir-dash .small, .dir-dash .tiny { color: #6e6e73; }
-  .dir-dash b { color: #1d1d1f; }
-  .dir-dash .card { border-radius: 16px; }
-  @media (prefers-color-scheme: dark) {
-    .dir-dash, .dir-dash h1, .dir-dash h3, .dir-dash .card-title, .dir-dash b { color: #f5f5f7; }
-    .dir-dash .small, .dir-dash .tiny { color: #86868b; }
-  }
+  .dir-dash { font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; color: var(--text); }
+  .dir-dash h1 { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 700; letter-spacing: -.025em; color: var(--text); font-size: 1.6rem; }
+  .dir-dash h3, .dir-dash .card-title { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 600; letter-spacing: -.02em; color: var(--text); }
+  .dir-dash .stat-value { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 800; letter-spacing: -.03em; color: var(--text); font-size: 1.7rem; }
+  .dir-dash .card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: var(--bg-elev) !important; border: 1px solid var(--border) !important; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04) !important; }
 </style>
 <div class="dir-dash">
 <div class="page-head">
