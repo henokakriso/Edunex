@@ -29,14 +29,14 @@
 </div>
 
 <?php if ($selectedCourse && $assessments): ?>
-<!-- Semester Remaining Marks -->
+<!-- Round Remaining Marks -->
 <div class="card" style="margin-bottom:18px">
-  <h4 class="card-title" style="margin-top:0">Semester Marks Budget</h4>
+  <h4 class="card-title" style="margin-top:0">Marks Budget</h4>
   <div style="display:flex;gap:16px">
     <?php for ($sem = 1; $sem <= 2; $sem++): ?>
       <?php $used = (int)($semesterUsedMarks[$sem] ?? 0); $remaining = max(0, 100 - $used); ?>
       <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
-        <div class="tiny faint">Semester <?= $sem ?></div>
+        <div class="tiny faint">Round <?= $sem ?> <?= $sem === 1 ? '(Mid)' : '(Final)' ?></div>
         <div style="font-size:22px;font-weight:800;color:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= $used ?>/100</div>
         <div class="tiny faint"><?= $remaining ?> remaining</div>
         <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">
@@ -57,7 +57,7 @@
         <div style="flex:1;min-width:0">
           <div style="font-weight:600;font-size:13.5px"><?= e($a['title']) ?></div>
           <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · Max: <span id="max-mark-<?= (int)$a['id'] ?>"><?= (int)$a['max_mark'] ?></span> · <?= e($a['assessment_date'] ?? '—') ?></div>
-          <button type="button" class="btn-link tiny" onclick="editMaxMark(<?= (int)$a['id'] ?>, <?= (int)$a['max_mark'] ?>)" style="color:var(--accent);background:none;border:none;cursor:pointer;padding:0;font-size:11px">edit out of</button>
+          <button type="button" onclick="event.preventDefault();event.stopPropagation();editMaxMark(<?= (int)$a['id'] ?>, <?= (int)$a['max_mark'] ?>)" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);border-radius:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='color-mix(in srgb, var(--accent) 15%, transparent)'" onmouseout="this.style.background='color-mix(in srgb, var(--accent) 8%, transparent)'">✏ Edit Out of</button>
         </div>
         <div style="text-align:right">
           <div class="small" style="font-weight:600"><?= (int)$a['graded_count'] ?>/<?= (int)$a['total_grades'] ?> graded</div>

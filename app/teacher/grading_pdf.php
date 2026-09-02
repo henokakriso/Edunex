@@ -87,7 +87,7 @@ class Ctl_grading_pdf {
 
         $html = '<div class="header"><h1>EDUNEX — STUDENT RESULT REPORT</h1><h2>' . e($schoolName) . '</h2><p>Course: ' . e($course['title'] ?? '') . ' (' . e($course['code'] ?? '') . ')</p></div>';
 
-        $html .= '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Sem 1</th><th>Sem 2</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
+        $html .= '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Round 1</th><th>Round 2</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
 
         $rank = 0;
         $finals = [];
@@ -154,7 +154,7 @@ class Ctl_grading_pdf {
         foreach ($assessments as $a) {
             $html .= '<th style="font-size:8px">' . e($a['type_slug'] !== $a['title'] ? $a['type_slug'] : mb_substr($a['title'], 0, 8)) . '<br>' . (int)$a['max_mark'] . '</th>';
         }
-        $html .= '<th>Sem 1</th><th>Sem 2</th><th>Bonus</th><th>Final</th><th>Grade</th></tr></thead><tbody>';
+        $html .= '<th>Round 1</th><th>Round 2</th><th>Bonus</th><th>Final</th><th>Grade</th></tr></thead><tbody>';
 
         $rank = 0;
         $allFinals = [];

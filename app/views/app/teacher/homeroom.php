@@ -6,7 +6,7 @@ $res = count(array_filter($students, fn($s) => $s['avg'] !== null));
     <h1><?= icon('school') ?> Homeroom — <?= e($group['name']) ?></h1>
     <p class="sub">
       <?php if ($group['grade'] || $group['section']): ?>Grade <?= e($group['grade']) ?><?= $group['section'] ? ' · Section ' . e($group['section']) : '' ?> — <?php endif; ?>
-      <?= count($students) ?> student(s) · semester results, averages &amp; class rank
+      <?= count($students) ?> student(s) · round results, averages &amp; class rank
     </p>
   </div>
 </div>
@@ -41,7 +41,7 @@ $res = count(array_filter($students, fn($s) => $s['avg'] !== null));
       <div style="min-width:0">
         <div class="stat-value"><?= $top ? e(mb_substr($top['name'], 0, 22)) : '—' ?></div>
         <div class="small faint">Top of class</div>
-        <div class="tiny faint"><?= $top ? 'Semester average ' . $top['avg'] . '%' : 'Waiting for results' ?></div>
+        <div class="tiny faint"><?= $top ? 'Round average ' . $top['avg'] . '%' : 'Waiting for results' ?></div>
       </div>
     </div>
     <div class="card stat-card">
@@ -66,11 +66,11 @@ $res = count(array_filter($students, fn($s) => $s['avg'] !== null));
     <h3 class="card-title"><?= icon('users') ?> Class results — <?= e($group['name']) ?></h3>
     <?php if ($res === 0): ?>
       <div class="alert alert-info" style="margin-bottom:0">
-        <?= icon('info') ?> No semester results yet. Averages and ranks appear here automatically once teachers <b>send exam results</b> (Grading → <b>Send results</b>) or grade assignments.
+        <?= icon('info') ?> No round results yet. Averages and ranks appear here automatically once teachers <b>send exam results</b> (Grading → <b>Send results</b>) or grade assignments.
       </div>
     <?php else: ?>
     <table class="table">
-      <thead><tr><th>#</th><th>Student</th><th>Semester avg</th><th>Exams</th><th>Assignments</th><th>Attendance</th></tr></thead>
+      <thead><tr><th>#</th><th>Student</th><th>Round avg</th><th>Exams</th><th>Assignments</th><th>Attendance</th></tr></thead>
       <tbody>
         <?php foreach ($students as $s): ?>
           <tr>

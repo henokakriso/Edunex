@@ -22,7 +22,7 @@
                     data-semester="<?= (int)($t['semester'] ?? 0) ?>"
                     data-max-round="<?= $t['round_num'] ?? '' ?>">
               <?= e($t['label']) ?>
-              <?= $t['is_round'] ? '(Round ' . $t['round_num'] . ' — Sem ' . $t['semester'] . ')' : '' ?>
+              <?= $t['is_round'] ? '(Round ' . $t['round_num'] . ')' : '' ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -46,11 +46,11 @@
       </div>
 
       <div class="flex-col">
-        <label class="small faint" style="font-weight:600">Semester *</label>
+        <label class="small faint" style="font-weight:600">Round *</label>
         <select class="input" name="semester" id="semester-select" required>
-          <option value="">— Select Semester —</option>
-          <option value="1">Semester 1 (R1 + R2)</option>
-          <option value="2">Semester 2 (R3 + R4)</option>
+          <option value="">— Select Round —</option>
+          <option value="1">Round 1 (Mid)</option>
+          <option value="2">Round 2 (Final)</option>
         </select>
       </div>
 
@@ -92,7 +92,7 @@ function updateRemaining() {
   const remaining = Math.max(0, 100 - used);
   const wouldExceed = used + maxMark > 100;
   info.style.display = 'block';
-  document.getElementById('remaining-text').textContent = `Semester ${sem}: ${used}/100 used, ${remaining} remaining` + (wouldExceed ? ` — EXCEEDS by ${used + maxMark - 100}!` : '');
+  document.getElementById('remaining-text').textContent = `Round ${sem}: ${used}/100 used, ${remaining} remaining` + (wouldExceed ? ` — EXCEEDS by ${used + maxMark - 100}!` : '');
   document.getElementById('remaining-text').style.color = wouldExceed ? 'var(--danger)' : 'var(--success)';
   document.getElementById('remaining-detail').textContent = wouldExceed
     ? `Cannot create: ${maxMark} marks exceeds ${remaining} remaining`

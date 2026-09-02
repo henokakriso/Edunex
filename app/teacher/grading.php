@@ -439,7 +439,7 @@ class Ctl_assessment_new {
 
             if ($title === '') { flash('danger', 'Title required.'); redirect('teacher/assessment/new&course=' . $courseId); }
             if ($maxMark <= 0 || $maxMark > 100) { flash('danger', 'Maximum mark must be between 1 and 100.'); redirect('teacher/assessment/new&course=' . $courseId); }
-            if ($semester < 1 || $semester > 2) { flash('danger', 'Semester required.'); redirect('teacher/assessment/new&course=' . $courseId); }
+            if ($semester < 1 || $semester > 2) { flash('danger', 'Round required.'); redirect('teacher/assessment/new&course=' . $courseId); }
 
             // Check round max marks
             $typeRow = Database::one("SELECT * FROM assessment_types WHERE slug = ?", [$typeSlug]);
@@ -454,7 +454,7 @@ class Ctl_assessment_new {
             if ($semester >= 1 && $semester <= 2) {
                 if ($semesterUsed[$semester] + $maxMark > 100) {
                     $remaining = max(0, 100 - $semesterUsed[$semester]);
-                    flash('danger', "Semester $semester already uses {$semesterUsed[$semester]}/100 marks. Only $remaining remaining. Cannot create assessment worth $maxMark.");
+                    flash('danger', "Round $semester already uses {$semesterUsed[$semester]}/100 marks. Only $remaining remaining. Cannot create assessment worth $maxMark.");
                     redirect('teacher/assessment/new&course=' . $courseId);
                 }
             }

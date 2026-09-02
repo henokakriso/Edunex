@@ -57,7 +57,7 @@ if ($semester >= 1 && $semester <= 2) {
 
     if ($otherUsed + $newMax > 100) {
         $remaining = max(0, 100 - $otherUsed);
-        echo json_encode(['error' => "Semester $semester would exceed 100. Only $remaining remaining (other assessments use $otherUsed/100)."]);
+        echo json_encode(['error' => "Round $semester would exceed 100. Only $remaining remaining (other assessments use $otherUsed/100)."]);
         exit;
     }
 }
