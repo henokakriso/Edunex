@@ -75,6 +75,13 @@ Router::page('teacher/reports', 'teacher/reports.php', ['teacher', 'lecturer']);
 Router::page('teacher/analytics', 'teacher/analytics.php', ['teacher', 'lecturer']);
 Router::page('teacher/library', 'teacher/library.php', ['teacher', 'lecturer', 'librarian', 'dean', 'hod']);
 Router::page('teacher/forum', 'teacher/forum.php', ['teacher', 'lecturer']);
+Router::page('teacher/grading', 'teacher/grading.php', ['teacher', 'lecturer']);
+Router::page('teacher/gradebook', 'teacher/gradebook.php', ['teacher', 'lecturer']);
+Router::page('teacher/assessment/new', 'teacher/assessment_new.php', ['teacher', 'lecturer']);
+Router::page('teacher/bonus', 'teacher/bonus.php', ['teacher', 'lecturer']);
+Router::page('teacher/grading/reports', 'teacher/grading_reports.php', ['teacher', 'lecturer']);
+Router::page('teacher/grading/pdf', 'teacher/grading_pdf.php', ['teacher', 'lecturer']);
+Router::page('api/grading_assessments', 'api/grading_assessments.php', ['teacher', 'lecturer', 'principal', 'ministry']);
 
 /* ---- Admin ---- */
 Router::page('admin/dashboard', 'admin/dashboard.php', 'ministry');
