@@ -161,7 +161,27 @@ async function downloadGradingPDF(url, filename) {
     var paper = doc.getElementById('pdf-content');
     if (!paper) { alert('PDF content not found'); return; }
     var container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1100px';
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1100px;background:#fff;color:#1d1d1f;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5';
+    // Add PDF styles inline
+    var style = document.createElement('style');
+    style.textContent = 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}' +
+      'thead th{background:rgba(99,102,241,.08);color:#6366f1;font-weight:600;text-align:left;padding:10px 14px;border-bottom:2px solid rgba(99,102,241,.2);white-space:nowrap}' +
+      'tbody td{padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.04);color:#1d1d1f}' +
+      'tbody tr:nth-child(even){background:rgba(99,102,241,.02)}' +
+      '.pass{color:#34c759;font-weight:700}.fail{color:#ff3b30;font-weight:700}' +
+      '.pdf-header{position:relative;z-index:1;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);padding-bottom:20px;margin-bottom:22px}' +
+      '.logos-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:8px}' +
+      '.logos-row .flag-wrap{justify-self:start}.logos-row .text-center{text-align:center;padding:0 20px}.logos-row .ministry-wrap{justify-self:end}' +
+      '.logo-img{height:60px;object-fit:contain}.flag-img{height:50px;border-radius:4px;object-fit:cover}' +
+      '.pdf-header h2{margin:0 0 4px;font-size:1.05rem;text-transform:uppercase;letter-spacing:.6px}' +
+      '.pdf-sub{font-size:13px;color:#6e6e73;font-weight:500;margin-top:4px}' +
+      '.pdf-meta{display:flex;gap:28px;font-size:12px;color:#6e6e73;margin-bottom:18px;flex-wrap:wrap}' +
+      '.pdf-meta span{display:inline-flex;align-items:center;gap:5px}' +
+      '.pdf-meta .meta-dot{width:4px;height:4px;border-radius:50%;background:#6366f1;opacity:.5}' +
+      '.pdf-footer{border-top:1px solid rgba(0,0,0,.06);padding-top:14px;margin-top:22px;display:flex;justify-content:space-between;font-size:11px;color:#6e6e73}' +
+      '.pdf-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);text-align:center;pointer-events:none;opacity:.08;z-index:0;display:flex;flex-direction:column;align-items:center;gap:6px}' +
+      '.wm-logo{height:140px;object-fit:contain;filter:grayscale(1)}.wm-edunex{font-size:36px;font-weight:900;letter-spacing:8px;color:#1e293b;text-transform:uppercase}.wm-url{font-size:14px;font-weight:500;letter-spacing:2px;color:#64748b}';
+    container.appendChild(style);
     container.appendChild(paper);
     document.body.appendChild(container);
     var imgs = await Promise.all([toDataURL(FLAG_URL, 'image/jpeg'), toDataURL(MINIS_URL, 'image/png')]);
@@ -177,7 +197,7 @@ async function downloadGradingPDF(url, filename) {
       pdf.save(filename);
     });
     container.remove();
-  } catch(e) { console.error(e); alert('PDF generation failed'); }
+  } catch(e) { console.error(e); alert('PDF generation failed: ' + e.message); }
   finally { btn.disabled = false; btn.textContent = '⬇ Generate PDF'; }
 }
 
