@@ -1,48 +1,39 @@
-<?php /* Director dashboard — interactive, matches other role dashboards */
+<?php /* Director dashboard — clean, organized, Apple glassmorphism */
 $u = $__u;
 $hour = (int)date('H');
 $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
-$statCards = [
-    ['label' => 'Teachers', 'value' => $stats['teachers'], 'icon' => icon('users'), 'link' => 'director/teachers', 'hint' => 'on staff'],
-    ['label' => 'Students', 'value' => $stats['students'], 'icon' => icon('graduation'), 'link' => 'director/students', 'hint' => $stats['active'] . ' active'],
-    ['label' => 'Courses', 'value' => $stats['courses'], 'icon' => icon('books'), 'link' => 'courses', 'hint' => $stats['exams'] . ' exams'],
-    ['label' => 'Active', 'value' => $stats['active'], 'icon' => icon('check-circle'), 'link' => 'director/students&filter=active', 'hint' => 'enrolled now'],
-    ['label' => 'Re-exam', 'value' => $stats['inactive'], 'icon' => icon('pause'), 'link' => 'director/students&filter=inactive', 'hint' => 'inactive students'],
-    ['label' => 'Pending', 'value' => $stats['pending'], 'icon' => icon('clock'), 'link' => 'director/students&filter=pending', 'hint' => 'need verification'],
-];
 $maxWeek = max(1, max(array_column($weeks, 'count')));
 $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => 'var(--info)', 'ok' => 'var(--success)'];
 ?>
 <div class="page-head">
   <div>
     <h1><?= $greeting ?>, <?= e($u['first_name']) ?> <?= icon('hand') ?></h1>
-    <p class="sub"><?= e(date('l, F j, Y')) ?> · <?= e($u['school_name'] ?? 'Your school') ?> · Manage teachers, students and transfers.</p>
+    <p class="sub"><?= e(date('l, F j, Y')) ?> · <?= e($u['school_name'] ?? 'Your school') ?></p>
   </div>
   <div class="flex gap-8" style="flex-wrap:wrap">
     <a class="btn btn-primary" href="<?= e(url('director/teachers')) ?>"><?= icon('plus') ?> New teacher</a>
-    <a class="btn btn-ghost" href="<?= e(url('director/import')) ?>"><?= icon('download') ?> Import users</a>
-    <?php if ($pending > 0): ?>
-      <a class="btn btn-warn" href="<?= e(url('director/students&filter=pending')) ?>"><?= icon('clock') ?> <?= (int)$pending ?> overdue</a>
-    <?php endif; ?>
+    <a class="btn btn-ghost" href="<?= e(url('director/import')) ?>"><?= icon('download') ?> Import</a>
   </div>
 </div>
 
 <!-- Stat cards -->
-<div class="grid grid-4" style="margin-bottom:22px">
-  <?php foreach ($statCards as $c): ?>
-    <a class="card stat-card tstat-card" href="<?= e(url($c['link'])) ?>" style="text-decoration:none;color:inherit">
-      <span class="stat-ico"><?= $c['icon'] ?></span>
-      <div style="min-width:0">
-        <div class="stat-value tstat-val" data-val="<?= (int)$c['value'] ?>">0</div>
-        <div class="small faint" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= $c['label'] ?></div>
-        <div class="tiny faint"><?= e($c['hint']) ?></div>
-      </div>
-    </a>
-  <?php endforeach; ?>
+<div class="grid grid-3" style="margin-bottom:22px">
+  <a class="card stat-card" href="<?= e(url('director/teachers')) ?>" style="text-decoration:none;color:inherit">
+    <span class="stat-ico"><?= icon('users') ?></span>
+    <div><div class="stat-value" data-val="<?= (int)$stats['teachers'] ?>">0</div><div class="small faint">Teachers · on staff</div></div>
+  </a>
+  <a class="card stat-card" href="<?= e(url('director/students')) ?>" style="text-decoration:none;color:inherit">
+    <span class="stat-ico"><?= icon('graduation') ?></span>
+    <div><div class="stat-value" data-val="<?= (int)$stats['students'] ?>">0</div><div class="small faint">Students · <?= (int)$stats['active'] ?> active</div></div>
+  </a>
+  <a class="card stat-card" href="<?= e(url('courses')) ?>" style="text-decoration:none;color:inherit">
+    <span class="stat-ico"><?= icon('books') ?></span>
+    <div><div class="stat-value" data-val="<?= (int)$stats['courses'] ?>">0</div><div class="small faint">Courses · <?= (int)$stats['exams'] ?> exams</div></div>
+  </a>
 </div>
 
-<div class="grid" style="grid-template-columns:1.55fr 1fr;gap:22px;align-items:start">
-  <div class="flex-col gap-24">
+<div class="grid" style="grid-template-columns:1.4fr 1fr;gap:22px;align-items:start">
+  <div class="flex-col gap-20">
 
     <!-- Signup trend -->
     <div class="card">
@@ -50,7 +41,7 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
         <h3 class="card-title" style="margin:0"><?= icon('trend-up') ?> New accounts</h3>
         <span class="tiny faint">teachers + students · last 8 weeks</span>
       </div>
-      <div style="height:150px;position:relative">
+      <div style="height:140px;position:relative">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
           <defs>
             <linearGradient id="dirTrendFill" x1="0" y1="0" x2="0" y2="1">
@@ -74,7 +65,7 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
           <polyline points="<?= implode(' ', array_map(fn($p) => number_format($p[0], 1) . ',' . number_format($p[1], 1), $pts)) ?>" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           <?php foreach ($pts as $i => [$x, $y]): ?>
             <circle cx="<?= number_format($x, 1) ?>" cy="<?= number_format($y, 1) ?>" r="1.1" fill="var(--accent)">
-              <title><?= e($weeks[$i]['label']) ?>: <?= (int)$weeks[$i]['count'] ?> new account<?= $weeks[$i]['count'] === 1 ? '' : 's' ?></title>
+              <title><?= e($weeks[$i]['label']) ?>: <?= (int)$weeks[$i]['count'] ?></title>
             </circle>
           <?php endforeach; ?>
         </svg>
@@ -87,31 +78,30 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
     <!-- Recently added -->
     <div class="card" style="padding:0;overflow:hidden">
       <div class="card-head" style="padding:14px 18px"><b><?= icon('spark') ?> Recently added</b><a class="small accent" href="<?= e(url('director/students')) ?>">All students →</a></div>
-      <?php if (!$recent): ?><p class="muted small" style="padding:0 18px 16px">No teachers or students yet. Use the import tool to add them.</p><?php endif; ?>
-      <?php foreach (array_slice($recent, 0, 6) as $r): ?>
-        <div class="list-row" style="padding:11px 18px;border-bottom:1px solid var(--border)">
-          <div class="avatar"><?= e(mb_strtoupper(mb_substr((string)$r['name'], 0, 1))) ?></div>
-          <div class="flex-1" style="min-width:0">
-            <b class="small" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block"><?= e($r['name']) ?></b>
-            <span class="tiny faint"><?= e($r['email']) ?> · <?= e(date('M j, H:i', strtotime($r['created_at']))) ?></span>
+      <?php if (!$recent): ?><p class="muted small" style="padding:0 18px 16px">No teachers or students yet.</p><?php endif; ?>
+      <?php foreach (array_slice($recent, 0, 5) as $r): ?>
+        <div class="list-row" style="padding:10px 18px;border-bottom:1px solid var(--border)">
+          <div class="avatar" style="width:34px;height:34px;font-size:13px;flex-shrink:0"><?= e(mb_strtoupper(mb_substr((string)$r['name'], 0, 1))) ?></div>
+          <div style="min-width:0;flex:1">
+            <div class="small" style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= e($r['name']) ?></div>
+            <div class="tiny faint"><?= e($r['email']) ?></div>
           </div>
-          <?php if ($r['role'] === 'teacher'): ?><span class="badge badge-muted">Teacher</span>
-          <?php else: ?><?= $r['status'] === 'active' ? '<span class="badge badge-success">active</span>' : '<span class="badge badge-warning">' . e($r['status']) . '</span>' ?><?php endif; ?>
+          <span class="tiny faint" style="flex-shrink:0"><?= e(date('M j', strtotime($r['created_at']))) ?></span>
         </div>
       <?php endforeach; ?>
     </div>
   </div>
 
-  <div class="flex-col gap-24" style="position:sticky;top:84px">
+  <div class="flex-col gap-20" style="position:sticky;top:84px">
 
     <!-- Today's focus -->
     <div class="card">
       <h3 class="card-title" style="margin-top:0"><?= icon('target') ?> Today's focus</h3>
-      <?php if (!$todo): ?><p class="muted small">All clear — nothing needs your attention. <?= icon('medal') ?></p><?php endif; ?>
+      <?php if (!$todo): ?><p class="muted small"><?= icon('medal') ?> All clear — nothing needs your attention.</p><?php endif; ?>
       <?php foreach ($todo as $t): ?>
         <a class="list-row" href="<?= e(url($t['link'])) ?>" style="padding:10px 0;text-decoration:none;color:inherit;border-bottom:1px solid var(--border)">
           <span class="feed-dot" style="background:<?= $todoCls[$t['cls']] ?? 'var(--accent)' ?>"></span>
-          <span class="small flex-1"><?= icon($t['icon']) ?> <?= e($t['label']) ?></span>
+          <span class="small flex-1"><?= e($t['label']) ?></span>
           <span class="tiny faint"><?= icon('reply') ?></span>
         </a>
       <?php endforeach; ?>
@@ -122,13 +112,13 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
       <h3 class="card-title" style="margin-top:0"><?= icon('bolt') ?> Quick actions</h3>
       <?php $quick = [
         ['label' => 'Create teacher', 'href' => 'director/teachers', 'icon' => 'users', 'bg' => 'var(--accent-soft)', 'fg' => 'var(--accent)'],
-        ['label' => 'Import users (Excel/CSV)', 'href' => 'director/import', 'icon' => 'download', 'bg' => 'var(--info-soft)', 'fg' => 'var(--info)'],
+        ['label' => 'Import users', 'href' => 'director/import', 'icon' => 'download', 'bg' => 'var(--info-soft)', 'fg' => 'var(--info)'],
         ['label' => 'Transfers', 'href' => 'director/transfers', 'icon' => 'refresh', 'bg' => 'var(--success-soft)', 'fg' => 'var(--success)'],
         ['label' => 'Reports', 'href' => 'director/reports', 'icon' => 'trend-up', 'bg' => 'var(--warning-soft)', 'fg' => 'var(--warning)'],
       ]; ?>
       <?php foreach ($quick as $q): ?>
         <a class="list-row" href="<?= e(url($q['href'])) ?>" style="padding:10px 0;text-decoration:none;color:inherit;border-bottom:1px solid var(--border)">
-          <span class="stat-ico" style="background:<?= $q['bg'] ?>;color:<?= $q['fg'] ?>"><?= icon($q['icon']) ?></span>
+          <span class="stat-ico" style="width:32px;height:32px;border-radius:9px;background:<?= $q['bg'] ?>;color:<?= $q['fg'] ?>;font-size:15px"><?= icon($q['icon']) ?></span>
           <span class="small flex-1"><?= e($q['label']) ?></span>
           <span class="tiny faint"><?= icon('reply') ?></span>
         </a>
@@ -138,21 +128,37 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
     <!-- Academic summary -->
     <div class="card">
       <h3 class="card-title" style="margin-top:0"><?= icon('chart-bar') ?> Academic</h3>
-      <div class="flex-between" style="margin-top:8px"><span class="tiny faint">Courses</span><b><?= (int)$stats['courses'] ?></b></div>
-      <div class="flex-between" style="margin-top:6px"><span class="tiny faint">Exams</span><b><?= (int)$stats['exams'] ?></b></div>
-      <div class="flex-between" style="margin-top:6px"><span class="tiny faint">Active rate</span>
-        <b><?= $stats['students'] > 0 ? (int)round($stats['active'] / $stats['students'] * 100) : 0 ?>%</b></div>
-      <div class="flex-between" style="margin-top:6px"><span class="tiny faint">Pending transfers</span><b><?= (int)$stats['transfers'] ?></b></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+        <div style="text-align:center;padding:10px;border-radius:10px;background:color-mix(in srgb, var(--accent) 6%, transparent)">
+          <div class="small" style="font-weight:700;color:var(--accent)"><?= (int)$stats['courses'] ?></div>
+          <div class="tiny faint">Courses</div>
+        </div>
+        <div style="text-align:center;padding:10px;border-radius:10px;background:color-mix(in srgb, var(--info) 6%, transparent)">
+          <div class="small" style="font-weight:700;color:var(--info)"><?= (int)$stats['exams'] ?></div>
+          <div class="tiny faint">Exams</div>
+        </div>
+        <div style="text-align:center;padding:10px;border-radius:10px;background:color-mix(in srgb, var(--success) 6%, transparent)">
+          <div class="small" style="font-weight:700;color:var(--success)"><?= $stats['students'] > 0 ? (int)round($stats['active'] / $stats['students'] * 100) : 0 ?>%</div>
+          <div class="tiny faint">Active rate</div>
+        </div>
+        <div style="text-align:center;padding:10px;border-radius:10px;background:color-mix(in srgb, var(--warning) 6%, transparent)">
+          <div class="small" style="font-weight:700;color:var(--warning)"><?= (int)$stats['transfers'] ?></div>
+          <div class="tiny faint">Transfers</div>
+        </div>
+      </div>
     </div>
 
     <!-- Recent activity -->
-    <div class="card">
-      <h3 class="card-title" style="margin-top:0"><?= icon('clock') ?> Recent activity</h3>
-      <?php if (!$activities): ?><p class="muted small">No recent activity.</p><?php endif; ?>
-      <?php foreach ($activities as $a): ?>
-        <div class="list-row" style="padding:8px 0;align-items:flex-start">
-          <div class="small flex-1" style="overflow-wrap:anywhere"><b><?= e($a['first_name'] . ' ' . $a['last_name']) ?></b> <?= e($a['detail'] ?: $a['action']) ?></div>
-          <div class="tiny faint" style="flex-shrink:0;margin-left:8px"><?= e(date('M j H:i', strtotime($a['created_at']))) ?></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 18px 8px"><b class="small"><?= icon('clock') ?> Recent activity</b></div>
+      <?php if (!$activities): ?><p class="muted small" style="padding:0 18px 16px">No recent activity.</p><?php endif; ?>
+      <?php foreach (array_slice($activities, 0, 5) as $a): ?>
+        <div style="padding:8px 18px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.5;margin-top:6px;flex-shrink:0"></div>
+          <div style="min-width:0;flex:1">
+            <div class="tiny" style="overflow-wrap:anywhere"><b><?= e($a['first_name']) ?></b> <?= e($a['detail'] ?: $a['action']) ?></div>
+          </div>
+          <div class="tiny faint" style="flex-shrink:0;white-space:nowrap"><?= e(date('M j', strtotime($a['created_at']))) ?></div>
         </div>
       <?php endforeach; ?>
     </div>
@@ -161,7 +167,7 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const vals = document.querySelectorAll('.tstat-val');
+  const vals = document.querySelectorAll('.stat-value[data-val]');
   const t0 = performance.now();
   const dur = 700;
   const targets = Array.from(vals).map(v => parseInt(v.dataset.val, 10) || 0);
