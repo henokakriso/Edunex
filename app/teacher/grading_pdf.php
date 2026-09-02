@@ -18,10 +18,15 @@ class Ctl_grading_pdf {
             if (!$ownCourse) { http_response_code(403); exit('Access denied.'); }
         }
 
-        $school = Database::one("SELECT name FROM schools WHERE id = ?", [$u['school_id'] ?? 1]);
+        $school = Database::one("SELECT name, id FROM schools WHERE id = ?", [$u['school_id'] ?? 1]);
         $schoolName = $school['name'] ?? 'Edunex School';
+        $schoolId = (int)($school['id'] ?? 1);
         $teacher = Database::one("SELECT first_name, last_name FROM users WHERE id = ?", [$uid]);
         $teacherName = $teacher['first_name'] . ' ' . $teacher['last_name'];
+
+        // Get school director/principal
+        $director = Database::one("SELECT first_name, last_name FROM users WHERE school_id = ? AND role = 'principal' LIMIT 1", [$schoolId]);
+        $directorName = $director ? ($director['first_name'] . ' ' . $director['last_name']) : 'School Director';
 
         $html = '';
         $title = '';
@@ -30,19 +35,19 @@ class Ctl_grading_pdf {
         switch ($type) {
             case 'student':
                 $title = 'Student Result Report';
-                $html = $this->studentReport($courseId, $uid, $schoolName, $teacherName, $recordCount);
+                $html = $this->studentReport($courseId, $uid, $schoolName, $teacherName, $directorName, $recordCount);
                 break;
             case 'class':
                 $title = 'Class Result Report';
-                $html = $this->classReport($courseId, $uid, $schoolName, $teacherName, $recordCount);
+                $html = $this->classReport($courseId, $uid, $schoolName, $teacherName, $directorName, $recordCount);
                 break;
             case 'exam':
                 $title = 'Exam Results Report';
-                $html = $this->examReport($assessmentId, $uid, $schoolName, $teacherName, $recordCount);
+                $html = $this->examReport($assessmentId, $uid, $schoolName, $teacherName, $directorName, $recordCount);
                 break;
             case 'teacher':
                 $title = 'Teacher Summary Report';
-                $html = $this->teacherReport($uid, $schoolName, $teacherName, $recordCount);
+                $html = $this->teacherReport($uid, $schoolName, $teacherName, $directorName, $recordCount);
                 break;
             default:
                 exit('Invalid report type.');
@@ -132,7 +137,7 @@ class Ctl_grading_pdf {
         exit;
     }
 
-    private function studentReport(int $courseId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
+    private function studentReport(int $courseId, int $uid, string $schoolName, string $teacherName, string $directorName, int &$recordCount): string {
         $course = Database::one("SELECT id, title, code, level FROM courses WHERE id = ?", [$courseId]);
         $students = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.student_id AS sid
@@ -183,15 +188,15 @@ class Ctl_grading_pdf {
         }
 
         // Signature lines
-        $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html = '<div style="display:flex;justify-content:space-between;margin-top:40px">';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($teacherName) . '</b><br>Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($directorName) . '</b><br>Director</div>';
         $html .= '</div>';
 
         return $html;
     }
 
-    private function classReport(int $courseId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
+    private function classReport(int $courseId, int $uid, string $schoolName, string $teacherName, string $directorName, int &$recordCount): string {
         $course = Database::one("SELECT id, title, code, level FROM courses WHERE id = ?", [$courseId]);
         $students = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.student_id AS sid
@@ -260,14 +265,14 @@ class Ctl_grading_pdf {
 
         // Signature lines
         $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($teacherName) . '</b><br>Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($directorName) . '</b><br>Director</div>';
         $html .= '</div>';
 
         return $html;
     }
 
-    private function examReport(int $assessmentId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
+    private function examReport(int $assessmentId, int $uid, string $schoolName, string $teacherName, string $directorName, int &$recordCount): string {
         $assessment = Database::one(
             "SELECT a.*, ats.label AS type_label, c.title AS course_title
              FROM assessments a LEFT JOIN assessment_types ats ON ats.slug = a.type_slug
@@ -316,7 +321,7 @@ class Ctl_grading_pdf {
         return $html;
     }
 
-    private function teacherReport(int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
+    private function teacherReport(int $uid, string $schoolName, string $teacherName, string $directorName, int &$recordCount): string {
         $courses = Database::all(
             "SELECT c.id, c.title, c.code,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students
@@ -360,8 +365,8 @@ class Ctl_grading_pdf {
 
         // Signature lines
         $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
-        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($teacherName) . '</b><br>Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($directorName) . '</b><br>Director</div>';
         $html .= '</div>';
 
         return $html;
