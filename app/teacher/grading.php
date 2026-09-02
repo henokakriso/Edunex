@@ -238,7 +238,7 @@ function grading_calc_semester_for_course(int $courseId, int $semester): array {
 
 function grading_calc_final_for_course(int $courseId): array {
     $s1 = grading_calc_semester_for_course($courseId, 1);
-    $s2 = grading_calc_semester_for_course($ courseId, 2);
+    $s2 = grading_calc_semester_for_course($courseId, 2);
 
     // Get bonus per student
     $bonuses = Database::all(
