@@ -1,6 +1,7 @@
 <?php
 /**
  * Grading PDF generator — student, class, exam, teacher reports
+ * Uses formal PDF template with logo, watermark, header, footer, per-page stamps
  */
 require_once __DIR__ . '/grading.php';
 
@@ -24,76 +25,128 @@ class Ctl_grading_pdf {
 
         $html = '';
         $title = '';
+        $recordCount = 0;
 
         switch ($type) {
             case 'student':
                 $title = 'Student Result Report';
-                $html = $this->studentReport($courseId, $uid, $schoolName, $teacherName);
+                $html = $this->studentReport($courseId, $uid, $schoolName, $teacherName, $recordCount);
                 break;
             case 'class':
                 $title = 'Class Result Report';
-                $html = $this->classReport($courseId, $uid, $schoolName, $teacherName);
+                $html = $this->classReport($courseId, $uid, $schoolName, $teacherName, $recordCount);
                 break;
             case 'exam':
                 $title = 'Exam Results Report';
-                $html = $this->examReport($assessmentId, $uid, $schoolName, $teacherName);
+                $html = $this->examReport($assessmentId, $uid, $schoolName, $teacherName, $recordCount);
                 break;
             case 'teacher':
                 $title = 'Teacher Summary Report';
-                $html = $this->teacherReport($uid, $schoolName, $teacherName);
+                $html = $this->teacherReport($uid, $schoolName, $teacherName, $recordCount);
                 break;
             default:
                 exit('Invalid report type.');
         }
 
-        // Render PDF page
+        // Set PDF template variables
+        $pdf_title = $title;
+        $pdf_subtitle = $schoolName . ' — Grading System';
+        $pdf_doc_id = 'EDU-' . date('Y') . '-' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        $pdf_stamp = date('F j, Y \a\t g:i A');
+        $pdf_filename = 'grading_' . $type . '_' . date('Ymd_His') . '.pdf';
+        $pdf_record_count = $recordCount;
+        $pdf_user_name = $teacherName;
+        $pdf_orientation = 'landscape';
+
+        // Render formal PDF page
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' . e($title) . '</title>';
-        echo '<style>
-            * { margin:0; padding:0; box-sizing:border-box; }
-            body { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:11px; color:#1d1d1f; line-height:1.5; padding:20px; }
-            .header { text-align:center; border-bottom:3px solid #0071e3; padding-bottom:12px; margin-bottom:16px; }
-            .header h1 { font-size:20px; font-weight:800; color:#0071e3; letter-spacing:1px; }
-            .header h2 { font-size:13px; font-weight:600; color:#1d1d1f; margin-top:4px; }
-            .header p { font-size:10px; color:#6e6e73; }
-            table { width:100%; border-collapse:collapse; margin:12px 0; font-size:10px; }
-            th { background:#f5f5f7; border:1px solid #d2d2d7; padding:6px 8px; text-align:left; font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:.5px; color:#6e6e73; }
-            td { border:1px solid #d2d2d7; padding:5px 8px; }
-            tr:nth-child(even) { background:#fafafa; }
-            .pass { color:#34c759; font-weight:700; }
-            .fail { color:#ff3b30; font-weight:700; }
-            .stats { display:flex; gap:12px; margin:12px 0; }
-            .stat-box { flex:1; text-align:center; border:1px solid #d2d2d7; border-radius:8px; padding:10px; }
-            .stat-val { font-size:18px; font-weight:800; color:#0071e3; }
-            .stat-label { font-size:9px; color:#6e6e73; text-transform:uppercase; }
-            .footer { margin-top:20px; border-top:1px solid #d2d2d7; padding-top:10px; font-size:9px; color:#6e6e73; display:flex; justify-content:space-between; }
-            .sig-line { border-top:1px solid #1d1d1f; width:180px; margin-top:40px; padding-top:4px; font-size:9px; text-align:center; }
-            @media print { body { padding:0; } .no-print { display:none; } }
-        </style></head><body>';
-        echo $html;
-        echo '<div class="no-print" style="text-align:center;margin-top:20px">';
-        echo '<button onclick="window.print()" style="padding:10px 24px;background:#0071e3;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Print / Save as PDF</button>';
-        echo '</div>';
-        echo '</body></html>';
+        require_once BASE_PATH . '/includes/pdf_template.php';
+        ?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= e($pdf_title) ?></title>
+</head>
+<body>
+  <div class="pdf-viewer">
+    <!-- Toolbar -->
+    <div class="pdf-toolbar">
+      <button class="pdf-toolbar-btn pdf-toolbar-btn--back" onclick="history.back()">← Back</button>
+      <button class="pdf-toolbar-btn pdf-toolbar-btn--dl" onclick="downloadPDF()">⬇ Download PDF</button>
+      <button class="pdf-toolbar-btn pdf-toolbar-btn--print" onclick="window.print()">🖨 Print</button>
+      <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)"><?= e($pdf_doc_id) ?></span>
+    </div>
+
+    <!-- Paper -->
+    <div class="pdf-paper" id="pdf-content">
+      <!-- Watermark -->
+      <div class="pdf-watermark">
+        <img class="wm-logo" src="<?= $pdf_logo_black ?>" alt="EDUNEX">
+        <div class="wm-edunex">EDUNEX</div>
+        <div class="wm-url">www.henokakriso.com</div>
+      </div>
+
+      <!-- Header -->
+      <div class="pdf-header">
+        <div class="logos-row">
+          <div class="flag-wrap">
+            <img class="logo-img flag-img" src="<?= $pdf_ethiopian_flag ?>" alt="Ethiopian Flag">
+          </div>
+          <div class="text-center">
+            <h2>Federal Democratic Republic of Ethiopia</h2>
+            <div>Ministry of Education</div>
+          </div>
+          <div class="ministry-wrap">
+            <img class="logo-img" src="<?= $pdf_ministry_logo ?>" alt="Ministry Logo">
+          </div>
+        </div>
+        <div class="pdf-sub"><?= e($pdf_subtitle) ?> — <?= e($title) ?></div>
+      </div>
+
+      <!-- Meta row -->
+      <div class="pdf-meta">
+        <span>Document: <strong><?= e($pdf_doc_id) ?></strong></span>
+        <span class="meta-dot"></span>
+        <span>Generated: <strong><?= e($pdf_stamp) ?></strong></span>
+        <span class="meta-dot"></span>
+        <span>Records: <strong><?= (int)$pdf_record_count ?></strong></span>
+        <span class="meta-dot"></span>
+        <span>Generated by: <strong><?= e($pdf_user_name) ?></strong></span>
+      </div>
+
+      <!-- Report Content -->
+      <?= $html ?>
+
+      <!-- Footer -->
+      <div class="pdf-footer">
+        <span>EDUNEX LMS · henockakriso.com · ARWE-PL Licensed [<?= date('Y') ?>]</span>
+        <span><?= e($pdf_doc_id) ?></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<?php
         exit;
     }
 
-    private function studentReport(int $courseId, int $uid, string $schoolName, string $teacherName): string {
+    private function studentReport(int $courseId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
         $course = Database::one("SELECT id, title, code, level FROM courses WHERE id = ?", [$courseId]);
         $students = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.student_id AS sid
              FROM course_enrollments ce JOIN users u ON u.id = ce.user_id
              WHERE ce.course_id = ? ORDER BY u.last_name, u.first_name", [$courseId]);
 
-        $html = '<div class="header"><h1>EDUNEX — STUDENT RESULT REPORT</h1><h2>' . e($schoolName) . '</h2><p>Course: ' . e($course['title'] ?? '') . ' (' . e($course['code'] ?? '') . ')</p></div>';
-
-        $html .= '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Round 1</th><th>Round 2</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
+        $recordCount = count($students);
+        $html = '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Round 1</th><th>Round 2</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
 
         $rank = 0;
         $finals = [];
         foreach ($students as $s) {
             $f = grading_calc_final((int)$s['id'], $courseId);
-            $finals[] = ['name' => $s['last_name'] . ' ' . $s['first_name'], 'sid' => $s['sid'], 'final' => $f];
+            $finals[] = ['name' => $s['last_name'] . ', ' . $s['first_name'], 'sid' => $s['sid'], 'final' => $f];
         }
         usort($finals, fn($a, $b) => ($b['final']['adjusted'] ?? 0) <=> ($a['final']['adjusted'] ?? 0));
 
@@ -119,29 +172,33 @@ class Ctl_grading_pdf {
         $adjScores = array_filter(array_column($finals, 'final'), fn($f) => $f['adjusted'] !== null);
         $adjScores = array_column($adjScores, 'adjusted');
         if ($adjScores) {
-            $html .= '<div class="stats">';
-            $html .= '<div class="stat-box"><div class="stat-val">' . count($students) . '</div><div class="stat-label">Students</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . round(array_sum($adjScores) / count($adjScores), 1) . '</div><div class="stat-label">Average</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . max($adjScores) . '</div><div class="stat-label">Highest</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . min($adjScores) . '</div><div class="stat-label">Lowest</div></div>';
+            $html .= '<div class="pdf-stats" style="display:flex;gap:12px;margin:16px 0">';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . count($students) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Students</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . round(array_sum($adjScores) / count($adjScores), 1) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Average</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#34c759">' . max($adjScores) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Highest</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#ff3b30">' . min($adjScores) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Lowest</div></div>';
             $passRate = round(count(array_filter($finals, fn($f) => $f['final']['pass'])) / count($finals) * 100, 1);
-            $html .= '<div class="stat-box"><div class="stat-val">' . $passRate . '%</div><div class="stat-label">Pass Rate</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . $passRate . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Pass Rate</div></div>';
             $html .= '</div>';
         }
 
-        $html .= '<div class="footer"><span>Generated: ' . date('M j, Y H:i') . '</span><span>EDUNEX Grading System</span></div>';
-        $html .= '<div style="display:flex;justify-content:space-between;margin-top:30px"><div class="sig-line">Teacher</div><div class="sig-line">Director</div></div>';
+        // Signature lines
+        $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html .= '</div>';
+
         return $html;
     }
 
-    private function classReport(int $courseId, int $uid, string $schoolName, string $teacherName): string {
+    private function classReport(int $courseId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
         $course = Database::one("SELECT id, title, code, level FROM courses WHERE id = ?", [$courseId]);
         $students = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.student_id AS sid
              FROM course_enrollments ce JOIN users u ON u.id = ce.user_id
              WHERE ce.course_id = ? ORDER BY u.last_name, u.first_name", [$courseId]);
 
-        $html = '<div class="header"><h1>EDUNEX — CLASS RESULT REPORT</h1><h2>' . e($schoolName) . '</h2><p>Course: ' . e($course['title'] ?? '') . ' · Teacher: ' . e($teacherName) . '</p></div>';
+        $recordCount = count($students);
 
         // Get all assessments grouped by type
         $assessments = Database::all(
@@ -150,7 +207,7 @@ class Ctl_grading_pdf {
              WHERE a.course_id = ? AND a.status = 'published' ORDER BY ats.sort_order", [$courseId]);
 
         // Build header
-        $html .= '<table><thead><tr><th>Rank</th><th>Student</th><th>ID</th>';
+        $html = '<table><thead><tr><th>Rank</th><th>Student</th><th>ID</th>';
         foreach ($assessments as $a) {
             $html .= '<th style="font-size:8px">' . e($a['type_slug'] !== $a['title'] ? $a['type_slug'] : mb_substr($a['title'], 0, 8)) . '<br>' . (int)$a['max_mark'] . '</th>';
         }
@@ -191,28 +248,32 @@ class Ctl_grading_pdf {
         $adjScores = [];
         foreach ($allFinals as $e) { if ($e['final']['adjusted'] !== null) $adjScores[] = $e['final']['adjusted']; }
         if ($adjScores) {
-            $html .= '<div class="stats">';
-            $html .= '<div class="stat-box"><div class="stat-val">' . count($students) . '</div><div class="stat-label">Students</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . round(array_sum($adjScores) / count($adjScores), 1) . '</div><div class="stat-label">Average</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . max($adjScores) . '</div><div class="stat-label">Highest</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . min($adjScores) . '</div><div class="stat-label">Lowest</div></div>';
+            $html .= '<div style="display:flex;gap:12px;margin:16px 0">';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . count($students) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Students</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . round(array_sum($adjScores) / count($adjScores), 1) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Average</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#34c759">' . max($adjScores) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Highest</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#ff3b30">' . min($adjScores) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Lowest</div></div>';
             $passRate = round(count(array_filter($allFinals, fn($e) => $e['final']['pass'])) / count($allFinals) * 100, 1);
-            $html .= '<div class="stat-box"><div class="stat-val">' . $passRate . '%</div><div class="stat-label">Pass Rate</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . $passRate . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Pass Rate</div></div>';
             $html .= '</div>';
         }
 
-        $html .= '<div class="footer"><span>Generated: ' . date('M j, Y H:i') . '</span><span>EDUNEX Grading System</span></div>';
-        $html .= '<div style="display:flex;justify-content:space-between;margin-top:30px"><div class="sig-line">Teacher</div><div class="sig-line">Director</div></div>';
+        // Signature lines
+        $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html .= '</div>';
+
         return $html;
     }
 
-    private function examReport(int $assessmentId, int $uid, string $schoolName, string $teacherName): string {
+    private function examReport(int $assessmentId, int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
         $assessment = Database::one(
             "SELECT a.*, ats.label AS type_label, c.title AS course_title
              FROM assessments a LEFT JOIN assessment_types ats ON ats.slug = a.type_slug
              JOIN courses c ON c.id = a.course_id
              WHERE a.id = ? AND a.teacher_id = ?", [$assessmentId, $uid]);
-        if (!$assessment) return '<p>Assessment not found.</p>';
+        if (!$assessment) { $recordCount = 0; return '<p>Assessment not found.</p>'; }
 
         $grades = Database::all(
             "SELECT g.*, u.first_name, u.last_name, u.student_id AS sid
@@ -220,9 +281,9 @@ class Ctl_grading_pdf {
              WHERE g.assessment_id = ?
              ORDER BY g.mark DESC", [$assessmentId]);
 
-        $html = '<div class="header"><h1>EDUNEX — EXAM RESULTS</h1><h2>' . e($assessment['title']) . '</h2><p>' . e($assessment['type_label'] ?? $assessment['type_slug']) . ' · ' . e($assessment['course_title']) . ' · Max: ' . (int)$assessment['max_mark'] . '</p></div>';
+        $recordCount = count($grades);
 
-        $html .= '<table><thead><tr><th>Rank</th><th>Student</th><th>ID</th><th>Mark</th><th>Out Of</th><th>Percentage</th><th>Grade</th></tr></thead><tbody>';
+        $html = '<table><thead><tr><th>Rank</th><th>Student</th><th>ID</th><th>Mark</th><th>Out Of</th><th>Percentage</th><th>Grade</th></tr></thead><tbody>';
 
         $rank = 0;
         foreach ($grades as $g) {
@@ -242,33 +303,31 @@ class Ctl_grading_pdf {
 
         $pcts = array_filter(array_column($grades, 'percentage'), fn($p) => $p !== null);
         if ($pcts) {
-            $html .= '<div class="stats">';
-            $html .= '<div class="stat-box"><div class="stat-val">' . count($grades) . '</div><div class="stat-label">Students</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . round(array_sum($pcts) / count($pcts), 1) . '%</div><div class="stat-label">Average</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . max($pcts) . '%</div><div class="stat-label">Highest</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . min($pcts) . '%</div><div class="stat-label">Lowest</div></div>';
+            $html .= '<div style="display:flex;gap:12px;margin:16px 0">';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . count($grades) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Students</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . round(array_sum($pcts) / count($pcts), 1) . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Average</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#34c759">' . max($pcts) . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Highest</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#ff3b30">' . min($pcts) . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Lowest</div></div>';
             $passRate = round(count(array_filter($pcts, fn($p) => $p >= 50)) / count($pcts) * 100, 1);
-            $html .= '<div class="stat-box"><div class="stat-val">' . $passRate . '%</div><div class="stat-label">Pass Rate</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . $passRate . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Pass Rate</div></div>';
             $html .= '</div>';
         }
 
-        $html .= '<div class="footer"><span>Generated: ' . date('M j, Y H:i') . '</span><span>EDUNEX Grading System</span></div>';
         return $html;
     }
 
-    private function teacherReport(int $uid, string $schoolName, string $teacherName): string {
+    private function teacherReport(int $uid, string $schoolName, string $teacherName, int &$recordCount): string {
         $courses = Database::all(
             "SELECT c.id, c.title, c.code,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students
              FROM courses c WHERE c.teacher_id = ? AND c.status = 'published' ORDER BY c.title", [$uid]);
 
-        $html = '<div class="header"><h1>EDUNEX — TEACHER SUMMARY</h1><h2>' . e($schoolName) . '</h2><p>Teacher: ' . e($teacherName) . '</p></div>';
-
+        $recordCount = count($courses);
         $totalStudents = 0;
         $allAvgs = [];
         $allPassRates = [];
 
-        $html .= '<table><thead><tr><th>Course</th><th>Code</th><th>Students</th><th>Avg Score</th><th>Pass Rate</th><th>Assessments</th></tr></thead><tbody>';
+        $html = '<table><thead><tr><th>Course</th><th>Code</th><th>Students</th><th>Avg Score</th><th>Pass Rate</th><th>Assessments</th></tr></thead><tbody>';
 
         foreach ($courses as $c) {
             $assessCount = (int)Database::scalar("SELECT COUNT(*) FROM assessments WHERE course_id = ? AND status = 'published'", [$c['id']], 0);
@@ -291,16 +350,20 @@ class Ctl_grading_pdf {
         $html .= '</tbody></table>';
 
         if ($allAvgs) {
-            $html .= '<div class="stats">';
-            $html .= '<div class="stat-box"><div class="stat-val">' . count($courses) . '</div><div class="stat-label">Courses</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . $totalStudents . '</div><div class="stat-label">Total Students</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . round(array_sum($allAvgs) / count($allAvgs), 1) . '%</div><div class="stat-label">Overall Average</div></div>';
-            $html .= '<div class="stat-box"><div class="stat-val">' . round(array_sum($allPassRates) / count($allPassRates), 1) . '%</div><div class="stat-label">Avg Pass Rate</div></div>';
+            $html .= '<div style="display:flex;gap:12px;margin:16px 0">';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . count($courses) . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Courses</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . $totalStudents . '</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Total Students</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . round(array_sum($allAvgs) / count($allAvgs), 1) . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Overall Average</div></div>';
+            $html .= '<div style="flex:1;text-align:center;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--accent)">' . round(array_sum($allPassRates) / count($allPassRates), 1) . '%</div><div style="font-size:9px;color:var(--text-secondary);text-transform:uppercase">Avg Pass Rate</div></div>';
             $html .= '</div>';
         }
 
-        $html .= '<div class="footer"><span>Generated: ' . date('M j, Y H:i') . '</span><span>EDUNEX Grading System</span></div>';
-        $html .= '<div style="display:flex;justify-content:space-between;margin-top:30px"><div class="sig-line">Teacher</div><div class="sig-line">Director</div></div>';
+        // Signature lines
+        $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Teacher</div>';
+        $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center">Director</div>';
+        $html .= '</div>';
+
         return $html;
     }
 }
