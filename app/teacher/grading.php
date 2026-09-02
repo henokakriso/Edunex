@@ -177,9 +177,8 @@ class Ctl_grading {
             }
             $finalStats = grading_calc_final_for_course($selectedCourse);
 
-            // Calculate course-wide remaining marks for semester
-            $courseTotalUsed = course_used_marks($selectedCourse);
-            $courseTotalRemaining = max(0, 100 - $courseTotalUsed);
+            // Calculate per-semester remaining marks
+            $semesterUsedMarks = course_used_marks($selectedCourse);
         }
 
         // Assessment types for creation
@@ -194,8 +193,7 @@ class Ctl_grading {
             'semesterStats' => $semesterStats,
             'finalStats' => $finalStats,
             'types' => $types,
-            'courseTotalUsed' => $courseTotalUsed,
-            'courseTotalRemaining' => $courseTotalRemaining,
+            'semesterUsedMarks' => $semesterUsedMarks ?? [1 => 0, 2 => 0],
         ]);
     }
 }
@@ -287,19 +285,20 @@ function grading_calc_final_for_course(int $courseId): array {
     ];
 }
 
-function course_used_marks(int $courseId): float {
+function course_used_marks(int $courseId): array {
     $rows = Database::all(
-        "SELECT a.type_slug, MAX(a.max_mark) AS max_mark
+        "SELECT a.type_slug, a.semester, MAX(a.max_mark) AS max_mark
          FROM assessments a WHERE a.course_id = ? AND a.status = 'published'
-         GROUP BY a.type_slug", [$courseId]);
-    $total = 0;
+         AND a.type_slug IN ('r1','r2','r3','r4')
+         GROUP BY a.type_slug, a.semester", [$courseId]);
+    $used = [1 => 0, 2 => 0];
     foreach ($rows as $r) {
-        $slug = $r['type_slug'];
-        if (in_array($slug, ['r1','r2','r3','r4'])) {
-            $total += (float)$r['max_mark'];
+        $sem = (int)($r['semester'] ?? 0);
+        if ($sem >= 1 && $sem <= 2) {
+            $used[$sem] += (float)$r['max_mark'];
         }
     }
-    return min(100, $total);
+    return $used;
 }
 
 /* =============== GRADING: Gradebook for a specific assessment =============== */

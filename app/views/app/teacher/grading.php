@@ -31,24 +31,19 @@
 <?php if ($selectedCourse && $assessments): ?>
 <!-- Semester Remaining Marks -->
 <div class="card" style="margin-bottom:18px">
-  <h4 class="card-title" style="margin-top:0">Semester Marks Used</h4>
+  <h4 class="card-title" style="margin-top:0">Semester Marks Budget</h4>
   <div style="display:flex;gap:16px">
-    <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
-      <div class="tiny faint">Semester 1</div>
-      <div style="font-size:22px;font-weight:800;color:<?= $courseTotalUsed >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= (int)$courseTotalUsed ?>/100</div>
-      <div class="tiny faint"><?= max(0, 100 - (int)$courseTotalUsed) ?> remaining</div>
-      <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">
-        <div style="height:100%;width:<?= min(100, (int)$courseTotalUsed) ?>%;background:<?= $courseTotalUsed >= 100 ? 'var(--danger)' : 'var(--accent)' ?>;border-radius:3px"></div>
+    <?php for ($sem = 1; $sem <= 2; $sem++): ?>
+      <?php $used = (int)($semesterUsedMarks[$sem] ?? 0); $remaining = max(0, 100 - $used); ?>
+      <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
+        <div class="tiny faint">Semester <?= $sem ?></div>
+        <div style="font-size:22px;font-weight:800;color:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= $used ?>/100</div>
+        <div class="tiny faint"><?= $remaining ?> remaining</div>
+        <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">
+          <div style="height:100%;width:<?= min(100, $used) ?>%;background:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>;border-radius:3px"></div>
+        </div>
       </div>
-    </div>
-    <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
-      <div class="tiny faint">Semester 2</div>
-      <div style="font-size:22px;font-weight:800;color:<?= $courseTotalUsed >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= (int)$courseTotalUsed ?>/100</div>
-      <div class="tiny faint"><?= max(0, 100 - (int)$courseTotalUsed) ?> remaining</div>
-      <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">
-        <div style="height:100%;width:<?= min(100, (int)$courseTotalUsed) ?>%;background:<?= $courseTotalUsed >= 100 ? 'var(--danger)' : 'var(--accent)' ?>;border-radius:3px"></div>
-      </div>
-    </div>
+    <?php endfor; ?>
   </div>
 </div>
 
