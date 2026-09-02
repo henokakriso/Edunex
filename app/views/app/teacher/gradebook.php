@@ -13,7 +13,7 @@
 <div class="card" style="margin-bottom:14px;padding:12px 18px">
   <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
     <?php if ($assessment['semester']): ?>
-    <span class="small" style="font-weight:600">Round <?= e($assessment['semester']) ?>:</span>
+    <span class="small" style="font-weight:600">Round <?= e($assessment['semester']) ?> Budget:</span>
     <span class="small"><?= (int)$semesterUsed ?>/100 marks used</span>
     <div style="flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;min-width:100px">
       <div style="height:100%;width:<?= min(100, (int)$semesterUsed) ?>%;background:var(--accent);border-radius:3px"></div>
