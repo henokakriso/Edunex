@@ -18,7 +18,7 @@
   <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
     <div style="flex:1;min-width:240px">
       <label class="small faint" style="display:block;margin-bottom:6px;font-weight:600">My Courses</label>
-      <select class="input" id="course-select" onchange="window.location.href='<?= e(url('teacher/grading')) ?>?course='+this.value" style="width:100%">
+      <select class="input" id="course-select" onchange="window.location.href='<?= e(url('teacher/grading')) ?>&course='+this.value" style="width:100%">
         <option value="">— Select Course —</option>
         <?php foreach ($courses as $c): ?>
           <option value="<?= (int)$c['id'] ?>" <?= $selectedCourse == $c['id'] ? 'selected' : '' ?>><?= e($c['title']) ?> (<?= (int)$c['students'] ?> students)</option>
