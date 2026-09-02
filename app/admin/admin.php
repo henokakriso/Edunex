@@ -1263,27 +1263,22 @@ class Ctl_courses {
         $u = require_role('ministry');
         $region = trim($_GET['region'] ?? '');
         $zone = trim($_GET['zone'] ?? '');
-        $type = trim($_GET['type'] ?? '');
-        $schoolId = (int)($_GET['school'] ?? 0);
-        $sort = $_GET['sort'] ?? 'created_at';
-        $dir = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
-        $sortMap = ['name' => 'c.title', 'school' => 's.name', 'teacher' => 'u.last_name', 'students' => 'students', 'lessons' => 'lessons', 'status' => 'c.status', 'created_at' => 'c.created_at'];
-        if (!isset($sortMap[$sort])) $sort = 'created_at';
-        $orderBy = $sortMap[$sort] . ' ' . $dir . ', c.id DESC';
+        $q = trim($_GET['q'] ?? '');
 
         $schools = Database::all("SELECT id, name, type, region, zone_id FROM schools WHERE status = 'active' ORDER BY type, region, name");
+
+        // Filter schools by region/zone
         $filteredSchools = $schools;
         if ($region) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['region'] ?: 'Other') === $region));
         if ($zone) {
             $zoneIds = array_column(Database::all("SELECT id FROM zones WHERE name = ?", [$zone]), 'id');
             $filteredSchools = $zoneIds ? array_values(array_filter($filteredSchools, fn($s) => in_array((int)($s['zone_id'] ?? 0), $zoneIds))) : [];
         }
-        if ($type) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => ($s['type'] ?: 'school') === $type));
-        if ($schoolId) $filteredSchools = array_values(array_filter($filteredSchools, fn($s) => (int)$s['id'] === $schoolId));
 
         $schoolIds = array_column($filteredSchools, 'id');
-        $hasFilter = $region || $zone || $type || $schoolId;
+        $hasFilter = $region || $zone;
 
+        // Build query
         $where = "1=1";
         $args = [];
         if (!$hasFilter) {
@@ -1296,12 +1291,49 @@ class Ctl_courses {
             $where .= " AND 1=0";
         }
 
+        if ($q !== '') {
+            $where .= " AND (c.title LIKE ? OR c.code LIKE ?)";
+            $args[] = "%$q%";
+            $args[] = "%$q%";
+        }
+
         $courses = Database::all(
-            "SELECT c.*, s.name AS school_name, u.first_name AS tfirst, u.last_name AS tlast,
+            "SELECT c.*, s.name AS school_name, s.region, z.name AS zone_name,
+                    u.first_name AS tfirst, u.last_name AS tlast,
                     (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students,
                     (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) AS lessons
-             FROM courses c JOIN schools s ON s.id = c.school_id JOIN users u ON u.id = c.teacher_id
-             WHERE $where ORDER BY $orderBy", $args);
+             FROM courses c
+             JOIN schools s ON s.id = c.school_id
+             LEFT JOIN zones z ON z.id = s.zone_id
+             JOIN users u ON u.id = c.teacher_id
+             WHERE c.status = 'published' AND $where
+             ORDER BY c.title", $args);
+
+        // Build courseTeachers: [course_id => [zone => [woreda => [teachers]]]]
+        $courseTeachers = [];
+        $courseIds = array_column($courses, 'id');
+        if ($courseIds) {
+            $cp = implode(',', array_fill(0, count($courseIds), '?'));
+            $allTeachers = Database::all(
+                "SELECT ct.course_id, u.first_name, u.last_name, u.id AS uid, s.name AS school_name,
+                        s.region, z.name AS zone_name, w.name AS woreda_name
+                 FROM course_teachers ct
+                 JOIN users u ON u.id = ct.teacher_id
+                 JOIN schools s ON s.id = u.school_id
+                 LEFT JOIN zones z ON z.id = s.zone_id
+                 LEFT JOIN woredas w ON w.id = s.woreda_id
+                 WHERE ct.course_id IN ($cp) ORDER BY z.name, w.name, u.last_name", $courseIds);
+            foreach ($allTeachers as $t) {
+                $cid = (int)$t['course_id'];
+                $zn = $t['zone_name'] ?: 'Other';
+                $wn = $t['woreda_name'] ?: 'Other';
+                $courseTeachers[$cid][$zn][$wn][] = [
+                    'name' => $t['first_name'] . ' ' . $t['last_name'],
+                    'school_name' => $t['school_name'],
+                    'role' => 'teacher',
+                ];
+            }
+        }
 
         $regions = array_values(array_unique(array_map(fn($s) => $s['region'] ?: 'Other', $schools)));
         sort($regions);
@@ -1310,16 +1342,12 @@ class Ctl_courses {
             $regionObj = Database::one("SELECT id FROM regions WHERE name = ?", [$region]);
             if ($regionObj) $allZones = array_column(Database::all("SELECT name FROM zones WHERE region_id = ? ORDER BY name", [(int)$regionObj['id']]), 'name');
         }
-        $types = array_values(array_unique(array_map(fn($s) => $s['type'] ?: 'school', $filteredSchools)));
-        usort($types, fn($a, $b) => array_search($a, ['university','college','school','training','other']) - array_search($b, ['university','college','school','training','other']));
-
-        $pager = fn(int $p): string => url('admin/courses?' . http_build_query(array_filter(['region'=>$region,'zone'=>$zone,'type'=>$type,'school'=>$schoolId,'sort'=>$sort,'dir'=>$dir,'page'=>$p], fn($x) => $x !== '')));
 
         Router::render('app/admin/courses', [
-            'title' => 'All Courses', 'courses' => $courses, 'schools' => $schools,
-            'region' => $region, 'zone' => $zone, 'type' => $type, 'schoolId' => $schoolId,
-            'regions' => $regions, 'allZones' => $allZones, 'types' => $types,
-            'sort' => $sort, 'dir' => $dir, 'pager' => $pager,
+            'title' => 'Course Catalog', 'courses' => $courses, 'schools' => $schools,
+            'region' => $region, 'zone' => $zone, 'q' => $q,
+            'regions' => $regions, 'allZones' => $allZones,
+            'courseTeachers' => $courseTeachers,
         ]);
     }
 }
