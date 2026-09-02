@@ -383,13 +383,16 @@ class Ctl_gradebook {
 
         // Remaining marks for semester
         $semester = $assessment['semester'] ?? null;
-        $typeSlugs = $semester === 1 ? "('r1','r2')" : ($semester === 2 ? "('r3','r4')" : "('r1','r2','r3','r4')");
-        $semesterMax = Database::all(
-            "SELECT a.type_slug, a.max_mark FROM assessments a
-             WHERE a.course_id = ? AND a.type_slug IN $typeSlugs AND a.status = 'published'", [$assessment['cid']]);
         $semesterUsed = 0;
-        foreach ($semesterMax as $sm) $semesterUsed += (float)$sm['max_mark'];
-        $semesterRemaining = max(0, 100 - $semesterUsed);
+        $semesterRemaining = 0;
+        if ($semester === 1 || $semester === 2) {
+            $typeSlugs = $semester === 1 ? "('r1','r2')" : "('r3','r4')";
+            $semesterMax = Database::all(
+                "SELECT a.type_slug, a.max_mark FROM assessments a
+                 WHERE a.course_id = ? AND a.type_slug IN $typeSlugs AND a.status = 'published'", [$assessment['cid']]);
+            foreach ($semesterMax as $sm) $semesterUsed += (float)$sm['max_mark'];
+            $semesterRemaining = max(0, 100 - $semesterUsed);
+        }
 
         Router::render('app/teacher/gradebook', [
             'title' => 'Gradebook — ' . $assessment['title'],
@@ -436,6 +439,7 @@ class Ctl_assessment_new {
 
             if ($title === '') { flash('danger', 'Title required.'); redirect('teacher/assessment/new&course=' . $courseId); }
             if ($maxMark <= 0 || $maxMark > 100) { flash('danger', 'Maximum mark must be between 1 and 100.'); redirect('teacher/assessment/new&course=' . $courseId); }
+            if ($semester < 1 || $semester > 2) { flash('danger', 'Semester required.'); redirect('teacher/assessment/new&course=' . $courseId); }
 
             // Check round max marks
             $typeRow = Database::one("SELECT * FROM assessment_types WHERE slug = ?", [$typeSlug]);

@@ -46,11 +46,11 @@
       </div>
 
       <div class="flex-col">
-        <label class="small faint" style="font-weight:600">Semester</label>
-        <select class="input" name="semester" id="semester-select">
-          <option value="0">Auto-detect from type</option>
-          <option value="1">Semester 1</option>
-          <option value="2">Semester 2</option>
+        <label class="small faint" style="font-weight:600">Semester *</label>
+        <select class="input" name="semester" id="semester-select" required>
+          <option value="">— Select Semester —</option>
+          <option value="1">Semester 1 (R1 + R2)</option>
+          <option value="2">Semester 2 (R3 + R4)</option>
         </select>
       </div>
 

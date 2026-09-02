@@ -12,12 +12,16 @@
 <!-- Semester remaining info -->
 <div class="card" style="margin-bottom:14px;padding:12px 18px">
   <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <span class="small" style="font-weight:600">Semester <?= e($assessment['semester'] ?? '—') ?>:</span>
+    <?php if ($assessment['semester']): ?>
+    <span class="small" style="font-weight:600">Semester <?= e($assessment['semester']) ?>:</span>
     <span class="small"><?= (int)$semesterUsed ?>/100 marks used</span>
     <div style="flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;min-width:100px">
       <div style="height:100%;width:<?= min(100, (int)$semesterUsed) ?>%;background:var(--accent);border-radius:3px"></div>
     </div>
     <span class="small" style="font-weight:600;color:<?= $semesterRemaining > 0 ? 'var(--success)' : 'var(--danger)' ?>"><?= (int)$semesterRemaining ?> remaining</span>
+    <?php else: ?>
+    <span class="small faint">Non-round assessment — not counted toward semester budget</span>
+    <?php endif; ?>
   </div>
 </div>
 
@@ -49,7 +53,6 @@
           <th style="width:220px">Student</th>
           <th style="width:120px">Student ID</th>
           <th style="width:120px;text-align:center">Mark (out of <?= (int)$assessment['max_mark'] ?>)</th>
-          <th style="width:90px;text-align:center">Percentage</th>
           <th style="width:70px;text-align:center">Grade</th>
           <th style="width:90px">Status</th>
         </tr>
@@ -70,11 +73,6 @@
                        class="input" style="width:90px;text-align:center;margin:0 auto;display:block"
                        oninput="calcPct(this, <?= (int)$assessment['max_mark'] ?>)">
               <?php endif; ?>
-            </td>
-            <td style="text-align:center">
-              <span class="pct-display small" data-student="<?= (int)$s['id'] ?>" style="font-weight:600">
-                <?= $s['percentage'] !== null ? e($s['percentage']) . '%' : '—' ?>
-              </span>
             </td>
             <td style="text-align:center">
               <span class="grade-display" data-student="<?= (int)$s['id'] ?>" style="font-weight:700;color:<?= ($s['percentage'] ?? 0) >= 50 ? 'var(--success)' : 'var(--danger)' ?>">
@@ -138,16 +136,13 @@
 function calcPct(input, maxMark) {
   const row = input.closest('tr');
   const val = parseFloat(input.value);
-  const pctEl = row.querySelector('.pct-display');
   const gradeEl = row.querySelector('.grade-display');
   if (isNaN(val) || val < 0 || input.value === '') {
-    pctEl.textContent = '—';
     gradeEl.textContent = '—';
     gradeEl.style.color = '';
     return;
   }
   const pct = Math.round((val / maxMark) * 10000) / 100;
-  pctEl.textContent = pct + '%';
   let letter = 'F';
   if (pct >= 90) letter = 'A+';
   else if (pct >= 80) letter = 'A';
