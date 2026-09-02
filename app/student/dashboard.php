@@ -52,7 +52,7 @@ class Ctl_student_dashboard {
             "SELECT b.*, ub.earned_at FROM user_badges ub JOIN badges b ON b.id = ub.badge_id WHERE ub.user_id = ? $dfBadge ORDER BY ub.earned_at DESC LIMIT 6", [$uid]);
 
         $schedule = Database::all(
-            "SELECT * FROM calendar_events WHERE (user_id = ? OR user_id IS NULL AND school_id = ?) AND DATE(start_at) = CURDATE() ORDER BY start_at", [$uid, $u['school_id']]);
+            "SELECT * FROM calendar_events WHERE (scope_type = 'school' AND scope_id = ? OR scope_type = 'national') AND DATE(gregorian_start) = CURDATE() ORDER BY gregorian_start", [$u['school_id']]);
 
         $goals = Database::all("SELECT * FROM goals WHERE user_id = ? AND completed = 0 LIMIT 3", [$uid]);
 
