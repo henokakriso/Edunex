@@ -35,23 +35,23 @@
           <td><span class="badge <?= $r['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>"><?= e($r['status']) ?></span></td>
           <td>
             <div class="eo-actions">
-              <form method="post" class="inline">
+              <form method="post" class="inline" action="<?= e(url('admin/override')) ?>">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
                 <button class="btn btn-xs btn-ghost" name="unlock" value="1" title="Unlock account"><?= icon('unlock') ?></button>
               </form>
-              <form method="post" class="inline">
+              <form method="post" class="inline" action="<?= e(url('admin/override')) ?>">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
                 <input type="hidden" name="password" value="">
                 <button class="btn btn-xs btn-ghost" name="reset_password" value="1" title="Reset password" onclick="var p=prompt('New password (leave empty for random):');this.form.password.value=p||''"><?= icon('key') ?></button>
               </form>
-              <form method="post" class="inline">
+              <form method="post" class="inline" action="<?= e(url('admin/override')) ?>">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
                 <button class="btn btn-xs btn-ghost" name="revoke_sessions" value="1" title="Revoke all sessions" onclick="return confirm('Revoke ALL sessions for this user?')"><?= icon('close') ?></button>
               </form>
-              <form method="post" class="inline">
+              <form method="post" class="inline" action="<?= e(url('admin/override')) ?>">
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_id" value="<?= (int)$r['id'] ?>">
                 <button class="btn btn-xs btn-danger" name="impersonate" value="1" title="Impersonate user" onclick="return confirm('Impersonate this user? This is logged.')"><?= icon('user') ?></button>
