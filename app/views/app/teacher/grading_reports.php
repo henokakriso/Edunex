@@ -118,19 +118,19 @@ async function loadAssessments(courseId) {
 function generateStudentReport() {
   const courseId = document.querySelector('#student-report-form [name=course]').value;
   if (!courseId) { alert('Select a course'); return; }
-  window.open('<?= url('teacher/grading/pdf') ?>?type=student&course=' + courseId, '_blank');
+  window.open('<?= url('teacher/grading/pdf') ?>&type=student&course=' + courseId, '_blank');
 }
 function generateClassReport() {
   const courseId = document.querySelector('#class-report-form [name=course]').value;
   if (!courseId) { alert('Select a course'); return; }
-  window.open('<?= url('teacher/grading/pdf') ?>?type=class&course=' + courseId, '_blank');
+  window.open('<?= url('teacher/grading/pdf') ?>&type=class&course=' + courseId, '_blank');
 }
 function generateExamReport() {
   const assessmentId = document.querySelector('#exam-report-form [name=assessment]').value;
   if (!assessmentId) { alert('Select an assessment'); return; }
-  window.open('<?= url('teacher/grading/pdf') ?>?type=exam&id=' + assessmentId, '_blank');
+  window.open('<?= url('teacher/grading/pdf') ?>&type=exam&id=' + assessmentId, '_blank');
 }
 function generateTeacherReport() {
-  window.open('<?= url('teacher/grading/pdf') ?>?type=teacher', '_blank');
+  window.open('<?= url('teacher/grading/pdf') ?>&type=teacher', '_blank');
 }
 </script>
