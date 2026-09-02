@@ -188,7 +188,7 @@ class Ctl_grading_pdf {
         }
 
         // Signature lines
-        $html = '<div style="display:flex;justify-content:space-between;margin-top:40px">';
+        $html .= '<div style="display:flex;justify-content:space-between;margin-top:40px">';
         $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($teacherName) . '</b><br>Teacher</div>';
         $html .= '<div style="border-top:1px solid #1d1d1f;width:180px;padding-top:4px;font-size:9px;text-align:center"><b>' . e($directorName) . '</b><br>Director</div>';
         $html .= '</div>';
