@@ -56,7 +56,8 @@
         <span style="font-size:18px"><?= icon(in_array($a['type_slug'], ['r1','r2','r3','r4']) ? 'doc' : ($a['type_slug'] === 'quiz' ? 'spark' : 'file')) ?></span>
         <div style="flex:1;min-width:0">
           <div style="font-weight:600;font-size:13.5px"><?= e($a['title']) ?></div>
-          <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · Max: <?= (int)$a['max_mark'] ?> · <?= e($a['assessment_date'] ?? '—') ?></div>
+          <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · Max: <span id="max-mark-<?= (int)$a['id'] ?>"><?= (int)$a['max_mark'] ?></span> · <?= e($a['assessment_date'] ?? '—') ?></div>
+          <button type="button" class="btn-link tiny" onclick="editMaxMark(<?= (int)$a['id'] ?>, <?= (int)$a['max_mark'] ?>)" style="color:var(--accent);background:none;border:none;cursor:pointer;padding:0;font-size:11px">edit out of</button>
         </div>
         <div style="text-align:right">
           <div class="small" style="font-weight:600"><?= (int)$a['graded_count'] ?>/<?= (int)$a['total_grades'] ?> graded</div>
@@ -108,3 +109,55 @@
   <p class="small" style="color:var(--muted)">No courses assigned to you yet.</p>
 </div>
 <?php endif; ?>
+
+<!-- Edit Max Mark Modal -->
+<div id="edit-max-modal" style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center" onclick="if(event.target===this)closeMaxModal()">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:340px;max-width:90vw">
+    <h4 style="margin:0 0 12px;font-size:15px">Edit Max Mark</h4>
+    <input type="number" id="new-max-mark" min="1" max="100" class="input" style="width:100%;margin-bottom:6px">
+    <div id="max-mark-remaining" class="tiny faint" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeMaxModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMaxMark()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let _editAssessId = null;
+let _editSemester = 0;
+let _editCourseId = <?= (int)($selectedCourse ?? 0) ?>;
+
+function editMaxMark(id, current) {
+  _editAssessId = id;
+  document.getElementById('new-max-mark').value = current;
+  document.getElementById('edit-max-modal').style.display = 'flex';
+  // Get semester info
+  const m = document.querySelector('[data-assess-id="'+id+'"]');
+  document.getElementById('new-max-mark').focus();
+}
+
+function closeMaxModal() {
+  document.getElementById('edit-max-modal').style.display = 'none';
+  _editAssessId = null;
+}
+
+function saveMaxMark() {
+  const val = parseInt(document.getElementById('new-max-mark').value);
+  if (!val || val < 1 || val > 100) { alert('Must be 1-100'); return; }
+  fetch('<?= url('api/grading_max_mark') ?>', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'assessment_id=' + _editAssessId + '&max_mark=' + val + '&_csrf=<?= e(csrf_token()) ?>'
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      document.getElementById('max-mark-' + _editAssessId).textContent = val;
+      closeMaxModal();
+      if (d.warning) alert(d.warning);
+      location.reload();
+    } else {
+      alert(d.error || 'Failed');
+    }
+  }).catch(() => alert('Network error'));
+}
+</script>

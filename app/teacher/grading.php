@@ -23,7 +23,7 @@ function grading_pass(float $pct, float $pass = 50): bool {
 
 /* =============== HELPER: Calculate semester total for student/course =============== */
 function grading_calc_semester(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
-    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('submitted','verified','published','locked')";
+    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
     $args = [$studentId, $courseId];
     if ($academicYearId) { $where .= " AND a.academic_year_id = ?"; $args[] = $academicYearId; }
 
