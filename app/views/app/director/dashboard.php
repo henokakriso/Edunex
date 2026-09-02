@@ -5,6 +5,20 @@ $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good
 $maxWeek = max(1, max(array_column($weeks, 'count')));
 $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => 'var(--info)', 'ok' => 'var(--success)'];
 ?>
+<style>
+  .dir-dash { font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; color: #1d1d1f; }
+  .dir-dash h1 { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 700; letter-spacing: -.025em; color: #1d1d1f; font-size: 1.6rem; }
+  .dir-dash h3, .dir-dash .card-title { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 600; letter-spacing: -.02em; color: #1d1d1f; }
+  .dir-dash .stat-value { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; font-weight: 800; letter-spacing: -.03em; color: #1d1d1f; font-size: 1.7rem; }
+  .dir-dash .small, .dir-dash .tiny { color: #6e6e73; }
+  .dir-dash b { color: #1d1d1f; }
+  .dir-dash .card { border-radius: 16px; }
+  @media (prefers-color-scheme: dark) {
+    .dir-dash, .dir-dash h1, .dir-dash h3, .dir-dash .card-title, .dir-dash b { color: #f5f5f7; }
+    .dir-dash .small, .dir-dash .tiny { color: #86868b; }
+  }
+</style>
+<div class="dir-dash">
 <div class="page-head">
   <div>
     <h1><?= $greeting ?>, <?= e($u['first_name']) ?> <?= icon('hand') ?></h1>
@@ -92,7 +106,7 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
     </div>
   </div>
 
-  <div class="flex-col gap-20" style="position:sticky;top:84px">
+  <div class="flex-col gap-20">
 
     <!-- Today's focus -->
     <div class="card">
@@ -163,6 +177,7 @@ $todoCls = ['accent' => 'var(--accent)', 'warn' => 'var(--warning)', 'info' => '
       <?php endforeach; ?>
     </div>
   </div>
+</div>
 </div>
 
 <script>
