@@ -209,38 +209,35 @@
 
 <style>
 .teacher-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
-.tcard { display:flex; flex-direction:column; gap:14px; padding:20px; border-radius:18px; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.tcard:hover { transform:translateY(-3px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.25), 0 8px 32px rgba(0,0,0,.08); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border-color:transparent; }
-.thead { display:flex; gap:14px; align-items:flex-start; }
-.tavatar { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:#fff; flex:none; }
-.thead-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.tcard { display:flex; flex-direction:column; gap:12px; padding:20px; border-radius:16px; background:var(--bg-elev); border:1px solid var(--border); transition:transform .18s ease, box-shadow .18s ease; }
+.tcard:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,.06); }
+.thead { display:flex; gap:12px; align-items:flex-start; }
+.tavatar { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; flex:none; }
+.thead-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
 .thead-top { display:flex; align-items:center; gap:8px; min-width:0; }
-.tname { font-size:15px; font-weight:700; letter-spacing:-.15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.temail { font-size:12.5px; color:var(--text-dim); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.temail:hover { color:var(--accent); text-decoration:underline; }
-.tlogin { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-faint); margin:0; }
-.tlogin .ico { width:12px; height:12px; }
-.tmetrics { display:flex; align-items:center; padding:12px 0; margin-top:8px; }
-.tm { flex:1; display:flex; align-items:center; gap:7px; font-size:12.5px; }
-.tm + .tm { border-left:1px dashed var(--border); padding-left:16px; }
-.tm .ico { width:15px; height:15px; color:var(--text-faint); flex:none; }
-.tm b { color:var(--text); font-size:15px; line-height:1; }
-.tm span { font-size:12px; color:var(--text-faint); }
-.tchips { display:flex; flex-wrap:wrap; gap:7px; min-height:26px; align-items:center; }
-.tchip { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:600; }
-.tchip-none { display:inline-flex; align-items:center; gap:6px; border:1px dashed var(--border); color:var(--text-faint); border-radius:999px; padding:4px 12px; font-size:12px; }
-.tchip-none .ico { width:13px; height:13px; }
-.tactions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding-top:13px; margin-top:auto; }
+.tname { font-size:14.5px; font-weight:700; letter-spacing:-.01em; color:var(--text); }
+.temail { font-size:12px; color:var(--text-dim); text-decoration:none; }
+.temail:hover { color:var(--accent); }
+.tlogin { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-faint); margin:0; }
+.tmetrics { display:flex; align-items:center; padding:10px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.tm { flex:1; display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text); }
+.tm + .tm { border-left:1px solid var(--border); padding-left:14px; }
+.tm b { font-size:15px; color:var(--text); }
+.tm span { color:var(--text-faint); }
+.tchips { display:flex; flex-wrap:wrap; gap:6px; min-height:24px; align-items:center; }
+.tchip { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:3px 10px; font-size:11.5px; font-weight:600; }
+.tchip-none { display:inline-flex; align-items:center; gap:5px; border:1px dashed var(--border); color:var(--text-faint); border-radius:999px; padding:3px 10px; font-size:11.5px; }
+.tactions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding-top:12px; margin-top:auto; }
 .tactions form { margin-left:auto; }
 .tactions .btn-danger { background:transparent; border:1px solid color-mix(in srgb,var(--danger) 25%,transparent); color:var(--danger); }
 .tactions .btn-danger:hover { background:var(--danger-soft); border-color:var(--danger); }
-.stat-link { text-decoration:none; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.stat-link:hover { transform:translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 6px 24px rgba(0,0,0,.07); backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%); border-color:transparent; }
+.stat-link { text-decoration:none; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; }
+.stat-link:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,.06); }
 .stat-link.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 5%,var(--card)); }
 .stat-link.on::after { content:"✕"; position:absolute; top:8px; right:10px; font-size:11px; color:var(--accent); opacity:.85; }
 .subject-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
 .chip { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:12.5px; cursor:pointer; background:var(--card); transition:all .15s ease; }
-.chip:hover { border-color:transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.06); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); }
+.chip:hover { border-color:var(--accent); }
 .chip input { accent-color: var(--accent); }
 .chip:has(input:checked) { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); font-weight:600; }
 </style>
