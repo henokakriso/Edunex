@@ -152,6 +152,7 @@ function stampEveryPage(pdf, flagURI, minisURI) {
 }
 
 async function downloadGradingPDF(url, filename) {
+  if (typeof html2pdf === 'undefined') { alert('PDF library still loading, please try again in a moment.'); return; }
   var btn = event.target; btn.disabled = true; btn.textContent = '⏳ Generating...';
   try {
     var resp = await fetch(url);
@@ -162,7 +163,6 @@ async function downloadGradingPDF(url, filename) {
     if (!paper) { alert('PDF content not found'); return; }
     var container = document.createElement('div');
     container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1100px;background:#fff;color:#1d1d1f;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5';
-    // Add PDF styles inline
     var style = document.createElement('style');
     style.textContent = 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}' +
       'thead th{background:rgba(99,102,241,.08);color:#6366f1;font-weight:600;text-align:left;padding:10px 14px;border-bottom:2px solid rgba(99,102,241,.2);white-space:nowrap}' +
@@ -184,6 +184,7 @@ async function downloadGradingPDF(url, filename) {
     container.appendChild(style);
     container.appendChild(paper);
     document.body.appendChild(container);
+
     var imgs = await Promise.all([toDataURL(FLAG_URL, 'image/jpeg'), toDataURL(MINIS_URL, 'image/png')]);
     var opt = {
       margin: [28, 12, 16, 12], filename: filename,
@@ -192,10 +193,14 @@ async function downloadGradingPDF(url, filename) {
       jsPDF: { unit:'mm', format:'a4', orientation:'landscape' },
       pagebreak: { mode:['avoid-all','css','legacy'] }
     };
-    await html2pdf().set(opt).from(container).then(function(pdf) {
+
+    var pdf = await html2pdf().set(opt).from(container);
+    if (pdf && typeof pdf.internal !== 'undefined') {
       stampEveryPage(pdf, imgs[0], imgs[1]);
       pdf.save(filename);
-    });
+    } else {
+      alert('PDF object not returned. Try Print (Ctrl+P) instead.');
+    }
     container.remove();
   } catch(e) { console.error(e); alert('PDF generation failed: ' + e.message); }
   finally { btn.disabled = false; btn.textContent = '⬇ Generate PDF'; }
