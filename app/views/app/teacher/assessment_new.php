@@ -22,7 +22,7 @@
                     data-semester="<?= (int)($t['semester'] ?? 0) ?>"
                     data-max-round="<?= $t['round_num'] ?? '' ?>">
               <?= e($t['label']) ?>
-              <?= $t['is_round'] ? '(Semester ' . $t['round_num'] . ')' : '' ?>
+              <?= $t['is_round'] ? '(Semester ' . $t['semester'] . ')' : '' ?>
             </option>
           <?php endforeach; ?>
         </select>

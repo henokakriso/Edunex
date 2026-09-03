@@ -461,7 +461,7 @@ class Ctl_assessment_new {
                 $existingMax = (float)Database::scalar(
                     "SELECT COALESCE(MAX(max_mark),0) FROM assessments WHERE course_id = ? AND type_slug = ? AND status = 'published'",
                     [$courseId, $typeSlug], 0);
-                if ($existingMax > 0) { flash('danger', "Round {$typeRow['round_num']} already has a published assessment with max mark {$existingMax}."); redirect('teacher/assessment/new&course=' . $courseId); }
+                if ($existingMax > 0) { flash('danger', "Semester {$typeRow['semester']} already has a published assessment with max mark {$existingMax}."); redirect('teacher/assessment/new&course=' . $courseId); }
             }
 
             // Check semester total
