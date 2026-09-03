@@ -29,46 +29,74 @@
 </div>
 
 <?php if ($selectedCourse && $assessments): ?>
-<!-- Semester Remaining Marks -->
-<div class="card" style="margin-bottom:18px">
-  <h4 class="card-title" style="margin-top:0">Marks Budget</h4>
-  <div style="display:flex;gap:16px">
-    <?php for ($sem = 1; $sem <= 2; $sem++): ?>
-      <?php $used = (int)($semesterUsedMarks[$sem] ?? 0); $remaining = max(0, 100 - $used); ?>
-      <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
-        <div class="tiny faint">Semester <?= $sem ?></div>
-        <div style="font-size:22px;font-weight:800;color:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= $used ?>/100</div>
-        <div class="tiny faint"><?= $remaining ?> remaining</div>
-        <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">
-          <div style="height:100%;width:<?= min(100, $used) ?>%;background:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>;border-radius:3px"></div>
-        </div>
-      </div>
-    <?php endfor; ?>
-  </div>
-</div>
-
-<!-- Assessments list -->
-<div class="card" style="margin-bottom:18px">
-  <h4 class="card-title" style="margin-top:0">Assessments</h4>
-  <div style="display:flex;flex-direction:column;gap:6px">
-    <?php foreach ($assessments as $a): ?>
-      <a href="<?= e(url('teacher/gradebook&id=' . $a['id'])) ?>" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:var(--text);transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <span style="font-size:18px"><?= icon(in_array($a['type_slug'], ['r1','r2','r3','r4']) ? 'doc' : ($a['type_slug'] === 'quiz' ? 'spark' : 'file')) ?></span>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:600;font-size:13.5px"><?= e($a['title']) ?></div>
-          <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · Max: <span id="max-mark-<?= (int)$a['id'] ?>"><?= (int)$a['max_mark'] ?></span> · <?= e($a['assessment_date'] ?? '—') ?></div>
-          <button type="button" onclick="event.preventDefault();event.stopPropagation();editMaxMark(<?= (int)$a['id'] ?>, <?= (int)$a['max_mark'] ?>)" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);border-radius:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='color-mix(in srgb, var(--accent) 15%, transparent)'" onmouseout="this.style.background='color-mix(in srgb, var(--accent) 8%, transparent)'">✏ Edit Out of</button>
+<!-- Semester boxes -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+  <?php for ($sem = 1; $sem <= 2; $sem++): ?>
+    <?php
+      $semAssessments = array_filter($assessments, fn($a) => (int)($a['semester'] ?? 0) === $sem);
+      $used = (int)($semesterUsedMarks[$sem] ?? 0);
+      $remaining = max(0, 100 - $used);
+      $semAvg = $semesterStats[$sem]['avg'] ?? null;
+      $semStudents = $semesterStats[$sem]['count'] ?? 0;
+    ?>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h4 class="card-title" style="margin:0;font-size:16px">Semester <?= $sem ?></h4>
+          <div class="tiny faint" style="margin-top:2px"><?= $semStudents ?> students with grades</div>
         </div>
         <div style="text-align:right">
-          <div class="small" style="font-weight:600"><?= (int)$a['graded_count'] ?>/<?= (int)$a['total_grades'] ?> graded</div>
-          <?php if ($a['avg_pct']): ?>
-            <div class="tiny faint">Avg: <?= e($a['avg_pct']) ?>%</div>
+          <?php if ($semAvg !== null): ?>
+            <div style="font-size:20px;font-weight:800;color:<?= $semAvg >= 50 ? 'var(--success)' : 'var(--danger)' ?>"><?= e($semAvg) ?>%</div>
+            <div class="tiny faint">Average</div>
+          <?php else: ?>
+            <div class="tiny faint">No grades yet</div>
           <?php endif; ?>
         </div>
-        <span class="badge <?= $a['result_status'] === 'locked' ? 'badge-muted' : ($a['result_status'] === 'published' ? 'badge-success' : ($a['result_status'] === 'submitted' ? 'badge-info' : 'badge-warning')) ?>"><?= e($a['result_status']) ?></span>
-      </a>
-    <?php endforeach; ?>
-  </div>
+      </div>
+
+      <!-- Marks budget bar -->
+      <div style="padding:12px 20px;background:color-mix(in srgb, var(--accent) 3%, transparent)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tiny faint" style="font-weight:600">Exam budget:</span>
+          <div style="flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden">
+            <div style="height:100%;width:<?= min(100, $used) ?>%;background:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>;border-radius:3px"></div>
+          </div>
+          <span class="tiny" style="font-weight:600;color:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= $used ?>/100</span>
+          <span class="tiny faint"><?= $remaining ?> left</span>
+        </div>
+      </div>
+
+      <!-- Assessments -->
+      <div style="padding:8px 12px">
+        <?php if (empty($semAssessments)): ?>
+          <div style="text-align:center;padding:20px" class="tiny faint">No assessments yet</div>
+        <?php else: ?>
+          <?php foreach ($semAssessments as $a): ?>
+            <a href="<?= e(url('teacher/gradebook&id=' . $a['id'])) ?>" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:var(--text);transition:background .15s;border:1px solid transparent" onmouseover="this.style.background='color-mix(in srgb, var(--accent) 4%, transparent)';this.style.borderColor='var(--border)'" onmouseout="this.style.background='';this.style.borderColor='transparent'">
+              <span style="font-size:16px;color:var(--accent)"><?= icon(in_array($a['type_slug'], ['r1','r2','r3','r4']) ? 'doc' : ($a['type_slug'] === 'quiz' ? 'spark' : 'file')) ?></span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:13px"><?= e($a['title']) ?></div>
+                <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · Max: <span id="max-mark-<?= (int)$a['id'] ?>"><?= (int)$a['max_mark'] ?></span></div>
+              </div>
+              <div style="text-align:right">
+                <div class="small" style="font-weight:600"><?= (int)$a['graded_count'] ?>/<?= (int)$a['total_grades'] ?></div>
+                <?php if ($a['avg_pct']): ?>
+                  <div class="tiny" style="color:<?= $a['avg_pct'] >= 50 ? 'var(--success)' : 'var(--danger)' ?>"><?= e($a['avg_pct']) ?>%</div>
+                <?php endif; ?>
+              </div>
+              <button type="button" onclick="event.preventDefault();event.stopPropagation();editMaxMark(<?= (int)$a['id'] ?>, <?= (int)$a['max_mark'] ?>)" style="padding:3px 8px;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);border-radius:6px;cursor:pointer;white-space:nowrap">✏</button>
+            </a>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+
+      <!-- Add assessment button -->
+      <div style="padding:8px 12px 12px;border-top:1px solid var(--border)">
+        <a class="btn btn-ghost btn-sm" href="<?= e(url('teacher/assessment/new&course=' . $selectedCourse . '&semester=' . $sem)) ?>" style="width:100%;justify-content:center">+ Add Assessment</a>
+      </div>
+    </div>
+  <?php endfor; ?>
 </div>
 
 <!-- Summary stats -->
