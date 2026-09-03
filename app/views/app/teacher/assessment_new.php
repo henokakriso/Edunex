@@ -75,10 +75,14 @@
 const semUsed = <?= json_encode($semesterUsed) ?>;
 function onTypeChange(sel) {
   const opt = sel.options[sel.selectedIndex];
-  const isRound = opt.dataset.round === '1';
   const semester = parseInt(opt.dataset.semester) || 0;
   const semSel = document.getElementById('semester-select');
-  if (semester) semSel.value = semester;
+  if (semester) {
+    semSel.value = semester;
+    semSel.disabled = true;
+  } else {
+    semSel.disabled = false;
+  }
   updateRemaining();
 }
 document.getElementById('max-mark').addEventListener('input', updateRemaining);
