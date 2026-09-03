@@ -6,100 +6,87 @@
   </div>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
-
-  <!-- Student Result Report -->
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <span style="font-size:20px;color:var(--accent)"><?= icon('user') ?></span>
-      <div>
-        <h4 class="card-title" style="margin:0">Student Result Report</h4>
-        <p class="tiny faint">Individual student results for all courses</p>
-      </div>
-    </div>
-    <form id="student-report-form">
-      <div class="flex-col" style="margin-bottom:10px">
-        <label class="small faint">Course</label>
-        <select class="input" name="course" required>
-          <option value="">— Select Course —</option>
-          <?php foreach ($courses as $c): ?>
-            <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <button type="button" class="btn btn-primary" style="width:100%" onclick="generateStudentReport()"><?= icon('file') ?> Generate PDF</button>
-    </form>
-  </div>
-
-  <!-- Class Report -->
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <span style="font-size:20px;color:var(--success)"><?= icon('users') ?></span>
-      <div>
-        <h4 class="card-title" style="margin:0">Class Result Report</h4>
-        <p class="tiny faint">Full class results with rankings</p>
-      </div>
-    </div>
-    <form id="class-report-form">
-      <div class="flex-col" style="margin-bottom:10px">
-        <label class="small faint">Course</label>
-        <select class="input" name="course" required>
-          <option value="">— Select Course —</option>
-          <?php foreach ($courses as $c): ?>
-            <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <button type="button" class="btn btn-primary" style="width:100%" onclick="generateClassReport()"><?= icon('file') ?> Generate PDF</button>
-    </form>
-  </div>
-
-  <!-- Exam-specific Report -->
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <span style="font-size:20px;color:var(--warning) <?= icon('doc') ?>"></span>
-      <div>
-        <h4 class="card-title" style="margin:0">Exam Results Report</h4>
-        <p class="tiny faint">Specific exam/assessment results</p>
-      </div>
-    </div>
-    <form id="exam-report-form">
-      <div class="flex-col" style="margin-bottom:10px">
-        <label class="small faint">Course</label>
-        <select class="input" name="course" required onchange="loadAssessments(this.value)">
-          <option value="">— Select Course —</option>
-          <?php foreach ($courses as $c): ?>
-            <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="flex-col" style="margin-bottom:10px">
-        <label class="small faint">Assessment</label>
-        <select class="input" name="assessment" id="assessment-select" required>
-          <option value="">— Select course first —</option>
-        </select>
-      </div>
-      <button type="button" class="btn btn-primary" style="width:100%" onclick="generateExamReport()"><?= icon('file') ?> Generate PDF</button>
-    </form>
-  </div>
-
-  <!-- Teacher Summary Report -->
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <span style="font-size:20px;color:var(--info)"><?= icon('graduation') ?></span>
-      <div>
-        <h4 class="card-title" style="margin:0">Teacher Summary</h4>
-        <p class="tiny faint">Your teaching performance overview</p>
-      </div>
-    </div>
-    <button type="button" class="btn btn-primary" style="width:100%" onclick="generateTeacherReport()"><?= icon('file') ?> Generate PDF</button>
-  </div>
-
+<div class="card">
+  <table class="table" style="margin:0">
+    <thead>
+      <tr>
+        <th style="width:40px"></th>
+        <th>Report Type</th>
+        <th>Description</th>
+        <th style="width:220px">Course</th>
+        <th style="width:220px;display:none" id="assess-col-th">Assessment</th>
+        <th style="width:120px">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Student Result -->
+      <tr>
+        <td style="text-align:center;color:var(--accent)"><?= icon('user') ?></td>
+        <td><b class="small">Student Result Report</b></td>
+        <td class="tiny faint">Individual student results with rounds and final grade</td>
+        <td>
+          <select class="input" id="rpt-student-course" style="width:100%;margin:0">
+            <option value="">— Select Course —</option>
+            <?php foreach ($courses as $c): ?>
+              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </td>
+        <td id="assess-col-student"></td>
+        <td><button class="btn btn-primary btn-sm" onclick="openPDF('student', document.getElementById('rpt-student-course').value)">⬇ PDF</button></td>
+      </tr>
+      <!-- Class Result -->
+      <tr>
+        <td style="text-align:center;color:var(--success)"><?= icon('users') ?></td>
+        <td><b class="small">Class Result Report</b></td>
+        <td class="tiny faint">Full class results with rankings and statistics</td>
+        <td>
+          <select class="input" id="rpt-class-course" style="width:100%;margin:0">
+            <option value="">— Select Course —</option>
+            <?php foreach ($courses as $c): ?>
+              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </td>
+        <td></td>
+        <td><button class="btn btn-primary btn-sm" onclick="openPDF('class', document.getElementById('rpt-class-course').value)">⬇ PDF</button></td>
+      </tr>
+      <!-- Exam Result -->
+      <tr>
+        <td style="text-align:center;color:var(--warning)"><?= icon('doc') ?></td>
+        <td><b class="small">Exam Results Report</b></td>
+        <td class="tiny faint">Specific exam/assessment results</td>
+        <td>
+          <select class="input" id="rpt-exam-course" style="width:100%;margin:0" onchange="loadExamAssessments(this.value)">
+            <option value="">— Select Course —</option>
+            <?php foreach ($courses as $c): ?>
+              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </td>
+        <td>
+          <select class="input" id="rpt-exam-assessment" style="width:100%;margin:0">
+            <option value="">— Select course first —</option>
+          </select>
+        </td>
+        <td><button class="btn btn-primary btn-sm" onclick="openPDF('exam', document.getElementById('rpt-exam-assessment').value, true)">⬇ PDF</button></td>
+      </tr>
+      <!-- Teacher Summary -->
+      <tr>
+        <td style="text-align:center;color:var(--info)"><?= icon('graduation') ?></td>
+        <td><b class="small">Teacher Summary</b></td>
+        <td class="tiny faint">Your teaching performance overview across all courses</td>
+        <td><span class="tiny faint">All courses</span></td>
+        <td></td>
+        <td><button class="btn btn-primary btn-sm" onclick="openPDF('teacher', 0)">⬇ PDF</button></td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <script>
-async function loadAssessments(courseId) {
-  var sel = document.getElementById('assessment-select');
+async function loadExamAssessments(courseId) {
+  var sel = document.getElementById('rpt-exam-assessment');
   sel.innerHTML = '<option value="">Loading...</option>';
   if (!courseId) { sel.innerHTML = '<option value="">— Select course first —</option>'; return; }
   try {
@@ -107,27 +94,18 @@ async function loadAssessments(courseId) {
     var data = await resp.json();
     sel.innerHTML = '<option value="">— Select Assessment —</option>';
     (data.assessments || []).forEach(function(a) {
-      sel.innerHTML += '<option value="' + a.id + '">' + a.title + ' (' + (a.type_label || a.type_slug) + ') — Max: ' + a.max_mark + '</option>';
+      sel.innerHTML += '<option value="' + a.id + '">' + a.title + ' (' + (a.type_label || a.type_slug) + ')</option>';
     });
   } catch(e) { sel.innerHTML = '<option value="">Error loading</option>'; }
 }
 
-function generateStudentReport() {
-  var courseId = document.querySelector('#student-report-form [name=course]').value;
-  if (!courseId) { alert('Select a course'); return; }
-  window.location.href = '<?= url("teacher/grading/pdf") ?>&type=student&course=' + courseId + '&_t=' + Date.now();
-}
-function generateClassReport() {
-  var courseId = document.querySelector('#class-report-form [name=course]').value;
-  if (!courseId) { alert('Select a course'); return; }
-  window.location.href = '<?= url("teacher/grading/pdf") ?>&type=class&course=' + courseId + '&_t=' + Date.now();
-}
-function generateExamReport() {
-  var assessmentId = document.querySelector('#exam-report-form [name=assessment]').value;
-  if (!assessmentId) { alert('Select an assessment'); return; }
-  window.location.href = '<?= url("teacher/grading/pdf") ?>&type=exam&id=' + assessmentId + '&_t=' + Date.now();
-}
-function generateTeacherReport() {
-  window.location.href = '<?= url("teacher/grading/pdf") ?>&type=teacher&_t=' + Date.now();
+function openPDF(type, id, isAssessment) {
+  if (type !== 'teacher' && !id) { alert('Please select a course first.'); return; }
+  if (isAssessment && !id) { alert('Please select an assessment.'); return; }
+  var url = '<?= url("teacher/grading/pdf") ?>&type=' + type;
+  if (type === 'exam') url += '&id=' + id;
+  else if (type !== 'teacher') url += '&course=' + id;
+  url += '&_t=' + Date.now();
+  window.location.href = url;
 }
 </script>

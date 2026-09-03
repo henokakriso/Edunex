@@ -1,7 +1,8 @@
 <?php
 /**
- * Grading PDF generator — server-side PDF using Pdf.php
- * Direct download, no new tab, no CDN dependency
+ * Grading PDF — viewer page with embedded PDF + download
+ * ?type=student&course=15 → HTML viewer with toolbar
+ * ?type=student&course=15&download=1 → raw PDF download
  */
 require_once __DIR__ . '/grading.php';
 require_once BASE_PATH . '/includes/Pdf.php';
@@ -13,6 +14,7 @@ class Ctl_grading_pdf {
         $type = $_GET['type'] ?? 'student';
         $courseId = (int)($_GET['course'] ?? 0);
         $assessmentId = (int)($_GET['id'] ?? 0);
+        $download = isset($_GET['download']);
 
         if ($courseId) {
             $ownCourse = Database::scalar("SELECT id FROM courses WHERE id = ? AND teacher_id = ?", [$courseId, $uid]);
@@ -32,24 +34,106 @@ class Ctl_grading_pdf {
             case 'student':
                 $this->studentReport($pdf, $courseId, $uid, $schoolName, $teacherName, $directorName);
                 $filename = 'student_result_' . date('Ymd_His') . '.pdf';
+                $title = 'Student Result Report';
                 break;
             case 'class':
                 $this->classReport($pdf, $courseId, $uid, $schoolName, $teacherName, $directorName);
                 $filename = 'class_result_' . date('Ymd_His') . '.pdf';
+                $title = 'Class Result Report';
                 break;
             case 'exam':
                 $this->examReport($pdf, $assessmentId, $uid, $schoolName, $teacherName, $directorName);
                 $filename = 'exam_result_' . date('Ymd_His') . '.pdf';
+                $title = 'Exam Results Report';
                 break;
             case 'teacher':
                 $this->teacherReport($pdf, $uid, $schoolName, $teacherName, $directorName);
                 $filename = 'teacher_summary_' . date('Ymd_His') . '.pdf';
+                $title = 'Teacher Summary';
                 break;
             default:
                 exit('Invalid report type.');
         }
 
-        $pdf->output($filename, false);
+        // If download=1, serve raw PDF
+        if ($download) {
+            $pdf->output($filename, false);
+            return;
+        }
+
+        // Otherwise, serve HTML viewer page with embedded PDF
+        $pdfUrl = url('teacher/grading/pdf') . '&type=' . e($type);
+        if ($type === 'exam') $pdfUrl .= '&id=' . $assessmentId;
+        else if ($type !== 'teacher') $pdfUrl .= '&course=' . $courseId;
+        $pdfUrl .= '&download=1&_t=' . time();
+
+        header('Content-Type: text/html; charset=utf-8');
+        ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= e($title) ?> — PDF Viewer</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg,#f5f5f7); color:#1d1d1f; }
+    .toolbar {
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; gap:12px; padding:12px 20px;
+      background:rgba(255,255,255,.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .toolbar-title { flex:1; font-size:15px; font-weight:700; }
+    .toolbar-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 18px; border-radius:10px; font-size:13px; font-weight:600;
+      border:none; cursor:pointer; transition:all .15s;
+      text-decoration:none; line-height:1;
+    }
+    .toolbar-btn--back {
+      background:rgba(0,0,0,.05); color:#1d1d1f;
+    }
+    .toolbar-btn--back:hover { background:rgba(0,0,0,.1); }
+    .toolbar-btn--dl {
+      background:linear-gradient(135deg,#6366f1,#818cf8); color:#fff;
+      box-shadow:0 2px 8px rgba(99,102,241,.3);
+    }
+    .toolbar-btn--dl:hover { box-shadow:0 4px 16px rgba(99,102,241,.4); transform:translateY(-1px); }
+    .toolbar-btn--print {
+      background:rgba(0,0,0,.05); color:#1d1d1f;
+    }
+    .toolbar-btn--print:hover { background:rgba(0,0,0,.1); }
+    .viewer {
+      display:flex; justify-content:center; padding:20px;
+      min-height:calc(100vh - 56px);
+    }
+    .viewer embed {
+      width:100%; max-width:1100px; height:calc(100vh - 96px);
+      border:1px solid rgba(0,0,0,.08); border-radius:12px;
+      box-shadow:0 4px 24px rgba(0,0,0,.06);
+    }
+    @media print {
+      .toolbar { display:none!important; }
+      .viewer { padding:0; }
+      .viewer embed { border:none; border-radius:0; box-shadow:none; height:100vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="toolbar-btn toolbar-btn--back" onclick="history.back()">← Back</button>
+    <div class="toolbar-title"><?= e($title) ?></div>
+    <button class="toolbar-btn toolbar-btn--dl" onclick="window.location.href='<?= e($pdfUrl) ?>'">⬇ Download PDF</button>
+    <button class="toolbar-btn toolbar-btn--print" onclick="document.querySelector('embed').print()">🖨 Print</button>
+  </div>
+  <div class="viewer">
+    <embed src="<?= e($pdfUrl) ?>" type="application/pdf">
+  </div>
+</body>
+</html>
+<?php
+        exit;
     }
 
     private function studentReport(Pdf $pdf, int $courseId, int $uid, string $schoolName, string $teacherName, string $directorName): void {
@@ -96,7 +180,6 @@ class Ctl_grading_pdf {
 
         $pdf->table(['#', 'Student', 'ID', 'Round 1', 'Round 2', 'Bonus', 'Final', 'Grade', 'Status'], $rows);
 
-        // Stats
         $adjScores = array_filter(array_column($finals, 'final'), fn($f) => $f['adjusted'] !== null);
         $adjScores = array_column($adjScores, 'adjusted');
         if ($adjScores) {
@@ -135,7 +218,6 @@ class Ctl_grading_pdf {
         ]);
         $pdf->spacer(6);
 
-        // Build headers: Rank, Student, ID, then each assessment, then Round 1, Round 2, Bonus, Final, Grade
         $headers = ['Rank', 'Student', 'ID'];
         foreach ($assessments as $a) {
             $headers[] = mb_substr($a['type_slug'], 0, 6) . '/' . (int)$a['max_mark'];
