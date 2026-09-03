@@ -43,21 +43,15 @@ function grading_calc_midterm(int $studentId, int $courseId, int $semester, ?int
     return $totalMax > 0 ? round(($totalMark / $totalMax) * 100, 2) : null;
 }
 
-/* =============== HELPER: Calculate cumulative semester percentage (mid + final combined) =============== */
-/* semester 1 → r1+r2 combined, semester 2 → r3+r4 combined */
+/* =============== HELPER: Calculate cumulative semester percentage (all assessments in semester) =============== */
+/* semester 1 → all assessments with semester=1, semester 2 → all with semester=2 */
 function grading_calc_semester_total(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
-    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
-    $args = [$studentId, $courseId];
+    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL AND a.semester = ?";
+    $args = [$studentId, $courseId, $semester];
     if ($academicYearId) { $where .= " AND a.academic_year_id = ?"; $args[] = $academicYearId; }
 
-    if ($semester === 1) {
-        $where .= " AND a.type_slug IN ('r1','r2')";
-    } else {
-        $where .= " AND a.type_slug IN ('r3','r4')";
-    }
-
     $rows = Database::all(
-        "SELECT a.max_mark, g.mark
+        "SELECT a.type_slug, a.max_mark, g.mark
          FROM grades g JOIN assessments a ON a.id = g.assessment_id
          WHERE $where", $args);
 
@@ -133,8 +127,8 @@ function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = nu
         $count = (int)Database::scalar(
             "SELECT COUNT(*) FROM grades g JOIN assessments a ON a.id = g.assessment_id
              WHERE g.student_id = ? AND a.course_id = ? AND g.status IN ('submitted','verified','published','locked')
-             AND a.type_slug IN " . ($sem === 1 ? "('r1','r2')" : "('r3','r4')"),
-            [$studentId, $courseId]);
+             AND a.semester = ?",
+            [$studentId, $courseId, $sem]);
         Database::run("INSERT INTO semester_results (student_id, course_id, class_id, academic_year_id, semester, total, assessment_count)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE total = VALUES(total), assessment_count = VALUES(assessment_count)",
@@ -220,13 +214,12 @@ class Ctl_grading {
 
 /* =============== HELPER: Semester stats for a course =============== */
 function grading_calc_semester_for_course(int $courseId, int $semester): array {
-    $typeSlugs = $semester === 1 ? "('r1','r2')" : "('r3','r4')";
     $results = Database::all(
         "SELECT g.student_id, a.type_slug, a.max_mark, g.mark, g.percentage
          FROM grades g JOIN assessments a ON a.id = g.assessment_id
-         WHERE a.course_id = ? AND a.type_slug IN $typeSlugs AND a.status = 'published'
+         WHERE a.course_id = ? AND a.semester = ? AND a.status = 'published'
          AND g.status IN ('submitted','verified','published','locked') AND g.mark IS NOT NULL",
-        [$courseId]);
+        [$courseId, $semester]);
 
     if (empty($results)) return ['avg' => null, 'highest' => null, 'lowest' => null, 'count' => 0, 'students' => []];
 
