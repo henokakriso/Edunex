@@ -301,15 +301,15 @@ function grading_calc_final_for_course(int $courseId): array {
 
 function course_used_marks(int $courseId): array {
     $rows = Database::all(
-        "SELECT a.type_slug, a.semester, MAX(a.max_mark) AS max_mark
+        "SELECT a.semester, SUM(a.max_mark) AS total_max
          FROM assessments a WHERE a.course_id = ? AND a.status = 'published'
-         AND a.type_slug IN ('r1','r2','r3','r4')
-         GROUP BY a.type_slug, a.semester", [$courseId]);
+         AND a.semester IN (1, 2)
+         GROUP BY a.semester", [$courseId]);
     $used = [1 => 0, 2 => 0];
     foreach ($rows as $r) {
-        $sem = (int)($r['semester'] ?? 0);
+        $sem = (int)$r['semester'];
         if ($sem >= 1 && $sem <= 2) {
-            $used[$sem] += (float)$r['max_mark'];
+            $used[$sem] = (float)$r['total_max'];
         }
     }
     return $used;
