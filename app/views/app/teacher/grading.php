@@ -29,14 +29,14 @@
 </div>
 
 <?php if ($selectedCourse && $assessments): ?>
-<!-- Round Remaining Marks -->
+<!-- Semester Remaining Marks -->
 <div class="card" style="margin-bottom:18px">
   <h4 class="card-title" style="margin-top:0">Marks Budget</h4>
   <div style="display:flex;gap:16px">
     <?php for ($sem = 1; $sem <= 2; $sem++): ?>
       <?php $used = (int)($semesterUsedMarks[$sem] ?? 0); $remaining = max(0, 100 - $used); ?>
       <div style="flex:1;text-align:center;padding:14px;border-radius:10px;border:1px solid var(--border)">
-        <div class="tiny faint">Round <?= $sem ?> <?= $sem === 1 ? '(Mid)' : '(Final)' ?></div>
+        <div class="tiny faint">Semester <?= $sem ?></div>
         <div style="font-size:22px;font-weight:800;color:<?= $used >= 100 ? 'var(--danger)' : 'var(--accent)' ?>"><?= $used ?>/100</div>
         <div class="tiny faint"><?= $remaining ?> remaining</div>
         <div style="height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden">

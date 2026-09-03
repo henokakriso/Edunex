@@ -21,8 +21,31 @@ function grading_pass(float $pct, float $pass = 50): bool {
     return $pct >= $pass;
 }
 
-/* =============== HELPER: Calculate semester total for student/course =============== */
-function grading_calc_semester(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
+/* =============== HELPER: Calculate midterm-only percentage for a semester =============== */
+/* semester 1 → r1 only, semester 2 → r3 only */
+function grading_calc_midterm(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
+    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
+    $args = [$studentId, $courseId];
+    if ($academicYearId) { $where .= " AND a.academic_year_id = ?"; $args[] = $academicYearId; }
+
+    $midSlug = $semester === 1 ? 'r1' : 'r3';
+    $where .= " AND a.type_slug = ?"; $args[] = $midSlug;
+
+    $rows = Database::all(
+        "SELECT a.max_mark, g.mark
+         FROM grades g JOIN assessments a ON a.id = g.assessment_id
+         WHERE $where", $args);
+
+    if (empty($rows)) return null;
+
+    $totalMark = 0; $totalMax = 0;
+    foreach ($rows as $r) { $totalMark += (float)$r['mark']; $totalMax += (float)$r['max_mark']; }
+    return $totalMax > 0 ? round(($totalMark / $totalMax) * 100, 2) : null;
+}
+
+/* =============== HELPER: Calculate cumulative semester percentage (mid + final combined) =============== */
+/* semester 1 → r1+r2 combined, semester 2 → r3+r4 combined */
+function grading_calc_semester_total(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
     $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
     $args = [$studentId, $courseId];
     if ($academicYearId) { $where .= " AND a.academic_year_id = ?"; $args[] = $academicYearId; }
@@ -33,30 +56,25 @@ function grading_calc_semester(int $studentId, int $courseId, int $semester, ?in
         $where .= " AND a.type_slug IN ('r3','r4')";
     }
 
-    $rounds = Database::all(
-        "SELECT a.type_slug, a.max_mark, g.mark
+    $rows = Database::all(
+        "SELECT a.max_mark, g.mark
          FROM grades g JOIN assessments a ON a.id = g.assessment_id
          WHERE $where", $args);
 
-    if (empty($rounds)) return null;
+    if (empty($rows)) return null;
 
-    $totalPct = 0;
-    $count = 0;
-    foreach ($rounds as $r) {
-        $max = (float)$r['max_mark'];
-        $mark = (float)$r['mark'];
-        if ($max > 0) {
-            $totalPct += ($mark / $max) * 100;
-            $count++;
-        }
-    }
-    return $count > 0 ? round($totalPct / $count, 2) : null;
+    $totalMark = 0; $totalMax = 0;
+    foreach ($rows as $r) { $totalMark += (float)$r['mark']; $totalMax += (float)$r['max_mark']; }
+    return $totalMax > 0 ? round(($totalMark / $totalMax) * 100, 2) : null;
 }
 
 /* =============== HELPER: Calculate final result for student/course =============== */
+/* Returns: midterm1, total1, midterm2, total2, final, bonus, adjusted, letter, pass */
 function grading_calc_final(int $studentId, int $courseId, ?int $academicYearId = null): array {
-    $s1 = grading_calc_semester($studentId, $courseId, 1, $academicYearId);
-    $s2 = grading_calc_semester($studentId, $courseId, 2, $academicYearId);
+    $midterm1 = grading_calc_midterm($studentId, $courseId, 1, $academicYearId);
+    $total1   = grading_calc_semester_total($studentId, $courseId, 1, $academicYearId);
+    $midterm2 = grading_calc_midterm($studentId, $courseId, 2, $academicYearId);
+    $total2   = grading_calc_semester_total($studentId, $courseId, 2, $academicYearId);
 
     $bonusRow = Database::one(
         "SELECT COALESCE(SUM(points), 0) AS total FROM bonus_entries
@@ -66,25 +84,27 @@ function grading_calc_final(int $studentId, int $courseId, ?int $academicYearId 
     $bonus = (float)($bonusRow['total'] ?? 0);
 
     $final = null;
-    if ($s1 !== null && $s2 !== null) {
-        $final = round(($s1 + $s2) / 2, 2);
-    } elseif ($s1 !== null) {
-        $final = $s1;
-    } elseif ($s2 !== null) {
-        $final = $s2;
+    if ($total1 !== null && $total2 !== null) {
+        $final = round(($total1 + $total2) / 2, 2);
+    } elseif ($total1 !== null) {
+        $final = $total1;
+    } elseif ($total2 !== null) {
+        $final = $total2;
     }
 
     $adjusted = $final !== null ? min(100, $final + $bonus) : null;
     $passMark = (float)Database::scalar("SELECT pass_mark FROM grading_config WHERE school_id = (SELECT school_id FROM users WHERE id = ?) LIMIT 1", [$studentId], 50);
 
     return [
-        'semester1' => $s1,
-        'semester2' => $s2,
+        'midterm1'  => $midterm1,
+        'total1'    => $total1,
+        'midterm2'  => $midterm2,
+        'total2'    => $total2,
         'final_score' => $final,
-        'bonus' => $bonus,
-        'adjusted' => $adjusted,
-        'letter' => $adjusted !== null ? grading_letter($adjusted, $passMark) : null,
-        'pass' => $adjusted !== null ? grading_pass($adjusted, $passMark) : null,
+        'bonus'     => $bonus,
+        'adjusted'  => $adjusted,
+        'letter'    => $adjusted !== null ? grading_letter($adjusted, $passMark) : null,
+        'pass'      => $adjusted !== null ? grading_pass($adjusted, $passMark) : null,
     ];
 }
 
@@ -109,7 +129,7 @@ function grading_audit(int $gradeId, int $studentId, int $assessmentId, string $
 function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = null): void {
     $classId = (int)Database::scalar("SELECT class_id FROM assessments WHERE course_id = ? LIMIT 1", [$courseId], 0);
     foreach ([1, 2] as $sem) {
-        $total = grading_calc_semester($studentId, $courseId, $sem, $academicYearId);
+        $total = grading_calc_semester_total($studentId, $courseId, $sem, $academicYearId);
         $count = (int)Database::scalar(
             "SELECT COUNT(*) FROM grades g JOIN assessments a ON a.id = g.assessment_id
              WHERE g.student_id = ? AND a.course_id = ? AND g.status IN ('submitted','verified','published','locked')
@@ -125,7 +145,7 @@ function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = nu
     Database::run("INSERT INTO final_results (student_id, course_id, class_id, academic_year_id, semester1_total, semester2_total, final_score, bonus_points, adjusted_score, letter_grade, is_pass)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE semester1_total=VALUES(semester1_total), semester2_total=VALUES(semester2_total), final_score=VALUES(final_score), bonus_points=VALUES(bonus_points), adjusted_score=VALUES(adjusted_score), letter_grade=VALUES(letter_grade), is_pass=VALUES(is_pass)",
-        [$studentId, $courseId, $classId, $academicYearId, $final['semester1'], $final['semester2'], $final['final_score'], $final['bonus'], $final['adjusted'], $final['letter'], $final['pass']]);
+        [$studentId, $courseId, $classId, $academicYearId, $final['total1'], $final['total2'], $final['final_score'], $final['bonus'], $final['adjusted'], $final['letter'], $final['pass']]);
 }
 
 /* =============== GRADING: Main landing page =============== */
@@ -213,16 +233,17 @@ function grading_calc_semester_for_course(int $courseId, int $semester): array {
     $studentData = [];
     foreach ($results as $r) {
         $sid = (int)$r['student_id'];
-        $pct = $r['percentage'] ?? (($float = (float)$r['max_mark']) > 0 ? round(((float)$r['mark'] / $float) * 100, 2) : 0);
-        $studentData[$sid][] = $pct;
+        $studentData[$sid][] = ['mark' => (float)$r['mark'], 'max' => (float)$r['max_mark']];
     }
 
     $allPcts = [];
     $studentAvgs = [];
-    foreach ($studentData as $sid => $pcts) {
-        $avg = round(array_sum($pcts) / count($pcts), 2);
-        $studentAvgs[$sid] = $avg;
-        $allPcts[] = $avg;
+    foreach ($studentData as $sid => $marks) {
+        $totalMark = 0; $totalMax = 0;
+        foreach ($marks as $m) { $totalMark += $m['mark']; $totalMax += $m['max']; }
+        $pct = $totalMax > 0 ? round(($totalMark / $totalMax) * 100, 2) : 0;
+        $studentAvgs[$sid] = $pct;
+        $allPcts[] = $pct;
     }
 
     return [
@@ -249,24 +270,24 @@ function grading_calc_final_for_course(int $courseId): array {
     $allStudents = array_unique(array_merge(array_keys($s1['students']), array_keys($s2['students'])));
 
     foreach ($allStudents as $sid) {
-        $sem1 = $s1['students'][$sid] ?? null;
-        $sem2 = $s2['students'][$sid] ?? null;
+        $total1 = $s1['students'][$sid] ?? null;
+        $total2 = $s2['students'][$sid] ?? null;
         $bonus = $bonusMap[$sid] ?? 0;
 
-        if ($sem1 !== null && $sem2 !== null) {
-            $final = round(($sem1 + $sem2) / 2, 2);
-        } elseif ($sem1 !== null) {
-            $final = $sem1;
-        } elseif ($sem2 !== null) {
-            $final = $sem2;
+        if ($total1 !== null && $total2 !== null) {
+            $final = round(($total1 + $total2) / 2, 2);
+        } elseif ($total1 !== null) {
+            $final = $total1;
+        } elseif ($total2 !== null) {
+            $final = $total2;
         } else {
             continue;
         }
 
         $adjusted = min(100, $final + $bonus);
         $finals[$sid] = [
-            'semester1' => $sem1,
-            'semester2' => $sem2,
+            'total1' => $total1,
+            'total2' => $total2,
             'final' => $final,
             'bonus' => $bonus,
             'adjusted' => $adjusted,

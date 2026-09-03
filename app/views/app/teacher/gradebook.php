@@ -13,14 +13,14 @@
 <div class="card" style="margin-bottom:14px;padding:12px 18px">
   <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
     <?php if ($assessment['semester']): ?>
-    <span class="small" style="font-weight:600">Round <?= e($assessment['semester']) ?> Budget:</span>
+    <span class="small" style="font-weight:600">Semester <?= e($assessment['semester']) ?> Budget:</span>
     <span class="small"><?= (int)$semesterUsed ?>/100 marks used</span>
     <div style="flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;min-width:100px">
       <div style="height:100%;width:<?= min(100, (int)$semesterUsed) ?>%;background:var(--accent);border-radius:3px"></div>
     </div>
     <span class="small" style="font-weight:600;color:<?= $semesterRemaining > 0 ? 'var(--success)' : 'var(--danger)' ?>"><?= (int)$semesterRemaining ?> remaining</span>
     <?php else: ?>
-    <span class="small faint">Non-round assessment — not counted toward round budget</span>
+    <span class="small faint">Non-semester assessment — not counted toward semester budget</span>
     <?php endif; ?>
   </div>
 </div>

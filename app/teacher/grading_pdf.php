@@ -189,7 +189,7 @@ class Ctl_grading_pdf {
         }
         usort($finals, fn($a, $b) => ($b['final']['adjusted'] ?? 0) <=> ($a['final']['adjusted'] ?? 0));
 
-        $h .= '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Round 1</th><th>Round 2</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
+        $h .= '<table><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Midterm</th><th>S1 Total</th><th>Bonus</th><th>Final</th><th>Grade</th><th>Status</th></tr></thead><tbody>';
         $rank = 0;
         foreach ($finals as $f) {
             $rank++;
@@ -197,8 +197,8 @@ class Ctl_grading_pdf {
             $pass = $f['final']['pass'];
             $statusColor = $pass ? '#059669' : '#dc2626';
             $h .= '<tr><td>' . $rank . '</td><td>' . e($f['name']) . '</td><td>' . e($f['sid'] ?? '—') . '</td>'
-                . '<td>' . e($f['final']['semester1'] ?? '—') . '</td>'
-                . '<td>' . e($f['final']['semester2'] ?? '—') . '</td>'
+                . '<td>' . e($f['final']['midterm1'] ?? '—') . '</td>'
+                . '<td>' . e($f['final']['total1'] ?? '—') . '</td>'
                 . '<td>+' . (int)($f['final']['bonus'] ?? 0) . '</td>'
                 . '<td><b>' . ($adj !== null ? e($adj) : '—') . '</b></td>'
                 . '<td><b>' . e($f['final']['letter'] ?? '—') . '</b></td>'
@@ -242,7 +242,7 @@ class Ctl_grading_pdf {
 
         $h .= '<div style="overflow-x:auto"><table><thead><tr><th>Rank</th><th>Student</th><th>ID</th>';
         foreach ($assessments as $a) $h .= '<th>' . e(mb_substr($a['type_slug'], 0, 6)) . '/' . (int)$a['max_mark'] . '</th>';
-        $h .= '<th>R1</th><th>R2</th><th>Bonus</th><th>Final</th><th>Grade</th></tr></thead><tbody>';
+        $h .= '<th>Mid</th><th>S1</th><th>Bonus</th><th>Final</th><th>Grade</th></tr></thead><tbody>';
 
         $rank = 0;
         foreach ($allFinals as $entry) {
@@ -252,7 +252,7 @@ class Ctl_grading_pdf {
                 $grade = Database::one("SELECT mark FROM grades WHERE assessment_id = ? AND student_id = ?", [$a['id'], $s['id']]);
                 $h .= '<td>' . ($grade ? e($grade['mark']) : '—') . '</td>';
             }
-            $h .= '<td>' . e($f['semester1'] ?? '—') . '</td><td>' . e($f['semester2'] ?? '—') . '</td>'
+            $h .= '<td>' . e($f['midterm1'] ?? '—') . '</td><td>' . e($f['total1'] ?? '—') . '</td>'
                 . '<td>+' . (int)($f['bonus'] ?? 0) . '</td>'
                 . '<td><b>' . ($f['adjusted'] !== null ? e($f['adjusted']) : '—') . '</b></td>'
                 . '<td><b>' . e($f['letter'] ?? '—') . '</b></td></tr>';
@@ -375,8 +375,8 @@ class Ctl_grading_pdf {
         usort($finals, fn($a, $b) => ($b['final']['adjusted'] ?? 0) <=> ($a['final']['adjusted'] ?? 0));
 
         $rows = []; $rank = 0;
-        foreach ($finals as $f) { $rank++; $adj = $f['final']['adjusted']; $rows[] = [$rank, $f['name'], $f['sid'] ?? '—', $f['final']['semester1'] ?? '—', $f['final']['semester2'] ?? '—', '+' . ($f['final']['bonus'] ?? 0), $adj !== null ? (string)$adj : '—', $f['final']['letter'] ?? '—', $f['final']['pass'] ? 'PASS' : 'FAIL']; }
-        $pdf->table(['#', 'Student', 'ID', 'Round 1', 'Round 2', 'Bonus', 'Final', 'Grade', 'Status'], $rows);
+        foreach ($finals as $f) { $rank++; $adj = $f['final']['adjusted']; $rows[] = [$rank, $f['name'], $f['sid'] ?? '—', $f['final']['midterm1'] ?? '—', $f['final']['total1'] ?? '—', '+' . ($f['final']['bonus'] ?? 0), $adj !== null ? (string)$adj : '—', $f['final']['letter'] ?? '—', $f['final']['pass'] ? 'PASS' : 'FAIL']; }
+        $pdf->table(['#', 'Student', 'ID', 'Midterm', 'S1 Total', 'Bonus', 'Final', 'Grade', 'Status'], $rows);
 
         $adjScores = array_filter(array_column($finals, 'final'), fn($f) => $f['adjusted'] !== null);
         $adjScores = array_column($adjScores, 'adjusted');
@@ -396,14 +396,14 @@ class Ctl_grading_pdf {
 
         $headers = ['Rank', 'Student', 'ID'];
         foreach ($assessments as $a) $headers[] = mb_substr($a['type_slug'], 0, 6) . '/' . (int)$a['max_mark'];
-        $headers = array_merge($headers, ['R1', 'R2', 'Bonus', 'Final', 'Grade']);
+        $headers = array_merge($headers, ['Mid', 'S1', 'Bonus', 'Final', 'Grade']);
 
         $allFinals = [];
         foreach ($students as $s) { $f = grading_calc_final((int)$s['id'], $courseId); $allFinals[] = ['student' => $s, 'final' => $f]; }
         usort($allFinals, fn($a, $b) => ($b['final']['adjusted'] ?? 0) <=> ($a['final']['adjusted'] ?? 0));
 
         $rows = []; $rank = 0;
-        foreach ($allFinals as $entry) { $rank++; $s = $entry['student']; $f = $entry['final']; $row = [$rank, $s['last_name'] . ', ' . $s['first_name'], $s['sid'] ?? '—']; foreach ($assessments as $a) { $grade = Database::one("SELECT mark FROM grades WHERE assessment_id = ? AND student_id = ?", [$a['id'], $s['id']]); $row[] = $grade ? (string)$grade['mark'] : '—'; } $row = array_merge($row, [$f['semester1'] ?? '—', $f['semester2'] ?? '—', '+' . ($f['bonus'] ?? 0), $f['adjusted'] !== null ? (string)$f['adjusted'] : '—', $f['letter'] ?? '—']); $rows[] = $row; }
+        foreach ($allFinals as $entry) { $rank++; $s = $entry['student']; $f = $entry['final']; $row = [$rank, $s['last_name'] . ', ' . $s['first_name'], $s['sid'] ?? '—']; foreach ($assessments as $a) { $grade = Database::one("SELECT mark FROM grades WHERE assessment_id = ? AND student_id = ?", [$a['id'], $s['id']]); $row[] = $grade ? (string)$grade['mark'] : '—'; } $row = array_merge($row, [$f['midterm1'] ?? '—', $f['total1'] ?? '—', '+' . ($f['bonus'] ?? 0), $f['adjusted'] !== null ? (string)$f['adjusted'] : '—', $f['letter'] ?? '—']); $rows[] = $row; }
         $pdf->table($headers, $rows);
 
         $adjScores = array_filter(array_column(array_column($allFinals, 'final'), 'adjusted'), fn($v) => $v !== null);
