@@ -101,21 +101,36 @@
 
 <!-- Student Marks Table -->
 <?php if ($students && $assessments): ?>
+<?php
+  $currentSem = $selectedSem ?: 1;
+  $semAssessments = array_filter($assessments, fn($a) => (int)($a['semester'] ?? 0) === $currentSem);
+  $gradeUrl = url('teacher/grading&course=' . $selectedCourse);
+?>
 <div class="card" style="margin-bottom:18px;overflow-x:auto">
-  <h4 class="card-title" style="margin-top:0">Student Marks</h4>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+    <h4 class="card-title" style="margin:0">Student Marks</h4>
+    <div style="display:flex;gap:4px;margin-left:auto">
+      <a href="<?= e($gradeUrl . '&sem=1') ?>" class="btn btn-sm <?= $currentSem === 1 ? 'btn-primary' : 'btn-ghost' ?>">Semester 1</a>
+      <a href="<?= e($gradeUrl . '&sem=2') ?>" class="btn btn-sm <?= $currentSem === 2 ? 'btn-primary' : 'btn-ghost' ?>">Semester 2</a>
+      <a href="<?= e($gradeUrl) ?>" class="btn btn-sm <?= !$selectedSem ? 'btn-primary' : 'btn-ghost' ?>">All</a>
+    </div>
+  </div>
   <table class="table" style="margin:0;white-space:nowrap">
     <thead>
       <tr>
         <th style="position:sticky;left:0;background:var(--card);z-index:1">#</th>
         <th style="position:sticky;left:40px;background:var(--card);z-index:1;min-width:160px">Student</th>
-        <?php foreach ($assessments as $a): ?>
+        <?php foreach ($semAssessments as $a): ?>
           <th style="text-align:center;font-size:11px;max-width:80px">
-            <div><?= e(mb_substr($a['type_label'] ?? $a['type_slug'], 0, 8)) ?></div>
-            <div class="tiny faint">/<?= (int)$a['max_mark'] ?></div>
+            <div><?= e($a['title']) ?></div>
+            <div class="tiny faint"><?= e($a['type_label'] ?? $a['type_slug']) ?> · /<?= (int)$a['max_mark'] ?></div>
           </th>
         <?php endforeach; ?>
-        <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S1</th>
-        <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S2</th>
+        <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">Total</th>
+        <?php if (!$selectedSem): ?>
+          <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S1</th>
+          <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S2</th>
+        <?php endif; ?>
         <th style="text-align:center;font-size:11px;font-weight:700">Final</th>
         <th style="text-align:center;font-size:11px">Grade</th>
       </tr>
@@ -138,7 +153,7 @@
               </div>
             </div>
           </td>
-          <?php foreach ($assessments as $a): ?>
+          <?php foreach ($semAssessments as $a): ?>
             <?php
               $grade = Database::one("SELECT mark FROM grades WHERE assessment_id = ? AND student_id = ?", [(int)$a['id'], (int)$s['id']]);
               $mark = $grade ? (float)$grade['mark'] : null;
@@ -153,12 +168,17 @@
               <?php endif; ?>
             </td>
           <?php endforeach; ?>
-          <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
-            <?= $f['total1'] !== null ? e($f['total1']) . '%' : '—' ?>
+          <td style="text-align:center;background:color-mix(in srgb, var(--accent) 6%, var(--card));font-weight:700">
+            <?= $currentSem === 1 ? ($f['total1'] !== null ? e($f['total1']) . '%' : '—') : ($f['total2'] !== null ? e($f['total2']) . '%' : '—') ?>
           </td>
-          <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
-            <?= $f['total2'] !== null ? e($f['total2']) . '%' : '—' ?>
-          </td>
+          <?php if (!$selectedSem): ?>
+            <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
+              <?= $f['total1'] !== null ? e($f['total1']) . '%' : '—' ?>
+            </td>
+            <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
+              <?= $f['total2'] !== null ? e($f['total2']) . '%' : '—' ?>
+            </td>
+          <?php endif; ?>
           <td style="text-align:center;font-weight:700;font-size:14px">
             <?= $f['adjusted'] !== null ? e($f['adjusted']) : '—' ?>
           </td>

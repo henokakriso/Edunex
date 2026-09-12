@@ -156,6 +156,7 @@ class Ctl_grading {
              WHERE c.teacher_id = ? AND c.status = 'published' ORDER BY c.title", [$uid]);
 
         $selectedCourse = (int)($_GET['course'] ?? 0);
+        $selectedSem = (int)($_GET['sem'] ?? 0);
         $assessments = [];
         $students = [];
         $semesterStats = [1 => null, 2 => null];
@@ -202,6 +203,7 @@ class Ctl_grading {
             'title' => 'Gradebook',
             'courses' => $courses,
             'selectedCourse' => $selectedCourse,
+            'selectedSem' => $selectedSem,
             'assessments' => $assessments,
             'students' => $students,
             'semesterStats' => $semesterStats,
