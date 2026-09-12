@@ -584,3 +584,51 @@ class Ctl_grading_reports {
         ]);
     }
 }
+
+class Ctl_grading_students {
+    public function run(): void {
+        $u = require_role('teacher', 'lecturer');
+        $uid = (int)$u['id'];
+        $courseId = (int)($_GET['course'] ?? 0);
+
+        if ($courseId <= 0) {
+            redirect(url('teacher/grading'));
+        }
+
+        $course = Database::one("SELECT id, title, teacher_id FROM courses WHERE id = ? AND status = 'published'", [$courseId]);
+        if (!$course || (int)$course['teacher_id'] !== $uid) {
+            redirect(url('teacher/grading'));
+        }
+
+        // Enrolled students
+        $enrolled = Database::all(
+            "SELECT u.id, u.first_name, u.last_name, u.sid
+             FROM course_enrollments ce
+             JOIN users u ON u.id = ce.user_id
+             WHERE ce.course_id = ? AND u.role = 'student'
+             ORDER BY u.last_name, u.first_name", [$courseId]);
+        $enrolledIds = array_column($enrolled, 'id');
+
+        // Search
+        $searchQuery = trim($_GET['q'] ?? '');
+        $searchResults = [];
+        if ($searchQuery !== '') {
+            $like = '%' . $searchQuery . '%';
+            $searchResults = Database::all(
+                "SELECT id, first_name, last_name, sid, email FROM users
+                 WHERE role = 'student' AND (first_name LIKE ? OR last_name LIKE ? OR sid LIKE ? OR email LIKE ?)
+                 ORDER BY last_name, first_name LIMIT 10",
+                [$like, $like, $like, $like]);
+        }
+
+        Router::render('app/teacher/grading_students', [
+            'title' => 'Course Students',
+            'selectedCourse' => $courseId,
+            'courseTitle' => $course['title'],
+            'enrolled' => $enrolled,
+            'enrolledIds' => $enrolledIds,
+            'searchQuery' => $searchQuery,
+            'searchResults' => $searchResults,
+        ]);
+    }
+}
