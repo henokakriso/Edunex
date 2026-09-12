@@ -99,6 +99,83 @@
   <?php endfor; ?>
 </div>
 
+<!-- Student Marks Table -->
+<?php if ($students && $assessments): ?>
+<div class="card" style="margin-bottom:18px;overflow-x:auto">
+  <h4 class="card-title" style="margin-top:0">Student Marks</h4>
+  <table class="table" style="margin:0;white-space:nowrap">
+    <thead>
+      <tr>
+        <th style="position:sticky;left:0;background:var(--card);z-index:1">#</th>
+        <th style="position:sticky;left:40px;background:var(--card);z-index:1;min-width:160px">Student</th>
+        <?php foreach ($assessments as $a): ?>
+          <th style="text-align:center;font-size:11px;max-width:80px">
+            <div><?= e(mb_substr($a['type_label'] ?? $a['type_slug'], 0, 8)) ?></div>
+            <div class="tiny faint">/<?= (int)$a['max_mark'] ?></div>
+          </th>
+        <?php endforeach; ?>
+        <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S1</th>
+        <th style="text-align:center;font-size:11px;background:color-mix(in srgb, var(--accent) 6%, var(--card))">S2</th>
+        <th style="text-align:center;font-size:11px;font-weight:700">Final</th>
+        <th style="text-align:center;font-size:11px">Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php $rank = 0; ?>
+      <?php foreach ($students as $s): ?>
+        <?php
+          $f = grading_calc_final((int)$s['id'], $selectedCourse);
+          $rank++;
+        ?>
+        <tr>
+          <td style="position:sticky;left:0;background:var(--card);z-index:1"><?= $rank ?></td>
+          <td style="position:sticky;left:40px;background:var(--card);z-index:1">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar" style="width:28px;height:28px;font-size:.65rem;flex-shrink:0"><?= e(mb_substr($s['last_name'], 0, 1)) ?></div>
+              <div>
+                <div class="small" style="font-weight:600"><?= e($s['last_name'] . ', ' . $s['first_name']) ?></div>
+                <div class="tiny faint"><?= e($s['sid'] ?? '') ?></div>
+              </div>
+            </div>
+          </td>
+          <?php foreach ($assessments as $a): ?>
+            <?php
+              $grade = Database::one("SELECT mark FROM grades WHERE assessment_id = ? AND student_id = ?", [(int)$a['id'], (int)$s['id']]);
+              $mark = $grade ? (float)$grade['mark'] : null;
+              $max = (float)$a['max_mark'];
+              $pct = ($mark !== null && $max > 0) ? ($mark / $max * 100) : null;
+            ?>
+            <td style="text-align:center">
+              <?php if ($mark !== null): ?>
+                <span style="font-weight:600;<?= $pct >= 50 ? 'color:var(--success)' : 'color:var(--danger)' ?>"><?= e((string)$mark) ?></span>
+              <?php else: ?>
+                <span class="tiny faint">—</span>
+              <?php endif; ?>
+            </td>
+          <?php endforeach; ?>
+          <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
+            <?= $f['total1'] !== null ? e($f['total1']) . '%' : '—' ?>
+          </td>
+          <td style="text-align:center;background:color-mix(in srgb, var(--accent) 3%, transparent);font-weight:600">
+            <?= $f['total2'] !== null ? e($f['total2']) . '%' : '—' ?>
+          </td>
+          <td style="text-align:center;font-weight:700;font-size:14px">
+            <?= $f['adjusted'] !== null ? e($f['adjusted']) : '—' ?>
+          </td>
+          <td style="text-align:center">
+            <?php if ($f['letter']): ?>
+              <span class="badge <?= $f['pass'] ? 'badge-success' : 'badge-danger' ?>" style="font-size:11px"><?= e($f['letter']) ?></span>
+            <?php else: ?>
+              <span class="tiny faint">—</span>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+<?php endif; ?>
+
 <!-- Summary stats -->
 <?php if ($finalStats && !empty($finalStats['students'])): ?>
 <div class="card">

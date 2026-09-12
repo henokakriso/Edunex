@@ -126,7 +126,7 @@ function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = nu
         $total = grading_calc_semester_total($studentId, $courseId, $sem, $academicYearId);
         $count = (int)Database::scalar(
             "SELECT COUNT(*) FROM grades g JOIN assessments a ON a.id = g.assessment_id
-             WHERE g.student_id = ? AND a.course_id = ? AND g.status IN ('submitted','verified','published','locked')
+             WHERE g.student_id = ? AND a.course_id = ? AND g.status IN ('draft','submitted','verified','published','locked')
              AND a.semester = ?",
             [$studentId, $courseId, $sem]);
         Database::run("INSERT INTO semester_results (student_id, course_id, class_id, academic_year_id, semester, total, assessment_count)
@@ -218,8 +218,8 @@ function grading_calc_semester_for_course(int $courseId, int $semester): array {
         "SELECT g.student_id, a.type_slug, a.max_mark, g.mark, g.percentage
          FROM grades g JOIN assessments a ON a.id = g.assessment_id
          WHERE a.course_id = ? AND a.semester = ? AND a.status = 'published'
-         AND g.status IN ('submitted','verified','published','locked') AND g.mark IS NOT NULL",
-        [$courseId, $semester]);
+         AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL",
+         [$courseId, $semester]);
 
     if (empty($results)) return ['avg' => null, 'highest' => null, 'lowest' => null, 'count' => 0, 'students' => []];
 
@@ -480,7 +480,6 @@ class Ctl_assessment_new {
 
             $id = Database::insert('assessments', [
                 'course_id' => $courseId,
-                'class_id' => (int)Database::scalar("SELECT class_id FROM course_enrollments WHERE course_id = ? LIMIT 1", [$courseId], 0),
                 'teacher_id' => $uid,
                 'type_slug' => $typeSlug,
                 'title' => $title,
