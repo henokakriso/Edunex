@@ -22,14 +22,10 @@ function grading_pass(float $pct, float $pass = 50): bool {
 }
 
 /* =============== HELPER: Calculate midterm-only percentage for a semester =============== */
-/* semester 1 → r1 only, semester 2 → r3 only */
 function grading_calc_midterm(int $studentId, int $courseId, int $semester, ?int $academicYearId = null): ?float {
-    $where = "g.student_id = ? AND a.course_id = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
-    $args = [$studentId, $courseId];
+    $where = "g.student_id = ? AND a.course_id = ? AND a.type_slug = 'r1' AND a.semester = ? AND a.status = 'published' AND g.status IN ('draft','submitted','verified','published','locked') AND g.mark IS NOT NULL";
+    $args = [$studentId, $courseId, $semester];
     if ($academicYearId) { $where .= " AND a.academic_year_id = ?"; $args[] = $academicYearId; }
-
-    $midSlug = $semester === 1 ? 'r1' : 'r3';
-    $where .= " AND a.type_slug = ?"; $args[] = $midSlug;
 
     $rows = Database::all(
         "SELECT a.max_mark, g.mark
@@ -107,7 +103,7 @@ function grading_audit(int $gradeId, int $studentId, int $assessmentId, string $
     $courseId = (int)Database::scalar("SELECT course_id FROM assessments WHERE id = ?", [$assessmentId], 0);
     $schoolId = (int)Database::scalar("SELECT school_id FROM courses WHERE id = ?", [$courseId], 0);
     $typeSlug = (string)Database::scalar("SELECT type_slug FROM assessments WHERE id = ?", [$assessmentId], '');
-    $aType = in_array($typeSlug, ['r1','r2','r3','r4']) ? 'exam' : ($typeSlug === 'assignment' ? 'assignment' : 'manual');
+    $aType = in_array($typeSlug, ['r1','r2']) ? 'exam' : ($typeSlug === 'assignment' ? 'assignment' : 'manual');
     Database::insert('grade_audit', [
         'student_id' => $studentId,
         'course_id' => $courseId,
@@ -405,10 +401,9 @@ class Ctl_gradebook {
         $semesterUsed = 0;
         $semesterRemaining = 0;
         if ($semester === 1 || $semester === 2) {
-            $typeSlugs = $semester === 1 ? "('r1','r2')" : "('r3','r4')";
             $semesterMax = Database::all(
                 "SELECT a.type_slug, a.max_mark FROM assessments a
-                 WHERE a.course_id = ? AND a.type_slug IN $typeSlugs AND a.status = 'published'", [$assessment['cid']]);
+                 WHERE a.course_id = ? AND a.semester = ? AND a.status = 'published'", [$assessment['cid'], $semester]);
             foreach ($semesterMax as $sm) $semesterUsed += (float)$sm['max_mark'];
             $semesterRemaining = max(0, 100 - $semesterUsed);
         }

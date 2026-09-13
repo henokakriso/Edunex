@@ -46,12 +46,11 @@ if ($assessment['result_status'] === 'locked') {
 // Check semester total won't exceed 100
 $semester = (int)($assessment['semester'] ?? 0);
 if ($semester >= 1 && $semester <= 2) {
-    $typeSlugs = $semester === 1 ? "('r1','r2')" : "('r3','r4')";
     $usedRows = Database::all(
         "SELECT a.id, a.type_slug, MAX(a.max_mark) AS max_mark
-         FROM assessments a WHERE a.course_id = ? AND a.type_slug IN $typeSlugs AND a.status = 'published' AND a.id != ?
+         FROM assessments a WHERE a.course_id = ? AND a.semester = ? AND a.status = 'published' AND a.id != ?
          GROUP BY a.type_slug, a.id",
-        [$assessment['course_id'], $assessmentId]);
+        [$assessment['course_id'], $semester, $assessmentId]);
     $otherUsed = 0;
     foreach ($usedRows as $r) $otherUsed += (float)$r['max_mark'];
 
