@@ -158,7 +158,7 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="<?= url('public/js/html2pdf.bundle.min.js') ?>"></script>
 <script>
 (function(){
   var FLAG_URL  = <?= json_encode($pdf_ethiopian_flag) ?>;
@@ -170,13 +170,15 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 
   function toDataURL(url, type){
     return new Promise(function(resolve){
+      if(!url){ resolve(null); return; }
       var img = new Image();
-      img.crossOrigin = 'anonymous';
       img.onload = function(){
-        var c = document.createElement('canvas');
-        c.width = img.naturalWidth; c.height = img.naturalHeight;
-        c.getContext('2d').drawImage(img, 0, 0);
-        resolve(c.toDataURL(type));
+        try {
+          var c = document.createElement('canvas');
+          c.width = img.naturalWidth; c.height = img.naturalHeight;
+          c.getContext('2d').drawImage(img, 0, 0);
+          resolve(c.toDataURL(type));
+        } catch(e) { resolve(null); }
       };
       img.onerror = function(){ resolve(null); };
       img.src = url;

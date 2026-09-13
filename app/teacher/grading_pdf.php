@@ -93,10 +93,10 @@ class Ctl_grading_pdf {
         Back
       </a>
       <div style="flex:1"></div>
-      <button class="pdf-toolbar-btn pdf-toolbar-btn--dl" onclick="downloadPDF()">
+      <a href="<?= e($_SERVER['REQUEST_URI'] . (strpos($_SERVER['REQUEST_URI'], '?') !== false ? '&' : '?') . 'download=1') ?>" class="pdf-toolbar-btn pdf-toolbar-btn--dl">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         Download PDF
-      </button>
+      </a>
       <button class="pdf-toolbar-btn pdf-toolbar-btn--print" onclick="window.print()">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Print
@@ -147,9 +147,6 @@ class Ctl_grading_pdf {
   </div>
 
   <?php include BASE_PATH . '/includes/pdf_template.php'; ?>
-  <script>
-    document.querySelector('.pdf-toolbar-btn--dl').addEventListener('click', function(e) { e.preventDefault(); downloadPDF(); });
-  </script>
 </body>
 </html>
 <?php
