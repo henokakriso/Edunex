@@ -592,17 +592,17 @@ class Ctl_grading_students {
         $courseId = (int)($_GET['course'] ?? 0);
 
         if ($courseId <= 0) {
-            redirect(url('teacher/grading'));
+            redirect('teacher/grading');
         }
 
         $course = Database::one("SELECT id, title, teacher_id FROM courses WHERE id = ? AND status = 'published'", [$courseId]);
         if (!$course || (int)$course['teacher_id'] !== $uid) {
-            redirect(url('teacher/grading'));
+            redirect('teacher/grading');
         }
 
         // Enrolled students
         $enrolled = Database::all(
-            "SELECT u.id, u.first_name, u.last_name, u.sid
+            "SELECT u.id, u.first_name, u.last_name, u.student_id
              FROM course_enrollments ce
              JOIN users u ON u.id = ce.user_id
              WHERE ce.course_id = ? AND u.role = 'student'
@@ -615,8 +615,8 @@ class Ctl_grading_students {
         if ($searchQuery !== '') {
             $like = '%' . $searchQuery . '%';
             $searchResults = Database::all(
-                "SELECT id, first_name, last_name, sid, email FROM users
-                 WHERE role = 'student' AND (first_name LIKE ? OR last_name LIKE ? OR sid LIKE ? OR email LIKE ?)
+                "SELECT id, first_name, last_name, student_id, email FROM users
+                 WHERE role = 'student' AND (first_name LIKE ? OR last_name LIKE ? OR student_id LIKE ? OR email LIKE ?)
                  ORDER BY last_name, first_name LIMIT 10",
                 [$like, $like, $like, $like]);
         }

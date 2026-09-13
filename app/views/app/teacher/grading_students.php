@@ -29,7 +29,7 @@
           <div style="width:36px;height:36px;border-radius:50%;background:color-mix(in srgb, var(--accent) 10%, var(--card));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent)"><?= e(mb_substr($sr['first_name'], 0, 1)) ?></div>
           <div style="flex:1">
             <div style="font-weight:600;font-size:13px"><?= e($sr['first_name'] . ' ' . $sr['last_name']) ?></div>
-            <div style="font-size:11px;color:var(--text-secondary)"><?= e($sr['sid'] ?? $sr['email']) ?></div>
+            <div style="font-size:11px;color:var(--text-secondary)"><?= e($sr['student_id'] ?? $sr['email']) ?></div>
           </div>
           <?php if ($alreadyEnrolled): ?>
             <span class="badge badge-success" style="font-size:11px">Enrolled</span>
@@ -66,7 +66,7 @@
           <div style="width:38px;height:38px;border-radius:50%;background:color-mix(in srgb, <?= $gradeColor ?> 10%, var(--card));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:<?= $gradeColor ?>;flex-shrink:0"><?= e(mb_substr($s['first_name'], 0, 1)) ?></div>
           <div style="flex:1;min-width:0">
             <div style="font-weight:600;font-size:14px"><?= e($s['first_name'] . ' ' . $s['last_name']) ?></div>
-            <div style="font-size:11px;color:var(--text-secondary)"><?= e($s['sid'] ?? '') ?></div>
+            <div style="font-size:11px;color:var(--text-secondary)"><?= e($s['student_id'] ?? '') ?></div>
           </div>
           <div style="text-align:right;min-width:60px">
             <?php if ($letter): ?>

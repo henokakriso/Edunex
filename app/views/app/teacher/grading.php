@@ -133,6 +133,7 @@
     </tbody>
   </table>
 </div>
+<?php endif; ?>
 
 <!-- Summary -->
 <?php if ($finalStats && !empty($finalStats['students'])): ?>
