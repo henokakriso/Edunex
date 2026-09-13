@@ -85,6 +85,7 @@ Router::page('teacher/grading/students', 'teacher/grading_students.php', ['teach
 Router::page('api/grading_assessments', 'api/grading_assessments.php', ['teacher', 'lecturer', 'principal', 'ministry']);
 Router::page('api/grading_max_mark', 'api/grading_max_mark.php', ['teacher', 'lecturer']);
 Router::page('api/grading_students', 'api/grading_students.php', ['teacher', 'lecturer']);
+Router::page('api/grading_save_mark', 'api/grading_save_mark.php', ['teacher', 'lecturer']);
 
 /* ---- Admin ---- */
 Router::page('admin/dashboard', 'admin/dashboard.php', 'ministry');

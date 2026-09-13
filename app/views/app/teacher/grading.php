@@ -99,11 +99,11 @@
             $max = (float)$a['max_mark'];
             $pct = ($mark !== null && $max > 0) ? ($mark / $max * 100) : null;
           ?>
-          <td style="padding:10px 12px;text-align:center">
+          <td style="padding:10px 12px;text-align:center;cursor:pointer" title="Click to edit">
             <?php if ($mark !== null): ?>
-              <span style="font-weight:600;font-size:13px;color:<?= $pct >= 50 ? 'var(--success)' : 'var(--danger)' ?>"><?= e((string)$mark) ?></span>
+              <span class="grade-cell" data-assess="<?= (int)$a['id'] ?>" data-student="<?= (int)$s['id'] ?>" data-max="<?= (int)$a['max_mark'] ?>" data-val="<?= e((string)$mark) ?>" style="font-weight:600;font-size:13px;color:<?= $pct >= 50 ? 'var(--success)' : 'var(--danger)' ?>;padding:4px 8px;border-radius:6px;transition:background .15s" onmouseover="this.style.background='color-mix(in srgb, var(--accent) 8%, transparent)'" onmouseout="this.style.background=''"><?= e((string)$mark) ?></span>
             <?php else: ?>
-              <span style="color:var(--text-secondary);opacity:.3">—</span>
+              <span class="grade-cell" data-assess="<?= (int)$a['id'] ?>" data-student="<?= (int)$s['id'] ?>" data-max="<?= (int)$a['max_mark'] ?>" data-val="" style="color:var(--text-secondary);opacity:.3;padding:4px 8px;border-radius:6px;transition:all .15s" onmouseover="this.style.background='color-mix(in srgb, var(--accent) 8%, transparent)';this.style.opacity='1'" onmouseout="this.style.background='';this.style.opacity='.3'">+</span>
             <?php endif; ?>
           </td>
         <?php endforeach; ?>
@@ -218,4 +218,69 @@ function saveMaxMark() {
     }
   }).catch(() => alert('Network error'));
 }
+
+// Inline grade editing
+document.querySelectorAll('.grade-cell').forEach(cell => {
+  cell.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (this.querySelector('input')) return;
+
+    const assessId = this.dataset.assess;
+    const studentId = this.dataset.student;
+    const maxMark = parseInt(this.dataset.max);
+    const currentVal = this.dataset.val;
+    const td = this.closest('td');
+    const origHTML = this.outerHTML;
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0';
+    input.max = maxMark;
+    input.step = '0.5';
+    input.value = currentVal;
+    input.style.cssText = 'width:52px;text-align:center;padding:4px 6px;font-size:13px;font-weight:600;border:2px solid var(--accent);border-radius:6px;background:var(--card);color:var(--text);outline:none;';
+
+    this.replaceWith(input);
+    input.focus();
+    input.select();
+
+    function revert() {
+      if (input.parentNode) {
+        input.outerHTML = origHTML;
+      }
+    }
+
+    function save() {
+      const newVal = input.value.trim();
+      if (newVal === currentVal) { revert(); return; }
+
+      const fd = new FormData();
+      fd.append('assessment_id', assessId);
+      fd.append('student_id', studentId);
+      fd.append('mark', newVal);
+      fd.append('_csrf', '<?= e(csrf_token()) ?>');
+
+      fetch('<?= url('api/grading_save_mark') ?>', {
+        method: 'POST',
+        body: fd
+      }).then(r => r.json()).then(d => {
+        if (d.ok) {
+          location.reload();
+        } else {
+          alert(d.error || 'Failed to save');
+          revert();
+        }
+      }).catch(() => {
+        alert('Network error');
+        revert();
+      });
+    }
+
+    input.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+      if (ev.key === 'Escape') { revert(); }
+    });
+    input.addEventListener('blur', () => { save(); });
+  });
+});
 </script>
