@@ -229,8 +229,8 @@ document.querySelectorAll('.grade-cell').forEach(cell => {
     const studentId = this.dataset.student;
     const maxMark = parseInt(this.dataset.max);
     const currentVal = this.dataset.val;
-    const td = this.closest('td');
     const origHTML = this.outerHTML;
+    let saving = false;
 
     const input = document.createElement('input');
     input.type = 'number';
@@ -251,8 +251,10 @@ document.querySelectorAll('.grade-cell').forEach(cell => {
     }
 
     function save() {
+      if (saving) return;
       const newVal = input.value.trim();
       if (newVal === currentVal) { revert(); return; }
+      saving = true;
 
       const fd = new FormData();
       fd.append('assessment_id', assessId);
@@ -267,10 +269,12 @@ document.querySelectorAll('.grade-cell').forEach(cell => {
         if (d.ok) {
           location.reload();
         } else {
+          saving = false;
           alert(d.error || 'Failed to save');
           revert();
         }
       }).catch(() => {
+        saving = false;
         alert('Network error');
         revert();
       });

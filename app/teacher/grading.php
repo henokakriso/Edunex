@@ -104,18 +104,21 @@ function grading_calc_final(int $studentId, int $courseId, ?int $academicYearId 
 
 /* =============== HELPER: Audit log =============== */
 function grading_audit(int $gradeId, int $studentId, int $assessmentId, string $action, ?float $oldMark, ?float $newMark, ?string $oldStatus, ?string $newStatus, int $userId, ?string $reason = null): void {
+    $courseId = (int)Database::scalar("SELECT course_id FROM assessments WHERE id = ?", [$assessmentId], 0);
+    $schoolId = (int)Database::scalar("SELECT school_id FROM courses WHERE id = ?", [$courseId], 0);
+    $typeSlug = (string)Database::scalar("SELECT type_slug FROM assessments WHERE id = ?", [$assessmentId], '');
+    $aType = in_array($typeSlug, ['r1','r2','r3','r4']) ? 'exam' : ($typeSlug === 'assignment' ? 'assignment' : 'manual');
     Database::insert('grade_audit', [
-        'grade_id' => $gradeId,
         'student_id' => $studentId,
+        'course_id' => $courseId,
+        'school_id' => $schoolId,
+        'assessment_type' => $aType,
         'assessment_id' => $assessmentId,
+        'old_score' => $oldMark !== null ? (string)$oldMark : null,
+        'new_score' => $newMark !== null ? (string)$newMark : null,
         'action' => $action,
-        'old_mark' => $oldMark,
-        'new_mark' => $newMark,
-        'old_status' => $oldStatus,
-        'new_status' => $newStatus,
-        'performed_by' => $userId,
         'reason' => $reason,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+        'actor_id' => $userId,
     ]);
 }
 
