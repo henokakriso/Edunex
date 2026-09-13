@@ -120,7 +120,7 @@ function grading_audit(int $gradeId, int $studentId, int $assessmentId, string $
 
 /* =============== HELPER: Recalculate semester + final =============== */
 function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = null): void {
-    $classId = (int)Database::scalar("SELECT class_id FROM assessments WHERE course_id = ? LIMIT 1", [$courseId], 0);
+    $classId = (int)Database::scalar("SELECT class_id FROM assessments WHERE course_id = ? AND class_id IS NOT NULL AND class_id > 0 LIMIT 1", [$courseId], 0);
     foreach ([1, 2] as $sem) {
         $total = grading_calc_semester_total($studentId, $courseId, $sem, $academicYearId);
         $count = (int)Database::scalar(
@@ -138,7 +138,7 @@ function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = nu
     Database::run("INSERT INTO final_results (student_id, course_id, class_id, academic_year_id, semester1_total, semester2_total, final_score, bonus_points, adjusted_score, letter_grade, is_pass)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE semester1_total=VALUES(semester1_total), semester2_total=VALUES(semester2_total), final_score=VALUES(final_score), bonus_points=VALUES(bonus_points), adjusted_score=VALUES(adjusted_score), letter_grade=VALUES(letter_grade), is_pass=VALUES(is_pass)",
-        [$studentId, $courseId, $classId, $academicYearId, $final['total1'], $final['total2'], $final['final_score'], $final['bonus'], $final['adjusted'], $final['letter'], $final['pass']]);
+        [$studentId, $courseId, $classId, $academicYearId, $final['total1'], $final['total2'], $final['final_score'], $final['bonus'], $final['adjusted'], $final['letter'], (int)($final['pass'] ?? 0)]);
 }
 
 /* =============== GRADING: Main landing page =============== */
