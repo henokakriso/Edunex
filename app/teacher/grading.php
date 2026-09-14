@@ -128,16 +128,19 @@ function grading_recalc(int $studentId, int $courseId, ?int $academicYearId = nu
              WHERE g.student_id = ? AND a.course_id = ? AND g.status IN ('draft','submitted','verified','published','locked')
              AND a.semester = ?",
             [$studentId, $courseId, $sem]);
+        // Delete first to avoid MySQL NULL unique key issue, then insert
+        Database::run("DELETE FROM semester_results WHERE student_id = ? AND course_id = ? AND academic_year_id <=> ? AND semester = ?",
+            [$studentId, $courseId, $academicYearId, $sem]);
         Database::run("INSERT INTO semester_results (student_id, course_id, class_id, academic_year_id, semester, total, assessment_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE total = VALUES(total), assessment_count = VALUES(assessment_count)",
+            VALUES (?, ?, ?, ?, ?, ?, ?)",
             [$studentId, $courseId, $classId, $academicYearId, $sem, $total, $count]);
     }
 
     $final = grading_calc_final($studentId, $courseId, $academicYearId);
+    Database::run("DELETE FROM final_results WHERE student_id = ? AND course_id = ? AND academic_year_id <=> ?",
+        [$studentId, $courseId, $academicYearId]);
     Database::run("INSERT INTO final_results (student_id, course_id, class_id, academic_year_id, semester1_total, semester2_total, final_score, bonus_points, adjusted_score, letter_grade, is_pass)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE semester1_total=VALUES(semester1_total), semester2_total=VALUES(semester2_total), final_score=VALUES(final_score), bonus_points=VALUES(bonus_points), adjusted_score=VALUES(adjusted_score), letter_grade=VALUES(letter_grade), is_pass=VALUES(is_pass)",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [$studentId, $courseId, $classId, $academicYearId, $final['total1'], $final['total2'], $final['final_score'], $final['bonus'], $final['adjusted'], $final['letter'], (int)($final['pass'] ?? 0)]);
 }
 
