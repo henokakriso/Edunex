@@ -514,7 +514,9 @@ class Ctl_assessment_new {
             ]);
 
             flash('success', "Assessment \"{$title}\" created.");
-            redirect('teacher/gradebook&id=' . $id);
+            $courseClass = Database::one("SELECT class_id FROM courses WHERE id = ?", [$courseId]);
+            $classParam = $courseClass && $courseClass['class_id'] ? '&class=' . (int)$courseClass['class_id'] : '';
+            redirect('teacher/grading' . $classParam . '&course=' . $courseId);
         }
 
         Router::render('app/teacher/assessment_new', [
@@ -597,7 +599,11 @@ class Ctl_grading_reports {
         $uid = (int)$u['id'];
 
         $courses = Database::all(
-            "SELECT c.id, c.title FROM courses c WHERE c.teacher_id = ? AND c.status = 'published' ORDER BY c.title", [$uid]);
+            "SELECT c.id, c.title, c.class_id, sg.name AS class_name
+             FROM courses c
+             LEFT JOIN student_groups sg ON sg.id = c.class_id
+             WHERE c.teacher_id = ? AND c.status = 'published' AND c.class_id IS NOT NULL
+             ORDER BY sg.grade, sg.section, c.title", [$uid]);
 
         Router::render('app/teacher/grading_reports', [
             'title' => 'Grading Reports',
@@ -616,18 +622,21 @@ class Ctl_grading_students {
             redirect('teacher/grading');
         }
 
-        $course = Database::one("SELECT id, title, teacher_id FROM courses WHERE id = ? AND status = 'published'", [$courseId]);
+        $course = Database::one("SELECT id, title, teacher_id, class_id FROM courses WHERE id = ? AND status = 'published'", [$courseId]);
         if (!$course || (int)$course['teacher_id'] !== $uid) {
             redirect('teacher/grading');
         }
 
-        // Enrolled students
+        $classId = (int)($course['class_id'] ?? 0);
+
+        // Enrolled students for this class only
         $enrolled = Database::all(
             "SELECT u.id, u.first_name, u.last_name, u.student_id
              FROM course_enrollments ce
              JOIN users u ON u.id = ce.user_id
              WHERE ce.course_id = ? AND u.role = 'student'
-             ORDER BY u.last_name, u.first_name", [$courseId]);
+             AND (ce.class_id = ? OR ce.class_id IS NULL)
+             ORDER BY u.last_name, u.first_name", [$courseId, $classId ?: null]);
         $enrolledIds = array_column($enrolled, 'id');
 
         // Search
@@ -646,6 +655,7 @@ class Ctl_grading_students {
             'title' => 'Course Students',
             'selectedCourse' => $courseId,
             'courseTitle' => $course['title'],
+            'classId' => $classId,
             'enrolled' => $enrolled,
             'enrolledIds' => $enrolledIds,
             'searchQuery' => $searchQuery,

@@ -4,7 +4,7 @@
     <h1><?= icon('users') ?> Course Students</h1>
     <p class="sub"><?= e($courseTitle ?? '') ?> — enrolled students</p>
   </div>
-  <a class="btn btn-ghost" href="<?= e(url('teacher/grading&course=' . $selectedCourse)) ?>"><?= icon('arrow-left') ?> Back to Gradebook</a>
+  <a class="btn btn-ghost" href="<?= e(url('teacher/grading&class=' . ($classId ?? 0) . '&course=' . $selectedCourse)) ?>"><?= icon('arrow-left') ?> Back to Gradebook</a>
 </div>
 
 <!-- Enroll form -->

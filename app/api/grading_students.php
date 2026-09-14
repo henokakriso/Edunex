@@ -26,7 +26,7 @@ $action = $_POST['action'] ?? '';
 $courseId = (int)($_POST['course_id'] ?? 0);
 $studentId = (int)($_POST['student_id'] ?? 0);
 
-if ($courseId <= 0 || $studentId <= 0 || !in_array($action, ['enroll', 'remove'])) {
+if ($courseId <= 0 || $studentId <= 0 || $action !== 'enroll') {
     echo json_encode(['error' => 'Invalid parameters']);
     exit;
 }
@@ -51,25 +51,14 @@ if ($action === 'enroll') {
         echo json_encode(['error' => 'Already enrolled']);
         exit;
     }
+    // Store class_id from course
+    $classId = (int)($course['class_id'] ?? 0);
     Database::insert('course_enrollments', [
         'course_id' => $courseId,
         'user_id' => $studentId,
+        'class_id' => $classId ?: null,
         'enrolled_at' => date('Y-m-d H:i:s')
     ]);
     echo json_encode(['ok' => true, 'message' => $student['first_name'] . ' enrolled']);
-} else {
-    $enrollment = Database::one(
-        "SELECT id FROM course_enrollments WHERE course_id = ? AND user_id = ?",
-        [$courseId, $studentId]);
-    if (!$enrollment) {
-        echo json_encode(['error' => 'Not enrolled']);
-        exit;
-    }
-    Database::run("DELETE FROM course_enrollments WHERE id = ?", [(int)$enrollment['id']]);
-    // Also remove their grades for this course's assessments
-    Database::run(
-        "DELETE g FROM grades g JOIN assessments a ON a.id = g.assessment_id WHERE a.course_id = ? AND g.user_id = ?",
-        [$courseId, $studentId]);
-    echo json_encode(['ok' => true, 'message' => $student['first_name'] . ' removed']);
 }
 exit;

@@ -19,6 +19,23 @@
       </tr>
     </thead>
     <tbody>
+      <?php
+        // Group courses by class for optgroups
+        $grouped = [];
+        foreach ($courses as $c) {
+            $className = $c['class_name'] ?? 'Unassigned';
+            $grouped[$className][] = $c;
+        }
+        $courseOpts = function($id) use ($grouped) {
+          foreach ($grouped as $className => $courses) {
+            echo '<optgroup label="' . e($className) . '">';
+            foreach ($courses as $c) {
+              echo '<option value="' . (int)$c['id'] . '">' . e($c['title']) . '</option>';
+            }
+            echo '</optgroup>';
+          }
+        };
+      ?>
       <!-- Student Result -->
       <tr>
         <td style="text-align:center;color:var(--accent)"><?= icon('user') ?></td>
@@ -27,9 +44,7 @@
         <td>
           <select class="input" id="rpt-student-course" style="width:100%;margin:0">
             <option value="">— Select Course —</option>
-            <?php foreach ($courses as $c): ?>
-              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-            <?php endforeach; ?>
+            <?php $courseOpts('rpt-student-course'); ?>
           </select>
         </td>
         <td id="assess-col-student"></td>
@@ -43,9 +58,7 @@
         <td>
           <select class="input" id="rpt-class-course" style="width:100%;margin:0">
             <option value="">— Select Course —</option>
-            <?php foreach ($courses as $c): ?>
-              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-            <?php endforeach; ?>
+            <?php $courseOpts('rpt-class-course'); ?>
           </select>
         </td>
         <td></td>
@@ -59,9 +72,7 @@
         <td>
           <select class="input" id="rpt-exam-course" style="width:100%;margin:0" onchange="loadExamAssessments(this.value)">
             <option value="">— Select Course —</option>
-            <?php foreach ($courses as $c): ?>
-              <option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option>
-            <?php endforeach; ?>
+            <?php $courseOpts('rpt-exam-course'); ?>
           </select>
         </td>
         <td>
