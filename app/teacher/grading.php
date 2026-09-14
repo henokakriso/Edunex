@@ -883,19 +883,21 @@ class Ctl_roster {
               <span><span class="meta-dot"></span>Date: <b><?= date('F j, Y') ?></b></span>
             </div>
 
-            <table>
+            <?php $colB = 'border-right:1px solid #e5e7eb'; $colBC = 'border-right:1px solid #e5e7eb;border-bottom:2px solid #e5e7eb'; ?>
+            <table style="width:100%;border-collapse:collapse">
               <thead>
                 <tr>
-                  <th style="text-align:left;padding:10px 12px;min-width:140px;border-bottom:2px solid #1a1a2e;background:#f8fafc">Student</th>
-                  <th style="text-align:center;padding:10px 8px;min-width:68px;border-bottom:2px solid #1a1a2e;background:#f8fafc">ID</th>
-                  <th style="text-align:center;padding:10px 8px;width:38px;border-bottom:2px solid #1a1a2e;background:#f8fafc">Age</th>
-                  <th style="text-align:center;padding:10px 8px;width:34px;border-bottom:2px solid #1a1a2e;background:#f8fafc">Sex</th>
+                  <th style="text-align:left;padding:10px 12px;min-width:140px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">Student</th>
+                  <th style="text-align:center;padding:10px 8px;min-width:68px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">ID</th>
+                  <th style="text-align:center;padding:10px 8px;width:38px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">Age</th>
+                  <th style="text-align:center;padding:10px 8px;width:34px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">Sex</th>
+                  <th style="text-align:center;padding:10px 6px;width:56px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>"></th>
                   <?php foreach ($courses as $c): ?>
-                    <th style="text-align:center;padding:10px 8px;min-width:52px;border-bottom:2px solid #1a1a2e;background:#f8fafc;font-size:10px"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 8, '')) ?></th>
+                    <th style="text-align:center;padding:10px 8px;min-width:52px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>;font-size:10px"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 8, '')) ?></th>
                   <?php endforeach; ?>
-                  <th style="text-align:center;padding:10px 8px;width:36px;border-bottom:2px solid #1a1a2e;background:#f8fafc">Abs</th>
-                  <th style="text-align:center;padding:10px 8px;width:52px;border-bottom:2px solid #1a1a2e;background:#f8fafc">Total</th>
-                  <th style="text-align:center;padding:10px 8px;width:56px;border-bottom:2px solid #1a1a2e;background:#f8fafc;color:#6366f1;font-weight:700">Avg</th>
+                  <th style="text-align:center;padding:10px 8px;width:36px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">Abs</th>
+                  <th style="text-align:center;padding:10px 8px;width:52px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>">Total</th>
+                  <th style="text-align:center;padding:10px 8px;width:56px;border-bottom:2px solid #1a1a2e;background:#f8fafc;<?= $colB ?>;color:#6366f1;font-weight:700">Avg</th>
                   <th style="text-align:center;padding:10px 8px;width:44px;border-bottom:2px solid #1a1a2e;background:#f8fafc;cursor:pointer" onclick="sortRoster()" id="rank-th" title="Click to cycle: FY → Sem 2 → Avg">Rank ↕</th>
                 </tr>
               </thead>
@@ -905,7 +907,7 @@ class Ctl_roster {
               ?>
                 <!-- FY row -->
                 <tr>
-                  <td rowspan="3" style="padding:10px 12px;font-weight:600;vertical-align:middle;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>">
+                  <td rowspan="3" style="padding:10px 12px;font-weight:600;vertical-align:middle;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>">
                     <div style="display:flex;align-items:center;gap:6px">
                       <div style="width:28px;height:28px;border-radius:6px;background:#e0e7ff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#3730a3;flex-shrink:0"><?= e(mb_substr(explode(', ', $r['name'])[1] ?? '', 0, 1)) ?><?= e(mb_substr($r['name'], 0, 1)) ?></div>
                       <div>
@@ -914,56 +916,59 @@ class Ctl_roster {
                       </div>
                     </div>
                   </td>
-                  <td rowspan="3" style="text-align:center;vertical-align:middle;font-size:10px;color:#6b7280;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= e($r['sid']) ?></td>
-                  <td rowspan="3" style="text-align:center;vertical-align:middle;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $r['age'] ?? '—' ?></td>
-                  <td rowspan="3" style="text-align:center;vertical-align:middle;font-weight:700;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;color:<?= $r['gender'] === 'M' ? '#0ea5e9' : '#ec4899' ?>"><?= e($r['gender']) ?></td>
+                  <td rowspan="3" style="text-align:center;vertical-align:middle;font-size:10px;color:#6b7280;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= e($r['sid']) ?></td>
+                  <td rowspan="3" style="text-align:center;vertical-align:middle;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $r['age'] ?? '—' ?></td>
+                  <td rowspan="3" style="text-align:center;vertical-align:middle;font-weight:700;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>;color:<?= $r['gender'] === 'M' ? '#0ea5e9' : '#ec4899' ?>"><?= e($r['gender']) ?></td>
+                  <td style="text-align:center;padding:4px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>">
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:#e0e7ff;color:#3730a3">FY</span>
+                  </td>
                   <?php foreach ($courses as $c):
                     $sub = $r['subjects'][$c['id']] ?? ['fy'=>null];
                     $val = $sub['fy'];
                     $color = $val === null ? '#9ca3af' : ($val >= 50 ? '#1a1a2e' : '#dc2626');
                   ?>
-                    <td style="text-align:center;padding:8px;font-weight:700;color:<?= $color ?>;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($val) ?></td>
+                    <td style="text-align:center;padding:8px;font-weight:700;color:<?= $color ?>;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($val) ?></td>
                   <?php endforeach; ?>
-                  <td style="text-align:center;padding:8px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['fy_absences'] > 0 ? '#dc2626' : '#6b7280' ?>"><?= $r['fy_absences'] ?></td>
-                  <td style="text-align:center;padding:8px;font-weight:700;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['fy_total']) ?></td>
-                  <td style="text-align:center;padding:8px;font-weight:800;color:#6366f1;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['fy_average']) ?></td>
+                  <td style="text-align:center;padding:8px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>;font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['fy_absences'] > 0 ? '#dc2626' : '#6b7280' ?>"><?= $r['fy_absences'] ?></td>
+                  <td style="text-align:center;padding:8px;font-weight:700;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['fy_total']) ?></td>
+                  <td style="text-align:center;padding:8px;font-weight:800;color:#6366f1;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['fy_average']) ?></td>
                   <td style="text-align:center;padding:8px;font-weight:700;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>" data-rank="fy">
                     <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;<?= $r['fy_rank'] <= 3 ? 'background:#e0e7ff;color:#3730a3;font-weight:800' : 'background:#f1f5f9;color:#64748b' ?>"><?= $r['fy_rank'] ?></span>
                   </td>
                 </tr>
                 <!-- Sem 2 row -->
                 <tr>
-                  <td style="padding:5px 12px;text-align:left;font-size:10px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>">
-                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;background:#dbeafe;color:#1e40af">Sem 2</span>
+                  <td style="text-align:center;padding:4px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>">
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:#dbeafe;color:#1e40af">S2</span>
                   </td>
                   <?php foreach ($courses as $c):
                     $sub = $r['subjects'][$c['id']] ?? ['s2'=>null];
                     $val = $sub['s2'];
                     $color = $val === null ? '#9ca3af' : ($val >= 50 ? '#374151' : '#dc2626');
                   ?>
-                    <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:<?= $color ?>;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($val) ?></td>
+                    <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:<?= $color ?>;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($val) ?></td>
                   <?php endforeach; ?>
-                  <td style="text-align:center;padding:5px 8px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['s2_absences'] > 0 ? '#dc2626' : '#9ca3af' ?>;font-size:11px"><?= $r['s2_absences'] ?></td>
-                  <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:#374151;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['s2_total']) ?></td>
-                  <td style="text-align:center;padding:5px 8px;font-weight:700;font-size:12px;color:#374151;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['s2_average']) ?></td>
+                  <td style="text-align:center;padding:5px 8px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['s2_absences'] > 0 ? '#dc2626' : '#9ca3af' ?>;font-size:11px"><?= $r['s2_absences'] ?></td>
+                  <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:#374151;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['s2_total']) ?></td>
+                  <td style="text-align:center;padding:5px 8px;font-weight:700;font-size:12px;color:#374151;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['s2_average']) ?></td>
                   <td style="text-align:center;padding:5px 8px;border-bottom:2px solid #e5e7eb;background:<?= $groupBg ?>" data-rank="s2">
                     <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600"><?= $r['s2_rank'] ?></span>
                   </td>
                 </tr>
                 <!-- Avg row -->
                 <tr>
-                  <td style="padding:5px 12px 10px;text-align:left;font-size:10px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>">
-                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;background:#d1fae5;color:#065f46">Avg</span>
+                  <td style="text-align:center;padding:4px 10px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>">
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:#d1fae5;color:#065f46">Avg</span>
                   </td>
                   <?php foreach ($courses as $c):
                     $sub = $r['subjects'][$c['id']] ?? ['avg'=>null];
                   ?>
-                    <td style="text-align:center;padding:5px 8px 10px;font-weight:600;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($sub['avg']) ?></td>
+                    <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($sub['avg']) ?></td>
                   <?php endforeach; ?>
-                  <td style="text-align:center;padding:5px 8px 10px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;color:#9ca3af;font-size:11px"><?= $r['avg_absences'] ?></td>
-                  <td style="text-align:center;padding:5px 8px 10px;font-weight:600;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['avg_total']) ?></td>
-                  <td style="text-align:center;padding:5px 8px 10px;font-weight:700;font-size:12px;color:#059669;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>"><?= $fmt($r['avg_average']) ?></td>
-                  <td style="text-align:center;padding:5px 8px 10px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>" data-rank="avg">
+                  <td style="text-align:center;padding:5px 8px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>;color:#9ca3af;font-size:11px"><?= $r['avg_absences'] ?></td>
+                  <td style="text-align:center;padding:5px 8px;font-weight:600;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['avg_total']) ?></td>
+                  <td style="text-align:center;padding:5px 8px;font-weight:700;font-size:12px;color:#059669;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>;<?= $colB ?>"><?= $fmt($r['avg_average']) ?></td>
+                  <td style="text-align:center;padding:5px 8px;border-bottom:1px solid #e5e7eb;background:<?= $groupBg ?>" data-rank="avg">
                     <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600"><?= $r['avg_rank'] ?></span>
                   </td>
                 </tr>
