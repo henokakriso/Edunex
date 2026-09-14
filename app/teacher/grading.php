@@ -566,7 +566,7 @@ class Ctl_bonus {
                     'title' => $title,
                     'reason' => $reason,
                     'points' => $points,
-                    'status' => 'pending',
+                    'status' => 'approved',
                 ]);
                 grading_recalc($studentId, $courseId);
                 flash('success', "Bonus of +{$points} added for student.");
