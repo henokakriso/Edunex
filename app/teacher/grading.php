@@ -708,39 +708,28 @@ class Ctl_roster {
 
             foreach ($courses as $c) {
                 $cid = (int)$c['id'];
-                $s1 = $this->courseSemesterTotal((int)$s['id'], $cid, 1);
-                $s2 = $this->courseSemesterTotal((int)$s['id'], $cid, 2);
-                // Full Year = combined mark from all assessments in both semesters
                 $fy = $this->courseFullYearTotal((int)$s['id'], $cid);
-                // Average of FY and S2 for display in row 3
-                $avg = ($fy !== null && $s2 !== null) ? round(($fy + $s2) / 2, 1)
-                     : ($fy ?? $s2 ?? null);
+                $s2 = $this->courseSemesterTotal((int)$s['id'], $cid, 2);
+                $avg = ($fy !== null && $s2 !== null) ? round(($fy + $s2) / 2, 1) : ($fy ?? $s2 ?? null);
 
                 $subjects[$cid] = ['fy' => $fy, 's2' => $s2, 'avg' => $avg];
-
                 if ($fy !== null) { $fyTotal += $fy; $fyCount++; }
                 if ($s2 !== null) { $s2Total += $s2; $s2Count++; }
             }
 
-            // Absences: total, semester 2 only
             $absTotal = (int)Database::scalar(
                 "SELECT COUNT(*) FROM attendance WHERE student_id = ? AND status = 'absent'
                  AND course_id IN (SELECT id FROM courses WHERE class_id = ?)",
                 [(int)$s['id'], $classId]);
-            // Semester 2 absences: attendance dates within sem2 assessment dates
             $absS2 = (int)Database::scalar(
                 "SELECT COUNT(*) FROM attendance att
                  WHERE att.student_id = ? AND att.status = 'absent'
                  AND att.course_id IN (SELECT id FROM courses WHERE class_id = ?)
-                 AND att.date >= (SELECT MIN(a.assessment_date) FROM assessments a
-                   JOIN courses c ON c.id = a.course_id WHERE c.class_id = ? AND a.semester = 2)
-                 AND att.date <= (SELECT MAX(a.assessment_date) FROM assessments a
-                   JOIN courses c ON c.id = a.course_id WHERE c.class_id = ? AND a.semester = 2)",
+                 AND att.date >= COALESCE((SELECT MIN(a.assessment_date) FROM assessments a
+                   JOIN courses c ON c.id = a.course_id WHERE c.class_id = ? AND a.semester = 2), '1900-01-01')
+                 AND att.date <= COALESCE((SELECT MAX(a.assessment_date) FROM assessments a
+                   JOIN courses c ON c.id = a.course_id WHERE c.class_id = ? AND a.semester = 2), '2099-12-31')",
                 [(int)$s['id'], $classId, $classId, $classId]);
-
-            $fyAbs = $absTotal;
-            $s2Abs = $absS2;
-            $avgAbs = round(($absTotal + $absS2) / 2, 0);
 
             $rosterData[] = [
                 'id' => (int)$s['id'],
@@ -755,28 +744,44 @@ class Ctl_roster {
                 's2_average' => $s2Count > 0 ? round($s2Total / $s2Count, 1) : null,
                 'avg_total' => ($fyCount > 0 && $s2Count > 0) ? round(($fyTotal + $s2Total) / 2, 1) : null,
                 'avg_average' => ($fyCount > 0 && $s2Count > 0) ? round(($fyTotal / $fyCount + $s2Total / $s2Count) / 2, 1) : null,
-                'fy_absences' => $fyAbs,
-                's2_absences' => $s2Abs,
-                'avg_absences' => $avgAbs,
+                'fy_absences' => $absTotal,
+                's2_absences' => $absS2,
+                'avg_absences' => round(($absTotal + $absS2) / 2, 0),
             ];
         }
 
-        // Rank by FY average descending
+        // Rank by FY average
         usort($rosterData, fn($a, $b) => ($b['fy_average'] ?? -1) <=> ($a['fy_average'] ?? -1));
-        $rank = 0; $prevAvg = null;
+        $rank = 0; $prev = null;
         foreach ($rosterData as &$r) {
-            if ($r['fy_average'] !== null && $r['fy_average'] !== $prevAvg) { $rank++; $prevAvg = $r['fy_average']; }
-            $r['rank'] = $rank;
+            if ($r['fy_average'] !== null && $r['fy_average'] !== $prev) { $rank++; $prev = $r['fy_average']; }
+            $r['fy_rank'] = $rank;
         }
         unset($r);
 
-        // PDF viewer (html view with download/print buttons)
-        if (isset($_GET['pdf'])) {
-            $this->renderPDFViewer($rosterData, $courses, $homeroom);
-            exit;
+        // Rank by S2 average
+        usort($rosterData, fn($a, $b) => ($b['s2_average'] ?? -1) <=> ($a['s2_average'] ?? -1));
+        $rank = 0; $prev = null;
+        foreach ($rosterData as &$r) {
+            if ($r['s2_average'] !== null && $r['s2_average'] !== $prev) { $rank++; $prev = $r['s2_average']; }
+            $r['s2_rank'] = $rank;
         }
-        // PDF direct download
-        if (isset($_GET['download'])) {
+        unset($r);
+
+        // Rank by AVG average
+        usort($rosterData, fn($a, $b) => ($b['avg_average'] ?? -1) <=> ($a['avg_average'] ?? -1));
+        $rank = 0; $prev = null;
+        foreach ($rosterData as &$r) {
+            if ($r['avg_average'] !== null && $r['avg_average'] !== $prev) { $rank++; $prev = $r['avg_average']; }
+            $r['avg_rank'] = $rank;
+        }
+        unset($r);
+
+        // Sort back by FY rank for display
+        usort($rosterData, fn($a, $b) => $a['fy_rank'] <=> $b['fy_rank']);
+
+        // PDF viewer
+        if (isset($_GET['pdf']) || isset($_GET['download'])) {
             $this->renderPDFViewer($rosterData, $courses, $homeroom);
             exit;
         }
@@ -814,8 +819,21 @@ class Ctl_roster {
     }
 
     private function renderPDFViewer(array $rosterData, array $courses, array $homeroom): void {
-        $title = 'Class Roster — ' . $homeroom['name'];
-        $subtitle = date('F Y');
+        global $__u;
+        $u = require_role('teacher', 'lecturer');
+        $__u = $u;
+
+        $fmt = fn($v) => $v !== null ? number_format($v, 1) : '—';
+
+        $pdf_title = 'Class Roster';
+        $pdf_subtitle = $homeroom['name'] . ' — ' . date('F Y');
+        $pdf_doc_id = 'EDU-ROSTER-' . date('Y') . '-' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        $pdf_stamp = date('F j, Y \a\t g:i A');
+        $pdf_filename = 'class_roster_' . $homeroom['name'] . '_' . date('Ymd') . '.pdf';
+        $pdf_record_count = count($rosterData);
+        $pdf_orientation = 'landscape';
+        $backUrl = url('teacher/grading/roster');
+
         $studentCount = count($rosterData);
         $subjectCount = count($courses);
         $allAvg = array_filter(array_column($rosterData, 'fy_average'));
@@ -823,167 +841,153 @@ class Ctl_roster {
         $passCount = count(array_filter($rosterData, fn($r) => $r['fy_average'] !== null && $r['fy_average'] >= 50));
         $passRate = $studentCount > 0 ? round(($passCount / $studentCount) * 100, 1) : 0;
 
-        $fmt = fn($v) => $v !== null ? number_format($v, 1) : '—';
-        $backUrl = url('teacher/grading/roster');
-        $downloadUrl = url('teacher/grading/roster&download=1');
+        require __DIR__ . '/../../includes/pdf_template.php';
         ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= e($title) ?></title>
-  <link rel="stylesheet" href="<?= url('public/css/app.css') ?>?v=<?= time() ?>">
-  <style>
-    body { background: #f0f2f5; margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-    .pdf-viewer { max-width: 1200px; margin: 0 auto; }
-    .pdf-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 12px 18px; background: #fff; border: 1px solid #e2e5ea; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-    .pdf-toolbar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; border: 1px solid #e2e5ea; background: #fff; color: #1a1a2e; transition: all .15s; }
-    .pdf-toolbar-btn:hover { background: #f5f5f5; }
-    .pdf-toolbar-btn--primary { background: #6366f1; color: #fff; border-color: #6366f1; }
-    .pdf-toolbar-btn--primary:hover { background: #4f46e5; }
-    .pdf-toolbar-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; color: #1a1a2e; }
-    .pdf-page { background: #fff; border: 1px solid #e2e5ea; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,.06); margin-bottom: 16px; overflow-x: auto; }
-    .pdf-header { margin-bottom: 20px; border-bottom: 2px solid #e2e5ea; padding-bottom: 16px; }
-    .pdf-header h1 { margin: 0 0 4px; font-size: 20px; color: #1a1a2e; }
-    .pdf-header .meta { font-size: 12px; color: #6b7280; }
-    .pdf-stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-    .pdf-stat { padding: 10px 16px; border-radius: 8px; background: #f0f4ff; font-size: 12px; }
-    .pdf-stat b { font-size: 16px; color: #1a1a2e; display: block; }
-    table.roster { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-    table.roster th { padding: 8px 10px; text-align: center; font-size: 10px; font-weight: 700; color: #374151; background: #f3f4f6; border: 1px solid #d1d5db; }
-    table.roster td { padding: 7px 10px; text-align: center; border: 1px solid #e5e7eb; }
-    table.roster td.name-col { text-align: left; font-weight: 600; white-space: nowrap; }
-    table.roster tr.row-fy { background: #fff; }
-    table.roster tr.row-s2 { background: #f8fafc; }
-    table.roster tr.row-avg { background: #f0f4ff; }
-    table.roster tr.row-fy td.name-col { border-top: 2px solid #1a1a2e; }
-    table.roster tr.row-s2 td.name-col { border-left: 3px solid #6366f1; }
-    table.roster tr.row-avg td.name-col { border-left: 3px solid #10b981; border-bottom: 2px solid #1a1a2e; }
-    .row-label { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
-    .row-label-fy { background: #e0e7ff; color: #3730a3; }
-    .row-label-s2 { background: #dbeafe; color: #1e40af; }
-    .row-label-avg { background: #d1fae5; color: #065f46; }
-    .legend { margin-top: 16px; padding: 10px 14px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 10px; color: #6b7280; }
-    @media print { .pdf-toolbar { display: none; } body { background: #fff; padding: 0; } .pdf-page { border: none; box-shadow: none; padding: 15px; } }
-  </style>
-</head>
-<body>
-  <div class="pdf-viewer">
-    <div class="pdf-toolbar">
-      <a href="<?= e($backUrl) ?>" class="pdf-toolbar-btn">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back
-      </a>
-      <div class="pdf-toolbar-title"><?= e($title) ?></div>
-      <button onclick="window.print()" class="pdf-toolbar-btn">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print
-      </button>
-      <a href="<?= e($downloadUrl) ?>" class="pdf-toolbar-btn pdf-toolbar-btn--primary">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        Download PDF
-      </a>
-    </div>
+        <div class="pdf-viewer">
+          <div class="pdf-toolbar">
+            <a href="<?= e($backUrl) ?>" class="pdf-toolbar-btn pdf-toolbar-btn--back">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Back
+            </a>
+            <div style="flex:1"></div>
+            <button onclick="window.print()" class="pdf-toolbar-btn pdf-toolbar-btn--print">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print
+            </button>
+            <button onclick="downloadPDF()" class="pdf-toolbar-btn pdf-toolbar-btn--dl">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Download PDF
+            </button>
+          </div>
 
-    <div class="pdf-page">
-      <div class="pdf-header">
-        <h1>Class Roster</h1>
-        <div class="meta"><?= e($homeroom['name']) ?> — <?= $subtitle ?></div>
-      </div>
+          <div class="pdf-paper" id="pdf-content">
+            <div class="pdf-header">
+              <div class="logos-row">
+                <div class="flag-wrap"><img class="flag-img" src="<?= e(url('public/images/ethiopian-flag.jpeg')) ?>" alt="Ethiopia"></div>
+                <div class="text-center">
+                  <h2>Federal Democratic Republic of Ethiopia</h2>
+                  <div class="pdf-sub"><?= e($pdf_subtitle) ?></div>
+                </div>
+                <div class="ministry-wrap"><img class="logo-img" src="<?= e(url('public/images/ministry-logo.png')) ?>" alt="Ministry"></div>
+              </div>
+            </div>
 
-      <div class="pdf-stats">
-        <div class="pdf-stat"><b><?= $studentCount ?></b>Students</div>
-        <div class="pdf-stat"><b><?= $subjectCount ?></b>Subjects</div>
-        <div class="pdf-stat"><b><?= number_format($classAvg, 1) ?>%</b>Class Average</div>
-        <div class="pdf-stat"><b><?= $passRate ?>%</b>Pass Rate</div>
-      </div>
+            <div class="pdf-meta">
+              <span><span class="meta-dot"></span>Class: <b><?= e($homeroom['name']) ?></b></span>
+              <span><span class="meta-dot"></span>Students: <b><?= $studentCount ?></b></span>
+              <span><span class="meta-dot"></span>Subjects: <b><?= $subjectCount ?></b></span>
+              <span><span class="meta-dot"></span>Class Average: <b><?= number_format($classAvg, 1) ?>%</b></span>
+              <span><span class="meta-dot"></span>Pass Rate: <b><?= $passRate ?>%</b></span>
+              <span><span class="meta-dot"></span>Date: <b><?= date('F j, Y') ?></b></span>
+            </div>
 
-      <table class="roster">
-        <thead>
-          <tr>
-            <th style="text-align:left;min-width:150px">Student Name</th>
-            <th style="min-width:70px">ID</th>
-            <th>Age</th>
-            <th>Sex</th>
-            <?php foreach ($courses as $c): ?>
-              <th style="min-width:55px"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 10, '')) ?></th>
-            <?php endforeach; ?>
-            <th>Abs</th>
-            <th>Total</th>
-            <th>Average</th>
-            <th>Rank</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($rosterData as $r): ?>
-          <!-- Full Year row -->
-          <tr class="row-fy">
-            <td class="name-col">
-              <?= e($r['name']) ?>
-              <span class="row-label row-label-fy">FY</span>
-            </td>
-            <td><?= e($r['sid']) ?></td>
-            <td><?= $r['age'] ?? '—' ?></td>
-            <td style="font-weight:700"><?= e($r['gender']) ?></td>
-            <?php foreach ($courses as $c):
-              $sub = $r['subjects'][$c['id']] ?? ['fy'=>null];
-            ?>
-              <td style="font-weight:700;color:<?= ($sub['fy'] ?? 0) >= 50 ? '#1a1a2e' : '#dc2626' ?>"><?= $fmt($sub['fy']) ?></td>
-            <?php endforeach; ?>
-            <td style="color:<?= $r['fy_absences'] > 0 ? '#dc2626' : '#6b7280' ?>;font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>"><?= $r['fy_absences'] ?></td>
-            <td style="font-weight:700"><?= $fmt($r['fy_total']) ?></td>
-            <td style="font-weight:800;color:#6366f1;font-size:13px"><?= $fmt($r['fy_average']) ?></td>
-            <td style="font-weight:700"><?= $r['rank'] ?></td>
-          </tr>
-          <!-- Semester 2 row -->
-          <tr class="row-s2">
-            <td class="name-col" style="padding-left:24px;color:#6b7280;font-weight:400;font-size:10px">
-              <span class="row-label row-label-s2">S2</span>
-            </td>
-            <td style="color:#9ca3af;font-size:10px"><?= e($r['sid']) ?></td>
-            <td style="color:#9ca3af"></td>
-            <td></td>
-            <?php foreach ($courses as $c):
-              $sub = $r['subjects'][$c['id']] ?? ['s2'=>null];
-            ?>
-              <td style="font-weight:600;color:<?= ($sub['s2'] ?? 0) >= 50 ? '#374151' : '#dc2626' ?>"><?= $fmt($sub['s2']) ?></td>
-            <?php endforeach; ?>
-            <td style="color:<?= $r['s2_absences'] > 0 ? '#dc2626' : '#9ca3af' ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>"><?= $r['s2_absences'] ?></td>
-            <td style="font-weight:600;color:#374151"><?= $fmt($r['s2_total']) ?></td>
-            <td style="font-weight:700;color:#374151"><?= $fmt($r['s2_average']) ?></td>
-            <td></td>
-          </tr>
-          <!-- Average row -->
-          <tr class="row-avg">
-            <td class="name-col" style="padding-left:24px;color:#6b7280;font-weight:400;font-size:10px">
-              <span class="row-label row-label-avg">AVG</span>
-            </td>
-            <td style="color:#9ca3af;font-size:10px"><?= e($r['sid']) ?></td>
-            <td style="color:#9ca3af"></td>
-            <td></td>
-            <?php foreach ($courses as $c):
-              $sub = $r['subjects'][$c['id']] ?? ['avg'=>null];
-            ?>
-              <td style="font-weight:600;color:#374151"><?= $fmt($sub['avg']) ?></td>
-            <?php endforeach; ?>
-            <td style="color:#9ca3af"><?= $r['avg_absences'] ?></td>
-            <td style="font-weight:600;color:#374151"><?= $fmt($r['avg_total']) ?></td>
-            <td style="font-weight:700;color:#059669"><?= $fmt($r['avg_average']) ?></td>
-            <td></td>
-          </tr>
-        <?php endforeach; ?>
-        </tbody>
-      </table>
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align:left;min-width:140px">Student Name</th>
+                  <th style="min-width:65px">ID</th>
+                  <th>Age</th>
+                  <th>Sex</th>
+                  <?php foreach ($courses as $c): ?>
+                    <th style="min-width:50px;text-align:center"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 10, '')) ?></th>
+                  <?php endforeach; ?>
+                  <th style="text-align:center">Abs</th>
+                  <th style="text-align:center">Total</th>
+                  <th style="text-align:center">Average</th>
+                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('fy')" title="Click to sort by FY Rank">FY Rank ↕</th>
+                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('s2')" title="Click to sort by S2 Rank">S2 Rank ↕</th>
+                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('avg')" title="Click to sort by AVG Rank">AVG Rank ↕</th>
+                </tr>
+              </thead>
+              <tbody id="roster-body">
+              <?php foreach ($rosterData as $r): ?>
+                <!-- Full Year row -->
+                <tr>
+                  <td rowspan="3" style="font-weight:600;vertical-align:top;border-top:2px solid #1a1a2e">
+                    <?= e($r['name']) ?>
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-left:4px">FY</span>
+                  </td>
+                  <td rowspan="3" style="text-align:center;vertical-align:top;font-size:10px;color:#6b7280;border-top:2px solid #1a1a2e"><?= e($r['sid']) ?></td>
+                  <td rowspan="3" style="text-align:center;vertical-align:top;border-top:2px solid #1a1a2e"><?= $r['age'] ?? '—' ?></td>
+                  <td rowspan="3" style="text-align:center;vertical-align:top;font-weight:700;border-top:2px solid #1a1a2e;color:<?= $r['gender'] === 'M' ? '#0ea5e9' : '#ec4899' ?>"><?= e($r['gender']) ?></td>
+                  <?php foreach ($courses as $c):
+                    $sub = $r['subjects'][$c['id']] ?? ['fy'=>null];
+                  ?>
+                    <td style="text-align:center;font-weight:700;color:<?= ($sub['fy'] ?? 0) >= 50 ? '#1a1a2e' : '#dc2626' ?>"><?= $fmt($sub['fy']) ?></td>
+                  <?php endforeach; ?>
+                  <td style="text-align:center;color:<?= $r['fy_absences'] > 0 ? '#dc2626' : '#6b7280' ?>;font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>"><?= $r['fy_absences'] ?></td>
+                  <td style="text-align:center;font-weight:700"><?= $fmt($r['fy_total']) ?></td>
+                  <td style="text-align:center;font-weight:800;color:#6366f1"><?= $fmt($r['fy_average']) ?></td>
+                  <td style="text-align:center;font-weight:700"><?= $r['fy_rank'] ?></td>
+                  <td style="text-align:center;color:#9ca3af">—</td>
+                  <td style="text-align:center;color:#9ca3af">—</td>
+                </tr>
+                <!-- Semester 2 row -->
+                <tr style="background:rgba(99,102,241,.03)">
+                  <td style="padding-left:8px;color:#6b7280;font-size:10px;text-align:left">
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;background:#dbeafe;color:#1e40af">S2</span>
+                  </td>
+                  <?php foreach ($courses as $c):
+                    $sub = $r['subjects'][$c['id']] ?? ['s2'=>null];
+                  ?>
+                    <td style="text-align:center;font-weight:600;color:<?= ($sub['s2'] ?? 0) >= 50 ? '#374151' : '#dc2626' ?>"><?= $fmt($sub['s2']) ?></td>
+                  <?php endforeach; ?>
+                  <td style="text-align:center;color:<?= $r['s2_absences'] > 0 ? '#dc2626' : '#9ca3af' ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>"><?= $r['s2_absences'] ?></td>
+                  <td style="text-align:center;font-weight:600;color:#374151"><?= $fmt($r['s2_total']) ?></td>
+                  <td style="text-align:center;font-weight:700;color:#374151"><?= $fmt($r['s2_average']) ?></td>
+                  <td style="text-align:center;color:#9ca3af">—</td>
+                  <td style="text-align:center;font-weight:700"><?= $r['s2_rank'] ?></td>
+                  <td style="text-align:center;color:#9ca3af">—</td>
+                </tr>
+                <!-- Average row -->
+                <tr style="background:rgba(16,185,129,.03);border-bottom:2px solid rgba(0,0,0,.1)">
+                  <td style="padding-left:8px;color:#6b7280;font-size:10px;text-align:left;border-bottom:2px solid rgba(0,0,0,.1)">
+                    <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;background:#d1fae5;color:#065f46">AVG</span>
+                  </td>
+                  <?php foreach ($courses as $c):
+                    $sub = $r['subjects'][$c['id']] ?? ['avg'=>null];
+                  ?>
+                    <td style="text-align:center;font-weight:600;color:#374151;border-bottom:2px solid rgba(0,0,0,.1)"><?= $fmt($sub['avg']) ?></td>
+                  <?php endforeach; ?>
+                  <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)"><?= $r['avg_absences'] ?></td>
+                  <td style="text-align:center;font-weight:600;color:#374151;border-bottom:2px solid rgba(0,0,0,.1)"><?= $fmt($r['avg_total']) ?></td>
+                  <td style="text-align:center;font-weight:700;color:#059669;border-bottom:2px solid rgba(0,0,0,.1)"><?= $fmt($r['avg_average']) ?></td>
+                  <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)">—</td>
+                  <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)">—</td>
+                  <td style="text-align:center;font-weight:700;border-bottom:2px solid rgba(0,0,0,.1)"><?= $r['avg_rank'] ?></td>
+                </tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table>
 
-      <div class="legend">
-        <b>Legend:</b> FY = Full Year (all assessments) · S2 = Semester 2 only · AVG = Average of FY and S2 ·
-        Abs = Absence Days · Total = Sum of Subject Averages · Average = Total ÷ Subjects · Rank = Class Standing (by FY Average)
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-<?php
+            <div class="pdf-footer">
+              <span><?= e($pdf_doc_id) ?></span>
+              <span><?= e($pdf_stamp) ?></span>
+            </div>
+          </div>
+        </div>
+
+        <script>
+        function sortRoster(type) {
+          var tbody = document.getElementById('roster-body');
+          var rows = [];
+          var trs = tbody.querySelectorAll('tr');
+          for (var i = 0; i < trs.length; i += 3) {
+            rows.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
+          }
+          var key = type + '_rank';
+          rows.sort(function(a, b) {
+            var aRank = parseInt(a.fy.getAttribute('data-' + key)) || 999;
+            var bRank = parseInt(b.fy.getAttribute('data-' + key)) || 999;
+            return aRank - bRank;
+          });
+          rows.forEach(function(r) {
+            tbody.appendChild(r.fy);
+            tbody.appendChild(r.s2);
+            tbody.appendChild(r.avg);
+          });
+        }
+        </script>
+        <?php
     }
 }
