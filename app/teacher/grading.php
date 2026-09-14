@@ -666,3 +666,212 @@ class Ctl_grading_students {
         ]);
     }
 }
+
+/* =============== ROSTER: Class grade report (homeroom teacher only) =============== */
+class Ctl_roster {
+    public function run(): void {
+        $u = require_role('teacher', 'lecturer');
+        $uid = (int)$u['id'];
+
+        // Find homeroom class
+        $homeroom = Database::one(
+            "SELECT id, name, grade, section, homeroom_teacher_id FROM student_groups WHERE homeroom_teacher_id = ?", [$uid]);
+        if (!$homeroom) {
+            flash('danger', 'You are not assigned as a homeroom teacher for any class.');
+            redirect('teacher/grading');
+        }
+        $classId = (int)$homeroom['id'];
+
+        // All courses for this class
+        $courses = Database::all(
+            "SELECT c.id, c.title, c.subject_id, s.name AS subject_name
+             FROM courses c
+             LEFT JOIN subjects s ON s.id = c.subject_id
+             WHERE c.class_id = ? AND c.status = 'published'
+             ORDER BY s.name, c.title", [$classId]);
+
+        // All students in this class (enrolled in any course of this class)
+        $students = Database::all(
+            "SELECT DISTINCT u.id, u.first_name, u.last_name, u.student_id AS sid,
+                    u.birth_date, u.gender
+             FROM course_enrollments ce
+             JOIN users u ON u.id = ce.user_id
+             WHERE ce.class_id = ? AND u.role = 'student'
+             ORDER BY u.last_name, u.first_name", [$classId]);
+
+        // For each student: compute per-course semester totals
+        $rosterData = [];
+        foreach ($students as $s) {
+            $age = null;
+            if ($s['birth_date']) {
+                $dob = new DateTime($s['birth_date']);
+                $now = new DateTime();
+                $age = $dob->diff($now)->y;
+            }
+            $gender = strtoupper($s['gender'] ?? 'O');
+
+            $row = [
+                'id' => (int)$s['id'],
+                'name' => $s['last_name'] . ', ' . $s['first_name'],
+                'sid' => $s['sid'] ?? '',
+                'age' => $age,
+                'gender' => $gender,
+                'subjects' => [],
+            ];
+
+            $totalAll = 0;
+            $subjectCount = 0;
+            foreach ($courses as $c) {
+                $cid = (int)$c['id'];
+                $s1 = $this->courseSemesterTotal((int)$s['id'], $cid, 1);
+                $s2 = $this->courseSemesterTotal((int)$s['id'], $cid, 2);
+                $avg = ($s1 !== null && $s2 !== null) ? round(($s1 + $s2) / 2, 1)
+                     : ($s1 ?? $s2 ?? null);
+                $row['subjects'][$cid] = ['s1' => $s1, 's2' => $s2, 'avg' => $avg];
+                if ($avg !== null) { $totalAll += $avg; $subjectCount++; }
+            }
+
+            // Absence days (all courses in this class)
+            $absent = (int)Database::scalar(
+                "SELECT COUNT(*) FROM attendance
+                 WHERE student_id = ? AND status = 'absent'
+                 AND course_id IN (SELECT id FROM courses WHERE class_id = ?)",
+                [(int)$s['id'], $classId]);
+
+            $row['absences'] = $absent;
+            $row['total'] = round($totalAll, 1);
+            $row['average'] = $subjectCount > 0 ? round($totalAll / $subjectCount, 1) : null;
+
+            $rosterData[] = $row;
+        }
+
+        // Rank by average descending
+        usort($rosterData, fn($a, $b) => ($b['average'] ?? -1) <=> ($a['average'] ?? -1));
+        $rank = 0;
+        $prevAvg = null;
+        foreach ($rosterData as &$r) {
+            if ($r['average'] !== null && $r['average'] !== $prevAvg) {
+                $rank++;
+                $prevAvg = $r['average'];
+            }
+            $r['rank'] = $rank;
+        }
+        unset($r);
+
+        // PDF download
+        if (isset($_GET['download'])) {
+            $this->generatePDF($rosterData, $courses, $homeroom);
+            exit;
+        }
+
+        Router::render('app/teacher/roster', [
+            'title' => 'Class Roster',
+            'homeroom' => $homeroom,
+            'courses' => $courses,
+            'rosterData' => $rosterData,
+        ]);
+    }
+
+    private function courseSemesterTotal(int $studentId, int $courseId, int $semester): ?float {
+        $row = Database::one(
+            "SELECT COALESCE(SUM(g.mark), 0) AS total_mark,
+                    COALESCE(SUM(a.max_mark), 0) AS total_max
+             FROM grades g
+             JOIN assessments a ON a.id = g.assessment_id
+             WHERE g.student_id = ? AND a.course_id = ? AND a.semester = ?
+             AND g.status IN ('published','locked') AND g.mark IS NOT NULL",
+            [$studentId, $courseId, $semester]);
+        if (!$row || (float)$row['total_max'] == 0) return null;
+        return round(((float)$row['total_mark'] / (float)$row['total_max']) * 100, 1);
+    }
+
+    private function generatePDF(array $rosterData, array $courses, array $homeroom): void {
+        require_once __DIR__ . '/../../includes/Pdf.php';
+
+        $pdf = new Pdf('landscape', 'A4', true);
+        $pdf->setTitle('CLASS ROSTER');
+        $pdf->setSubtitle($homeroom['name'] . ' — ' . date('F Y'));
+
+        $studentCount = count($rosterData);
+        $subjectCount = count($courses);
+        $allAvg = array_filter(array_column($rosterData, 'average'));
+        $classAvg = $allAvg ? round(array_sum($allAvg) / count($allAvg), 1) : 0;
+        $passCount = count(array_filter($rosterData, fn($r) => $r['average'] !== null && $r['average'] >= 50));
+        $passRate = $studentCount > 0 ? round(($passCount / $studentCount) * 100, 1) : 0;
+
+        $pdf->infoBlock([
+            ['Class', $homeroom['name']],
+            ['Students', $studentCount],
+            ['Subjects', $subjectCount],
+            ['Date', date('F j, Y')],
+        ]);
+        $pdf->spacer(6);
+
+        // Build header: Name | ID | Age | Sex | [Subject1 FY|S2|Avg] ... | Abs | Total | Avg | Rank
+        $headers = ['#', 'Name', 'ID', 'Age', 'Sex'];
+        foreach ($courses as $c) {
+            $name = mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 10, '');
+            $headers[] = $name . ' FY';
+            $headers[] = $name . ' S2';
+            $headers[] = $name . ' Avg';
+        }
+        $headers[] = 'Abs';
+        $headers[] = 'Total';
+        $headers[] = 'Average';
+        $headers[] = 'Rank';
+
+        $fmt = fn($v) => $v !== null ? number_format($v, 1) : '—';
+
+        $rows = [];
+        $rank = 0;
+        $prevAvg = null;
+        foreach ($rosterData as $i => $r) {
+            if ($r['average'] !== null && $r['average'] !== $prevAvg) {
+                $rank++;
+                $prevAvg = $r['average'];
+            }
+            $row = [
+                $rank,
+                $r['name'],
+                $r['sid'],
+                $r['age'] ?? '—',
+                $r['gender'],
+            ];
+            foreach ($courses as $c) {
+                $sub = $r['subjects'][$c['id']] ?? ['s1' => null, 's2' => null, 'avg' => null];
+                $avgVal = ($sub['s1'] !== null && $sub['s2'] !== null) ? round(($sub['s1'] + $sub['s2']) / 2, 1) : null;
+                $row[] = $fmt($sub['avg']);
+                $row[] = $fmt($sub['s2']);
+                $row[] = $fmt($avgVal);
+            }
+            $row[] = $r['absences'];
+            $row[] = number_format($r['total'], 1);
+            $row[] = $r['average'] !== null ? number_format($r['average'], 1) : '—';
+            $row[] = $rank;
+            $rows[] = $row;
+        }
+
+        $pdf->table($headers, $rows);
+
+        $pdf->spacer(8);
+        $pdf->summaryBox([
+            ['Students', $studentCount],
+            ['Class Average', $classAvg],
+            ['Pass Rate', $passRate . '%'],
+            ['Total Absences', array_sum(array_column($rosterData, 'absences'))],
+        ]);
+
+        $pdf->spacer(20);
+        $pdf->rule();
+        $pdf->bold('Homeroom Teacher: ' . (Database::one("SELECT first_name, last_name FROM users WHERE id = ?", [(int)$homeroom['homeroom_teacher_id']])['first_name'] ?? '') . ' ' . (Database::one("SELECT first_name, last_name FROM users WHERE id = ?", [(int)$homeroom['homeroom_teacher_id']])['last_name'] ?? ''), 9);
+
+        $pdf->spacer(20);
+        $pdf->rule();
+        $u = require_role('teacher', 'lecturer');
+        $director = Database::one("SELECT first_name, last_name FROM users WHERE school_id = (SELECT school_id FROM users WHERE id = ?) AND role = 'principal' LIMIT 1", [(int)$u['id']]);
+        $pdf->bold('Director: ' . ($director ? $director['first_name'] . ' ' . $director['last_name'] : ''), 9);
+
+        $filename = 'class_roster_' . $homeroom['name'] . '_' . date('Ymd') . '.pdf';
+        $pdf->output($filename, false);
+    }
+}

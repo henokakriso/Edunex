@@ -10,6 +10,7 @@
       <a class="btn btn-ghost" href="<?= e(url('teacher/bonus&course=' . $selectedCourse)) ?>"><?= icon('spark') ?> Bonus</a>
       <a class="btn btn-ghost" href="<?= e(url('teacher/grading/students&course=' . $selectedCourse)) ?>"><?= icon('users') ?> Students</a>
       <a class="btn btn-ghost" href="<?= e(url('teacher/grading/reports')) ?>"><?= icon('file') ?> Reports</a>
+      <a class="btn btn-ghost" href="<?= e(url('teacher/grading/roster')) ?>"><?= icon('doc') ?> Roster</a>
     </div>
   <?php endif; ?>
 </div>

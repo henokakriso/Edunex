@@ -82,6 +82,7 @@ Router::page('teacher/bonus', 'teacher/bonus.php', ['teacher', 'lecturer']);
 Router::page('teacher/grading/reports', 'teacher/grading_reports.php', ['teacher', 'lecturer']);
 Router::page('teacher/grading/pdf', 'teacher/grading_pdf.php', ['teacher', 'lecturer']);
 Router::page('teacher/grading/students', 'teacher/grading_students.php', ['teacher', 'lecturer']);
+Router::page('teacher/grading/roster', 'teacher/roster.php', ['teacher', 'lecturer']);
 Router::page('api/grading_assessments', 'api/grading_assessments.php', ['teacher', 'lecturer', 'principal', 'ministry']);
 Router::page('api/grading_max_mark', 'api/grading_max_mark.php', ['teacher', 'lecturer']);
 Router::page('api/grading_students', 'api/grading_students.php', ['teacher', 'lecturer']);

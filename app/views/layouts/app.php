@@ -192,6 +192,7 @@ $__nav = [
     ['grading', 'Gradebook', 'teacher/grading', icon('grades')],
     ['bonus', 'Bonus', 'teacher/bonus', icon('spark')],
     ['reports', 'Grading Reports', 'teacher/grading/reports', icon('file')],
+    ['roster', 'Class Roster', 'teacher/grading/roster', icon('doc')],
     ['OVERVIEW'],
     ['forum', 'Discussion', 'teacher/forum', icon('chat')],
     ['library', 'Library', 'teacher/library', icon('university')],
