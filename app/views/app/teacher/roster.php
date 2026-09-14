@@ -54,9 +54,7 @@
       <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);border-left:2px solid var(--border)">Abs</th>
       <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary)">Total</th>
       <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--accent)">Average</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:40px;cursor:pointer" onclick="sortRoster('fy')" title="Click to sort by FY Rank">FY ↕</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:40px;cursor:pointer" onclick="sortRoster('s2')" title="Click to sort by S2 Rank">S2 ↕</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:40px;cursor:pointer" onclick="sortRoster('avg')" title="Click to sort by AVG Rank">AVG ↕</th>
+      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:40px;cursor:pointer" onclick="sortRoster()" title="Click to cycle rank: FY → S2 → AVG" id="rank-th">Rank ↕</th>
     </tr>
   </thead>
   <tbody id="roster-body">
@@ -78,11 +76,9 @@
       <td style="padding:8px;text-align:center;border-left:2px solid var(--border);font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['fy_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>"><?= $r['fy_absences'] ?></td>
       <td style="padding:8px;text-align:center;font-weight:700"><?= $fmt($r['fy_total']) ?></td>
       <td style="padding:8px;text-align:center;font-weight:800;font-size:14px;color:var(--accent)"><?= $fmt($r['fy_average']) ?></td>
-      <td style="padding:8px;text-align:center;font-weight:700;font-size:13px">
+      <td style="padding:8px;text-align:center;font-weight:700;font-size:13px" data-rank="fy">
         <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;<?= $r['fy_rank'] <= 3 ? 'background:color-mix(in srgb, var(--accent) 12%, var(--card));color:var(--accent)' : 'background:var(--bg-secondary);color:var(--text-secondary)' ?>"><?= $r['fy_rank'] ?></span>
       </td>
-      <td style="padding:8px;text-align:center;color:var(--text-secondary);opacity:.4">—</td>
-      <td style="padding:8px;text-align:center;color:var(--text-secondary);opacity:.4">—</td>
     </tr>
     <!-- Semester 2 row -->
     <tr style="background:color-mix(in srgb, var(--accent) 2%, var(--card))">
@@ -97,11 +93,9 @@
       <td style="padding:6px 8px;text-align:center;border-left:2px solid var(--border);color:<?= $r['s2_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>;font-size:11px"><?= $r['s2_absences'] ?></td>
       <td style="padding:6px 8px;text-align:center;font-weight:600;font-size:11px;color:var(--text-secondary)"><?= $fmt($r['s2_total']) ?></td>
       <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px;color:var(--text-secondary)"><?= $fmt($r['s2_average']) ?></td>
-      <td style="padding:6px 8px;text-align:center;color:var(--text-secondary);opacity:.4">—</td>
-      <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px"><?= $r['s2_rank'] ?></span>
+      <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px" data-rank="s2">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px"><?= $r['s2_rank'] ?></span>
       </td>
-      <td style="padding:6px 8px;text-align:center;color:var(--text-secondary);opacity:.4">—</td>
     </tr>
     <!-- Average row -->
     <tr style="background:color-mix(in srgb, var(--success) 3%, var(--card));border-bottom:2px solid var(--border)">
@@ -116,9 +110,7 @@
       <td style="padding:6px 8px 10px;text-align:center;border-left:2px solid var(--border);border-bottom:2px solid var(--border);color:var(--text-secondary);font-size:11px"><?= $r['avg_absences'] ?></td>
       <td style="padding:6px 8px 10px;text-align:center;font-weight:600;font-size:11px;border-bottom:2px solid var(--border);color:var(--text-secondary)"><?= $fmt($r['avg_total']) ?></td>
       <td style="padding:6px 8px 10px;text-align:center;font-weight:700;font-size:12px;border-bottom:2px solid var(--border);color:var(--success)"><?= $fmt($r['avg_average']) ?></td>
-      <td style="padding:6px 8px 10px;text-align:center;color:var(--text-secondary);opacity:.4;border-bottom:2px solid var(--border)">—</td>
-      <td style="padding:6px 8px 10px;text-align:center;color:var(--text-secondary);opacity:.4;border-bottom:2px solid var(--border)">—</td>
-      <td style="padding:6px 8px 10px;text-align:center;font-weight:700;font-size:12px;border-bottom:2px solid var(--border)">
+      <td style="padding:6px 8px 10px;text-align:center;font-weight:700;font-size:12px;border-bottom:2px solid var(--border)" data-rank="avg">
         <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px"><?= $r['avg_rank'] ?></span>
       </td>
     </tr>
@@ -149,7 +141,15 @@
 </div>
 
 <script>
-function sortRoster(type) {
+var _sortMode = 'fy';
+var _sortLabels = { fy: 'FY ↕', s2: 'S2 ↕', avg: 'AVG ↕' };
+var _sortCycle = ['fy', 's2', 'avg'];
+
+function sortRoster() {
+  var next = _sortCycle[(_sortCycle.indexOf(_sortMode) + 1) % _sortCycle.length];
+  _sortMode = next;
+  document.getElementById('rank-th').textContent = _sortLabels[next];
+
   var tbody = document.getElementById('roster-body');
   var groups = [];
   var trs = Array.from(tbody.querySelectorAll('tr'));
@@ -157,8 +157,10 @@ function sortRoster(type) {
     groups.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
   }
   groups.sort(function(a, b) {
-    var aRank = parseInt(a.fy.querySelector('[data-rank-' + type + ']')?.textContent) || 999;
-    var bRank = parseInt(b.fy.querySelector('[data-rank-' + type + ']')?.textContent) || 999;
+    var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
+    var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
+    var aRank = aEl ? parseInt(aEl.textContent) || 999 : 999;
+    var bRank = bEl ? parseInt(bEl.textContent) || 999 : 999;
     return aRank - bRank;
   });
   groups.forEach(function(g) {

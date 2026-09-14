@@ -841,6 +841,8 @@ class Ctl_roster {
         $passCount = count(array_filter($rosterData, fn($r) => $r['fy_average'] !== null && $r['fy_average'] >= 50));
         $passRate = $studentCount > 0 ? round(($passCount / $studentCount) * 100, 1) : 0;
 
+        // Landscape paper width
+        $paperWidth = '297mm';
         require __DIR__ . '/../../includes/pdf_template.php';
         ?>
         <div class="pdf-viewer">
@@ -860,7 +862,7 @@ class Ctl_roster {
             </button>
           </div>
 
-          <div class="pdf-paper" id="pdf-content">
+          <div class="pdf-paper" id="pdf-content" style="max-width:<?= $paperWidth ?>;margin:0 auto">
             <div class="pdf-header">
               <div class="logos-row">
                 <div class="flag-wrap"><img class="flag-img" src="<?= e(url('public/images/ethiopian-flag.jpeg')) ?>" alt="Ethiopia"></div>
@@ -894,9 +896,7 @@ class Ctl_roster {
                   <th style="text-align:center">Abs</th>
                   <th style="text-align:center">Total</th>
                   <th style="text-align:center">Average</th>
-                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('fy')" title="Click to sort by FY Rank">FY Rank ↕</th>
-                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('s2')" title="Click to sort by S2 Rank">S2 Rank ↕</th>
-                  <th style="text-align:center;cursor:pointer" onclick="sortRoster('avg')" title="Click to sort by AVG Rank">AVG Rank ↕</th>
+                  <th style="text-align:center;cursor:pointer" onclick="sortRoster()" title="Click to cycle rank: FY → S2 → AVG" id="rank-th">Rank ↕</th>
                 </tr>
               </thead>
               <tbody id="roster-body">
@@ -918,9 +918,7 @@ class Ctl_roster {
                   <td style="text-align:center;color:<?= $r['fy_absences'] > 0 ? '#dc2626' : '#6b7280' ?>;font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>"><?= $r['fy_absences'] ?></td>
                   <td style="text-align:center;font-weight:700"><?= $fmt($r['fy_total']) ?></td>
                   <td style="text-align:center;font-weight:800;color:#6366f1"><?= $fmt($r['fy_average']) ?></td>
-                  <td style="text-align:center;font-weight:700"><?= $r['fy_rank'] ?></td>
-                  <td style="text-align:center;color:#9ca3af">—</td>
-                  <td style="text-align:center;color:#9ca3af">—</td>
+                  <td style="text-align:center;font-weight:700" data-rank="fy"><?= $r['fy_rank'] ?></td>
                 </tr>
                 <!-- Semester 2 row -->
                 <tr style="background:rgba(99,102,241,.03)">
@@ -935,9 +933,7 @@ class Ctl_roster {
                   <td style="text-align:center;color:<?= $r['s2_absences'] > 0 ? '#dc2626' : '#9ca3af' ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>"><?= $r['s2_absences'] ?></td>
                   <td style="text-align:center;font-weight:600;color:#374151"><?= $fmt($r['s2_total']) ?></td>
                   <td style="text-align:center;font-weight:700;color:#374151"><?= $fmt($r['s2_average']) ?></td>
-                  <td style="text-align:center;color:#9ca3af">—</td>
-                  <td style="text-align:center;font-weight:700"><?= $r['s2_rank'] ?></td>
-                  <td style="text-align:center;color:#9ca3af">—</td>
+                  <td style="text-align:center;font-weight:700" data-rank="s2"><?= $r['s2_rank'] ?></td>
                 </tr>
                 <!-- Average row -->
                 <tr style="background:rgba(16,185,129,.03);border-bottom:2px solid rgba(0,0,0,.1)">
@@ -952,9 +948,7 @@ class Ctl_roster {
                   <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)"><?= $r['avg_absences'] ?></td>
                   <td style="text-align:center;font-weight:600;color:#374151;border-bottom:2px solid rgba(0,0,0,.1)"><?= $fmt($r['avg_total']) ?></td>
                   <td style="text-align:center;font-weight:700;color:#059669;border-bottom:2px solid rgba(0,0,0,.1)"><?= $fmt($r['avg_average']) ?></td>
-                  <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)">—</td>
-                  <td style="text-align:center;color:#9ca3af;border-bottom:2px solid rgba(0,0,0,.1)">—</td>
-                  <td style="text-align:center;font-weight:700;border-bottom:2px solid rgba(0,0,0,.1)"><?= $r['avg_rank'] ?></td>
+                  <td style="text-align:center;font-weight:700;border-bottom:2px solid rgba(0,0,0,.1)" data-rank="avg"><?= $r['avg_rank'] ?></td>
                 </tr>
               <?php endforeach; ?>
               </tbody>
@@ -968,23 +962,32 @@ class Ctl_roster {
         </div>
 
         <script>
-        function sortRoster(type) {
+        var _sortMode = 'fy';
+        var _sortLabels = { fy: 'FY ↕', s2: 'S2 ↕', avg: 'AVG ↕' };
+        var _sortCycle = ['fy', 's2', 'avg'];
+
+        function sortRoster() {
+          var next = _sortCycle[(_sortCycle.indexOf(_sortMode) + 1) % _sortCycle.length];
+          _sortMode = next;
+          document.getElementById('rank-th').textContent = _sortLabels[next];
+
           var tbody = document.getElementById('roster-body');
-          var rows = [];
+          var groups = [];
           var trs = tbody.querySelectorAll('tr');
           for (var i = 0; i < trs.length; i += 3) {
-            rows.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
+            groups.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
           }
-          var key = type + '_rank';
-          rows.sort(function(a, b) {
-            var aRank = parseInt(a.fy.getAttribute('data-' + key)) || 999;
-            var bRank = parseInt(b.fy.getAttribute('data-' + key)) || 999;
+          groups.sort(function(a, b) {
+            var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
+            var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
+            var aRank = aEl ? parseInt(aEl.textContent) || 999 : 999;
+            var bRank = bEl ? parseInt(bEl.textContent) || 999 : 999;
             return aRank - bRank;
           });
-          rows.forEach(function(r) {
-            tbody.appendChild(r.fy);
-            tbody.appendChild(r.s2);
-            tbody.appendChild(r.avg);
+          groups.forEach(function(g) {
+            tbody.appendChild(g.fy);
+            tbody.appendChild(g.s2);
+            tbody.appendChild(g.avg);
           });
         }
         </script>
