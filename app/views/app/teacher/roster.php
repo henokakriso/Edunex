@@ -1,4 +1,4 @@
-<?php /* Roster — 3 rows per student, Name/ID/Age/Sex single row, sortable ranks */ ?>
+<?php /* Roster — Clean balanced table */ ?>
 <div class="page-head">
   <div>
     <h1><?= icon('doc') ?> Class Roster</h1>
@@ -19,99 +19,101 @@
   $totalAbs = array_sum(array_column($rosterData, 'fy_absences'));
 ?>
 
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
-  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600;color:var(--accent)">
-    <?= icon('users') ?> <?= count($rosterData) ?> Students
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600;color:var(--accent)">
-    <?= icon('note') ?> <?= count($courses) ?> Subjects
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:color-mix(in srgb, var(--accent) 6%, var(--card));font-size:13px;font-weight:600;color:var(--accent)">
-    <?= number_format($classAvg, 1) ?>% Class Average
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:color-mix(in srgb, var(--success) 6%, var(--card));font-size:13px;font-weight:600;color:var(--success)">
-    <?= $passRate ?>% Pass Rate
-  </div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600;color:var(--accent)"><?= icon('users') ?> <?= count($rosterData) ?> Students</div>
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600;color:var(--accent)"><?= icon('note') ?> <?= count($courses) ?> Subjects</div>
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:color-mix(in srgb, var(--accent) 6%, var(--card));font-size:13px;font-weight:600;color:var(--accent)"><?= number_format($classAvg, 1) ?>% Avg</div>
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:color-mix(in srgb, var(--success) 6%, var(--card));font-size:13px;font-weight:600;color:var(--success)"><?= $passRate ?>% Pass</div>
 </div>
 
 <?php if (empty($rosterData)): ?>
-  <div class="card" style="text-align:center;padding:40px">
-    <p class="small" style="color:var(--muted)">No students enrolled in this class yet.</p>
-  </div>
+  <div class="card" style="text-align:center;padding:40px"><p class="small" style="color:var(--muted)">No students enrolled in this class yet.</p></div>
 <?php else: ?>
 
-<div style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)">
+<div style="overflow-x:auto;border:1px solid var(--border);border-radius:14px;background:var(--card)">
 <table id="roster-table" style="width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap">
   <thead>
-    <tr style="border-bottom:2px solid var(--border)">
-      <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:140px">Student Name</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:65px">ID</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:36px">Age</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:32px">Sex</th>
+    <tr>
+      <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);min-width:150px;position:sticky;left:0;z-index:2">Student</th>
+      <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);min-width:68px">ID</th>
+      <th style="padding:12px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:38px">Age</th>
+      <th style="padding:12px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:34px">Sex</th>
       <?php foreach ($courses as $c): ?>
-        <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:50px;border-left:2px solid var(--border)"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 10, '')) ?></th>
+        <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);min-width:52px"><?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 8, '')) ?></th>
       <?php endforeach; ?>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);border-left:2px solid var(--border)">Abs</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary)">Total</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--accent)">Average</th>
-      <th style="padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:40px;cursor:pointer" onclick="sortRoster()" title="Click to cycle rank: FY → S2 → AVG" id="rank-th">Rank ↕</th>
+      <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:36px">Abs</th>
+      <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:52px">Total</th>
+      <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:700;color:var(--accent);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:56px">Avg</th>
+      <th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:2px solid var(--border);width:44px;cursor:pointer" onclick="sortRoster()" title="Click to cycle: FY → S2 → AVG" id="rank-th">Rank ↕</th>
     </tr>
   </thead>
   <tbody id="roster-body">
-  <?php foreach ($rosterData as $r): ?>
-    <!-- Full Year row -->
-    <tr>
-      <td rowspan="3" style="padding:10px 12px;font-weight:600;vertical-align:top;border-top:2px solid var(--text);border-right:1px solid var(--border)">
-        <?= e($r['name']) ?>
-        <span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--accent);margin-left:6px">FY</span>
+  <?php $prevBg = ''; foreach ($rosterData as $ri => $r):
+    $groupBg = $ri % 2 === 0 ? 'var(--card)' : 'color-mix(in srgb, var(--accent) 1.5%, var(--card))';
+  ?>
+    <!-- FY row -->
+    <tr style="background:<?= $groupBg ?>">
+      <td rowspan="3" style="padding:12px 14px;font-weight:600;vertical-align:middle;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:1;background:<?= $groupBg ?>">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:30px;height:30px;border-radius:8px;background:color-mix(in srgb, var(--accent) 10%, var(--card));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0"><?= e(mb_substr(explode(', ', $r['name'])[1] ?? '', 0, 1)) ?><?= e(mb_substr($r['name'], 0, 1)) ?></div>
+          <div>
+            <div style="font-size:13px;line-height:1.2"><?= e($r['name']) ?></div>
+            <div style="font-size:10px;color:var(--text-secondary);font-weight:400"><?= e($r['sid']) ?></div>
+          </div>
+        </div>
       </td>
-      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:top;font-size:10px;color:var(--text-secondary);border-top:2px solid var(--text)"><?= e($r['sid']) ?></td>
-      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:top;border-top:2px solid var(--text)"><?= $r['age'] ?? '—' ?></td>
-      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:top;font-weight:700;border-top:2px solid var(--text);color:<?= $r['gender'] === 'M' ? 'var(--info)' : 'var(--accent-2)' ?>"><?= e($r['gender']) ?></td>
+      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:middle;font-size:10px;color:var(--text-secondary);border-bottom:2px solid var(--border)"><?= e($r['sid']) ?></td>
+      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:middle;border-bottom:2px solid var(--border)"><?= $r['age'] ?? '—' ?></td>
+      <td rowspan="3" style="padding:8px;text-align:center;vertical-align:middle;font-weight:700;border-bottom:2px solid var(--border);color:<?= $r['gender'] === 'M' ? 'var(--info)' : 'var(--accent-2)' ?>"><?= e($r['gender']) ?></td>
       <?php foreach ($courses as $c):
         $sub = $r['subjects'][$c['id']] ?? ['fy'=>null];
+        $val = $sub['fy'];
+        $color = $val === null ? 'var(--text-secondary)' : ($val >= 50 ? 'var(--text)' : 'var(--danger)');
       ?>
-        <td style="padding:8px;text-align:center;font-weight:700;border-left:2px solid var(--border);color:<?= ($sub['fy'] ?? 0) >= 50 ? 'var(--text)' : 'var(--danger)' ?>"><?= $fmt($sub['fy']) ?></td>
+        <td style="padding:10px;text-align:center;font-weight:700;color:<?= $color ?>;border-bottom:2px solid var(--border)"><?= $fmt($val) ?></td>
       <?php endforeach; ?>
-      <td style="padding:8px;text-align:center;border-left:2px solid var(--border);font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['fy_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>"><?= $r['fy_absences'] ?></td>
-      <td style="padding:8px;text-align:center;font-weight:700"><?= $fmt($r['fy_total']) ?></td>
-      <td style="padding:8px;text-align:center;font-weight:800;font-size:14px;color:var(--accent)"><?= $fmt($r['fy_average']) ?></td>
-      <td style="padding:8px;text-align:center;font-weight:700;font-size:13px" data-rank="fy">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;<?= $r['fy_rank'] <= 3 ? 'background:color-mix(in srgb, var(--accent) 12%, var(--card));color:var(--accent)' : 'background:var(--bg-secondary);color:var(--text-secondary)' ?>"><?= $r['fy_rank'] ?></span>
+      <td style="padding:10px;text-align:center;border-bottom:2px solid var(--border);font-weight:<?= $r['fy_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['fy_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>"><?= $r['fy_absences'] ?></td>
+      <td style="padding:10px;text-align:center;font-weight:700;border-bottom:2px solid var(--border)"><?= $fmt($r['fy_total']) ?></td>
+      <td style="padding:10px;text-align:center;font-weight:800;font-size:14px;color:var(--accent);border-bottom:2px solid var(--border)"><?= $fmt($r['fy_average']) ?></td>
+      <td style="padding:10px;text-align:center;font-weight:700;border-bottom:2px solid var(--border)" data-rank="fy">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;<?= $r['fy_rank'] <= 3 ? 'background:color-mix(in srgb, var(--accent) 12%, var(--card));color:var(--accent);font-weight:800' : 'background:var(--bg-secondary);color:var(--text-secondary)' ?>"><?= $r['fy_rank'] ?></span>
       </td>
     </tr>
-    <!-- Semester 2 row -->
-    <tr style="background:color-mix(in srgb, var(--accent) 2%, var(--card))">
-      <td style="padding:6px 12px 6px 12px;color:var(--text-secondary);font-size:10px;text-align:left">
-        <span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb, var(--info) 10%, var(--card));color:var(--info)">S2</span>
+    <!-- S2 row -->
+    <tr style="background:<?= $groupBg ?>">
+      <td style="padding:6px 14px;text-align:left;font-size:10px;border-bottom:2px solid var(--border)">
+        <span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb, var(--info) 10%, var(--card));color:var(--info)">Sem 2</span>
       </td>
       <?php foreach ($courses as $c):
         $sub = $r['subjects'][$c['id']] ?? ['s2'=>null];
+        $val = $sub['s2'];
+        $color = $val === null ? 'var(--text-secondary)' : ($val >= 50 ? 'var(--text-secondary)' : 'var(--danger)');
       ?>
-        <td style="padding:6px 8px;text-align:center;font-weight:600;font-size:11px;border-left:2px solid var(--border);color:<?= ($sub['s2'] ?? 0) >= 50 ? 'var(--text-secondary)' : 'var(--danger)' ?>"><?= $fmt($sub['s2']) ?></td>
+        <td style="padding:6px 10px;text-align:center;font-weight:600;font-size:11px;color:<?= $color ?>;border-bottom:2px solid var(--border)"><?= $fmt($val) ?></td>
       <?php endforeach; ?>
-      <td style="padding:6px 8px;text-align:center;border-left:2px solid var(--border);color:<?= $r['s2_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>;font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>;font-size:11px"><?= $r['s2_absences'] ?></td>
-      <td style="padding:6px 8px;text-align:center;font-weight:600;font-size:11px;color:var(--text-secondary)"><?= $fmt($r['s2_total']) ?></td>
-      <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px;color:var(--text-secondary)"><?= $fmt($r['s2_average']) ?></td>
-      <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px" data-rank="s2">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px"><?= $r['s2_rank'] ?></span>
+      <td style="padding:6px 10px;text-align:center;border-bottom:2px solid var(--border);font-weight:<?= $r['s2_absences'] > 0 ? '700' : '400' ?>;color:<?= $r['s2_absences'] > 0 ? 'var(--danger)' : 'var(--text-secondary)' ?>;font-size:11px"><?= $r['s2_absences'] ?></td>
+      <td style="padding:6px 10px;text-align:center;font-weight:600;font-size:11px;color:var(--text-secondary);border-bottom:2px solid var(--border)"><?= $fmt($r['s2_total']) ?></td>
+      <td style="padding:6px 10px;text-align:center;font-weight:700;font-size:12px;color:var(--text-secondary);border-bottom:2px solid var(--border)"><?= $fmt($r['s2_average']) ?></td>
+      <td style="padding:6px 10px;text-align:center;border-bottom:2px solid var(--border)" data-rank="s2">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px;font-weight:600"><?= $r['s2_rank'] ?></span>
       </td>
     </tr>
-    <!-- Average row -->
-    <tr style="background:color-mix(in srgb, var(--success) 3%, var(--card));border-bottom:2px solid var(--border)">
-      <td style="padding:6px 12px 10px 12px;color:var(--text-secondary);font-size:10px;text-align:left;border-bottom:2px solid var(--border)">
-        <span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb, var(--success) 10%, var(--card));color:var(--success)">AVG</span>
+    <!-- AVG row -->
+    <tr style="background:<?= $groupBg ?>">
+      <td style="padding:6px 14px 12px;text-align:left;font-size:10px;border-bottom:1px solid var(--border)">
+        <span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb, var(--success) 10%, var(--card));color:var(--success)">Avg</span>
       </td>
       <?php foreach ($courses as $c):
         $sub = $r['subjects'][$c['id']] ?? ['avg'=>null];
+        $val = $sub['avg'];
       ?>
-        <td style="padding:6px 8px 10px;text-align:center;font-weight:600;font-size:11px;border-left:2px solid var(--border);border-bottom:2px solid var(--border);color:var(--text-secondary)"><?= $fmt($sub['avg']) ?></td>
+        <td style="padding:6px 10px 12px;text-align:center;font-weight:600;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--border)"><?= $fmt($val) ?></td>
       <?php endforeach; ?>
-      <td style="padding:6px 8px 10px;text-align:center;border-left:2px solid var(--border);border-bottom:2px solid var(--border);color:var(--text-secondary);font-size:11px"><?= $r['avg_absences'] ?></td>
-      <td style="padding:6px 8px 10px;text-align:center;font-weight:600;font-size:11px;border-bottom:2px solid var(--border);color:var(--text-secondary)"><?= $fmt($r['avg_total']) ?></td>
-      <td style="padding:6px 8px 10px;text-align:center;font-weight:700;font-size:12px;border-bottom:2px solid var(--border);color:var(--success)"><?= $fmt($r['avg_average']) ?></td>
-      <td style="padding:6px 8px 10px;text-align:center;font-weight:700;font-size:12px;border-bottom:2px solid var(--border)" data-rank="avg">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px"><?= $r['avg_rank'] ?></span>
+      <td style="padding:6px 10px 12px;text-align:center;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:11px"><?= $r['avg_absences'] ?></td>
+      <td style="padding:6px 10px 12px;text-align:center;font-weight:600;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--border)"><?= $fmt($r['avg_total']) ?></td>
+      <td style="padding:6px 10px 12px;text-align:center;font-weight:700;font-size:12px;color:var(--success);border-bottom:1px solid var(--border)"><?= $fmt($r['avg_average']) ?></td>
+      <td style="padding:6px 10px 12px;text-align:center;border-bottom:1px solid var(--border)" data-rank="avg">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:var(--bg-secondary);color:var(--text-secondary);font-size:11px;font-weight:600"><?= $r['avg_rank'] ?></span>
       </td>
     </tr>
   <?php endforeach; ?>
@@ -120,35 +122,37 @@
 </div>
 
 <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">
-  <div style="padding:12px 18px;border-radius:10px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
+  <div style="padding:14px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
     <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">Class Average</div>
-    <div style="font-size:22px;font-weight:800;color:var(--accent)"><?= number_format($classAvg, 1) ?>%</div>
+    <div style="font-size:24px;font-weight:800;color:var(--accent)"><?= number_format($classAvg, 1) ?>%</div>
   </div>
-  <div style="padding:12px 18px;border-radius:10px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
+  <div style="padding:14px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
     <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">Pass Rate</div>
-    <div style="font-size:22px;font-weight:800;color:var(--success)"><?= $passRate ?>%</div>
+    <div style="font-size:24px;font-weight:800;color:var(--success)"><?= $passRate ?>%</div>
   </div>
-  <div style="padding:12px 18px;border-radius:10px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
+  <div style="padding:14px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border);flex:1;min-width:150px">
     <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">Total Absences</div>
-    <div style="font-size:22px;font-weight:800;color:<?= $totalAbs > 0 ? 'var(--danger)' : 'var(--text)' ?>"><?= $totalAbs ?></div>
+    <div style="font-size:24px;font-weight:800;color:<?= $totalAbs > 0 ? 'var(--danger)' : 'var(--text)' ?>"><?= $totalAbs ?></div>
   </div>
 </div>
 
-<div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
-  <b>Legend:</b> FY = Full Year (all assessments) · S2 = Semester 2 only · AVG = Average of FY and S2 ·
-  Abs = Absence Days · Total = Sum of Subject Averages · Average = Total ÷ Subjects ·
-  Click ↕ on rank columns to sort
+<div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
+  <b>FY</b> = Full Year · <b>Sem 2</b> = Semester 2 · <b>Avg</b> = Average of FY and Sem 2 ·
+  <b>Abs</b> = Absence Days · <b>Total</b> = Sum of Subject Avgs · <b>Avg</b> = Total ÷ Subjects ·
+  Click <b>Rank ↕</b> to cycle sort (FY → Sem 2 → Avg)
 </div>
 
 <script>
 var _sortMode = 'fy';
-var _sortLabels = { fy: 'FY ↕', s2: 'S2 ↕', avg: 'AVG ↕' };
+var _sortLabels = { fy: 'Rank ↕', s2: 'Rank ↕', avg: 'Rank ↕' };
 var _sortCycle = ['fy', 's2', 'avg'];
 
 function sortRoster() {
   var next = _sortCycle[(_sortCycle.indexOf(_sortMode) + 1) % _sortCycle.length];
   _sortMode = next;
-  document.getElementById('rank-th').textContent = _sortLabels[next];
+  var th = document.getElementById('rank-th');
+  th.textContent = 'Rank ↕';
+  th.title = 'Sorted by: ' + next.toUpperCase() + ' (click to cycle)';
 
   var tbody = document.getElementById('roster-body');
   var groups = [];
@@ -159,9 +163,9 @@ function sortRoster() {
   groups.sort(function(a, b) {
     var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
     var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
-    var aRank = aEl ? parseInt(aEl.textContent) || 999 : 999;
-    var bRank = bEl ? parseInt(bEl.textContent) || 999 : 999;
-    return aRank - bRank;
+    var aR = aEl ? parseInt(aEl.textContent) || 999 : 999;
+    var bR = bEl ? parseInt(bEl.textContent) || 999 : 999;
+    return aR - bR;
   });
   groups.forEach(function(g) {
     tbody.appendChild(g.fy);
@@ -170,5 +174,4 @@ function sortRoster() {
   });
 }
 </script>
-
 <?php endif; ?>
