@@ -147,13 +147,15 @@ class Ctl_grading {
         $u = require_role('teacher', 'lecturer');
         $uid = (int)$u['id'];
 
-        // Teacher's assigned courses
-        $courses = Database::all(
-            "SELECT c.id, c.title, c.code, c.level, s.name AS school_name,
-                    (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students
-             FROM courses c JOIN schools s ON s.id = c.school_id
-             WHERE c.teacher_id = ? AND c.status = 'published' ORDER BY c.title", [$uid]);
+        // Teacher's classes (distinct classes from their courses)
+        $classes = Database::all(
+            "SELECT DISTINCT sg.id, sg.name, sg.grade, sg.section
+             FROM courses c
+             JOIN student_groups sg ON sg.id = c.class_id
+             WHERE c.teacher_id = ? AND c.status = 'published' AND c.class_id IS NOT NULL
+             ORDER BY sg.grade, sg.section", [$uid]);
 
+        $selectedClass = (int)($_GET['class'] ?? 0);
         $selectedCourse = (int)($_GET['course'] ?? 0);
         $selectedSem = (int)($_GET['sem'] ?? 0);
         $assessments = [];
@@ -162,11 +164,32 @@ class Ctl_grading {
         $finalStats = null;
         $courseTotalUsed = 0;
         $courseTotalRemaining = 100;
+        $classSubjects = [];
+        $className = '';
 
+        // If class selected, show subjects for that class
+        if ($selectedClass) {
+            $classRow = Database::one("SELECT id, name FROM student_groups WHERE id = ?", [$selectedClass]);
+            $className = $classRow['name'] ?? '';
+            $classSubjects = Database::all(
+                "SELECT c.id, c.title, c.code,
+                        (SELECT COUNT(*) FROM course_enrollments ce WHERE ce.course_id = c.id) AS students
+                 FROM courses c
+                 WHERE c.teacher_id = ? AND c.class_id = ? AND c.status = 'published'
+                 ORDER BY c.title", [$uid, $selectedClass]);
+        }
+
+        // If course selected, show gradebook
         if ($selectedCourse) {
             // Verify teacher owns this course
             $ownCourse = Database::scalar("SELECT id FROM courses WHERE id = ? AND teacher_id = ?", [$selectedCourse, $uid]);
             if (!$ownCourse) { flash('danger', 'Access denied.'); redirect('teacher/grading'); }
+
+            // Get class name for this course
+            $courseClass = Database::one(
+                "SELECT sg.name AS class_name FROM courses c JOIN student_groups sg ON sg.id = c.class_id WHERE c.id = ?",
+                [$selectedCourse]);
+            $className = $courseClass['class_name'] ?? $className;
 
             // Get assessments for this course
             $assessments = Database::all(
@@ -179,11 +202,12 @@ class Ctl_grading {
                  WHERE a.course_id = ? AND a.status IN ('published','draft')
                  ORDER BY ats.sort_order, a.assessment_date", [$selectedCourse]);
 
-            // Get enrolled students
+            // Get enrolled students for THIS class only
             $students = Database::all(
                 "SELECT u.id, u.first_name, u.last_name, u.student_id AS sid
                  FROM course_enrollments ce JOIN users u ON u.id = ce.user_id
-                 WHERE ce.course_id = ? ORDER BY u.last_name, u.first_name", [$selectedCourse]);
+                 WHERE ce.course_id = ? AND (ce.class_id = ? OR ce.class_id IS NULL)
+                 ORDER BY u.last_name, u.first_name", [$selectedCourse, $selectedClass]);
 
             // Calculate semester/final stats
             foreach ([1, 2] as $sem) {
@@ -195,19 +219,18 @@ class Ctl_grading {
             $semesterUsedMarks = course_used_marks($selectedCourse);
         }
 
-        // Assessment types for creation
-        $types = Database::all("SELECT * FROM assessment_types WHERE enabled = 1 ORDER BY sort_order");
-
         Router::render('app/teacher/grading', [
             'title' => 'Gradebook',
-            'courses' => $courses,
+            'classes' => $classes,
+            'selectedClass' => $selectedClass,
+            'classSubjects' => $classSubjects,
+            'className' => $className,
             'selectedCourse' => $selectedCourse,
             'selectedSem' => $selectedSem,
             'assessments' => $assessments,
             'students' => $students,
             'semesterStats' => $semesterStats,
             'finalStats' => $finalStats,
-            'types' => $types,
             'semesterUsedMarks' => $semesterUsedMarks ?? [1 => 0, 2 => 0],
         ]);
     }

@@ -75,7 +75,7 @@
               <span style="font-size:12px;color:var(--text-secondary)">—</span>
             <?php endif; ?>
           </div>
-          <button type="button" class="btn btn-ghost btn-sm" style="color:var(--danger);font-size:11px" onclick="removeStudent(<?= (int)$s['id'] ?>, '<?= e($s['first_name']) ?>')">Remove</button>
+          <span class="badge badge-success" style="font-size:11px">Enrolled</span>
         </div>
       <?php endforeach; ?>
     </div>
@@ -92,18 +92,6 @@ function enrollStudent(studentId) {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'action=enroll&course_id=' + COURSE_ID + '&student_id=' + studentId + '&_csrf=' + CSRF
-  }).then(r => r.json()).then(d => {
-    if (d.ok) { location.reload(); }
-    else { alert(d.error || 'Failed'); }
-  }).catch(() => alert('Network error'));
-}
-
-function removeStudent(studentId, name) {
-  if (!confirm('Remove ' + name + ' from this course? Their grades will also be deleted.')) return;
-  fetch(API_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: 'action=remove&course_id=' + COURSE_ID + '&student_id=' + studentId + '&_csrf=' + CSRF
   }).then(r => r.json()).then(d => {
     if (d.ok) { location.reload(); }
     else { alert(d.error || 'Failed'); }

@@ -1,8 +1,8 @@
-<?php /* Teacher Gradebook */ ?>
+<?php /* Teacher Gradebook — Class → Subject → Gradebook */ ?>
 <div class="page-head">
   <div>
     <h1><?= icon('note') ?> Gradebook</h1>
-    <p class="sub">Manage assessments and enter marks</p>
+    <p class="sub"><?= $className ? e($className) . ' — ' : '' ?>Manage assessments and enter marks</p>
   </div>
   <?php if ($selectedCourse): ?>
     <div style="display:flex;gap:8px">
@@ -14,29 +14,73 @@
   <?php endif; ?>
 </div>
 
-<!-- Course selector -->
+<?php if (!$selectedClass): ?>
+<!-- STEP 1: Select a Class -->
 <div class="card" style="margin-bottom:18px">
-  <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
-    <div style="flex:1;min-width:240px">
-      <label class="small faint" style="display:block;margin-bottom:6px;font-weight:600">My Courses</label>
-      <select class="input" id="course-select" onchange="window.location.href='<?= e(url('teacher/grading')) ?>&course='+this.value" style="width:100%">
-        <option value="">— Select Course —</option>
-        <?php foreach ($courses as $c): ?>
-          <option value="<?= (int)$c['id'] ?>" <?= $selectedCourse == $c['id'] ? 'selected' : '' ?>><?= e($c['title']) ?> (<?= (int)$c['students'] ?> students)</option>
-        <?php endforeach; ?>
-      </select>
+  <h4 class="card-title" style="margin-top:0">Select a Class</h4>
+  <?php if (empty($classes)): ?>
+    <p class="small faint" style="text-align:center;padding:20px 0">No classes assigned to you yet.</p>
+  <?php else: ?>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+      <?php foreach ($classes as $cl): ?>
+        <a href="<?= e(url('teacher/grading&class=' . $cl['id'])) ?>" style="display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);background:var(--card);transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px color-mix(in srgb, var(--accent) 8%, transparent)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+          <div style="width:44px;height:44px;border-radius:12px;background:color-mix(in srgb, var(--accent) 10%, var(--card));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--accent);flex-shrink:0"><?= e($cl['grade']) ?></div>
+          <div>
+            <div style="font-weight:600;font-size:14px"><?= e($cl['name']) ?></div>
+            <div style="font-size:12px;color:var(--text-secondary)">Section <?= e($cl['section']) ?></div>
+          </div>
+          <svg style="margin-left:auto;color:var(--text-secondary)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      <?php endforeach; ?>
     </div>
-  </div>
+  <?php endif; ?>
 </div>
 
-<?php if ($selectedCourse && $assessments): ?>
+<?php elseif ($selectedClass && !$selectedCourse): ?>
+<!-- STEP 2: Select a Subject for this class -->
+<div class="card" style="margin-bottom:18px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <a href="<?= e(url('teacher/grading')) ?>" style="font-size:13px;color:var(--accent);text-decoration:none;font-weight:600">← All Classes</a>
+    <span class="tiny faint">/</span>
+    <h4 class="card-title" style="margin:0"><?= e($className) ?></h4>
+  </div>
+  <h4 class="card-title" style="margin-top:0">Select a Subject</h4>
+  <?php if (empty($classSubjects)): ?>
+    <p class="small faint" style="text-align:center;padding:20px 0">No subjects assigned for this class.</p>
+  <?php else: ?>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+      <?php foreach ($classSubjects as $cs): ?>
+        <a href="<?= e(url('teacher/grading&class=' . $selectedClass . '&course=' . $cs['id'])) ?>" style="display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);background:var(--card);transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px color-mix(in srgb, var(--accent) 8%, transparent)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+          <div style="width:44px;height:44px;border-radius:12px;background:color-mix(in srgb, var(--accent) 10%, var(--card));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--accent);flex-shrink:0"><?= icon('note') ?></div>
+          <div>
+            <div style="font-weight:600;font-size:14px"><?= e($cs['title']) ?></div>
+            <div style="font-size:12px;color:var(--text-secondary)"><?= (int)$cs['students'] ?> students</div>
+          </div>
+          <svg style="margin-left:auto;color:var(--text-secondary)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+</div>
+
+<?php else: ?>
+<!-- STEP 3: Gradebook for selected class + subject -->
 <?php
   $currentSem = $selectedSem ?: 1;
   $semAssessments = array_filter($assessments, fn($a) => (int)($a['semester'] ?? 0) === $currentSem);
-  $gradeUrl = url('teacher/grading&course=' . $selectedCourse);
+  $gradeUrl = url('teacher/grading&class=' . $selectedClass . '&course=' . $selectedCourse);
 ?>
 
-<?php if ($students): ?>
+<!-- Breadcrumb -->
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:13px">
+  <a href="<?= e(url('teacher/grading')) ?>" style="color:var(--accent);text-decoration:none;font-weight:600">Classes</a>
+  <span class="tiny faint">›</span>
+  <a href="<?= e(url('teacher/grading&class=' . $selectedClass)) ?>" style="color:var(--accent);text-decoration:none;font-weight:600"><?= e($className) ?></a>
+  <span class="tiny faint">›</span>
+  <span style="font-weight:600"><?= e($assessments[0]['course_title'] ?? '') ?></span>
+</div>
+
+<?php if ($students && $assessments): ?>
 <!-- Semester tabs + Student Marks -->
 <div class="card" style="margin-bottom:18px;overflow-x:auto;padding:0">
   <div style="display:flex;align-items:center;gap:0;padding:0;border-bottom:1px solid var(--border)">
@@ -133,7 +177,6 @@
     </tbody>
   </table>
 </div>
-<?php endif; ?>
 
 <!-- Summary -->
 <?php if ($finalStats && !empty($finalStats['students'])): ?>
@@ -158,19 +201,10 @@
 <?php elseif ($selectedCourse && empty($assessments)): ?>
 <div class="card" style="text-align:center;padding:40px">
   <div style="font-size:28px;margin-bottom:10px"><?= icon('note') ?></div>
-  <p class="small" style="color:var(--muted)">No assessments yet for this course.</p>
+  <p class="small" style="color:var(--muted)">No assessments yet for this subject.</p>
   <a class="btn btn-primary" href="<?= e(url('teacher/assessment/new&course=' . $selectedCourse)) ?>" style="margin-top:12px"><?= icon('plus') ?> Create First Assessment</a>
 </div>
-<?php elseif (!$selectedCourse && $courses): ?>
-<div class="card" style="text-align:center;padding:40px">
-  <div style="font-size:28px;margin-bottom:10px"><?= icon('graduation') ?></div>
-  <p class="small" style="color:var(--muted)">Select a course above to view its gradebook.</p>
-</div>
-<?php else: ?>
-<div class="card" style="text-align:center;padding:40px">
-  <div style="font-size:28px;margin-bottom:10px"><?= icon('graduation') ?></div>
-  <p class="small" style="color:var(--muted)">No courses assigned to you yet.</p>
-</div>
+<?php endif; ?>
 <?php endif; ?>
 
 <!-- Edit Max Mark Modal -->
