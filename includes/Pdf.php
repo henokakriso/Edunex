@@ -25,6 +25,8 @@ class Pdf {
     private string $boldFont = 'Helvetica-Bold';
     private string $italicFont = 'Helvetica-Oblique';
     private bool $headerDrawn = false;
+    private string $watermarkText = '';
+    private string $watermarkSub = '';
 
     public function __construct(string $orientation = 'portrait', string $pageSize = 'A4', bool $ministry = false) {
         $w = $h = 612;
@@ -101,8 +103,31 @@ class Pdf {
         }
     }
 
+    /** Set watermark text shown on every page */
+    public function setWatermark(string $text, string $subtext = ''): self {
+        $this->watermarkText = $text;
+        $this->watermarkSub = $subtext;
+        return $this;
+    }
+
     /** Draw footer on current page */
     private function drawFooter(): void {
+        // Draw watermark first (behind content)
+        if ($this->watermarkText) {
+            $cx = $this->pageW / 2;
+            $cy = $this->pageH / 2;
+            $this->out("0.90 0.90 0.90 rg");
+            $this->out("BT /Helvetica-Bold 42 Tf");
+            $tw = strlen($this->watermarkText) * 14;
+            $this->out(($cx - $tw/2) . " $cy Td (" . $this->esc($this->watermarkText) . ") Tj ET");
+            if ($this->watermarkSub) {
+                $this->out("BT /Helvetica 10 Tf");
+                $sw = strlen($this->watermarkSub) * 3;
+                $this->out(($cx - $sw/2) . " " . ($cy - 18) . " Td (" . $this->esc($this->watermarkSub) . ") Tj ET");
+            }
+            $this->out("0 0 0 rg");
+        }
+
         $mh = $this->margin;
         $right = $this->pageW - $mh;
         $fy = $this->footerH;
@@ -295,6 +320,23 @@ class Pdf {
             $this->y -= 16;
         }
         $this->y -= 4;
+    }
+
+    /** Draw watermark text on current page */
+    public function watermark(string $text = 'EDUNEX', string $subtext = ''): void {
+        $cx = $this->pageW / 2;
+        $cy = $this->pageH / 2;
+        // Large faded text
+        $this->out("0.88 0.88 0.88 rg");
+        $this->out("BT /Helvetica-Bold 48 Tf");
+        $tw = strlen($text) * 16;
+        $this->out(($cx - $tw/2) . " $cy Td (" . $this->esc($text) . ") Tj ET");
+        if ($subtext) {
+            $this->out("BT /Helvetica 10 Tf");
+            $sw = strlen($subtext) * 3.2;
+            $this->out(($cx - $sw/2) . " " . ($cy - 20) . " Td (" . $this->esc($subtext) . ") Tj ET");
+        }
+        $this->out("0 0 0 rg");
     }
 
     /**

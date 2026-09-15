@@ -6,7 +6,7 @@
   </div>
   <div style="display:flex;gap:8px">
     <a class="btn btn-ghost" href="<?= e(url('teacher/grading')) ?>"><?= icon('arrow-left') ?> Back</a>
-    <a class="btn btn-primary" href="<?= e(url('teacher/grading/roster&pdf=1')) ?>"><?= icon('file') ?> Generate PDF</a>
+    <a class="btn btn-primary" href="<?= e(url('teacher/grading/roster&download=1')) ?>"><?= icon('file') ?> Download PDF</a>
   </div>
 </div>
 

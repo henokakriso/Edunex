@@ -780,8 +780,13 @@ class Ctl_roster {
         // Sort by name (last, first) for display
         usort($rosterData, fn($a, $b) => strcmp($a['name'], $b['name']));
 
-        // PDF viewer
-        if (isset($_GET['pdf']) || isset($_GET['download'])) {
+        // PDF download (server-side)
+        if (isset($_GET['download'])) {
+            $this->renderServerPDF($rosterData, $courses, $homeroom);
+            exit;
+        }
+        // PDF viewer (HTML preview)
+        if (isset($_GET['pdf'])) {
             $this->renderPDFViewer($rosterData, $courses, $homeroom);
             exit;
         }
@@ -816,6 +821,122 @@ class Ctl_roster {
             [$studentId, $courseId]);
         if (!$row || (float)$row['total_max'] == 0) return null;
         return round(((float)$row['total_mark'] / (float)$row['total_max']) * 100, 1);
+    }
+
+    private function renderServerPDF(array $rosterData, array $courses, array $homeroom): void {
+        require_once __DIR__ . '/../../includes/Pdf.php';
+
+        $fmt = fn($v) => $v !== null ? number_format($v, 1) : '—';
+        $subLabel = fn($c) => strtoupper(mb_substr($c['subject_name'] ?? $c['title'], 0, 3));
+
+        $pdf = new Pdf('landscape', 'A4', true);
+        $pdf->setWatermark('EDUNEX', 'www.edunex.com');
+
+        // Watermark on every page
+        $pdf->setTitle('CLASS ROSTER');
+        $pdf->setSubtitle($homeroom['name'] . ' — ' . date('F Y'));
+
+        // Summary
+        $allAvg = array_filter(array_column($rosterData, 'fy_average'));
+        $classAvg = $allAvg ? round(array_sum($allAvg) / count($allAvg), 1) : 0;
+        $passCount = count(array_filter($rosterData, fn($r) => $r['fy_average'] !== null && $r['fy_average'] >= 50));
+        $passRate = count($rosterData) > 0 ? round(($passCount / count($rosterData)) * 100, 0) : 0;
+        $totalAbs = array_sum(array_column($rosterData, 'fy_absences'));
+
+        $pdf->summaryBox([
+            ['Class', $homeroom['name']],
+            ['Students', count($rosterData)],
+            ['Subjects', count($courses)],
+            ['Class Average', number_format($classAvg, 1) . '%'],
+            ['Pass Rate', $passRate . '%'],
+            ['Total Absences', $totalAbs],
+        ]);
+
+        // Subject header row
+        $pdf->sectionHeader('Grade Report');
+        $pdf->spacer(4);
+
+        // Build table: 3 rows per student (FY, S2, Avg)
+        // Columns: # | Name | ID | Age | Sex | Period | BIO | MAT | PHY | ENG | CHE | HIS | GEO | AMH | COM | GEN | Abs | Tot | Avg | Rank
+        $numSubjects = count($courses);
+        $extraCols = 7; // #, Name, ID, Age, Sex, Period, Abs, Tot, Avg, Rank
+        $totalCols = $extraCols + $numSubjects;
+        $pageW = 841.89; // landscape A4 width in points
+        $mh = 50;
+        $usableW = $pageW - ($mh * 2);
+
+        // Calculate widths
+        $nameW = 80;
+        $idW = 55;
+        $rollW = 16;
+        $ageW = 16;
+        $sexW = 14;
+        $periodW = 18;
+        $absW = 16;
+        $totW = 26;
+        $avgW = 26;
+        $rankW = 18;
+        $fixedW = $nameW + $idW + $rollW + $ageW + $sexW + $periodW + $absW + $totW + $avgW + $rankW;
+        $subjW = max(22, ($usableW - $fixedW) / $numSubjects);
+
+        $headers = ['#', 'Name', 'ID', 'Age', 'Sex', ''];
+        foreach ($courses as $c) { $headers[] = $subLabel($c); }
+        $headers = array_merge($headers, ['Abs', 'Tot', 'Avg', 'Rank']);
+
+        $widths = [$rollW, $nameW, $idW, $ageW, $sexW, $periodW];
+        for ($i = 0; $i < $numSubjects; $i++) { $widths[] = $subjW; }
+        $widths = array_merge($widths, [$absW, $totW, $avgW, $rankW]);
+
+        // Build rows: 3 per student
+        $rows = [];
+        foreach ($rosterData as $ri => $r) {
+            $roll = $ri + 1;
+            $name = $r['name'];
+            $sid = $r['sid'];
+            $age = $r['age'] ?? '—';
+            $sex = $r['gender'];
+
+            // FY row
+            $fyRow = [$roll, $name, $sid, $age, $sex, 'FY'];
+            foreach ($courses as $c) {
+                $sub = $r['subjects'][$c['id']] ?? ['fy' => null];
+                $fyRow[] = $fmt($sub['fy']);
+            }
+            $fyRow[] = $r['fy_absences'];
+            $fyRow[] = $fmt($r['fy_total']);
+            $fyRow[] = $fmt($r['fy_average']);
+            $fyRow[] = $r['fy_rank'];
+            $rows[] = $fyRow;
+
+            // S2 row
+            $s2Row = ['', '', '', '', '', 'S2'];
+            foreach ($courses as $c) {
+                $sub = $r['subjects'][$c['id']] ?? ['s2' => null];
+                $s2Row[] = $fmt($sub['s2']);
+            }
+            $s2Row[] = $r['s2_absences'];
+            $s2Row[] = $fmt($r['s2_total']);
+            $s2Row[] = $fmt($r['s2_average']);
+            $s2Row[] = $r['s2_rank'];
+            $rows[] = $s2Row;
+
+            // Avg row
+            $avgRow = ['', '', '', '', '', 'Avg'];
+            foreach ($courses as $c) {
+                $sub = $r['subjects'][$c['id']] ?? ['avg' => null];
+                $avgRow[] = $fmt($sub['avg']);
+            }
+            $avgRow[] = $r['avg_absences'];
+            $avgRow[] = $fmt($r['avg_total']);
+            $avgRow[] = $fmt($r['avg_average']);
+            $avgRow[] = $r['avg_rank'];
+            $rows[] = $avgRow;
+        }
+
+        $pdf->table($headers, $rows, $widths);
+
+        $filename = 'class_roster_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $homeroom['name']) . '_' . date('Ymd') . '.pdf';
+        $pdf->output($filename, false);
     }
 
     private function renderPDFViewer(array $rosterData, array $courses, array $homeroom): void {
