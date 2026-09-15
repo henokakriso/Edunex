@@ -977,10 +977,10 @@ class Ctl_roster {
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               Print
             </button>
-            <button onclick="downloadPDF()" class="pdf-toolbar-btn pdf-toolbar-btn--dl">
+            <a href="<?= e(url('teacher/grading/roster&download=1')) ?>" class="pdf-toolbar-btn pdf-toolbar-btn--dl">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               Download PDF
-            </button>
+            </a>
           </div>
 
           <div class="pdf-paper" id="pdf-content" style="max-width:<?= $paperWidth ?>;margin:0 auto">
