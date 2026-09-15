@@ -15,7 +15,7 @@
  */
 $pdf_logo_black = url('public/images/logo-black.jpeg');
 $pdf_logo_white = url('public/images/logo-white.jpeg');
-$pdf_logo_color = url('public/images/logo-color.jpeg');
+$pdf_logo_color = url('public/images/ethiopia-map.png');
 $pdf_ministry_logo = url('public/images/ministry-logo.png');
 $pdf_ethiopian_flag = url('public/images/ethiopian-flag.jpeg');
 $pdf_doc_id = $pdf_doc_id ?? 'EDU-' . date('Y') . '-' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
@@ -170,19 +170,25 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
   var SUBTITLE  = <?= json_encode($pdf_subtitle) ?>;
   var FOOTER    = 'EDUNEX LMS \u00b7 henockakriso.com \u00b7 ARWE-PL Licensed [<?= date('Y') ?>]';
 
-  function toDataURL(url, type){
+  function toDataURL(url, type, maxW){
     return new Promise(function(resolve){
       if(!url){ resolve(null); return; }
+      var timeout = setTimeout(function(){ resolve(null); }, 8000);
       var img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = function(){
         try {
+          clearTimeout(timeout);
           var c = document.createElement('canvas');
-          c.width = img.naturalWidth; c.height = img.naturalHeight;
-          c.getContext('2d').drawImage(img, 0, 0);
-          resolve(c.toDataURL(type));
-        } catch(e) { resolve(null); }
+          var w = img.naturalWidth, h = img.naturalHeight;
+          var mw = maxW || 300;
+          if(w > mw){ h = h * mw / w; w = mw; }
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(c.toDataURL(type, 0.8));
+        } catch(e) { clearTimeout(timeout); resolve(null); }
       };
-      img.onerror = function(){ resolve(null); };
+      img.onerror = function(){ clearTimeout(timeout); resolve(null); };
       img.src = url;
     });
   }
@@ -208,15 +214,12 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 
       /* ── Watermark (logo + text) ── */
       if(logoURI){
-        try{ pdf.addImage(logoURI,'JPEG',W/2-30,H/2-35,60,60); }catch(e){}
-        pdf.setTextColor(220); pdf.setFontSize(28); pdf.setFont('helvetica','bold');
-        pdf.text('EDUNEX', W/2, H/2+35, {align:'center'});
-      } else {
-        pdf.setTextColor(210); pdf.setFontSize(48); pdf.setFont('helvetica','bold');
-        pdf.text('EDUNEX', W/2, H/2, {align:'center', angle:-30});
+        try{ pdf.addImage(logoURI,'PNG',W/2-25,H/2-30,50,50); }catch(e){}
       }
-      pdf.setFontSize(10); pdf.setFont('helvetica','normal'); pdf.setTextColor(180);
-      pdf.text('www.edunex.com', W/2, H/2+45, {align:'center'});
+      pdf.setTextColor(200); pdf.setFontSize(42); pdf.setFont('helvetica','bold');
+      pdf.text('EDUNEX', W/2, H/2+8, {align:'center'});
+      pdf.setFontSize(11); pdf.setFont('helvetica','normal'); pdf.setTextColor(180);
+      pdf.text('www.edunex.com', W/2, H/2+18, {align:'center'});
 
       /* ── Footer ── */
       pdf.setDrawColor(200); pdf.setLineWidth(0.3);
@@ -232,9 +235,9 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
     if(!el){ alert('PDF content not found'); return; }
 
     Promise.all([
-      toDataURL(FLAG_URL, 'image/jpeg'),
-      toDataURL(MINIS_URL, 'image/png'),
-      toDataURL(LOGO_URL, 'image/jpeg')
+      toDataURL(FLAG_URL, 'image/jpeg', 100),
+      toDataURL(MINIS_URL, 'image/png', 100),
+      toDataURL(LOGO_URL, 'image/png', 150)
     ]).then(function(imgs){
       var flagURI  = imgs[0];
       var minisURI = imgs[1];
@@ -243,8 +246,8 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
       var opt = {
         margin: [28, 12, 16, 12],
         filename: FNAME,
-        image: { type:'jpeg', quality:0.98 },
-        html2canvas: { scale:2, useCORS:true },
+        image: { type:'jpeg', quality:0.95 },
+        html2canvas: { scale:1.5, useCORS:true, logging:false },
         jsPDF: { unit:'mm', format:'a4', orientation:ORIENT },
         pagebreak: { mode:['avoid-all','css','legacy'] }
       };
@@ -254,20 +257,38 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
         pdf.save(FNAME);
       }).catch(function(err){
         console.error('html2pdf error:', err);
-        alert('PDF render failed. Try Print (Ctrl+P) instead.');
+        // Fallback: try without logo
+        var opt2 = {
+          margin: [28, 12, 16, 12],
+          filename: FNAME,
+          image: { type:'jpeg', quality:0.95 },
+        html2canvas: { scale:1, useCORS:true, logging:false },
+          jsPDF: { unit:'mm', format:'a4', orientation:ORIENT },
+          pagebreak: { mode:['avoid-all','css','legacy'] }
+        };
+        html2pdf().set(opt2).from(el).then(function(pdf2){
+          stampEveryPage(pdf2, flagURI, minisURI, null);
+          pdf2.save(FNAME);
+        }).catch(function(err2){
+          console.error('html2pdf fallback error:', err2);
+          alert('PDF render failed. Use Print (Ctrl+P) instead.');
+        });
       });
     }).catch(function(){
       var opt = {
         margin: [28, 12, 16, 12],
         filename: FNAME,
-        image: { type:'jpeg', quality:0.98 },
-        html2canvas: { scale:2 },
+        image: { type:'jpeg', quality:0.95 },
+        html2canvas: { scale:1, logging:false },
         jsPDF: { unit:'mm', format:'a4', orientation:ORIENT },
         pagebreak: { mode:['avoid-all','css','legacy'] }
       };
       html2pdf().set(opt).from(el).then(function(pdf){
         stampEveryPage(pdf, null, null, null);
         pdf.save(FNAME);
+      }).catch(function(err){
+        console.error('html2pdf final error:', err);
+        alert('PDF render failed. Use Print (Ctrl+P) instead.');
       });
     });
   };
