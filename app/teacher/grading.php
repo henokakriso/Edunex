@@ -777,8 +777,8 @@ class Ctl_roster {
         }
         unset($r);
 
-        // Sort back by FY rank for display
-        usort($rosterData, fn($a, $b) => $a['fy_rank'] <=> $b['fy_rank']);
+        // Sort by name (last, first) for display
+        usort($rosterData, fn($a, $b) => strcmp($a['name'], $b['name']));
 
         // PDF viewer
         if (isset($_GET['pdf']) || isset($_GET['download'])) {
@@ -984,13 +984,12 @@ class Ctl_roster {
         </div>
 
         <script>
-        var _sortMode = 'fy';
-        var _sortCycle = ['fy', 's2', 'avg'];
+        var _sortMode = 'name';
+        var _sortCycle = ['name', 'fy', 's2', 'avg'];
 
         function sortRoster() {
           var next = _sortCycle[(_sortCycle.indexOf(_sortMode) + 1) % _sortCycle.length];
           _sortMode = next;
-          document.getElementById('rank-th').textContent = 'Rank ↕';
           document.getElementById('rank-th').title = 'Sorted by: ' + next.toUpperCase() + ' (click to cycle)';
 
           var tbody = document.getElementById('roster-body');
@@ -999,13 +998,20 @@ class Ctl_roster {
           for (var i = 0; i < trs.length; i += 3) {
             groups.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
           }
-          groups.sort(function(a, b) {
-            var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
-            var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
-            var aRank = aEl ? parseInt(aEl.textContent) || 999 : 999;
-            var bRank = bEl ? parseInt(bEl.textContent) || 999 : 999;
-            return aRank - bRank;
-          });
+
+          if (next === 'name') {
+            groups.sort(function(a, b) {
+              var aName = a.fy.querySelector('td:first-child div div:first-child');
+              var bName = b.fy.querySelector('td:first-child div div:first-child');
+              return (aName ? aName.textContent.trim() : '').localeCompare(bName ? bName.textContent.trim() : '');
+            });
+          } else {
+            groups.sort(function(a, b) {
+              var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
+              var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
+              return (aEl ? parseInt(aEl.textContent) || 999 : 999) - (bEl ? parseInt(bEl.textContent) || 999 : 999);
+            });
+          }
           groups.forEach(function(g) {
             tbody.appendChild(g.fy);
             tbody.appendChild(g.s2);

@@ -150,14 +150,13 @@
 </div>
 
 <script>
-var _sortMode = 'fy';
-var _sortCycle = ['fy', 's2', 'avg'];
+var _sortMode = 'name';
+var _sortCycle = ['name', 'fy', 's2', 'avg'];
 
 function sortRoster() {
   var next = _sortCycle[(_sortCycle.indexOf(_sortMode) + 1) % _sortCycle.length];
   _sortMode = next;
   var th = document.getElementById('rank-th');
-  th.textContent = 'Rank ↕';
   th.title = 'Sorted by: ' + next.toUpperCase() + ' (click to cycle)';
 
   var tbody = document.getElementById('roster-body');
@@ -166,13 +165,25 @@ function sortRoster() {
   for (var i = 0; i < trs.length; i += 3) {
     groups.push({ fy: trs[i], s2: trs[i+1], avg: trs[i+2] });
   }
-  groups.sort(function(a, b) {
-    var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
-    var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
-    var aR = aEl ? parseInt(aEl.textContent) || 999 : 999;
-    var bR = bEl ? parseInt(bEl.textContent) || 999 : 999;
-    return aR - bR;
-  });
+
+  if (next === 'name') {
+    groups.sort(function(a, b) {
+      var aName = a.fy.querySelector('td:first-child div div:first-child');
+      var bName = b.fy.querySelector('td:first-child div div:first-child');
+      var aText = aName ? aName.textContent.trim() : '';
+      var bText = bName ? bName.textContent.trim() : '';
+      return aText.localeCompare(bText);
+    });
+  } else {
+    groups.sort(function(a, b) {
+      var aEl = a.fy.querySelector('[data-rank="' + next + '"]');
+      var bEl = b.fy.querySelector('[data-rank="' + next + '"]');
+      var aR = aEl ? parseInt(aEl.textContent) || 999 : 999;
+      var bR = bEl ? parseInt(bEl.textContent) || 999 : 999;
+      return aR - bR;
+    });
+  }
+
   groups.forEach(function(g) {
     tbody.appendChild(g.fy);
     tbody.appendChild(g.s2);

@@ -15,6 +15,7 @@
  */
 $pdf_logo_black = url('public/images/logo-black.jpeg');
 $pdf_logo_white = url('public/images/logo-white.jpeg');
+$pdf_logo_color = url('public/images/logo-color.jpeg');
 $pdf_ministry_logo = url('public/images/ministry-logo.png');
 $pdf_ethiopian_flag = url('public/images/ethiopian-flag.jpeg');
 $pdf_doc_id = $pdf_doc_id ?? 'EDU-' . date('Y') . '-' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
@@ -163,6 +164,7 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 (function(){
   var FLAG_URL  = <?= json_encode($pdf_ethiopian_flag) ?>;
   var MINIS_URL = <?= json_encode($pdf_ministry_logo) ?>;
+  var LOGO_URL  = <?= json_encode($pdf_logo_color) ?>;
   var FNAME     = <?= json_encode($pdf_filename) ?>;
   var ORIENT    = <?= json_encode($pdf_orientation) ?>;
   var SUBTITLE  = <?= json_encode($pdf_subtitle) ?>;
@@ -185,7 +187,7 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
     });
   }
 
-  function stampEveryPage(pdf, flagURI, minisURI){
+  function stampEveryPage(pdf, flagURI, minisURI, logoURI){
     var total = pdf.internal.getNumberOfPages();
     var W = pdf.internal.pageSize.getWidth();
     var H = pdf.internal.pageSize.getHeight();
@@ -204,11 +206,17 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
       pdf.setDrawColor(200); pdf.setLineWidth(0.3);
       pdf.line(14, 24, W-14, 24);
 
-      /* ── Watermark ── */
-      pdf.setTextColor(210); pdf.setFontSize(48); pdf.setFont('helvetica','bold');
-      pdf.text('EDUNEX', W/2, H/2, {align:'center', angle:-30});
-      pdf.setFontSize(12); pdf.setFont('helvetica','normal');
-      pdf.text('www.henokakriso.com', W/2, H/2+14, {align:'center', angle:-30});
+      /* ── Watermark (logo + text) ── */
+      if(logoURI){
+        try{ pdf.addImage(logoURI,'JPEG',W/2-30,H/2-35,60,60); }catch(e){}
+        pdf.setTextColor(220); pdf.setFontSize(28); pdf.setFont('helvetica','bold');
+        pdf.text('EDUNEX', W/2, H/2+35, {align:'center'});
+      } else {
+        pdf.setTextColor(210); pdf.setFontSize(48); pdf.setFont('helvetica','bold');
+        pdf.text('EDUNEX', W/2, H/2, {align:'center', angle:-30});
+      }
+      pdf.setFontSize(10); pdf.setFont('helvetica','normal'); pdf.setTextColor(180);
+      pdf.text('www.edunex.com', W/2, H/2+45, {align:'center'});
 
       /* ── Footer ── */
       pdf.setDrawColor(200); pdf.setLineWidth(0.3);
@@ -225,10 +233,12 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
 
     Promise.all([
       toDataURL(FLAG_URL, 'image/jpeg'),
-      toDataURL(MINIS_URL, 'image/png')
+      toDataURL(MINIS_URL, 'image/png'),
+      toDataURL(LOGO_URL, 'image/jpeg')
     ]).then(function(imgs){
       var flagURI  = imgs[0];
       var minisURI = imgs[1];
+      var logoURI  = imgs[2];
 
       var opt = {
         margin: [28, 12, 16, 12],
@@ -240,7 +250,7 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
       };
 
       html2pdf().set(opt).from(el).then(function(pdf){
-        stampEveryPage(pdf, flagURI, minisURI);
+        stampEveryPage(pdf, flagURI, minisURI, logoURI);
         pdf.save(FNAME);
       }).catch(function(err){
         console.error('html2pdf error:', err);
@@ -256,7 +266,7 @@ $pdf_user_name = $pdf_user_name ?? full_name($__u ?? []);
         pagebreak: { mode:['avoid-all','css','legacy'] }
       };
       html2pdf().set(opt).from(el).then(function(pdf){
-        stampEveryPage(pdf, null, null);
+        stampEveryPage(pdf, null, null, null);
         pdf.save(FNAME);
       });
     });
