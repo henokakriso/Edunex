@@ -379,7 +379,7 @@ class Pdf {
         for ($i = 0; $i < $totalPages; $i++) {
             $pageObjId = 6 + $i;
             $contentObjId = 6 + $totalPages + $i;
-            $objs[$pageObjId] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $w $h] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> /ProcSet [/PDF /Text] >> /Contents $contentObjId 0 R >>";
+            $objs[$pageObjId] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $w $h] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> /ProcSet [/PDF /Text] >> /Contents $contentObjId 0 R >>";
             $objs[$contentObjId] = "<< /Length " . strlen($this->pages[$i]) . " >>\nstream\n" . $this->pages[$i] . "\nendstream";
         }
 
