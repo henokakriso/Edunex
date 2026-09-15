@@ -237,20 +237,21 @@ class Pdf {
         $totalW = $right - $mh;
         $colW = $totalW / $colCount;
         $widths = $widths ?: array_fill(0, $colCount, $colW);
+        $actualW = array_sum($widths);
 
         // Header row
         $this->ensureSpace(20);
         $yy = $this->y;
         $this->out("0.92 0.92 0.92 rg");
-        $this->rect($mh, $yy - 12, $totalW, 15, true);
+        $this->rect($mh, $yy - 12, $actualW, 15, true);
         $this->out("0 0 0 rg");
         $x = $mh;
         foreach ($headers as $i => $h) {
-            $this->text(mb_substr((string)$h, 0, 45), 8, true, $x + 4, $yy);
+            $this->text(mb_substr((string)$h, 0, 45), 7, true, $x + 2, $yy);
             $x += $widths[$i];
         }
         $this->y -= 14;
-        $this->line($mh, $this->y, $right, $this->y);
+        $this->line($mh, $this->y, $mh + $actualW, $this->y);
         $this->y -= 4;
 
         // Data rows
@@ -260,20 +261,20 @@ class Pdf {
             $yy = $this->y;
             if ($rowNum % 2 === 1) {
                 $this->out("0.96 0.96 0.98 rg");
-                $this->rect($mh, $yy - 11, $totalW, 14, true);
+                $this->rect($mh, $yy - 11, $actualW, 14, true);
                 $this->out("0 0 0 rg");
             }
             $x = $mh;
             $cells = array_values($row);
             foreach ($cells as $i => $cell) {
                 if ($i >= $colCount) break;
-                $this->text(mb_substr((string)($cell ?? '—'), 0, 50), 8, false, $x + 4, $yy);
+                $this->text(mb_substr((string)($cell ?? '—'), 0, 50), 7, false, $x + 2, $yy);
                 $x += $widths[$i];
             }
             $this->y -= 13;
             $rowNum++;
         }
-        $this->line($mh, $this->y, $right, $this->y);
+        $this->line($mh, $this->y, $mh + $actualW, $this->y);
         $this->y -= 8;
     }
 

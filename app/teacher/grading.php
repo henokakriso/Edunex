@@ -700,7 +700,8 @@ class Ctl_roster {
             if ($s['birth_date']) {
                 $age = (new DateTime($s['birth_date']))->diff(new DateTime())->y;
             }
-            $gender = strtoupper($s['gender'] ?? 'O');
+            $gender = strtoupper($s['gender'] ?? '');
+            if (!in_array($gender, ['M', 'F'])) $gender = 'M';
 
             $subjects = [];
             $fyTotal = 0; $fyCount = 0;
@@ -857,27 +858,24 @@ class Ctl_roster {
         $pdf->spacer(4);
 
         // Build table: 3 rows per student (FY, S2, Avg)
-        // Columns: # | Name | ID | Age | Sex | Period | BIO | MAT | PHY | ENG | CHE | HIS | GEO | AMH | COM | GEN | Abs | Tot | Avg | Rank
+        // Calculate widths — distribute evenly across available space
         $numSubjects = count($courses);
-        $extraCols = 7; // #, Name, ID, Age, Sex, Period, Abs, Tot, Avg, Rank
-        $totalCols = $extraCols + $numSubjects;
-        $pageW = 841.89; // landscape A4 width in points
-        $mh = 50;
+        $pageW = 841.89; // landscape A4
+        $mh = 36;
         $usableW = $pageW - ($mh * 2);
 
-        // Calculate widths
-        $nameW = 80;
-        $idW = 55;
-        $rollW = 16;
-        $ageW = 16;
-        $sexW = 14;
-        $periodW = 18;
-        $absW = 16;
-        $totW = 26;
-        $avgW = 26;
-        $rankW = 18;
-        $fixedW = $nameW + $idW + $rollW + $ageW + $sexW + $periodW + $absW + $totW + $avgW + $rankW;
-        $subjW = max(22, ($usableW - $fixedW) / $numSubjects);
+        $rollW = 18;
+        $nameW = 110;
+        $idW = 60;
+        $ageW = 20;
+        $sexW = 18;
+        $periodW = 22;
+        $absW = 20;
+        $totW = 30;
+        $avgW = 30;
+        $rankW = 22;
+        $fixedW = $rollW + $nameW + $idW + $ageW + $sexW + $periodW + $absW + $totW + $avgW + $rankW;
+        $subjW = max(28, round(($usableW - $fixedW) / $numSubjects, 1));
 
         $headers = ['#', 'Name', 'ID', 'Age', 'Sex', ''];
         foreach ($courses as $c) { $headers[] = $subLabel($c); }
