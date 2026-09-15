@@ -27,6 +27,8 @@ class Pdf {
     private bool $headerDrawn = false;
     private string $watermarkText = '';
     private string $watermarkSub = '';
+    private ?string $watermarkImage = null;
+    private array $images = []; // name => ['path'=>, 'objId'=>]
 
     public function __construct(string $orientation = 'portrait', string $pageSize = 'A4', bool $ministry = false) {
         $w = $h = 612;
@@ -110,10 +112,39 @@ class Pdf {
         return $this;
     }
 
+    /** Set watermark as a JPEG image (centered, faded) */
+    public function setWatermarkImage(string $jpegPath): self {
+        $this->watermarkImage = $jpegPath;
+        if (file_exists($jpegPath)) {
+            $size = @getimagesize($jpegPath);
+            $this->images['watermark'] = [
+                'name' => 'WmLogo',
+                'objId' => 0,
+                'w' => $size[0] ?? 300,
+                'h' => $size[1] ?? 167,
+                'data' => file_get_contents($jpegPath),
+            ];
+        }
+        return $this;
+    }
+
     /** Draw footer on current page */
     private function drawFooter(): void {
         // Draw watermark first (behind content)
-        if ($this->watermarkText) {
+        if (!empty($this->images['watermark'])) {
+            $img = $this->images['watermark'];
+            $cx = $this->pageW / 2;
+            $cy = $this->pageH / 2;
+            $scale = 0.30;
+            $drawW = $img['w'] * $scale;
+            $drawH = $img['h'] * $scale;
+            $tx = $cx - ($drawW / 2);
+            $ty = $cy - ($drawH / 2);
+            $this->out("q");
+            $this->out("$scale 0 0 $scale $tx $ty cm");
+            $this->out("/{$img['name']} Do");
+            $this->out("Q");
+        } elseif ($this->watermarkText) {
             $cx = $this->pageW / 2;
             $cy = $this->pageH / 2;
             $this->out("0.90 0.90 0.90 rg");
@@ -227,9 +258,10 @@ class Pdf {
     public function spacer(float $h = 8): void { $this->y -= $h; }
 
     /**
-     * Official table with header row, alternating row shading
+     * Official table with header row, alternating row shading, column alignment
+     * @param array $aligns Optional per-column alignment: 'l' (left), 'c' (center), 'r' (right)
      */
-    public function table(array $headers, array $rows, array $widths = []): void {
+    public function table(array $headers, array $rows, array $widths = [], array $aligns = []): void {
         $mh = $this->margin;
         $right = $this->pageW - $mh;
         $colCount = count($headers);
@@ -239,43 +271,84 @@ class Pdf {
         $widths = $widths ?: array_fill(0, $colCount, $colW);
         $actualW = array_sum($widths);
 
+        // Default alignment: left
+        for ($i = count($aligns); $i < $colCount; $i++) { $aligns[$i] = 'l'; }
+
+        $fontSize = 6.5;
+        $headerSize = 6;
+
         // Header row
         $this->ensureSpace(20);
         $yy = $this->y;
-        $this->out("0.92 0.92 0.92 rg");
-        $this->rect($mh, $yy - 12, $actualW, 15, true);
+        $this->out("0.88 0.88 0.88 rg");
+        $this->rect($mh, $yy - 11, $actualW, 14, true);
         $this->out("0 0 0 rg");
         $x = $mh;
-        foreach ($headers as $i => $h) {
-            $this->text(mb_substr((string)$h, 0, 45), 7, true, $x + 2, $yy);
-            $x += $widths[$i];
+        for ($i = 0; $i < $colCount; $i++) {
+            $h = (string)$headers[$i];
+            $w = $widths[$i];
+            if ($aligns[$i] === 'c') {
+                $tx = $x + ($w - strlen($h) * $headerSize * 0.45) / 2;
+            } elseif ($aligns[$i] === 'r') {
+                $tx = $x + $w - strlen($h) * $headerSize * 0.45 - 2;
+            } else {
+                $tx = $x + 2;
+            }
+            $this->text(mb_substr($h, 0, 45), $headerSize, true, $tx, $yy);
+            $x += $w;
         }
-        $this->y -= 14;
+        $this->y -= 13;
         $this->line($mh, $this->y, $mh + $actualW, $this->y);
-        $this->y -= 4;
+        $this->y -= 3;
+
+        // Column separator lines
+        $colLines = [];
+        $cx = $mh;
+        for ($i = 0; $i < $colCount - 1; $i++) {
+            $cx += $widths[$i];
+            $colLines[] = $cx;
+        }
 
         // Data rows
         $rowNum = 0;
         foreach ($rows as $row) {
-            $this->ensureSpace(14);
+            $this->ensureSpace(12);
             $yy = $this->y;
             if ($rowNum % 2 === 1) {
-                $this->out("0.96 0.96 0.98 rg");
-                $this->rect($mh, $yy - 11, $actualW, 14, true);
+                $this->out("0.96 0.96 0.97 rg");
+                $this->rect($mh, $yy - 10, $actualW, 12, true);
                 $this->out("0 0 0 rg");
             }
             $x = $mh;
             $cells = array_values($row);
-            foreach ($cells as $i => $cell) {
-                if ($i >= $colCount) break;
-                $this->text(mb_substr((string)($cell ?? '—'), 0, 50), 7, false, $x + 2, $yy);
-                $x += $widths[$i];
+            for ($i = 0; $i < $colCount; $i++) {
+                $cell = $cells[$i] ?? '—';
+                $w = $widths[$i];
+                $cellStr = mb_substr((string)$cell, 0, 45);
+                $tw = strlen($cellStr) * $fontSize * 0.45;
+                if ($aligns[$i] === 'c') {
+                    $tx = $x + ($w - $tw) / 2;
+                } elseif ($aligns[$i] === 'r') {
+                    $tx = $x + $w - $tw - 2;
+                } else {
+                    $tx = $x + 2;
+                }
+                $this->text($cellStr, $fontSize, false, $tx, $yy);
+                $x += $w;
             }
-            $this->y -= 13;
+            // Draw column separators (very light)
+            $this->out("0.90 0.90 0.90 rg");
+            foreach ($colLines as $lx) {
+                $yBot = $yy - 10;
+                $yTop = $yy + 1;
+                $this->out("$lx $yBot m $lx $yTop l S");
+            }
+            $this->out("0 0 0 rg");
+            $this->y -= 11;
             $rowNum++;
         }
         $this->line($mh, $this->y, $mh + $actualW, $this->y);
-        $this->y -= 8;
+        $this->y -= 6;
     }
 
     /**
@@ -344,75 +417,122 @@ class Pdf {
      * Generate and output the PDF
      */
     public function output(string $filename = 'document.pdf', bool $inline = false, ?string $saveTo = null): void {
-        // Draw footer on last page
         $this->drawFooter();
 
-        // Replace page count placeholder
         $totalPages = count($this->pages);
         foreach ($this->pages as &$page) {
             $page = str_replace('{N}', (string)$totalPages, $page);
         }
         unset($page);
 
-        // Build PDF objects
-        $w = $this->pageW;
-        $h = $this->pageH;
-        $objs = [];
+        $hasImageWatermark = !empty($this->watermarkImage) && file_exists($this->watermarkImage);
 
-        // Obj 1: Catalog
-        $objs[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+        if ($hasImageWatermark) {
+            $tmpBase = tempnam(sys_get_temp_dir(), 'edunex_base_') . '.pdf';
+            $tmpFinal = tempnam(sys_get_temp_dir(), 'edunex_final_') . '.pdf';
+            $this->writePdfFile($tmpBase);
 
-        // Obj 2: Pages (placeholder, updated after fonts)
-        // Fonts go first: 3, 4, 5
-        $objs[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
-        $objs[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>";
-        $objs[5] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>";
+            $script = __DIR__ . '/../scripts/add_watermark.py';
+            $scale = 30;
+            $cmd = sprintf('python3 %s %s %s %s %d 2>&1',
+                escapeshellarg($script),
+                escapeshellarg($tmpBase),
+                escapeshellarg($tmpFinal),
+                escapeshellarg($this->watermarkImage),
+                $scale
+            );
+            exec($cmd, $output, $returnCode);
 
-        // Page objects start at 6, content streams at 6+totalPages
-        $pageObjIds = [];
-        for ($i = 0; $i < $totalPages; $i++) {
-            $pageObjIds[] = (6 + $i) . " 0 R";
+            @unlink($tmpBase);
+
+            if ($returnCode === 0 && file_exists($tmpFinal) && filesize($tmpFinal) > 0) {
+                if ($saveTo !== null) {
+                    rename($tmpFinal, $saveTo);
+                    return;
+                }
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="' . $filename . '"');
+                readfile($tmpFinal);
+                @unlink($tmpFinal);
+                exit;
+            }
+            @unlink($tmpFinal);
         }
-        $kids = implode(' ', $pageObjIds);
-        $objs[2] = "<< /Type /Pages /Kids [$kids] /Count $totalPages >>";
-
-        for ($i = 0; $i < $totalPages; $i++) {
-            $pageObjId = 6 + $i;
-            $contentObjId = 6 + $totalPages + $i;
-            $objs[$pageObjId] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $w $h] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> /ProcSet [/PDF /Text] >> /Contents $contentObjId 0 R >>";
-            $objs[$contentObjId] = "<< /Length " . strlen($this->pages[$i]) . " >>\nstream\n" . $this->pages[$i] . "\nendstream";
-        }
-
-        // Sort objects
-        ksort($objs);
-
-        // Build PDF string
-        $pdf = "%PDF-1.4\n";
-        $offsets = [];
-        foreach ($objs as $id => $obj) {
-            $offsets[$id] = strlen($pdf);
-            $pdf .= "$id 0 obj\n$obj\nendobj\n";
-        }
-
-        // Cross-reference table
-        $xref = strlen($pdf);
-        $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-        for ($id = 1; $id <= count($objs); $id++) {
-            $pdf .= sprintf("%010d 00000 n \n", $offsets[$id] ?? 0);
-        }
-
-        // Trailer
-        $pdf .= "trailer\n<< /Size " . (count($objs) + 1) . " /Root 1 0 R >>\nstartxref\n$xref\n%%EOF";
 
         if ($saveTo !== null) {
-            file_put_contents($saveTo, $pdf);
+            $this->writePdfFile($saveTo);
             return;
         }
         header('Content-Type: application/pdf');
         header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="' . $filename . '"');
-        echo $pdf;
+        $this->writePdfFile('php://output');
         exit;
     }
 
     public function getDocId(): string { return $this->docId; }
+
+    /** Write PDF using fwrite() for binary-safe output */
+    private function writePdfFile(string $dest): void {
+        $fp = fopen($dest, 'wb');
+        if (!$fp) {
+            throw new \RuntimeException("Cannot open $dest for writing");
+        }
+
+        $offsets = [];
+        fwrite($fp, "%PDF-1.4\n");
+
+        // Obj 1: Catalog
+        $offsets[1] = ftell($fp);
+        fwrite($fp, "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+
+        // Obj 3-5: Fonts
+        $offsets[3] = ftell($fp);
+        fwrite($fp, "3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n");
+        $offsets[4] = ftell($fp);
+        fwrite($fp, "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n");
+        $offsets[5] = ftell($fp);
+        fwrite($fp, "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>\nendobj\n");
+
+        // Page objects and content streams
+        $nextObjId = 6;
+        $pageStartObjId = $nextObjId;
+        $contentStartObjId = $nextObjId + count($this->pages);
+        $pageObjIds = [];
+        for ($i = 0; $i < count($this->pages); $i++) {
+            $pageObjIds[] = ($pageStartObjId + $i) . " 0 R";
+        }
+        $kids = implode(' ', $pageObjIds);
+        $totalPages = count($this->pages);
+        $pw = $this->pageW;
+        $ph = $this->pageH;
+
+        $offsets[2] = ftell($fp);
+        fwrite($fp, "2 0 obj\n<< /Type /Pages /Kids [$kids] /Count $totalPages >>\nendobj\n");
+
+        for ($i = 0; $i < $totalPages; $i++) {
+            $pageObjId = $pageStartObjId + $i;
+            $contentObjId = $contentStartObjId + $i;
+            $offsets[$pageObjId] = ftell($fp);
+            fwrite($fp, "{$pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $pw $ph] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> /ProcSet [/PDF /Text] >> /Contents {$contentObjId} 0 R >>\nendobj\n");
+
+            $pageContent = $this->pages[$i];
+            $offsets[$contentObjId] = ftell($fp);
+            fwrite($fp, "{$contentObjId} 0 obj\n<< /Length " . strlen($pageContent) . " >>\nstream\n");
+            fwrite($fp, $pageContent);
+            fwrite($fp, "\nendstream\nendobj\n");
+        }
+
+        // Cross-reference table
+        $xrefOffset = ftell($fp);
+        $totalObjs = count($offsets);
+        fwrite($fp, "xref\n0 " . ($totalObjs + 1) . "\n0000000000 65535 f \n");
+        for ($id = 1; $id <= $totalObjs; $id++) {
+            fwrite($fp, sprintf("%010d 00000 n \n", $offsets[$id] ?? 0));
+        }
+
+        // Trailer
+        fwrite($fp, "trailer\n<< /Size " . ($totalObjs + 1) . " /Root 1 0 R >>\nstartxref\n{$xrefOffset}\n%%EOF");
+
+        fclose($fp);
+    }
 }

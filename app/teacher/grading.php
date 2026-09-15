@@ -831,7 +831,22 @@ class Ctl_roster {
         $subLabel = fn($c) => strtoupper(mb_substr($c['subject_name'] ?? $c['title'], 0, 3));
 
         $pdf = new Pdf('landscape', 'A4', true);
-        $pdf->setWatermark('EDUNEX', 'www.edunex.com');
+        $logoPath = __DIR__ . '/../../public/images/logo-black.jpeg';
+        $flagPath = __DIR__ . '/../../public/images/ethiopian-flag.jpeg';
+        $ministryPath = __DIR__ . '/../../public/images/ministry-logo.png';
+        $watermarkPath = '/tmp/watermark_composite.jpg';
+        // Create composite watermark with logo + flag + ministry
+        if (!file_exists($watermarkPath) || filemtime($watermarkPath) < filemtime($logoPath)) {
+            $wmScript = __DIR__ . '/../../scripts/make_watermark.php';
+            if (file_exists($wmScript)) {
+                exec("php " . escapeshellarg($wmScript) . " 2>/dev/null");
+            }
+        }
+        if (file_exists($watermarkPath)) {
+            $pdf->setWatermarkImage($watermarkPath);
+        } else {
+            $pdf->setWatermark('EDUNEX');
+        }
 
         // Watermark on every page
         $pdf->setTitle('CLASS ROSTER');
@@ -858,24 +873,24 @@ class Ctl_roster {
         $pdf->spacer(4);
 
         // Build table: 3 rows per student (FY, S2, Avg)
-        // Calculate widths — distribute evenly across available space
+        // Match browser layout column proportions
         $numSubjects = count($courses);
         $pageW = 841.89; // landscape A4
         $mh = 36;
         $usableW = $pageW - ($mh * 2);
 
-        $rollW = 18;
-        $nameW = 110;
-        $idW = 60;
-        $ageW = 20;
-        $sexW = 18;
-        $periodW = 22;
-        $absW = 20;
+        $rollW = 26;
+        $nameW = 100;
+        $idW = 50;
+        $ageW = 22;
+        $sexW = 20;
+        $periodW = 24;
+        $absW = 22;
         $totW = 30;
         $avgW = 30;
-        $rankW = 22;
+        $rankW = 28;
         $fixedW = $rollW + $nameW + $idW + $ageW + $sexW + $periodW + $absW + $totW + $avgW + $rankW;
-        $subjW = max(28, round(($usableW - $fixedW) / $numSubjects, 1));
+        $subjW = max(30, round(($usableW - $fixedW) / $numSubjects, 1));
 
         $headers = ['#', 'Name', 'ID', 'Age', 'Sex', ''];
         foreach ($courses as $c) { $headers[] = $subLabel($c); }
@@ -931,7 +946,11 @@ class Ctl_roster {
             $rows[] = $avgRow;
         }
 
-        $pdf->table($headers, $rows, $widths);
+        $aligns = ['c', 'l', 'l', 'c', 'c', 'c']; // #, Name, ID, Age, Sex, Period
+        for ($i = 0; $i < $numSubjects; $i++) { $aligns[] = 'c'; }
+        $aligns = array_merge($aligns, ['c', 'c', 'c', 'c']); // Abs, Tot, Avg, Rank
+
+        $pdf->table($headers, $rows, $widths, $aligns);
 
         $filename = 'class_roster_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $homeroom['name']) . '_' . date('Ymd') . '.pdf';
         $pdf->output($filename, false);

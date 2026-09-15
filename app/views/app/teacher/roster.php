@@ -6,6 +6,7 @@
   </div>
   <div style="display:flex;gap:8px">
     <a class="btn btn-ghost" href="<?= e(url('teacher/grading')) ?>"><?= icon('arrow-left') ?> Back</a>
+    <button class="btn btn-ghost" onclick="window.print()" style="cursor:pointer"><?= icon('file') ?> Print</button>
     <a class="btn btn-primary" href="<?= e(url('teacher/grading/roster&download=1')) ?>"><?= icon('file') ?> Download PDF</a>
   </div>
 </div>
@@ -142,9 +143,12 @@
   </div>
 </div>
 
-<div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
-  Subject codes: <?php foreach ($courses as $c): ?><b><?= e($subLabel($c)) ?></b>=<?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 20, '')) ?><?php if (!$c === end($courses)): ?> · <?php endif; endforeach; ?> ·
-  Click any column header to sort ↕
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;padding:10px 14px;border-radius:8px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
+  <span style="margin-right:4px">Subject codes:</span>
+  <?php foreach ($courses as $i => $c): ?>
+    <span><b><?= e($subLabel($c)) ?></b>=<?= e(mb_strimwidth($c['subject_name'] ?? $c['title'], 0, 20, '')) ?><?php if ($i < count($courses) - 1): ?><span style="margin:0 3px;opacity:.4">|</span><?php endif; ?></span>
+  <?php endforeach; ?>
+  <span style="margin-left:auto;opacity:.6">Click any column header to sort ↕</span>
 </div>
 
 <script>
