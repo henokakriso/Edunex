@@ -120,16 +120,89 @@ def build_pdf(data, output_path=None):
                            preserveAspectRatio=True, mask='auto')
             canvas.restoreState()
 
-        # ── Footer ──
+        # ── Signature block (horizontal, above footer) ──
+        sig_y = 22 * mm
+        line_w = 55 * mm
+        canvas.setFont('Helvetica', 7)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        # Prepared by (left)
+        canvas.drawString(mh, sig_y + 10, 'Prepared by:')
+        canvas.setStrokeColor(colors.HexColor('#94a3b8'))
+        canvas.setLineWidth(0.4)
+        canvas.line(mh, sig_y + 3, mh + line_w, sig_y + 3)
+        canvas.setFont('Helvetica-Bold', 7)
+        canvas.setFillColor(colors.HexColor('#1e293b'))
+        canvas.drawString(mh, sig_y - 6, teacher_name or '________________')
+        canvas.setFont('Helvetica', 6)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        canvas.drawString(mh, sig_y - 13, 'Homeroom Teacher')
+
+        # Approved by (right)
+        rx = w - mh - line_w
+        canvas.setFont('Helvetica', 7)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        canvas.drawString(rx, sig_y + 10, 'Approved by:')
+        canvas.setStrokeColor(colors.HexColor('#94a3b8'))
+        canvas.line(rx, sig_y + 3, rx + line_w, sig_y + 3)
+        canvas.setFont('Helvetica-Bold', 7)
+        canvas.setFillColor(colors.HexColor('#1e293b'))
+        canvas.drawString(rx, sig_y - 6, director_name or '________________')
+        canvas.setFont('Helvetica', 6)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        canvas.drawString(rx, sig_y - 13, 'School Director')
+
+        # ── Footer line ──
         canvas.setStrokeColor(colors.HexColor('#d1d5db'))
         canvas.setLineWidth(0.5)
         canvas.line(mh, 12 * mm, w - mh, 12 * mm)
 
+        # Footer: EDUNEX LMS (bold label)
         canvas.setFont('Helvetica-Bold', 6)
         canvas.setFillColor(colors.HexColor('#64748b'))
         canvas.drawString(mh, 8 * mm, 'EDUNEX LMS')
+
+        # Footer: clickable links
         canvas.setFont('Helvetica', 5.5)
-        canvas.drawString(mh, 5 * mm, 'henockakriso.com  ·  GitHub @henokakriso  ·  ARWE-PL Licensed [' + str(__import__('datetime').datetime.now().year) + ']')
+        link_y = 5 * mm
+        lx = mh
+        # Website link
+        web_url = 'https://henokakriso.com'
+        canvas.setFillColor(colors.HexColor('#6366f1'))
+        canvas.drawString(lx, link_y, 'henokakriso.com')
+        web_w = canvas.stringWidth('henokakriso.com', 'Helvetica', 5.5)
+        canvas.linkURL(web_url, (lx, link_y - 1, lx + web_w, link_y + 7), relative=0)
+        lx += web_w + 3
+
+        # Separator
+        canvas.setFillColor(colors.HexColor('#94a3b8'))
+        canvas.drawString(lx, link_y, '·')
+        lx += 8
+
+        # GitHub link
+        gh_url = 'https://github.com/henokakriso/Edunex'
+        canvas.setFillColor(colors.HexColor('#6366f1'))
+        canvas.drawString(lx, link_y, 'GitHub @henokakriso')
+        gh_w = canvas.stringWidth('GitHub @henokakriso', 'Helvetica', 5.5)
+        canvas.linkURL(gh_url, (lx, link_y - 1, lx + gh_w, link_y + 7), relative=0)
+        lx += gh_w + 3
+
+        # Separator
+        canvas.setFillColor(colors.HexColor('#94a3b8'))
+        canvas.drawString(lx, link_y, '·')
+        lx += 8
+
+        # License link
+        yr = __import__('datetime').datetime.now().year
+        lic_text = f'ARWE-PL Licensed [{yr}]'
+        lic_url = 'https://github.com/henokakriso/Edunex/blob/main/LICENSE'
+        canvas.setFillColor(colors.HexColor('#6366f1'))
+        canvas.drawString(lx, link_y, lic_text)
+        lic_w = canvas.stringWidth(lic_text, 'Helvetica', 5.5)
+        canvas.linkURL(lic_url, (lx, link_y - 1, lx + lic_w, link_y + 7), relative=0)
+
+        # Doc ID (center) and Page number (right)
+        canvas.setFont('Helvetica', 6.5)
+        canvas.setFillColor(colors.HexColor('#64748b'))
         canvas.drawCentredString(w / 2, 8 * mm, doc_id)
         canvas.drawRightString(w - mh, 8 * mm, f'Page {canvas.getPageNumber()}')
 
@@ -314,53 +387,12 @@ def build_pdf(data, output_path=None):
     roster_table.setStyle(TableStyle(ts))
     elements.append(roster_table)
 
-    # ── Signature block ──
-    elements.append(Spacer(1, 15 * mm))
-
-    sig_style = ParagraphStyle('Sig', fontSize=8, fontName='Helvetica',
-                                textColor=colors.HexColor('#1e293b'), alignment=TA_CENTER,
-                                leading=10)
-    sig_name_style = ParagraphStyle('SigName', fontSize=8, fontName='Helvetica-Bold',
-                                     textColor=colors.HexColor('#1e293b'), alignment=TA_CENTER,
-                                     leading=10)
-
-    sig_data = [[
-        Paragraph('Prepared by:', sig_style),
-        '',
-        Paragraph('Approved by:', sig_style),
-    ], [
-        Paragraph('<br/><br/>', sig_style),
-        '',
-        Paragraph('<br/><br/>', sig_style),
-    ], [
-        Paragraph('________________________', sig_style),
-        '',
-        Paragraph('________________________', sig_style),
-    ], [
-        Paragraph(teacher_name or 'Teacher', sig_name_style),
-        '',
-        Paragraph(director_name or 'Director', sig_name_style),
-    ], [
-        Paragraph('Homeroom Teacher', sig_style),
-        '',
-        Paragraph('School Director', sig_style),
-    ]]
-
-    sig_table = Table(sig_data, colWidths=[page_w_usable / 2 - 10, 20, page_w_usable / 2 - 10])
-    sig_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    ]))
-    elements.append(sig_table)
-
     # Build PDF
     if output_path:
         doc = SimpleDocTemplate(
             output_path, pagesize=landscape(A4),
             leftMargin=margin, rightMargin=margin,
-            topMargin=22 * mm, bottomMargin=18 * mm
+            topMargin=22 * mm, bottomMargin=35 * mm
         )
         doc.build(elements, onFirstPage=on_first_page, onLaterPages=on_page)
         return output_path
@@ -371,7 +403,7 @@ def build_pdf(data, output_path=None):
         doc = SimpleDocTemplate(
             buf, pagesize=landscape(A4),
             leftMargin=margin, rightMargin=margin,
-            topMargin=22 * mm, bottomMargin=18 * mm
+            topMargin=22 * mm, bottomMargin=35 * mm
         )
         doc.build(elements, onFirstPage=on_first_page, onLaterPages=on_page)
         sys.stdout.buffer.write(buf.getvalue())
