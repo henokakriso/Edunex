@@ -69,42 +69,59 @@ def build_pdf(data, output_path=None):
         w, h = landscape(A4)
         mh = margin
 
-        # Top line
+        # Top border line
         canvas.setStrokeColor(colors.HexColor('#1a1a2e'))
         canvas.setLineWidth(1.2)
         canvas.line(mh, h - 8 * mm, w - mh, h - 8 * mm)
 
+        # Header images — balanced: same height, vertically centered
+        img_h = 11 * mm
+        img_y = h - 7.5 * mm - img_h  # top of header area minus image height
+
         # Flag (top-left)
         flag_path = os.path.join(IMAGES, 'ethiopian-flag.jpeg')
         if os.path.exists(flag_path):
-            canvas.drawImage(flag_path, mh, h - 18 * mm, width=14 * mm, height=10 * mm,
+            fw = img_h  # flag is square
+            canvas.drawImage(flag_path, mh, img_y, width=fw, height=img_h,
                            preserveAspectRatio=True, mask='auto')
 
         # Ministry logo (top-right)
         min_path = os.path.join(IMAGES, 'ministry-logo.png')
         if os.path.exists(min_path):
-            canvas.drawImage(min_path, w - mh - 14 * mm, h - 18 * mm, width=14 * mm, height=14 * mm,
+            mw = img_h  # ministry logo is also square
+            canvas.drawImage(min_path, w - mh - mw, img_y, width=mw, height=img_h,
                            preserveAspectRatio=True, mask='auto')
 
-        # Header text (center)
+        # Header text (centered between the two logos)
+        header_cy = h - 8 * mm - img_h / 2 - 1 * mm
         canvas.setFont('Helvetica-Bold', 8)
         canvas.setFillColor(colors.HexColor('#1a1a2e'))
-        canvas.drawCentredString(w / 2, h - 11 * mm, 'FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA')
+        canvas.drawCentredString(w / 2, header_cy + 3 * mm, 'FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA')
         canvas.setFont('Helvetica', 7)
         canvas.setFillColor(colors.HexColor('#64748b'))
-        canvas.drawCentredString(w / 2, h - 15 * mm, 'Ministry of Education')
+        canvas.drawCentredString(w / 2, header_cy - 2 * mm, 'Ministry of Education')
 
-        # Doc ID
+        # Doc ID (right-aligned under top line)
         canvas.setFont('Helvetica', 6.5)
         canvas.setFillColor(colors.HexColor('#64748b'))
         canvas.drawRightString(w - mh, h - 11 * mm, doc_id)
 
-        # Footer line
+        # ── Watermark: Edunex black logo (very faded, centered) ──
+        logo_path = os.path.join(IMAGES, 'logo-black.jpeg')
+        if os.path.exists(logo_path):
+            wm_size = 90 * mm
+            canvas.saveState()
+            canvas.setFillAlpha(0.06)
+            canvas.drawImage(logo_path, w / 2 - wm_size / 2, h / 2 - wm_size / 2,
+                           width=wm_size, height=wm_size,
+                           preserveAspectRatio=True, mask='auto')
+            canvas.restoreState()
+
+        # ── Footer ──
         canvas.setStrokeColor(colors.HexColor('#d1d5db'))
         canvas.setLineWidth(0.5)
         canvas.line(mh, 12 * mm, w - mh, 12 * mm)
 
-        # Footer text
         canvas.setFont('Helvetica-Bold', 6)
         canvas.setFillColor(colors.HexColor('#64748b'))
         canvas.drawString(mh, 8 * mm, 'EDUNEX LMS')
@@ -112,15 +129,6 @@ def build_pdf(data, output_path=None):
         canvas.drawString(mh, 5 * mm, 'henockakriso.com  ·  GitHub @henokakriso  ·  ARWE-PL Licensed [' + str(__import__('datetime').datetime.now().year) + ']')
         canvas.drawCentredString(w / 2, 8 * mm, doc_id)
         canvas.drawRightString(w - mh, 8 * mm, f'Page {canvas.getPageNumber()}')
-
-        # Watermark (very faded EDUNEX text, behind content)
-        canvas.saveState()
-        canvas.setFillColor(colors.Color(0.92, 0.92, 0.93))
-        canvas.setFont('Helvetica-Bold', 80)
-        canvas.drawCentredString(w / 2, h / 2, 'EDUNEX')
-        canvas.setFont('Helvetica', 14)
-        canvas.drawCentredString(w / 2, h / 2 - 20, 'www.edunex.com')
-        canvas.restoreState()
 
         canvas.restoreState()
 
