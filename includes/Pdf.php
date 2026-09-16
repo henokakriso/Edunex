@@ -267,18 +267,34 @@ class Pdf {
         $widths = $widths ?: array_fill(0, $colCount, $colW);
         $actualW = array_sum($widths);
 
-        // Default alignment: left
         for ($i = count($aligns); $i < $colCount; $i++) { $aligns[$i] = 'l'; }
 
         $fontSize = 6.5;
         $headerSize = 6;
+        $lineColor = "0.82 0.82 0.85";
+        $gridLW = "0.2";
+        $rowH = 11;
+        $rowStep = $rowH + 1;
+
+        // Column x positions
+        $colX = [$mh];
+        $cx = $mh;
+        for ($i = 0; $i < $colCount - 1; $i++) {
+            $cx += $widths[$i];
+            $colX[] = $cx;
+        }
 
         // Header row
         $this->ensureSpace(20);
+        $tableTop = $this->y + 1;
         $yy = $this->y;
+
+        // Header background
         $this->out("0.88 0.88 0.88 rg");
-        $this->rect($mh, $yy - 11, $actualW, 14, true);
+        $this->rect($mh, $yy - 13, $actualW, 14, true);
         $this->out("0 0 0 rg");
+
+        // Header text
         $x = $mh;
         for ($i = 0; $i < $colCount; $i++) {
             $h = (string)$headers[$i];
@@ -293,28 +309,38 @@ class Pdf {
             $this->text(mb_substr($h, 0, 45), $headerSize, true, $tx, $yy);
             $x += $w;
         }
-        $this->y -= 13;
-        $this->line($mh, $this->y, $mh + $actualW, $this->y);
-        $this->y -= 3;
 
-        // Column separator lines
-        $colLines = [];
-        $cx = $mh;
-        for ($i = 0; $i < $colCount - 1; $i++) {
-            $cx += $widths[$i];
-            $colLines[] = $cx;
+        // Header bottom line + column separators for header
+        $headerBot = $yy - 13;
+        $this->out("$lineColor RG $gridLW w");
+        $this->out("$mh $headerBot m " . ($mh + $actualW) . " $headerBot l S");
+        foreach ($colX as $lx) {
+            $this->out("$lx $tableTop m $lx $headerBot l S");
         }
+        $this->out("0 0 0 RG 0.5 w");
+        $this->y -= 14;
 
-        // Data rows
+        // Data rows — draw line FIRST, then background, then text
         $rowNum = 0;
+        $rowTop = $this->y;
         foreach ($rows as $row) {
-            $this->ensureSpace(12);
-            $yy = $this->y;
+            $this->ensureSpace($rowStep);
+            $rowBot = $this->y - $rowH;
+
+            // Row horizontal line (behind everything)
+            $this->out("$lineColor RG $gridLW w");
+            $this->out("$mh $rowBot m " . ($mh + $actualW) . " $rowBot l S");
+            $this->out("0 0 0 RG 0.5 w");
+
+            // Alternating row background (behind text)
             if ($rowNum % 2 === 1) {
                 $this->out("0.96 0.96 0.97 rg");
-                $this->rect($mh, $yy - 10, $actualW, 12, true);
+                $this->rect($mh, $rowBot, $actualW, $rowH, true);
                 $this->out("0 0 0 rg");
             }
+
+            // Data text (on top of lines)
+            $yy = $this->y - 2;
             $x = $mh;
             $cells = array_values($row);
             for ($i = 0; $i < $colCount; $i++) {
@@ -332,18 +358,26 @@ class Pdf {
                 $this->text($cellStr, $fontSize, false, $tx, $yy);
                 $x += $w;
             }
-            // Draw column separators (very light)
-            $this->out("0.90 0.90 0.90 rg");
-            foreach ($colLines as $lx) {
-                $yBot = $yy - 10;
-                $yTop = $yy + 1;
-                $this->out("$lx $yBot m $lx $yTop l S");
+            $this->y -= $rowStep;
+
+            // Vertical column separators for this row segment
+            $this->out("$lineColor RG $gridLW w");
+            foreach ($colX as $lx) {
+                $this->out("$lx $rowBot m $lx " . ($rowTop) . " l S");
             }
-            $this->out("0 0 0 rg");
-            $this->y -= 11;
+            $this->out("0 0 0 RG 0.5 w");
+
+            $rowTop = $rowBot;
             $rowNum++;
         }
-        $this->line($mh, $this->y, $mh + $actualW, $this->y);
+
+        // Left and right full-height borders
+        $tableBot = $this->y;
+        $this->out("$lineColor RG $gridLW w");
+        $this->out("$mh $tableBot m $mh $tableTop l S");
+        $this->out(($mh + $actualW) . " $tableBot m " . ($mh + $actualW) . " $tableTop l S");
+        $this->out("0 0 0 RG 0.5 w");
+
         $this->y -= 6;
     }
 
