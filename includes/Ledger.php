@@ -285,7 +285,8 @@ class Ledger {
      * Legacy append() wrapper — maps old (schoolId, userId, action, table, recordId, data) signature to write().
      */
     public static function append(int $schoolId, int $userId, string $action, string $table, int $recordId, array $data = []): array {
-        return self::write($table, $recordId, $action, $data);
+        $data['event'] = $action;
+        return self::write($table, $recordId, 'INSERT', $data);
     }
 
     /** Check if C/FFI is available */
