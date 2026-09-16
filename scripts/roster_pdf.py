@@ -27,6 +27,9 @@ def build_pdf(data, output_path=None):
     roster = data['roster']
     homeroom = data['homeroom']
     stats = data['stats']
+    teacher_name = data.get('teacher_name', '')
+    school_name = data.get('school_name', '')
+    director_name = data.get('director_name', '')
     doc_id = data.get('doc_id', 'EDU-' + __import__('datetime').datetime.now().strftime('%Y') + '-000001')
     stamp = data.get('stamp', __import__('datetime').datetime.now().strftime('%B %d, %Y'))
 
@@ -146,12 +149,14 @@ def build_pdf(data, output_path=None):
 
     # Summary box
     summary_data = [
-        [Paragraph('<b>Class</b>', s_label), Paragraph(homeroom['name'], s_value),
-         Paragraph('<b>Students</b>', s_label), Paragraph(str(stats['student_count']), s_value)],
-        [Paragraph('<b>Subjects</b>', s_label), Paragraph(str(stats['subject_count']), s_value),
-         Paragraph('<b>Class Average</b>', s_label), Paragraph(f'{stats["class_avg"]}%', s_value)],
-        [Paragraph('<b>Pass Rate</b>', s_label), Paragraph(f'{stats["pass_rate"]}%', s_value),
-         Paragraph('<b>Total Absences</b>', s_label), Paragraph(str(stats['total_absences']), s_value)],
+        [Paragraph('<b>School</b>', s_label), Paragraph(school_name or '—', s_value),
+         Paragraph('<b>Class</b>', s_label), Paragraph(homeroom['name'], s_value)],
+        [Paragraph('<b>Students</b>', s_label), Paragraph(str(stats['student_count']), s_value),
+         Paragraph('<b>Subjects</b>', s_label), Paragraph(str(stats['subject_count']), s_value)],
+        [Paragraph('<b>Class Average</b>', s_label), Paragraph(f'{stats["class_avg"]}%', s_value),
+         Paragraph('<b>Pass Rate</b>', s_label), Paragraph(f'{stats["pass_rate"]}%', s_value)],
+        [Paragraph('<b>Total Absences</b>', s_label), Paragraph(str(stats['total_absences']), s_value),
+         Paragraph('<b>Academic Year</b>', s_label), Paragraph(stamp, s_value)],
     ]
     summary_table = Table(summary_data, colWidths=[70, 80, 80, 80])
     summary_table.setStyle(TableStyle([
@@ -222,10 +227,10 @@ def build_pdf(data, output_path=None):
         age = str(r.get('age') or '—')
         sex = r.get('gender') or '—'
 
-        # FY row
+        # S1 row (was FY)
         fy = [Paragraph(str(roll), s_cell), Paragraph(name, s_cell_left),
               Paragraph(sid, s_cell_left), Paragraph(age, s_cell),
-              Paragraph(sex, s_cell), Paragraph('FY', s_cell)]
+              Paragraph(sex, s_cell), Paragraph('S1', s_cell)]
         for c in courses:
             sub = r.get('subjects', {}).get(str(c['id']), {})
             fy.append(Paragraph(fmt(sub.get('fy')), s_cell))
@@ -308,6 +313,47 @@ def build_pdf(data, output_path=None):
 
     roster_table.setStyle(TableStyle(ts))
     elements.append(roster_table)
+
+    # ── Signature block ──
+    elements.append(Spacer(1, 15 * mm))
+
+    sig_style = ParagraphStyle('Sig', fontSize=8, fontName='Helvetica',
+                                textColor=colors.HexColor('#1e293b'), alignment=TA_CENTER,
+                                leading=10)
+    sig_name_style = ParagraphStyle('SigName', fontSize=8, fontName='Helvetica-Bold',
+                                     textColor=colors.HexColor('#1e293b'), alignment=TA_CENTER,
+                                     leading=10)
+
+    sig_data = [[
+        Paragraph('Prepared by:', sig_style),
+        '',
+        Paragraph('Approved by:', sig_style),
+    ], [
+        Paragraph('<br/><br/>', sig_style),
+        '',
+        Paragraph('<br/><br/>', sig_style),
+    ], [
+        Paragraph('________________________', sig_style),
+        '',
+        Paragraph('________________________', sig_style),
+    ], [
+        Paragraph(teacher_name or 'Teacher', sig_name_style),
+        '',
+        Paragraph(director_name or 'Director', sig_name_style),
+    ], [
+        Paragraph('Homeroom Teacher', sig_style),
+        '',
+        Paragraph('School Director', sig_style),
+    ]]
+
+    sig_table = Table(sig_data, colWidths=[page_w_usable / 2 - 10, 20, page_w_usable / 2 - 10])
+    sig_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 1),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ]))
+    elements.append(sig_table)
 
     # Build PDF
     if output_path:

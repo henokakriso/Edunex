@@ -674,12 +674,20 @@ class Ctl_roster {
         $uid = (int)$u['id'];
 
         $homeroom = Database::one(
-            "SELECT id, name, grade, section, homeroom_teacher_id FROM student_groups WHERE homeroom_teacher_id = ?", [$uid]);
+            "SELECT id, name, grade, section, homeroom_teacher_id, school_id FROM student_groups WHERE homeroom_teacher_id = ?", [$uid]);
         if (!$homeroom) {
             flash('danger', 'You are not assigned as a homeroom teacher for any class.');
             redirect('teacher/grading');
         }
         $classId = (int)$homeroom['id'];
+        $schoolId = (int)($homeroom['school_id'] ?? $u['school_id'] ?? 0);
+
+        // Get school name and director
+        $school = $schoolId ? Database::one("SELECT id, name FROM schools WHERE id = ?", [$schoolId]) : null;
+        $schoolName = $school['name'] ?? '';
+        $director = Database::one("SELECT first_name, last_name FROM users WHERE school_id = ? AND role = 'principal' LIMIT 1", [$schoolId]);
+        $directorName = $director ? trim($director['first_name'] . ' ' . $director['last_name']) : '';
+        $teacherName = trim(($u['first_name'] ?? '') . ' ' . ($u['last_name'] ?? ''));
 
         $courses = Database::all(
             "SELECT c.id, c.title, c.subject_id, s.name AS subject_name
@@ -783,7 +791,7 @@ class Ctl_roster {
 
         // PDF download (server-side)
         if (isset($_GET['download'])) {
-            $this->renderServerPDF($rosterData, $courses, $homeroom);
+            $this->renderServerPDF($rosterData, $courses, $homeroom, $teacherName, $schoolName, $directorName);
             exit;
         }
         // PDF viewer (HTML preview)
@@ -824,7 +832,7 @@ class Ctl_roster {
         return round(((float)$row['total_mark'] / (float)$row['total_max']) * 100, 1);
     }
 
-    private function renderServerPDF(array $rosterData, array $courses, array $homeroom): void {
+    private function renderServerPDF(array $rosterData, array $courses, array $homeroom, string $teacherName = '', string $schoolName = '', string $directorName = ''): void {
         $fmt = fn($v) => $v !== null ? number_format((float)$v, 1) : '—';
         $subLabel = fn($c) => strtoupper(mb_substr($c['subject_name'] ?? $c['title'], 0, 3));
 
@@ -880,6 +888,9 @@ class Ctl_roster {
             'courses' => $coursesJson,
             'roster' => $rosterJson,
             'homeroom' => ['name' => $homeroom['name']],
+            'teacher_name' => $teacherName,
+            'school_name' => $schoolName,
+            'director_name' => $directorName,
             'stats' => [
                 'student_count' => count($rosterData),
                 'subject_count' => count($courses),
