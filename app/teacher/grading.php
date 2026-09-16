@@ -834,19 +834,11 @@ class Ctl_roster {
         $logoPath = __DIR__ . '/../../public/images/logo-black.jpeg';
         $flagPath = __DIR__ . '/../../public/images/ethiopian-flag.jpeg';
         $ministryPath = __DIR__ . '/../../public/images/ministry-logo.png';
-        $watermarkPath = '/tmp/watermark_composite.jpg';
-        // Create composite watermark with logo + flag + ministry
-        if (!file_exists($watermarkPath) || filemtime($watermarkPath) < filemtime($logoPath)) {
-            $wmScript = __DIR__ . '/../../scripts/make_watermark.php';
-            if (file_exists($wmScript)) {
-                exec("php " . escapeshellarg($wmScript) . " 2>/dev/null");
-            }
-        }
-        if (file_exists($watermarkPath)) {
-            $pdf->setWatermarkImage($watermarkPath);
-        } else {
-            $pdf->setWatermark('EDUNEX');
-        }
+
+        // Set header images (flag top-left, ministry logo top-right) like admin PDF style
+        $pdf->setHeaderImages($flagPath, $ministryPath);
+        // Faded text watermark in center
+        $pdf->setWatermark('EDUNEX', 'www.edunex.com');
 
         // Watermark on every page
         $pdf->setTitle('CLASS ROSTER');

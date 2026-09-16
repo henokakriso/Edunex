@@ -29,6 +29,7 @@ class Pdf {
     private string $watermarkSub = '';
     private ?string $watermarkImage = null;
     private array $images = []; // name => ['path'=>, 'objId'=>]
+    private array $headerImages = []; // 'flag' => path, 'ministry' => path
 
     public function __construct(string $orientation = 'portrait', string $pageSize = 'A4', bool $ministry = false) {
         $w = $h = 612;
@@ -128,23 +129,18 @@ class Pdf {
         return $this;
     }
 
+    /** Set header images: flag (top-left) and ministry logo (top-right) */
+    public function setHeaderImages(string $flagPath = '', string $ministryPath = ''): self {
+        $this->headerImages['flag'] = $flagPath;
+        $this->headerImages['ministry'] = $ministryPath;
+        return $this;
+    }
+
     /** Draw footer on current page */
     private function drawFooter(): void {
-        // Draw watermark first (behind content)
-        if (!empty($this->images['watermark'])) {
-            $img = $this->images['watermark'];
-            $cx = $this->pageW / 2;
-            $cy = $this->pageH / 2;
-            $scale = 0.30;
-            $drawW = $img['w'] * $scale;
-            $drawH = $img['h'] * $scale;
-            $tx = $cx - ($drawW / 2);
-            $ty = $cy - ($drawH / 2);
-            $this->out("q");
-            $this->out("$scale 0 0 $scale $tx $ty cm");
-            $this->out("/{$img['name']} Do");
-            $this->out("Q");
-        } elseif ($this->watermarkText) {
+        // Watermark image is handled by Python pipeline (add_watermark.py)
+        // Draw text watermark if no image watermark
+        if ($this->watermarkText && empty($this->watermarkImage)) {
             $cx = $this->pageW / 2;
             $cy = $this->pageH / 2;
             $this->out("0.90 0.90 0.90 rg");
@@ -426,21 +422,49 @@ class Pdf {
         unset($page);
 
         $hasImageWatermark = !empty($this->watermarkImage) && file_exists($this->watermarkImage);
+        $hasHeaderImages = !empty($this->headerImages['flag']) || !empty($this->headerImages['ministry']);
 
-        if ($hasImageWatermark) {
+        if ($hasImageWatermark || $hasHeaderImages) {
             $tmpBase = tempnam(sys_get_temp_dir(), 'edunex_base_') . '.pdf';
             $tmpFinal = tempnam(sys_get_temp_dir(), 'edunex_final_') . '.pdf';
             $this->writePdfFile($tmpBase);
 
             $script = __DIR__ . '/../scripts/add_watermark.py';
-            $scale = 30;
-            $cmd = sprintf('python3 %s %s %s %s %d 2>&1',
-                escapeshellarg($script),
-                escapeshellarg($tmpBase),
-                escapeshellarg($tmpFinal),
-                escapeshellarg($this->watermarkImage),
-                $scale
-            );
+
+            if ($hasHeaderImages) {
+                // Header mode: flag + ministry logo at top of each page
+                $parts = ['python3', escapeshellarg($script), escapeshellarg($tmpBase), escapeshellarg($tmpFinal), '--header-left'];
+                if (!empty($this->headerImages['flag']) && file_exists($this->headerImages['flag'])) {
+                    $parts[] = escapeshellarg($this->headerImages['flag']);
+                } else {
+                    $parts[] = "''";
+                }
+                $parts[] = '--header-right';
+                if (!empty($this->headerImages['ministry']) && file_exists($this->headerImages['ministry'])) {
+                    $parts[] = escapeshellarg($this->headerImages['ministry']);
+                } else {
+                    $parts[] = "''";
+                }
+                // Optional center watermark
+                if ($hasImageWatermark) {
+                    $parts[] = '--center';
+                    $parts[] = escapeshellarg($this->watermarkImage);
+                    $parts[] = '--scale';
+                    $parts[] = '30';
+                }
+                $cmd = implode(' ', $parts) . ' 2>&1';
+            } else {
+                // Legacy watermark mode
+                $scale = 30;
+                $cmd = sprintf('python3 %s %s %s %s %d 2>&1',
+                    escapeshellarg($script),
+                    escapeshellarg($tmpBase),
+                    escapeshellarg($tmpFinal),
+                    escapeshellarg($this->watermarkImage),
+                    $scale
+                );
+            }
+
             exec($cmd, $output, $returnCode);
 
             @unlink($tmpBase);

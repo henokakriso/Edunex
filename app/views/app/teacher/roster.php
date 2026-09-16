@@ -151,6 +151,16 @@
   <span style="margin-left:auto;opacity:.6">Click any column header to sort ↕</span>
 </div>
 
+<style>
+@media print {
+  .sidebar, .topbar, .page-head .btn-ghost { display: none !important; }
+  .shell { display: block !important; }
+  .main { margin: 0 !important; padding: 12px !important; }
+  body { background: #fff !important; }
+  #roster-table { font-size: 10px !important; }
+}
+</style>
+
 <script>
 var _sortCol = 'roll';
 var _sortAsc = true;
