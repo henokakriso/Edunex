@@ -281,6 +281,13 @@ class Ledger {
         return $tmpFile;
     }
 
+    /**
+     * Legacy append() wrapper — maps old (schoolId, userId, action, table, recordId, data) signature to write().
+     */
+    public static function append(int $schoolId, int $userId, string $action, string $table, int $recordId, array $data = []): array {
+        return self::write($table, $recordId, $action, $data);
+    }
+
     /** Check if C/FFI is available */
     public static function ffi_available(): bool {
         self::ffi();
