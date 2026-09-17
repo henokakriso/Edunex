@@ -11,6 +11,9 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
 
 <div class="grid" style="grid-template-columns:1.5fr 1fr;gap:22px;align-items:start">
   <div class="card">
+    <?php if (!empty($item['cover'])): ?>
+      <img src="<?= e(url('file?p=' . $item['cover'])) ?>" alt="<?= e($item['title']) ?>" style="width:100%;border-radius:8px;margin-bottom:16px;max-height:300px;object-fit:cover">
+    <?php endif; ?>
     <h3 class="card-title" style="margin-top:0">Description</h3>
     <p class="small" style="white-space:pre-wrap"><?= nl2br(e($item['description'])) ?></p>
     <?php if ($item['file_path']): ?>
@@ -32,6 +35,9 @@ $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('
       <div class="flex-between"><span class="small faint">Category</span><b class="small"><?= e($item['category']) ?: '—' ?></b></div>
       <div class="flex-between"><span class="small faint">Downloads</span><b class="small"><?= (int)$item['downloads'] ?></b></div>
       <div class="flex-between"><span class="small faint">Added</span><b class="small"><?= e(date('M j, Y', strtotime($item['created_at']))) ?></b></div>
+      <?php if (!empty($item['uploader_name'])): ?>
+        <div class="flex-between"><span class="small faint">Uploaded by</span><b class="small"><?= e($item['uploader_name']) ?></b></div>
+      <?php endif; ?>
     </div>
   </div>
 </div>

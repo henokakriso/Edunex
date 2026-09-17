@@ -6,7 +6,7 @@ require_once __DIR__ . "/../library/library.php";
 
 class Ctl_teacher_library extends Ctl_index {
     public function run(): void {
-        $u = require_role(['teacher', 'lecturer', 'librarian', 'dean', 'hod']);
+        $u = require_role('teacher', 'lecturer', 'librarian', 'dean', 'hod');
         if (!module_active((int)$u['school_id'], 'library')) { http_response_code(403); die('The Library module is not installed for your school.'); }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -16,12 +16,15 @@ class Ctl_teacher_library extends Ctl_index {
                 $type = $_POST['type'] ?? 'book';
                 if ($title === '') { flash('danger', 'Title required.'); redirect('teacher/library'); }
                 [$ok, $path] = upload_file($_FILES['file'] ?? null, 'uploads/library', ['pdf','doc','docx','ppt','pptx','mp4','webm','mp3']);
+                [$coverOk, $coverPath] = upload_file($_FILES['cover'] ?? null, 'uploads/library/covers', ['jpg','jpeg','png','webp']);
                 Database::insert('library_items', [
                     'school_id' => (int)$u['school_id'], 'title' => $title,
                     'type' => in_array($type, ['book','notes','paper','slides','video','past_exam','tutorial'], true) ? $type : 'book',
                     'author' => trim($_POST['author'] ?? ''), 'category' => trim($_POST['category'] ?? ''),
                     'description' => trim($_POST['description'] ?? ''),
+                    'cover' => $coverOk ? $coverPath : null,
                     'file_path' => $ok ? $path : null, 'status' => 'published',
+                    'uploaded_by' => (int)$u['id'],
                 ]);
                 flash('success', 'Item uploaded to library.');
                 redirect('teacher/library');
@@ -42,8 +45,10 @@ class Ctl_teacher_library extends Ctl_index {
         $type = $_GET['type'] ?? '';
         $df = demo_filter('i');
         $sql = "SELECT i.*, s.name AS school_name,
+                    CONCAT(u.first_name, ' ', u.last_name) AS uploader_name,
                     (SELECT COUNT(*) FROM library_favorites f WHERE f.item_id = i.id) AS favs
                 FROM library_items i JOIN schools s ON s.id = i.school_id
+                LEFT JOIN users u ON u.id = i.uploaded_by
                 WHERE i.status = 'published' $df AND i.school_id = ?";
         $args = [(int)$u['school_id']];
         if ($q !== '') { $sql .= " AND (i.title LIKE ? OR i.author LIKE ? OR i.category LIKE ? OR i.description LIKE ?)"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; $args[] = "%$q%"; }

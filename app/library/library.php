@@ -11,8 +11,10 @@ class Ctl_index {
         $type = $_GET['type'] ?? '';
         $df = demo_filter('i');
         $sql = "SELECT i.*, s.name AS school_name,
+                    CONCAT(u.first_name, ' ', u.last_name) AS uploader_name,
                     (SELECT COUNT(*) FROM library_favorites f WHERE f.item_id = i.id) AS favs
                 FROM library_items i JOIN schools s ON s.id = i.school_id
+                LEFT JOIN users u ON u.id = i.uploaded_by
                 WHERE i.status = 'published' $df";
         $args = [];
         // All users only see their own school's library
@@ -49,7 +51,7 @@ class Ctl_item {
     public function run(): void {
         $u = require_login();
         $id = (int)($_GET['id'] ?? 0);
-        $item = Database::one("SELECT i.*, s.name AS school_name FROM library_items i JOIN schools s ON s.id = i.school_id WHERE i.id = ?", [$id]);
+        $item = Database::one("SELECT i.*, s.name AS school_name, CONCAT(u.first_name, ' ', u.last_name) AS uploader_name FROM library_items i JOIN schools s ON s.id = i.school_id LEFT JOIN users u ON u.id = i.uploaded_by WHERE i.id = ?", [$id]);
         if (!$item) { flash('danger', 'Item not found.'); redirect('library'); }
         if ((int)$u['school_id'] > 0 && (int)$item['school_id'] !== (int)$u['school_id']) {
             flash('danger', 'Access denied.');

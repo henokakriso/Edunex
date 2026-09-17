@@ -1,16 +1,22 @@
-<?php /* Library index view */
+<?php /* Library index view — 3-column grid cards with thumbnails */
 $typeIcons = ['book' => icon('book'), 'notes' => icon('note'), 'paper' => icon('file'), 'slides' => icon('image'), 'video' => icon('video'), 'past_exam' => icon('doc'), 'tutorial' => icon('graduation')];
 $canUpload = $canUpload ?? false;
 ?>
 <style>
-.lib-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--bg-elev);transition:border-color .15s,box-shadow .15s}
-.lib-row:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.lib-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
-.lib-icon{width:42px;height:42px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
-.lib-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
-.lib-meta{font-size:12px;color:var(--text-dim);margin-top:2px}
-.lib-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
-.lib-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0;align-items:center}
+.lib-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:960px){.lib-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.lib-grid{grid-template-columns:1fr}}
+.lib-card{border-radius:12px;border:1px solid var(--border);background:var(--bg-elev);overflow:hidden;transition:border-color .15s,box-shadow .15s;display:flex;flex-direction:column}
+.lib-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.lib-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--bg-muted);display:block}
+.lib-thumb-placeholder{width:100%;aspect-ratio:4/3;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.lib-card-body{padding:12px 14px;flex:1;display:flex;flex-direction:column}
+.lib-card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-card-meta{font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.4}
+.lib-card-desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-card-actions{margin-top:auto;padding-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lib-card-actions .btn{font-size:11px;padding:4px 10px;border-radius:8px}
+.lib-type-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
 </style>
 
 <div class="page-head">
@@ -45,6 +51,7 @@ $canUpload = $canUpload ?? false;
           <div class="flex-col"><label class="small faint">Category</label><input class="input" name="category" placeholder="e.g. Mathematics, STEM"></div>
         </div>
         <div class="flex-col" style="margin-top:10px"><label class="small faint">Description</label><textarea class="input" name="description" rows="3" placeholder="Brief description..."></textarea></div>
+        <div class="flex-col" style="margin-top:10px"><label class="small faint">Cover image (JPG, PNG)</label><input class="input" type="file" name="cover" accept=".jpg,.jpeg,.png,.webp"></div>
         <div class="flex-col" style="margin-top:10px"><label class="small faint">File (PDF, DOC, PPT, MP4, MP3)</label><input class="input" type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.webm,.mp3"></div>
         <div class="modal-foot">
           <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
@@ -58,7 +65,7 @@ $canUpload = $canUpload ?? false;
 
 <div class="card" style="margin-bottom:18px">
   <form method="get" class="flex gap-12" style="align-items:end">
-    <input type="hidden" name="r" value="library">
+    <input type="hidden" name="r" value="teacher/library">
     <div class="flex-col flex-1"><label class="small faint">Search</label><div class="input-icon-wrap"><span class="input-ico"><?= icon('search') ?></span><input class="input has-ico" name="q" id="lib-search" value="<?= e($q ?? '') ?>" placeholder="Search by title, author or category…" oninput="document.getElementById('lib-clear').style.display=this.value?'flex':'none'"><button type="button" class="input-icon-btn" id="lib-clear" style="display:<?= ($q ?? '') ? 'flex' : 'none' ?>" onclick="document.getElementById('lib-search').value='';this.style.display='none';this.form.submit()"><?= icon('x') ?></button></div></div>
     <div class="flex-col"><label class="small faint">Type</label>
       <select class="input" name="type" onchange="this.form.submit()">
@@ -72,35 +79,48 @@ $canUpload = $canUpload ?? false;
   </form>
 </div>
 
-<div style="display:flex;flex-direction:column;gap:8px">
+<div class="lib-grid">
   <?php foreach (($items ?? []) as $it): ?>
-    <?php $itId = (int)($it['id'] ?? 0); ?>
-    <div class="lib-row" tabindex="0">
-      <div class="lib-icon"><?= $typeIcons[$it['type'] ?? ''] ?? icon('file') ?></div>
-      <div style="flex:1;min-width:0">
-        <div class="lib-title"><?= e($it['title'] ?? '') ?></div>
-        <div class="lib-meta">
-          <?= e($it['author'] ?? '') ?: '—' ?>
-          · <?= e($it['category'] ?? '') ?: '—' ?>
-          · <?= e($it['school_name'] ?? '') ?: '—' ?>
+    <?php $itId = (int)($it['id'] ?? 0); $hasFile = !empty($it['file_path']); ?>
+    <div class="lib-card">
+      <?php if (!empty($it['cover'])): ?>
+        <img class="lib-thumb" src="<?= e(url('file?p=' . $it['cover'])) ?>" alt="<?= e($it['title'] ?? '') ?>">
+      <?php else: ?>
+        <div class="lib-thumb-placeholder"><?= $typeIcons[$it['type'] ?? ''] ?? icon('file') ?></div>
+      <?php endif; ?>
+      <div class="lib-card-body">
+        <div class="lib-card-title"><?= e($it['title'] ?? '') ?></div>
+        <div class="lib-card-meta">
+          <span class="lib-type-badge"><?= $typeIcons[$it['type'] ?? ''] ?? icon('file') ?> <?= ucfirst(str_replace('_', ' ', $it['type'] ?? '')) ?></span>
+          <?php if (!empty($it['author'])): ?>
+            <span style="margin-left:6px"><?= e($it['author']) ?></span>
+          <?php endif; ?>
         </div>
-        <?php if (!empty($it['description'])): ?>
-          <div class="lib-desc"><?= e(mb_strimwidth((string)($it['description'] ?? ''), 0, 120, '…')) ?></div>
+        <?php if (!empty($it['uploader_name']) || !empty($it['category'])): ?>
+          <div class="lib-card-meta">
+            <?php if (!empty($it['uploader_name'])): ?>By <?= e($it['uploader_name']) ?><?php endif; ?>
+            <?php if (!empty($it['category'])): ?><?php if (!empty($it['uploader_name'])): ?> · <?php endif; ?><?= e($it['category']) ?><?php endif; ?>
+          </div>
         <?php endif; ?>
-      </div>
-      <div class="lib-actions">
-        <span class="tiny faint">⬇ <?= (int)($it['downloads'] ?? 0) ?></span>
-        <?php if ($itId && in_array($itId, $myFavs ?? [], true)): ?>
-          <form method="post" class="inline"><?= csrf_field() ?><button class="btn btn-sm btn-ghost" name="unfavorite" value="<?= $itId ?>" title="Unfavorite"><?= icon('heart') ?></button></form>
-        <?php else: ?>
-          <form method="post" class="inline"><?= csrf_field() ?><button class="btn btn-sm btn-ghost" name="favorite" value="<?= $itId ?>" title="Favorite"><?= icon('heart') ?></button></form>
-        <?php endif; ?>
-        <?php if (!empty($it['file_path'])): ?>
-          <a class="btn btn-sm btn-ghost" title="Download" href="<?= e(url('file?p=' . $it['file_path'] . '&dl=1&item=library&id=' . $itId)) ?>"><?= icon('download') ?></a>
-        <?php endif; ?>
-        <?php if ($itId): ?>
-          <a class="btn btn-sm" href="<?= e(url('library/item&id=' . $itId)) ?>">View</a>
-        <?php endif; ?>
+        <div class="lib-card-actions">
+          <?php if ($itId && in_array($itId, $myFavs ?? [], true)): ?>
+            <form method="post" class="inline" style="margin:0"><?= csrf_field() ?><button class="btn btn-sm" style="background:var(--danger-soft);color:var(--danger)" name="unfavorite" value="<?= $itId ?>" title="Remove from favorites"><?= icon('heart') ?> Liked</button></form>
+          <?php else: ?>
+            <form method="post" class="inline" style="margin:0"><?= csrf_field() ?><button class="btn btn-sm btn-ghost" name="favorite" value="<?= $itId ?>" title="Add to favorites"><?= icon('heart') ?> Like</button></form>
+          <?php endif; ?>
+          <?php if ($hasFile): ?>
+            <a class="btn btn-sm btn-ghost" title="Download" href="<?= e(url('file?p=' . $it['file_path'] . '&dl=1&item=library&id=' . $itId)) ?>"><?= icon('download') ?> Download</a>
+          <?php endif; ?>
+          <?php if ($hasFile && preg_match('/\.(pdf)$/i', (string)$it['file_path'])): ?>
+            <a class="btn btn-sm btn-ghost" title="Read online" href="<?= e(url('file?p=' . $it['file_path'] . '&item=library&id=' . $itId)) ?>" target="_blank"><?= icon('book') ?> Read</a>
+          <?php endif; ?>
+          <?php if ($itId): ?>
+            <a class="btn btn-sm btn-primary" href="<?= e(url('library/item&id=' . $itId)) ?>" style="margin-left:auto"><?= icon('eye') ?> View</a>
+          <?php endif; ?>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <span class="tiny faint"><?= icon('download') ?> <?= (int)($it['downloads'] ?? 0) ?> downloads</span>
+        </div>
       </div>
     </div>
   <?php endforeach; ?>
